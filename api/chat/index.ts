@@ -38,22 +38,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Fetch relevant programs
-    let programQuery = `SELECT name, category, description, use_case, province, stage, website FROM programs`;
-    if (provFilter) {
-      programQuery += ` WHERE $1 = ANY(province) OR 'National' = ANY(province)`;
-    }
-    programQuery += ` ORDER BY name LIMIT 50`;
-
-    const rows = provFilter
-      ? await client.unsafe(programQuery, [provFilter])
-      : await client.unsafe(programQuery);
+    const rows = await client.unsafe(
+      provFilter
+        ? `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE $1 = ANY(province) OR 'National' = ANY(province) ORDER BY name LIMIT 50`
+        : `SELECT name, category, description, use_case, province, stage, website FROM programs ORDER BY name LIMIT 50`,
+      provFilter ? [provFilter] : []
+    );
 
     // Fetch knowledge
-    const knowledge = await client`
-      SELECT title, body FROM knowledge
-      ${provFilter ? client`WHERE $${provFilter} = ANY(province) OR province = '{}'` : client``}
-      ORDER BY confidence DESC LIMIT 8
-    `;
+    const knowledge = await client.unsafe(
+      `SELECT title, body FROM knowledge ORDER BY confidence DESC LIMIT 8`
+    );
 
     const context = `ECOSYSTEM DATA (${rows.length} programs${provFilter ? ` in ${provFilter}` : ""}):
 ${rows.map((p: any) => `- ${p.name} [${p.category}] | Stages: ${(p.stage || []).join(",")} | Province: ${(p.province || []).join(",")} | ${p.description?.slice(0, 120) || ""}`).join("\n")}
