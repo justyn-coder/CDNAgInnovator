@@ -1,0 +1,33 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green-dark: #1a3a0a;
+  --green-mid: #2d5016;
+  --green-light: #4a7a2a;
+  --gold: #c5a55a;
+  --gold-light: #e8d5a0;
+  --cream: #f7f5f0;
+  --cream-dark: #ede8df;
+  --text: #1a1a1a;
+  --text-light: #666;
+  --font: 'DM Sans', sans-serif;
+  --font-serif: 'Source Serif 4', serif;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--cream);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+button {
+  cursor: pointer;
+  font-family: var(--font);
+}
+
+input, select, textarea {
+  font-family: var(--font);
+}
