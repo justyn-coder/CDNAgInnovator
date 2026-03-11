@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import Wizard from "../components/Wizard";
+import GapMatrix from "../components/GapMatrix";
 
 interface Program {
   id: number; name: string; category: string;
@@ -309,6 +310,7 @@ export default function Navigator() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showBrowse, setShowBrowse] = useState(false);
+  const [showGapMap, setShowGapMap] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [wizardSnapshot, setWizardSnapshot] = useState<WizardSnapshot | null>(null);
   const isEco = mode === "ec";
@@ -373,6 +375,7 @@ export default function Navigator() {
   return (
     <>
       {showBrowse && <BrowsePanel onClose={() => setShowBrowse(false)} />}
+      {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} />}
       <div style={{ position: "fixed", inset: 0, background: "var(--bg)", display: "flex", flexDirection: "column", fontFamily: "var(--font-text)" }}>
 
         {/* Top bar */}
@@ -399,6 +402,11 @@ export default function Navigator() {
               borderRadius: "var(--radius-sm)", padding: "5px 12px",
               fontSize: "0.75rem", fontWeight: 500, color: "var(--text)",
             }}>Browse All</button>
+            <button onClick={() => setShowGapMap(true)} style={{
+              background: "var(--bg-secondary)", border: "1px solid var(--border)",
+              borderRadius: "var(--radius-sm)", padding: "5px 12px",
+              fontSize: "0.75rem", fontWeight: 500, color: "var(--text)",
+            }}>Gap Map</button>
             <button onClick={() => setShowSubmit(s => !s)} style={{
               background: showSubmit ? "var(--green-mid)" : "var(--bg-secondary)",
               border: "1px solid var(--border)",
