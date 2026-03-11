@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
+import PathwayCard from "../components/PathwayCard";
 
 interface Program {
   id: number; name: string; category: string;
@@ -313,9 +314,32 @@ export default function Navigator() {
   const [showGapMap, setShowGapMap] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [wizardSnapshot, setWizardSnapshot] = useState<WizardSnapshot | null>(null);
+  const [wizardDescription, setWizardDescription] = useState("");
+  const [showPathway, setShowPathway] = useState(false);
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Check for shareable URL params on mount
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlStage = params.get("stage");
+      const urlProv = params.get("prov");
+      const urlNeed = params.get("need");
+      if (urlStage && urlProv) {
+        const snapshot = {
+          stage: urlStage,
+          provinces: urlProv.split(","),
+          need: urlNeed || "all",
+        };
+        setWizardSnapshot(snapshot);
+        setWizardDescription(params.get("desc") || "an agtech company");
+        setShowWizard(false);
+        setShowPathway(true);
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (isEco) {
@@ -328,25 +352,33 @@ export default function Navigator() {
   function handleWizardComplete(prompt: string, snapshot: WizardSnapshot) {
     setShowWizard(false);
     setWizardSnapshot(snapshot);
-    setInput(prompt);
-    setTimeout(() => {
-      setInput("");
-      const newMessages: Message[] = [...messages, { role: "user", content: prompt }];
-      setMessages(newMessages);
-      setLoading(true);
-      fetch("/api/chat", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: prompt, mode, history: [] }),
-      })
-        .then(r => r.json())
-        .then(data => { setMessages(m => [...m, { role: "assistant", content: data.reply || "Something went wrong." }]); })
-        .catch(() => { setMessages(m => [...m, { role: "assistant", content: "Network error — please try again." }]); })
-        .finally(() => setLoading(false));
-    }, 0);
+    // Extract description from the prompt (everything before "I'm at the")
+    const descMatch = prompt.match(/I'm building (.+?)\. I'm at/);
+    setWizardDescription(descMatch ? descMatch[1] : "an agtech company");
+    setShowPathway(true);
+  }
+
+  function handlePathwayFollowUp(question: string) {
+    // Transition from pathway view to chat with the follow-up question
+    const newMessages: Message[] = [{ role: "user", content: question }];
+    setMessages(newMessages);
+    setLoading(true);
+    const context = wizardSnapshot
+      ? `Context: I'm building ${wizardDescription}. Stage: ${wizardSnapshot.stage}. Province: ${wizardSnapshot.provinces.join(", ")}. Need: ${wizardSnapshot.need}.\n\n${question}`
+      : question;
+    fetch("/api/chat", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: context, mode, history: [] }),
+    })
+      .then(r => r.json())
+      .then(data => { setMessages(m => [...m, { role: "assistant", content: data.reply || "Something went wrong." }]); })
+      .catch(() => { setMessages(m => [...m, { role: "assistant", content: "Network error — please try again." }]); })
+      .finally(() => setLoading(false));
   }
 
   function handleReset() {
     setShowWizard(true);
+    setShowPathway(false);
     setWizardSnapshot(null);
     setMessages([]);
     setInput("");
@@ -375,7 +407,7 @@ export default function Navigator() {
   return (
     <>
       {showBrowse && <BrowsePanel onClose={() => setShowBrowse(false)} />}
-      {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} />}
+      {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} mode={mode === "ec" ? "ec" : "founder"} />}
       <div style={{ position: "fixed", inset: 0, background: "var(--bg)", display: "flex", flexDirection: "column", fontFamily: "var(--font-text)" }}>
 
         {/* Top bar */}
@@ -444,6 +476,17 @@ export default function Navigator() {
 
           {!isEco && !showWizard && wizardSnapshot && (
             <WizardSummary snapshot={wizardSnapshot} onReset={handleReset} />
+          )}
+
+          {/* Pathway Card — shown after wizard, before chat */}
+          {!isEco && showPathway && wizardSnapshot && (
+            <PathwayCard
+              description={wizardDescription}
+              stage={wizardSnapshot.stage}
+              provinces={wizardSnapshot.provinces}
+              need={wizardSnapshot.need}
+              onChatFollowUp={handlePathwayFollowUp}
+            />
           )}
 
           {(!showWizard || isEco) && messages.map((m, i) => <ChatBubble key={i} msg={m} />)}

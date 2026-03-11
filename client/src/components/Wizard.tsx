@@ -58,7 +58,7 @@ export default function Wizard({ onComplete }: Props) {
     const provinceStr = data.provinces.length > 0 ? data.provinces.join(" and ") : "Canada";
     const needStr = needKey  === "all"
       ? "I want to see all relevant programs across funding, pilot sites, accelerators, and first customer opportunities"
-      : `My biggest need right now is ${NEEDS.find(n => n.key === neekKey)?.label?.toLowerCase() || data.need}`;
+      : `My biggest need right now is ${NEEDS.find(n => n.key === needKey)?.label?.toLowerCase() || data.need}`;
     const stageLabel = STAGES.find(s => s.key === data.stage)?.label || data.stage;
 
     const prompt = `I'm building ${data.description}. I'm at the ${stageLabel} stage, based in ${provinceStr}. ${needStr}. What are the best programs for my situation?`;

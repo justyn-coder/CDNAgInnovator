@@ -26,6 +26,22 @@ interface GapData {
   };
 }
 
+interface GapExplanation {
+  classification_label: string;
+  why: string;
+  action: string;
+}
+
+interface ExplainResponse {
+  gapType: string;
+  explanation: GapExplanation;
+  meta: {
+    unfilteredCount: number;
+    nationalCount: number;
+    neighborCounts: Record<string, number>;
+  };
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────
 const STAGES = ["All", "Idea", "MVP", "Pilot", "Comm", "Scale"];
 
@@ -59,11 +75,213 @@ function gapLabel(count: number): string {
   return "Strong";
 }
 
+const GAP_TYPE_STYLE: Record<string, { bg: string; text: string; border: string }> = {
+  structural:     { bg: "#fef3c7", text: "#92400e", border: "#fcd34d" },
+  market_failure: { bg: "#fee2e2", text: "#991b1b", border: "#fca5a5" },
+  coverage_gap:   { bg: "#e0e7ff", text: "#3730a3", border: "#a5b4fc" },
+  stage_mismatch: { bg: "#fce7f3", text: "#9d174d", border: "#f9a8d4" },
+  data_gap:       { bg: "#f3e8ff", text: "#6b21a8", border: "#c4b5fd" },
+  weak:           { bg: "#fef9c3", text: "#854d0e", border: "#fde047" },
+  adequate:       { bg: "#d1fae5", text: "#064e3b", border: "#34d399" },
+};
+
+// ── AI Explain card ────────────────────────────────────────────────────────
+function ExplainCard({
+  prov, cat, stage, mode,
+}: {
+  prov: string; cat: string; stage: string; mode: string;
+}) {
+  const [data, setData] = useState<ExplainResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showMeta, setShowMeta] = useState(false);
+
+  function fetchExplain() {
+    if (data || loading) return;
+    setLoading(true);
+    setError("");
+    fetch("/api/gaps/explain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ province: prov, category: cat, stage, mode }),
+    })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((d: ExplainResponse) => {
+        setData(d);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load analysis.");
+        setLoading(false);
+      });
+  }
+
+  const typeStyle = data ? (GAP_TYPE_STYLE[data.gapType] || GAP_TYPE_STYLE.adequate) : null;
+
+  if (!data && !loading && !error) {
+    return (
+      <button
+        onClick={fetchExplain}
+        style={{
+          width: "100%",
+          padding: "10px 14px",
+          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          border: "1px solid #334155",
+          borderRadius: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          cursor: "pointer",
+          marginTop: 10,
+          transition: "all 0.15s",
+        }}
+      >
+        <div style={{
+          width: 22, height: 22, borderRadius: 6,
+          background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0,
+        }}>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <div style={{ textAlign: "left" }}>
+          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#e2e8f0" }}>AI Gap Analysis</div>
+          <div style={{ fontSize: "0.6rem", color: "#94a3b8", marginTop: 1 }}>Why does this gap exist? What can be done?</div>
+        </div>
+      </button>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div style={{
+        width: "100%", padding: "14px",
+        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+        border: "1px solid #334155", borderRadius: 10,
+        marginTop: 10, display: "flex", alignItems: "center", gap: 8,
+      }}>
+        <div style={{
+          width: 22, height: 22, borderRadius: 6,
+          background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <div style={{
+            width: 10, height: 10, border: "2px solid rgba(255,255,255,0.3)",
+            borderTop: "2px solid #fff", borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }} />
+        </div>
+        <div>
+          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#e2e8f0" }}>Analyzing…</div>
+          <div style={{ fontSize: "0.6rem", color: "#94a3b8", marginTop: 1 }}>Reasoning about this ecosystem gap</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{
+        marginTop: 10, padding: "10px 14px",
+        background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10,
+        fontSize: "0.75rem", color: "#991b1b",
+      }}>
+        {error}{" "}
+        <button onClick={() => { setError(""); setData(null); }} style={{
+          background: "none", border: "none", textDecoration: "underline", cursor: "pointer",
+          color: "#991b1b", fontSize: "0.75rem",
+        }}>Retry</button>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  return (
+    <div style={{
+      marginTop: 10,
+      background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+      border: "1px solid #334155",
+      borderRadius: 10,
+      overflow: "hidden",
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: "10px 14px 8px",
+        display: "flex", alignItems: "center", gap: 8,
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+      }}>
+        <div style={{
+          width: 18, height: 18, borderRadius: 5,
+          background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <svg width="9" height="9" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "#e2e8f0" }}>AI Analysis</span>
+        {typeStyle && (
+          <span style={{
+            fontSize: "0.58rem", fontWeight: 700, padding: "2px 7px",
+            borderRadius: 100, background: typeStyle.bg, color: typeStyle.text,
+            border: `1px solid ${typeStyle.border}`, marginLeft: "auto",
+          }}>{data.explanation.classification_label}</span>
+        )}
+      </div>
+
+      {/* Why */}
+      <div style={{ padding: "10px 14px 6px" }}>
+        <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#6366f1", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>Why</div>
+        <div style={{ fontSize: "0.73rem", color: "#cbd5e1", lineHeight: 1.55 }}>{data.explanation.why}</div>
+      </div>
+
+      {/* Action */}
+      <div style={{ padding: "6px 14px 12px" }}>
+        <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#22c55e", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>
+          {mode === "ec" ? "Opportunity" : "What to do"}
+        </div>
+        <div style={{ fontSize: "0.73rem", color: "#cbd5e1", lineHeight: 1.55 }}>{data.explanation.action}</div>
+      </div>
+
+      {/* Meta */}
+      <div style={{ padding: "0 14px 10px" }}>
+        <button
+          onClick={() => setShowMeta(!showMeta)}
+          style={{
+            background: "none", border: "none", padding: 0,
+            fontSize: "0.6rem", color: "#64748b", cursor: "pointer",
+            textDecoration: "underline", textDecorationColor: "#334155",
+          }}
+        >{showMeta ? "Hide" : "Show"} context</button>
+        {showMeta && (
+          <div style={{
+            marginTop: 6, padding: "6px 10px",
+            background: "rgba(255,255,255,0.04)", borderRadius: 6,
+            fontSize: "0.63rem", color: "#64748b", lineHeight: 1.6,
+          }}>
+            {Object.keys(data.meta.neighborCounts).length > 0 && (
+              <div>Neighbors: {Object.entries(data.meta.neighborCounts).map(([p, c]) => `${p} ${c}`).join(" · ")}</div>
+            )}
+            <div>National programs: {data.meta.nationalCount}</div>
+            {data.meta.unfilteredCount > 0 && <div>All stages: {data.meta.unfilteredCount} programs</div>}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Drill-down panel ───────────────────────────────────────────────────────
 function CellDetail({
-  prov, cat, cell, onClose,
+  prov, cat, cell, stage, mode, onClose,
 }: {
-  prov: string; cat: string; cell: Cell; onClose: () => void;
+  prov: string; cat: string; cell: Cell; stage: string; mode: string; onClose: () => void;
 }) {
   const colors = cellColor(cell.count);
   return (
@@ -74,15 +292,13 @@ function CellDetail({
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: "100%", maxHeight: "65vh", overflowY: "auto",
+          width: "100%", maxHeight: "75vh", overflowY: "auto",
           background: "var(--bg)", borderRadius: "16px 16px 0 0",
           padding: "20px 18px 32px",
         }}
       >
-        {/* Handle */}
         <div style={{ width: 36, height: 4, background: "var(--border)", borderRadius: 2, margin: "0 auto 16px" }} />
 
-        {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
           <div>
             <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
@@ -94,6 +310,12 @@ function CellDetail({
               <span style={{ fontSize: "0.72rem", color: "var(--text-secondary)", fontWeight: 600 }}>
                 {cell.count} program{cell.count !== 1 ? "s" : ""}
               </span>
+              {stage !== "All" && (
+                <span style={{
+                  fontSize: "0.6rem", padding: "2px 7px", borderRadius: 4,
+                  background: "var(--bg-tertiary)", color: "var(--text-secondary)", fontWeight: 600,
+                }}>{stage} stage</span>
+              )}
             </div>
             <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--text)" }}>
               {prov === "National" ? "National" : prov} · {CAT_LABELS[cat]}
@@ -106,7 +328,6 @@ function CellDetail({
           }}>Close</button>
         </div>
 
-        {/* Programs */}
         {cell.count === 0 ? (
           <div style={{
             padding: "20px 16px", background: "var(--bg-secondary)",
@@ -152,13 +373,15 @@ function CellDetail({
             ))}
           </div>
         )}
+
+        <ExplainCard prov={prov} cat={cat} stage={stage} mode={mode} />
       </div>
     </div>
   );
 }
 
 // ── Main component ─────────────────────────────────────────────────────────
-export default function GapMatrix({ onClose }: { onClose: () => void }) {
+export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () => void; mode?: string }) {
   const [stage, setStage] = useState("All");
   const [data, setData] = useState<GapData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -175,14 +398,14 @@ export default function GapMatrix({ onClose }: { onClose: () => void }) {
       .catch(() => { setError("Failed to load gap data."); setLoading(false); });
   }, [stage]);
 
+  useEffect(() => { setSelected(null); }, [stage]);
+
   const selectedCell = selected && data
     ? { prov: selected.prov, cat: selected.cat, cell: data.matrix[selected.prov][selected.cat] }
     : null;
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
-
-      {/* Header */}
       <div style={{
         height: 52, padding: "0 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
         borderBottom: "1px solid var(--border)", flexShrink: 0,
@@ -195,13 +418,11 @@ export default function GapMatrix({ onClose }: { onClose: () => void }) {
         }}>Done</button>
       </div>
 
-      {/* Stage filter + legend */}
       <div style={{
         padding: "10px 16px", borderBottom: "1px solid var(--border)",
         background: "var(--bg-secondary)", flexShrink: 0,
         display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap",
       }}>
-        {/* Stage pills */}
         <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
           {STAGES.map(s => (
             <button key={s} onClick={() => setStage(s)} style={{
@@ -214,8 +435,6 @@ export default function GapMatrix({ onClose }: { onClose: () => void }) {
             }}>{s}</button>
           ))}
         </div>
-
-        {/* Legend */}
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {[
             { label: "Gap", bg: "#fde8e8", text: "#b91c1c", border: "#fca5a5" },
@@ -232,7 +451,6 @@ export default function GapMatrix({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      {/* Summary bar */}
       {data && !loading && (
         <div style={{
           padding: "7px 16px", borderBottom: "1px solid var(--border)",
@@ -254,12 +472,9 @@ export default function GapMatrix({ onClose }: { onClose: () => void }) {
         </div>
       )}
 
-      {/* Matrix */}
       <div style={{ flex: 1, overflowY: "auto", overflowX: "auto" }}>
         {loading && (
-          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)", fontSize: "0.85rem" }}>
-            Loading gap data…
-          </div>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)", fontSize: "0.85rem" }}>Loading gap data…</div>
         )}
         {error && (
           <div style={{ padding: 48, textAlign: "center", color: "#b91c1c", fontSize: "0.85rem" }}>{error}</div>
@@ -268,37 +483,30 @@ export default function GapMatrix({ onClose }: { onClose: () => void }) {
           <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 520 }}>
             <thead>
               <tr>
-                {/* Province label col */}
                 <th style={{
                   padding: "8px 10px", textAlign: "left", fontWeight: 600,
                   fontSize: "0.65rem", color: "var(--text-secondary)",
                   borderBottom: "1px solid var(--border)",
-                  background: "var(--bg-secondary)", position: "sticky", top: 0, left: 0, zIndex: 2,
-                  minWidth: 48,
+                  background: "var(--bg-secondary)", position: "sticky", top: 0, left: 0, zIndex: 2, minWidth: 48,
                 }}>Prov</th>
                 {data.categories.map(cat => (
                   <th key={cat} style={{
                     padding: "8px 6px", textAlign: "center", fontWeight: 600,
                     fontSize: "0.62rem", color: "var(--text-secondary)",
                     borderBottom: "1px solid var(--border)",
-                    background: "var(--bg-secondary)", position: "sticky", top: 0, zIndex: 1,
-                    letterSpacing: "0.02em",
+                    background: "var(--bg-secondary)", position: "sticky", top: 0, zIndex: 1, letterSpacing: "0.02em",
                   }}>{CAT_LABELS[cat]}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {data.provinces.map((prov, pi) => (
+              {data.provinces.map(prov => (
                 <tr key={prov} style={{ borderBottom: "1px solid var(--border)" }}>
-                  {/* Province label */}
                   <td style={{
                     padding: "7px 10px", fontWeight: 700, fontSize: "0.72rem",
                     color: "var(--text)", background: "var(--bg-secondary)",
-                    position: "sticky", left: 0, zIndex: 1,
-                    borderRight: "1px solid var(--border)",
+                    position: "sticky", left: 0, zIndex: 1, borderRight: "1px solid var(--border)",
                   }}>{PROV_LABELS[prov] || prov}</td>
-
-                  {/* Cells */}
                   {data.categories.map(cat => {
                     const cell = data.matrix[prov][cat];
                     const colors = cellColor(cell.count);
@@ -307,23 +515,15 @@ export default function GapMatrix({ onClose }: { onClose: () => void }) {
                       <td key={cat}
                         onClick={() => setSelected({ prov, cat })}
                         style={{
-                          padding: "5px 4px", textAlign: "center",
-                          cursor: "pointer",
+                          padding: "5px 4px", textAlign: "center", cursor: "pointer",
                           background: isSelected ? colors.border : colors.bg,
                           transition: "background 0.1s",
                           outline: isSelected ? `2px solid ${colors.text}` : "none",
                           outlineOffset: -2,
                         }}
                       >
-                        <div style={{
-                          fontSize: "0.75rem", fontWeight: 700,
-                          color: colors.text, lineHeight: 1,
-                          marginBottom: 1,
-                        }}>{cell.count}</div>
-                        <div style={{
-                          fontSize: "0.5rem", fontWeight: 600,
-                          color: colors.text, opacity: 0.75, letterSpacing: "0.03em",
-                        }}>{gapLabel(cell.count)}</div>
+                        <div style={{ fontSize: "0.75rem", fontWeight: 700, color: colors.text, lineHeight: 1, marginBottom: 1 }}>{cell.count}</div>
+                        <div style={{ fontSize: "0.5rem", fontWeight: 600, color: colors.text, opacity: 0.75, letterSpacing: "0.03em" }}>{gapLabel(cell.count)}</div>
                       </td>
                     );
                   })}
@@ -334,15 +534,18 @@ export default function GapMatrix({ onClose }: { onClose: () => void }) {
         )}
       </div>
 
-      {/* Drill-down panel */}
       {selectedCell && (
         <CellDetail
           prov={selectedCell.prov}
           cat={selectedCell.cat}
           cell={selectedCell.cell}
+          stage={stage}
+          mode={mode}
           onClose={() => setSelected(null)}
         />
       )}
+
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
