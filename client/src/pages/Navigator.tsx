@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import Wizard from "../components/Wizard";
 
 interface Program {
   id: number; name: string; category: string;
@@ -250,6 +251,8 @@ export default function Navigator() {
   const [loading, setLoading] = useState(false);
   const [showBrowse, setShowBrowse] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
+  const isEco = mode === "ec";
+  const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -260,6 +263,25 @@ export default function Navigator() {
   }, [mode]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  function handleWizardComplete(prompt: string) {
+    setShowWizard(false);
+    setInput(prompt);
+    setTimeout(() => {
+      setInput("");
+      const newMessages: Message[] = [...messages, { role: "user", content: prompt }];
+      setMessages(newMessages);
+      setLoading(true);
+      fetch("/api/chat", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: prompt, mode, history: [] }),
+      })
+        .then(r => r.json())
+        .then(data => { setMessages(m => [...m, { role: "assistant", content: data.reply || "Something went wrong." }]); })
+        .catch(() => { setMessages(m => [...m, { role: "assistant", content: "Network error — please try again." }]); })
+        .finally(() => setLoading(false));
+    }, 0);
+  }
 
   async function send() {
     const text = input.trim();
@@ -280,8 +302,6 @@ export default function Navigator() {
     }
     setLoading(false);
   }
-
-  const isEco = mode === "ec";
 
   return (
     <>
@@ -343,7 +363,11 @@ export default function Navigator() {
 
         {/* Messages */}
         <div style={{ flex: 1, overflowY: "auto", paddingTop: 20, paddingBottom: 12 }}>
-          {messages.map((m, i) => <ChatBubble key={i} msg={m} />)}
+          {/* Wizard — founder mode only, before any messages sent */}
+          {!isEco && showWizard && messages.length === 0 && (
+            <Wizard onComplete={handleWizardComplete} />
+          )}
+          {(!showWizard || messages.length > 0 || isEco) && messages.map((m, i) => <ChatBubble key={i} msg={m} />)}
           {loading && (
             <div style={{ padding: "0 16px 4px" }}>
               <div style={{
@@ -365,7 +389,8 @@ export default function Navigator() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
+        {/* Input — hidden while wizard is active */}
+        {(!showWizard || messages.length > 0 || isEco) && (
         <div style={{
           background: "var(--bg)", borderTop: "1px solid var(--border)",
           padding: "10px 12px", display: "flex", gap: 8, flexShrink: 0,
@@ -398,6 +423,7 @@ export default function Navigator() {
             }}
           >→</button>
         </div>
+        )}
 
         <style>{`
           @keyframes pulse {
