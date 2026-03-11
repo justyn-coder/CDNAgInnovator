@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 
 interface WizardResult {
@@ -58,7 +57,7 @@ export default function Wizard({ onComplete }: Props) {
   function finish() {
     const provinceStr = data.provinces.length > 0 ? data.provinces.join(" and ") : "Canada";
     const needStr = data.need === "all"
-      ? "I want to see all relevant programs"
+      ? "I want to see all relevant programs across funding, pilot sites, accelerators, and first customer opportunities"
       : `My biggest need right now is ${NEEDS.find(n => n.key === data.need)?.label?.toLowerCase() || data.need}`;
     const stageLabel = STAGES.find(s => s.key === data.stage)?.label || data.stage;
 
