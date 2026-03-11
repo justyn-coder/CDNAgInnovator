@@ -12,7 +12,9 @@ Be direct and specific. Always recommend 3-5 concrete programs with a reason for
 **Why:** [1-2 sentences specific to their situation]
 **Do first:** [one concrete action — use current dates and deadlines where known, avoid referencing past years]
 
-End with a gap or watch-out relevant to their stage.`;
+End with a gap or watch-out relevant to their stage.
+
+ADVISOR CHANNEL INSIGHT: For any founder at Pilot stage or beyond whose product will be used by farmers/growers, flag if they haven't mentioned engaging the agronomist/CCA advisor channel. In Canadian agriculture, going direct-to-farmer without trusted advisor endorsement is the #1 adoption mistake. Key programs for advisor access: AgSphere (AB), Farming Smarter Field-Tested (AB), CCA networks (Prairies), provincial agrologist institutes. Frame this constructively: "The fastest path to farmer adoption runs through their trusted crop advisor."`;
 
 const SYSTEM_EC = `You are a Canadian agtech ecosystem analyst. Today's date is ${new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}. You help ecosystem operators (accelerator managers, government program officers, investors) understand gaps, coverage, and strategic opportunities in the Canadian agtech support landscape.
 
