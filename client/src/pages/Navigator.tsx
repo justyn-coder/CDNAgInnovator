@@ -256,10 +256,10 @@ export default function Navigator() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const greeting = mode === "e"
-      ? "Hi! I'm your Canadian Ag Innovation Navigator.\n\nTell me about your agtech company — what you're building, what stage you're at, and which province(s) you're targeting. I'll recommend the best programs for your situation."
-      : "Welcome, ecosystem operator.\n\nI can help you analyze the Canadian agtech support landscape — coverage gaps, stage distribution, provincial blind spots, or strategic opportunities. What would you like to explore?";
-    setMessages([{ role: "assistant", content: greeting }]);
+    if (isEco) {
+      setMessages([{ role: "assistant", content: "Welcome, ecosystem operator.\n\nI can help you analyze the Canadian agtech support landscape — coverage gaps, stage distribution, provincial blind spots, or strategic opportunities. What would you like to explore?" }]);
+    }
+    // Founder mode: messages stay empty so wizard renders
   }, [mode]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
@@ -364,10 +364,10 @@ export default function Navigator() {
         {/* Messages */}
         <div style={{ flex: 1, overflowY: "auto", paddingTop: 20, paddingBottom: 12 }}>
           {/* Wizard — founder mode only, before any messages sent */}
-          {!isEco && showWizard && messages.length === 0 && (
+          {!isEco && showWizard && (
             <Wizard onComplete={handleWizardComplete} />
           )}
-          {(!showWizard || messages.length > 0 || isEco) && messages.map((m, i) => <ChatBubble key={i} msg={m} />)}
+          {(!showWizard || isEco) && messages.map((m, i) => <ChatBubble key={i} msg={m} />)}
           {loading && (
             <div style={{ padding: "0 16px 4px" }}>
               <div style={{
@@ -390,7 +390,7 @@ export default function Navigator() {
         </div>
 
         {/* Input — hidden while wizard is active */}
-        {(!showWizard || messages.length > 0 || isEco) && (
+        {(!showWizard || isEco) && (
         <div style={{
           background: "var(--bg)", borderTop: "1px solid var(--border)",
           padding: "10px 12px", display: "flex", gap: 8, flexShrink: 0,
