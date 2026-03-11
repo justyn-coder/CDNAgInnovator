@@ -14,7 +14,6 @@ const NEED_TO_CATEGORIES: Record<string, string[]> = {
 };
 
 // ── Stage progression logic ──────────────────────────────────────────────
-// What categories matter most at each stage
 const STAGE_PRIORITIES: Record<string, string[]> = {
   Idea:  ["Train", "Accel", "Fund", "Event"],
   MVP:   ["Fund", "Accel", "Pilot", "Event"],
@@ -23,7 +22,6 @@ const STAGE_PRIORITIES: Record<string, string[]> = {
   Scale: ["Fund", "Org", "Event", "Pilot"],
 };
 
-// What's the NEXT stage they should be thinking about
 const NEXT_STAGE: Record<string, string> = {
   Idea: "MVP", MVP: "Pilot", Pilot: "Comm", Comm: "Scale", Scale: "Scale",
 };
@@ -85,37 +83,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const needCategories = NEED_TO_CATEGORIES[need] || NEED_TO_CATEGORIES["all"];
     const stagePriorities = STAGE_PRIORITIES[stage] || STAGE_PRIORITIES["MVP"];
     const nextStage = NEXT_STAGE[stage] || "Scale";
-
-    // Merge: need categories first, then stage priorities for breadth
     const allCategories = [...new Set([...needCategories, ...stagePriorities])];
 
-    // 2. Query matching programs
-    // Get programs that match province(s) + National, filtered by stage compatibility
-    const provFilter = provinces.length > 0
-      ? provinces.map((_: string, i: number) => `$${i + 1} = ANY(province)`).join(" OR ") + ` OR 'National' = ANY(province)`
-      : `TRUE`;
-
+    // 2. Query matching programs — simple approach, no dynamic param numbering
+    const provArray = provinces.length > 0 ? provinces : [];
     const rows = await client.unsafe(
       `SELECT name, category, description, use_case, province, stage, website, funding_type, funding_max_cad
        FROM programs
-       WHERE (${provFilter})
-         AND ($${provinces.length + 1} = ANY(stage) OR $${provinces.length + 2} = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)
+       WHERE (
+         province && $1::text[]
+         OR 'National' = ANY(province)
+         ${provArray.length === 0 ? "OR TRUE" : ""}
+       )
+       AND ($2 = ANY(stage) OR $3 = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)
        ORDER BY
-         CASE WHEN category = ANY($${provinces.length + 3}::text[]) THEN 0 ELSE 1 END,
+         CASE WHEN category = ANY($4::text[]) THEN 0 ELSE 1 END,
          name
        LIMIT 40`,
-      [...provinces, stage, nextStage, `{${allCategories.join(",")}}`]
+      [
+        `{${provArray.join(",")}}`,
+        stage,
+        nextStage,
+        `{${allCategories.join(",")}}`,
+      ]
     );
 
-    // 3. Also get a count of what's available vs not for gap detection
+    // 3. Gap detection — simple per-category counts
     const gapInfo: Record<string, number> = {};
     for (const cat of allCategories) {
       const countRows = await client.unsafe(
         `SELECT COUNT(*) as cnt FROM programs
          WHERE category = $1
-           AND (${provFilter})
-           AND ($${provinces.length + 2} = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)`,
-        [...provinces, cat, stage]
+           AND (province && $2::text[] OR 'National' = ANY(province) ${provArray.length === 0 ? "OR TRUE" : ""})
+           AND ($3 = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)`,
+        [cat, `{${provArray.join(",")}}`, stage]
       );
       gapInfo[cat] = parseInt((countRows as any[])[0]?.cnt || "0", 10);
     }
@@ -145,7 +146,7 @@ Province(s): ${provinces.join(", ") || "Not specified"}
 Primary Need: ${need}
 
 AVAILABLE PROGRAMS (${(rows as any[]).length} matching):
-${programList}
+${programList || "No programs found matching these criteria."}
 
 CATEGORY AVAILABILITY for ${provinces.join("/")}:
 ${gapSummary}
