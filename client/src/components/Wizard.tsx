@@ -8,7 +8,7 @@ interface WizardResult {
 }
 
 interface Props {
-  onComplete: (prompt: string) => void;
+  onComplete: (prompt: string, snapshot: { stage: string; provinces: string[]; need: string }) => void;
 }
 
 const STAGES = [
@@ -62,7 +62,7 @@ export default function Wizard({ onComplete }: Props) {
     const stageLabel = STAGES.find(s => s.key === data.stage)?.label || data.stage;
 
     const prompt = `I'm building ${data.description}. I'm at the ${stageLabel} stage, based in ${provinceStr}. ${needStr}. What are the best programs for my situation?`;
-    onComplete(prompt);
+    onComplete(prompt, { stage: data.stage, provinces: data.provinces, need: needKey });
   }
 
   const canProceed = [

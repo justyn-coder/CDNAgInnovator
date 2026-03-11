@@ -11,6 +11,12 @@ interface Program {
 
 interface Message { role: "user" | "assistant"; content: string; }
 
+interface WizardSnapshot {
+  stage: string;
+  provinces: string[];
+  need: string;
+}
+
 const CAT_META: Record<string, { label: string; color: string; bg: string }> = {
   Fund:  { label: "Funding",      color: "#1a4b8c", bg: "#e8f0fe" },
   Accel: { label: "Accelerator",  color: "#8c5a1a", bg: "#fff3e0" },
@@ -21,6 +27,15 @@ const CAT_META: Record<string, { label: string; color: string; bg: string }> = {
 };
 const CATEGORIES = Object.keys(CAT_META);
 const STAGES = ["Idea", "MVP", "Pilot", "Comm", "Scale"];
+
+const NEED_META: Record<string, { label: string; color: string; bg: string }> = {
+  funding:    { label: "Funding",      color: "#1a4b8c", bg: "#e8f0fe" },
+  pilot:      { label: "Pilot Site",   color: "#1a6b2a", bg: "#e8f5e9" },
+  accel:      { label: "Accelerator",  color: "#8c5a1a", bg: "#fff3e0" },
+  customers:  { label: "Customers",    color: "#8c1a3a", bg: "#fce4ec" },
+  network:    { label: "Network",      color: "#6a1a8c", bg: "#f3e5f5" },
+  regulatory: { label: "Regulatory",   color: "#1a6b7a", bg: "#e0f7fa" },
+};
 
 // Simple markdown renderer
 function renderMarkdown(text: string): string {
@@ -71,6 +86,55 @@ function ChatBubble({ msg }: { msg: Message }) {
   );
 }
 
+function WizardSummary({ snapshot, onReset }: { snapshot: WizardSnapshot; onReset: () => void }) {
+  const needMeta = snapshot.need ? NEED_META[snapshot.need] : null;
+  return (
+    <div style={{
+      margin: "0 16px 14px",
+      padding: "8px 12px",
+      background: "var(--bg-secondary)",
+      border: "1px solid var(--border)",
+      borderRadius: "var(--radius)",
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      flexWrap: "wrap",
+      fontSize: "0.72rem",
+    }}>
+      {snapshot.stage && (
+        <span style={{
+          background: "var(--green-mid)", color: "#fff",
+          padding: "2px 8px", borderRadius: 100, fontWeight: 700,
+          fontSize: "0.65rem", letterSpacing: "0.02em",
+        }}>{snapshot.stage}</span>
+      )}
+      {snapshot.provinces.map(p => (
+        <span key={p} style={{
+          background: "var(--bg-tertiary)", color: "var(--text-secondary)",
+          padding: "2px 7px", borderRadius: 100, fontSize: "0.65rem", fontWeight: 600,
+          border: "1px solid var(--border)",
+        }}>{p}</span>
+      ))}
+      {needMeta && (
+        <span style={{
+          background: needMeta.bg, color: needMeta.color,
+          padding: "2px 8px", borderRadius: 100, fontSize: "0.65rem", fontWeight: 700,
+        }}>{needMeta.label}</span>
+      )}
+      <span style={{ flex: 1 }} />
+      <button
+        onClick={onReset}
+        style={{
+          background: "none", border: "none", padding: 0,
+          fontSize: "0.65rem", color: "var(--text-tertiary)",
+          cursor: "pointer", textDecoration: "underline",
+          textDecorationColor: "var(--border)",
+        }}
+      >Start over</button>
+    </div>
+  );
+}
+
 function CategoryPill({ cat }: { cat: string }) {
   const m = CAT_META[cat] || { label: cat, color: "#555", bg: "#eee" };
   return (
@@ -102,7 +166,6 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
       <div style={{
         padding: "0 16px", height: 52, display: "flex", justifyContent: "space-between", alignItems: "center",
         borderBottom: "1px solid var(--border)", background: "var(--bg)", flexShrink: 0,
@@ -116,8 +179,6 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
           fontSize: "0.78rem", fontWeight: 600, color: "var(--text)",
         }}>Done</button>
       </div>
-
-      {/* Filters */}
       <div style={{
         padding: "10px 16px", display: "flex", gap: 8, flexWrap: "wrap",
         background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)", flexShrink: 0,
@@ -144,8 +205,6 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
           {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
-
-      {/* Table */}
       <div style={{ flex: 1, overflowY: "auto" }}>
         {loading ? (
           <div style={{ padding: 40, textAlign: "center", color: "var(--text-tertiary)", fontSize: "0.85rem" }}>Loading programs…</div>
@@ -251,6 +310,7 @@ export default function Navigator() {
   const [loading, setLoading] = useState(false);
   const [showBrowse, setShowBrowse] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
+  const [wizardSnapshot, setWizardSnapshot] = useState<WizardSnapshot | null>(null);
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -259,13 +319,13 @@ export default function Navigator() {
     if (isEco) {
       setMessages([{ role: "assistant", content: "Welcome, ecosystem operator.\n\nI can help you analyze the Canadian agtech support landscape — coverage gaps, stage distribution, provincial blind spots, or strategic opportunities. What would you like to explore?" }]);
     }
-    // Founder mode: messages stay empty so wizard renders
   }, [mode]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  function handleWizardComplete(prompt: string) {
+  function handleWizardComplete(prompt: string, snapshot: WizardSnapshot) {
     setShowWizard(false);
+    setWizardSnapshot(snapshot);
     setInput(prompt);
     setTimeout(() => {
       setInput("");
@@ -281,6 +341,13 @@ export default function Navigator() {
         .catch(() => { setMessages(m => [...m, { role: "assistant", content: "Network error — please try again." }]); })
         .finally(() => setLoading(false));
     }, 0);
+  }
+
+  function handleReset() {
+    setShowWizard(true);
+    setWizardSnapshot(null);
+    setMessages([]);
+    setInput("");
   }
 
   async function send() {
@@ -350,7 +417,7 @@ export default function Navigator() {
         }}>
           <div style={{ width: 5, height: 5, borderRadius: "50%", background: isEco ? "#4a9eff" : "rgba(255,255,255,0.5)" }} />
           <span style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: isEco ? "rgba(74,158,255,0.8)" : "rgba(255,255,255,0.65)" }}>
-            {isEco ? "Ecosystem Operator Mode" : "Founder Mode"} · AI-Powered · 225 Programs
+            {isEco ? "Ecosystem Operator Mode" : "Founder Mode"} · AI-Powered · 275 Programs
           </span>
         </div>
 
@@ -363,10 +430,14 @@ export default function Navigator() {
 
         {/* Messages */}
         <div style={{ flex: 1, overflowY: "auto", paddingTop: 20, paddingBottom: 12 }}>
-          {/* Wizard — founder mode only, before any messages sent */}
           {!isEco && showWizard && (
             <Wizard onComplete={handleWizardComplete} />
           )}
+
+          {!isEco && !showWizard && wizardSnapshot && (
+            <WizardSummary snapshot={wizardSnapshot} onReset={handleReset} />
+          )}
+
           {(!showWizard || isEco) && messages.map((m, i) => <ChatBubble key={i} msg={m} />)}
           {loading && (
             <div style={{ padding: "0 16px 4px" }}>
@@ -389,7 +460,6 @@ export default function Navigator() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Input — hidden while wizard is active */}
         {(!showWizard || isEco) && (
         <div style={{
           background: "var(--bg)", borderTop: "1px solid var(--border)",
