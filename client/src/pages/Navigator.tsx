@@ -31,12 +31,11 @@ const CATEGORIES = Object.keys(CAT_META);
 const STAGES = ["Idea", "MVP", "Pilot", "Comm", "Scale"];
 
 const NEED_META: Record<string, { label: string; color: string; bg: string }> = {
-  funding:    { label: "Funding",      color: "#1a4b8c", bg: "#e8f0fe" },
-  pilot:      { label: "Pilot Site",   color: "#1a6b2a", bg: "#e8f5e9" },
-  accel:      { label: "Accelerator",  color: "#8c5a1a", bg: "#fff3e0" },
-  customers:  { label: "Customers",    color: "#8c1a3a", bg: "#fce4ec" },
-  network:    { label: "Network",      color: "#6a1a8c", bg: "#f3e5f5" },
-  regulatory: { label: "Regulatory",   color: "#1a6b7a", bg: "#e0f7fa" },
+  "non-dilutive-capital":        { label: "Funding",      color: "#1a4b8c", bg: "#e8f0fe" },
+  "pilot-site-field-validation": { label: "Pilot Site",   color: "#1a6b2a", bg: "#e8f5e9" },
+  "accelerator":                 { label: "Accelerator",  color: "#8c5a1a", bg: "#fff3e0" },
+  "first-customers":             { label: "Customers",    color: "#8c1a3a", bg: "#fce4ec" },
+  "all":                         { label: "All Programs", color: "#6a1a8c", bg: "#f3e5f5" },
 };
 
 // Simple markdown renderer
@@ -347,7 +346,7 @@ export default function Navigator() {
     }
   }, [mode]);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
 
   function handleWizardComplete(prompt: string, snapshot: WizardSnapshot) {
     setShowWizard(false);

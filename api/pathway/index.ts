@@ -72,11 +72,16 @@ Respond ONLY with a JSON object, no markdown, no backticks, no preamble:
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { description, stage, provinces = [], need = "all" } = req.body;
+  const { description, stage, provinces: rawProvinces = [], need = "all" } = req.body;
 
   if (!description || !stage) {
     return res.status(400).json({ error: "description and stage are required" });
   }
+
+  // Expand "Atlantic" into individual province codes
+  const provinces: string[] = rawProvinces.flatMap((p: string) =>
+    p === "Atlantic" ? ["NB", "NS", "PE", "NL"] : [p]
+  );
 
   try {
     // 1. Determine which categories to focus on
