@@ -54,11 +54,11 @@ export default function Wizard({ onComplete }: Props) {
     }));
   }
 
-  function finish() {
+  function finish(needKey: string) {
     const provinceStr = data.provinces.length > 0 ? data.provinces.join(" and ") : "Canada";
-    const needStr = data.need === "all"
+    const needStr = needKey  === "all"
       ? "I want to see all relevant programs across funding, pilot sites, accelerators, and first customer opportunities"
-      : `My biggest need right now is ${NEEDS.find(n => n.key === data.need)?.label?.toLowerCase() || data.need}`;
+      : `My biggest need right now is ${NEEDS.find(n => n.key === neekKey)?.label?.toLowerCase() || data.need}`;
     const stageLabel = STAGES.find(s => s.key === data.stage)?.label || data.stage;
 
     const prompt = `I'm building ${data.description}. I'm at the ${stageLabel} stage, based in ${provinceStr}. ${needStr}. What are the best programs for my situation?`;
@@ -133,7 +133,7 @@ export default function Wizard({ onComplete }: Props) {
       <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: 18 }}>Pick one — this prioritizes your recommendations.</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {NEEDS.map(n => (
-          <button key={n.key} onClick={() => { setData(d => ({ ...d, need: n.key })); setTimeout(() => finish(), 150); }}
+          <button key={n.key} onClick={() => { setData(d => ({ ...d, need: n.key })); finish(n.key); }}
             style={{ ...btn(data.need === n.key), display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: "1.1rem" }}>{n.icon}</span>
             <span>{n.label}</span>
