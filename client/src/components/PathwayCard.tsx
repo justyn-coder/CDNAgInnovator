@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 
+// ── Stage display labels ───────────────────────────────────────────────────
+const SL: Record<string, string> = {
+  Idea: "Idea", MVP: "MVP", Pilot: "Pilot",
+  Comm: "First Customers", Scale: "Scale",
+};
+
 // ── Types ──────────────────────────────────────────────────────────────────
 interface PathwayStep {
   order: number;
@@ -102,7 +108,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
           Building your pathway…
         </div>
         <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>
-          Analyzing {provinces.join(", ")} programs for {stage}-stage companies
+          Analyzing {provinces.join(", ")} programs for {SL[stage] || stage}-stage companies
         </div>
       </div>
     );
@@ -175,7 +181,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
           <span style={{
             fontSize: "0.6rem", fontWeight: 700, padding: "3px 9px", borderRadius: 100,
             background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.7)",
-          }}>{stage} → {meta.nextStage}</span>
+          }}>{SL[stage] || stage} → {SL[meta.nextStage] || meta.nextStage}</span>
           {provinces.map(p => (
             <span key={p} style={{
               fontSize: "0.6rem", fontWeight: 600, padding: "3px 9px", borderRadius: 100,
@@ -298,7 +304,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
           borderRadius: "0 0 16px 16px",
           fontSize: "0.73rem", color: "var(--text-secondary)", lineHeight: 1.5,
         }}>
-          <strong style={{ fontWeight: 700, color: "var(--text)" }}>Next stage ({meta.nextStage}):</strong>{" "}
+          <strong style={{ fontWeight: 700, color: "var(--text)" }}>Next stage ({SL[meta.nextStage] || meta.nextStage}):</strong>{" "}
           {pathway.next_stage_note}
         </div>
       )}

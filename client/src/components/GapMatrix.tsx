@@ -45,6 +45,11 @@ interface ExplainResponse {
 // ── Constants ──────────────────────────────────────────────────────────────
 const STAGES = ["All", "Idea", "MVP", "Pilot", "Comm", "Scale"];
 
+const STAGE_LABELS: Record<string, string> = {
+  All: "All", Idea: "Idea", MVP: "MVP", Pilot: "Pilot",
+  Comm: "First Customers", Scale: "Scale",
+};
+
 const CAT_LABELS: Record<string, string> = {
   Fund:  "Funding",
   Accel: "Accelerator",
@@ -432,7 +437,7 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
               background: stage === s ? "var(--green-mid)" : "var(--bg)",
               color: stage === s ? "#fff" : "var(--text-secondary)",
               transition: "all 0.12s",
-            }}>{s}</button>
+            }}>{STAGE_LABELS[s] || s}</button>
           ))}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

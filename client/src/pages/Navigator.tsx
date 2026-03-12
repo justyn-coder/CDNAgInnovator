@@ -29,6 +29,10 @@ const CAT_META: Record<string, { label: string; color: string; bg: string }> = {
 };
 const CATEGORIES = Object.keys(CAT_META);
 const STAGES = ["Idea", "MVP", "Pilot", "Comm", "Scale"];
+const STAGE_LABELS: Record<string, string> = {
+  Idea: "Idea", MVP: "MVP", Pilot: "Pilot",
+  Comm: "First Customers", Scale: "Scale",
+};
 
 const NEED_META: Record<string, { label: string; color: string; bg: string }> = {
   "non-dilutive-capital":        { label: "Funding",      color: "#1a4b8c", bg: "#e8f0fe" },
@@ -107,7 +111,7 @@ function WizardSummary({ snapshot, onReset }: { snapshot: WizardSnapshot; onRese
           background: "var(--green-mid)", color: "#fff",
           padding: "2px 8px", borderRadius: 100, fontWeight: 700,
           fontSize: "0.65rem", letterSpacing: "0.02em",
-        }}>{snapshot.stage}</span>
+        }}>{STAGE_LABELS[snapshot.stage] || snapshot.stage}</span>
       )}
       {snapshot.provinces.map(p => (
         <span key={p} style={{
@@ -203,7 +207,7 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
           fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)",
         }}>
           <option value="All">All Stages</option>
-          {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+          {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
         </select>
       </div>
       <div style={{ flex: 1, overflowY: "auto" }}>
