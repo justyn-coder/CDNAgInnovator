@@ -310,17 +310,54 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       )}
 
       {/* ── Actions bar ───────────────────────────────────────────────── */}
-      <div style={{
-        display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap",
-      }}>
-        <button
-          onClick={() => onChatFollowUp("Tell me more about the first step in my pathway. What exactly should I prepare before reaching out?")}
-          style={{
-            flex: "1 1 140px", padding: "10px 14px",
-            background: "var(--green-mid)", color: "#fff", border: "none",
-            borderRadius: "var(--radius-sm)", fontWeight: 600, fontSize: "0.78rem",
-          }}
-        >Ask a follow-up question →</button>
+      <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+        {/* Contextual quick-ask chips */}
+        <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--text-tertiary)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          Ask a follow-up
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {(() => {
+            const chips: { label: string; q: string }[] = [];
+            const firstStep = pathway.steps[0];
+            if (firstStep) {
+              chips.push({
+                label: `How do I approach ${firstStep.program_name.length > 25 ? firstStep.program_name.slice(0, 22) + "…" : firstStep.program_name}?`,
+                q: `Tell me more about ${firstStep.program_name}. What exactly should I prepare before reaching out, and who should I contact?`,
+              });
+            }
+            if (pathway.gap_warning) {
+              chips.push({
+                label: "How do I fill the gap?",
+                q: "You flagged a gap in my pathway. What's the best workaround — are there national programs, neighboring provinces, or other approaches I should consider?",
+              });
+            }
+            chips.push({
+              label: "What am I missing?",
+              q: `Beyond the programs in my pathway, what other resources, connections, or strategies should I be pursuing at the ${SL[stage] || stage} stage in ${provinces.join(", ")}?`,
+            });
+            if (pathway.steps.length > 2) {
+              chips.push({
+                label: "Prioritize for me",
+                q: "If I only have bandwidth for 2 things this month, which steps in my pathway should I prioritize and why?",
+              });
+            }
+            return chips.slice(0, 3).map((chip, i) => (
+              <button key={i} onClick={() => onChatFollowUp(chip.q)}
+                style={{
+                  background: "var(--bg-secondary)", border: "1px solid var(--border)",
+                  borderRadius: 100, padding: "7px 14px",
+                  fontSize: "0.75rem", fontWeight: 500, color: "var(--text)",
+                  transition: "border-color 0.12s, background 0.12s",
+                  textAlign: "left",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--green-mid)"; (e.currentTarget as HTMLElement).style.background = "var(--green-soft, #e8f5e0)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; }}
+              >{chip.label}</button>
+            ));
+          })()}
+        </div>
+
+        {/* Copy link */}
         <button
           onClick={() => {
             const url = new URL(window.location.origin + "/navigator");
@@ -333,11 +370,11 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
             );
           }}
           style={{
-            flex: "0 0 auto", padding: "10px 14px",
-            background: "var(--bg-secondary)", color: "var(--text)", border: "1px solid var(--border)",
-            borderRadius: "var(--radius-sm)", fontWeight: 600, fontSize: "0.78rem",
+            alignSelf: "flex-start", padding: "7px 14px",
+            background: "var(--bg-secondary)", color: "var(--text-secondary)", border: "1px solid var(--border)",
+            borderRadius: "var(--radius-sm)", fontWeight: 500, fontSize: "0.72rem",
           }}
-        >Copy link</button>
+        >📋 Copy shareable link</button>
       </div>
 
       <style>{`
