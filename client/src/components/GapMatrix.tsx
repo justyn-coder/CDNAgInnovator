@@ -392,6 +392,9 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<{ prov: string; cat: string } | null>(null);
+  const [showGuide, setShowGuide] = useState(() => {
+    try { return !sessionStorage.getItem("ag_gap_guided"); } catch { return true; }
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -404,6 +407,14 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
   }, [stage]);
 
   useEffect(() => { setSelected(null); }, [stage]);
+
+  // Dismiss guide on first cell click
+  useEffect(() => {
+    if (selected && showGuide) {
+      setShowGuide(false);
+      try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {}
+    }
+  }, [selected]);
 
   const selectedCell = selected && data
     ? { prov: selected.prov, cat: selected.cat, cell: data.matrix[selected.prov][selected.cat] }
@@ -425,6 +436,30 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
           transition: "all 0.12s",
         }}>Done</button>
       </div>
+
+      {/* Inline onboarding — shows once */}
+      {showGuide && !loading && data && (
+        <div style={{
+          padding: "14px 18px", borderBottom: "1px solid var(--border)",
+          background: "linear-gradient(90deg, #eff6ff, #dbeafe)",
+          display: "flex", gap: 12, alignItems: "flex-start",
+          animation: "fadeInUp 0.3s ease",
+        }}>
+          <span style={{ fontSize: "1.2rem", flexShrink: 0, marginTop: 2 }}>💡</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: "0.82rem", color: "#1e40af", marginBottom: 4 }}>
+              How to read this map
+            </div>
+            <div style={{ fontSize: "0.75rem", color: "#3b82f6", lineHeight: 1.55 }}>
+              Each cell shows how many programs exist for that Province × Category combination. <strong style={{ color: "#1e40af" }}>Red = gap</strong> (no programs), <strong style={{ color: "#1e40af" }}>yellow = weak</strong> (only 1). Tap any cell to see the programs and get an <strong style={{ color: "#1e40af" }}>AI-powered analysis</strong> of why the gap exists and what could fill it.
+            </div>
+          </div>
+          <button onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }} style={{
+            background: "none", border: "none", fontSize: "0.75rem", color: "#3b82f6", padding: "2px 4px",
+            fontWeight: 600, flexShrink: 0,
+          }}>Got it ✕</button>
+        </div>
+      )}
 
       <div style={{
         padding: "10px 16px", borderBottom: "1px solid var(--border)",
@@ -461,7 +496,7 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
 
       {data && !loading && (
         <div style={{
-          padding: "7px 16px", borderBottom: "1px solid var(--border)",
+          padding: "8px 18px", borderBottom: "1px solid var(--border)",
           background: "var(--bg)", flexShrink: 0,
           display: "flex", gap: 16, alignItems: "center",
         }}>
@@ -470,12 +505,16 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
             { label: "weak", value: data.summary.weakCells, color: "#854d0e" },
             { label: "covered", value: data.summary.coveredCells, color: "#166534" },
           ].map(s => (
-            <span key={s.label} style={{ fontSize: "0.72rem", color: "var(--text-secondary)" }}>
+            <span key={s.label} style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
               <strong style={{ color: s.color, fontWeight: 700 }}>{s.value}</strong> {s.label}
             </span>
           ))}
-          <span style={{ fontSize: "0.68rem", color: "var(--text-tertiary)", marginLeft: "auto" }}>
-            Tap a cell to drill down
+          <span style={{
+            fontSize: "0.72rem", color: "var(--text-tertiary)", marginLeft: "auto",
+            display: "flex", alignItems: "center", gap: 4,
+          }}>
+            <span style={{ display: "inline-block", width: 18, height: 18, borderRadius: 4, background: "#fde8e8", border: "1px solid #fca5a5", lineHeight: "18px", textAlign: "center", fontSize: "0.6rem", fontWeight: 700, color: "#b91c1c" }}>0</span>
+            ← tap any cell to drill down + get AI analysis
           </span>
         </div>
       )}

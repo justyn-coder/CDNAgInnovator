@@ -276,19 +276,33 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
 }
 
 // ── Feedback Modal (replaces old Submit form) ───────────────────────────────
-function FeedbackModal({ onClose, isEco }: { onClose: () => void; isEco: boolean }) {
-  const [form, setForm] = useState({ feedback: "", email: "", name: "" });
+function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; isEco: boolean; pageContext?: string }) {
+  const [form, setForm] = useState(() => {
+    // Load saved identity from sessionStorage
+    let email = "", name = "";
+    try {
+      email = sessionStorage.getItem("ag_fb_email") || "";
+      name = sessionStorage.getItem("ag_fb_name") || "";
+    } catch {}
+    return { feedback: "", email, name };
+  });
+  const hasIdentity = !!form.email;
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function submit() {
     if (!form.feedback.trim()) { alert("Please share some feedback."); return; }
+    // Save identity for next time
+    try {
+      if (form.email) sessionStorage.setItem("ag_fb_email", form.email);
+      if (form.name) sessionStorage.setItem("ag_fb_name", form.name);
+    } catch {}
     setBusy(true);
     try {
       await fetch("/api/submissions", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          programName: `FEEDBACK: ${isEco ? "operator" : "founder"}`,
+          programName: `FEEDBACK: ${isEco ? "operator" : "founder"}${pageContext ? ` [${pageContext}]` : ""}`,
           bestFor: form.feedback,
           submitterName: form.name || "anonymous",
           submitterEmail: form.email || `anon-${Date.now()}@feedback`,
@@ -325,7 +339,7 @@ function FeedbackModal({ onClose, isEco }: { onClose: () => void; isEco: boolean
               Beta Feedback
             </div>
             <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.65)" }}>
-              Help us build the tool you actually need
+              {pageContext ? `Feedback on: ${pageContext}` : "Help us build the tool you actually need"}
             </div>
           </div>
         </div>
@@ -345,6 +359,7 @@ function FeedbackModal({ onClose, isEco }: { onClose: () => void; isEco: boolean
                   What's working? What's wrong? What's missing? *
                 </label>
                 <textarea value={form.feedback} onChange={e => setForm(f => ({ ...f, feedback: e.target.value }))}
+                  autoFocus
                   placeholder={isEco ? "e.g. My program isn't listed, the gap data is wrong for SK, I'd use this if it had…" : "e.g. The pathway was great but missed X, the loading took too long, I wish it showed…"}
                   rows={3}
                   style={{
@@ -357,28 +372,36 @@ function FeedbackModal({ onClose, isEco }: { onClose: () => void; isEco: boolean
                   onBlur={e => (e.target.style.borderColor = "var(--border)")}
                 />
               </div>
-              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--text-tertiary)" }}>Your name</label>
-                  <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Optional"
-                    style={{
-                      width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
-                      border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 3,
-                      outline: "none", background: "var(--bg-secondary)", fontFamily: "var(--font-text)",
-                    }}
-                  />
+              {/* Show identity fields only if we don't have them yet */}
+              {!hasIdentity && (
+                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--text-tertiary)" }}>Your name</label>
+                    <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Optional"
+                      style={{
+                        width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
+                        border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 3,
+                        outline: "none", background: "var(--bg-secondary)", fontFamily: "var(--font-text)",
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--text-tertiary)" }}>Email <span style={{ color: "#d97706" }}>(so we can follow up)</span></label>
+                    <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@company.com"
+                      style={{
+                        width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
+                        border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 3,
+                        outline: "none", background: "var(--bg-secondary)", fontFamily: "var(--font-text)",
+                      }}
+                    />
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--text-tertiary)" }}>Email <span style={{ color: "#d97706" }}>(so we can follow up)</span></label>
-                  <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@company.com"
-                    style={{
-                      width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
-                      border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 3,
-                      outline: "none", background: "var(--bg-secondary)", fontFamily: "var(--font-text)",
-                    }}
-                  />
+              )}
+              {hasIdentity && (
+                <div style={{ fontSize: "0.68rem", color: "var(--text-tertiary)", marginBottom: 14 }}>
+                  Sending as <strong style={{ color: "var(--text-secondary)" }}>{form.name || form.email}</strong>
                 </div>
-              </div>
+              )}
               <button onClick={submit} disabled={busy} style={{
                 width: "100%", padding: "11px",
                 background: "linear-gradient(135deg, #d97706, #b45309)",
@@ -506,7 +529,7 @@ export default function Navigator() {
     <>
       {showBrowse && <BrowsePanel onClose={() => setShowBrowse(false)} />}
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} mode={mode === "ec" ? "ec" : "founder"} />}
-      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} />}
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
 
       <div style={{ position: "fixed", inset: 0, background: "var(--bg)", display: "flex", flexDirection: "column", fontFamily: "var(--font-text)" }}>
 
