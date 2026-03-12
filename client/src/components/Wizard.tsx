@@ -22,13 +22,37 @@ const STAGES = [
 
 const PROVINCES = ["AB", "SK", "MB", "ON", "BC", "QC", "Atlantic", "National"];
 
-const NEEDS = [
-  { key: "non-dilutive-capital", label: "Funding", icon: "💰" },
-  { key: "pilot-site-field-validation", label: "Pilot Site", icon: "🌾" },
-  { key: "first-customers", label: "First Customers", icon: "🤝" },
-  { key: "accelerator", label: "Accelerator", icon: "🚀" },
-  { key: "all", label: "Show me everything", icon: "✦" },
+// Stage-aware needs — different options depending on company maturity
+const EARLY_NEEDS = [
+  { key: "non-dilutive-capital", label: "Funding", sub: "Grants, vouchers, non-dilutive capital", icon: "💰" },
+  { key: "pilot-site-field-validation", label: "Pilot Site", sub: "Test with real farmers or on research farms", icon: "🌾" },
+  { key: "accelerator", label: "Accelerator / Incubator", sub: "Structured programs with mentorship + cohort", icon: "🚀" },
+  { key: "all", label: "Show me everything", sub: "", icon: "✦" },
 ];
+
+const MID_NEEDS = [
+  { key: "non-dilutive-capital", label: "Funding", sub: "Grants, vouchers, growth capital", icon: "💰" },
+  { key: "pilot-site-field-validation", label: "Pilot Site", sub: "Test with real farmers or on research farms", icon: "🌾" },
+  { key: "first-customers", label: "First Customers", sub: "Events, intros, advisor channels to reach growers", icon: "🤝" },
+  { key: "accelerator", label: "Accelerator", sub: "Structured programs with mentorship + cohort", icon: "🚀" },
+  { key: "all", label: "Show me everything", sub: "", icon: "✦" },
+];
+
+const GROWTH_NEEDS = [
+  { key: "market-expansion", label: "Market Expansion", sub: "New regions, export, channel partnerships, adoption", icon: "🌍" },
+  { key: "growth-capital", label: "Growth Capital", sub: "Series A+, growth debt, strategic investment", icon: "📈" },
+  { key: "industry-connections", label: "Industry Connections", sub: "Associations, advisor networks, trade events", icon: "🏛" },
+  { key: "all", label: "Show me everything", sub: "", icon: "✦" },
+];
+
+function getNeedsForStage(stage: string) {
+  if (stage === "Scale" || stage === "Comm") return GROWTH_NEEDS;
+  if (stage === "Pilot") return MID_NEEDS;
+  return EARLY_NEEDS;
+}
+
+// All possible need keys for the finish function label lookup
+const ALL_NEEDS = [...EARLY_NEEDS, ...MID_NEEDS, ...GROWTH_NEEDS];
 
 const btn = (active: boolean, small = false) => ({
   padding: small ? "7px 14px" : "10px 16px",
@@ -59,7 +83,7 @@ export default function Wizard({ onComplete }: Props) {
     const provinceStr = data.provinces.length > 0 ? data.provinces.join(" and ") : "Canada";
     const needStr = needKey  === "all"
       ? "I want to see all relevant programs across funding, pilot sites, accelerators, and first customer opportunities"
-      : `My biggest need right now is ${NEEDS.find(n => n.key === needKey)?.label?.toLowerCase() || data.need}`;
+      : `My biggest need right now is ${ALL_NEEDS.find(n => n.key === needKey)?.label?.toLowerCase() || data.need}`;
     const stageLabel = STAGES.find(s => s.key === data.stage)?.label || data.stage;
 
     const prompt = `I'm building ${data.description}. I'm at the ${stageLabel} stage, based in ${provinceStr}. ${needStr}. What are the best programs for my situation?`;
@@ -147,17 +171,20 @@ export default function Wizard({ onComplete }: Props) {
       </div>
     </div>,
 
-    // Step 3: Need
+    // Step 3: Need (stage-aware)
     <div key="3">
       <p style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 10 }}>Step 4 of 4</p>
       <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.02em" }}>What do you need most right now?</h2>
       <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: 18 }}>Pick one — this prioritizes your recommendations.</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {NEEDS.map(n => (
+        {getNeedsForStage(data.stage).map(n => (
           <button key={n.key} onClick={() => { setData(d => ({ ...d, need: n.key })); finish(n.key); }}
             style={{ ...btn(data.need === n.key), display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: "1.1rem" }}>{n.icon}</span>
-            <span>{n.label}</span>
+            <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>{n.icon}</span>
+            <div>
+              <div>{n.label}</div>
+              {n.sub && <div style={{ fontSize: "0.7rem", fontWeight: 400, color: data.need === n.key ? "rgba(255,255,255,0.65)" : "var(--text-tertiary)", marginTop: 1 }}>{n.sub}</div>}
+            </div>
           </button>
         ))}
       </div>

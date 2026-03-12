@@ -10,6 +10,9 @@ const NEED_TO_CATEGORIES: Record<string, string[]> = {
   "pilot-site-field-validation": ["Pilot", "Accel", "Org"],
   "first-customers": ["Org", "Event", "Accel", "Fund"],
   "accelerator": ["Accel", "Fund", "Event"],
+  "market-expansion": ["Org", "Event", "Fund", "Pilot"],
+  "growth-capital": ["Fund", "Accel", "Org"],
+  "industry-connections": ["Org", "Event", "Train", "Fund"],
   "all": ["Fund", "Accel", "Pilot", "Event", "Org", "Train"],
 };
 
