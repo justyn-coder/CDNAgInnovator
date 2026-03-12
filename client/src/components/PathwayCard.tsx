@@ -73,7 +73,7 @@ const CONFIDENCE: Record<string, { label: string; color: string; bg: string }> =
 
 // ── Loading messages ────────────────────────────────────────────────────────
 const LOADING_MESSAGES = [
-  "Scanning 283 programs across Canada…",
+  "Scanning programs across Canada…",
   "Matching to your stage and province…",
   "Filtering by your primary need…",
   "Building your personalized pathway…",

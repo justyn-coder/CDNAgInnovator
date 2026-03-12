@@ -233,12 +233,12 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
               <div key={p.id} style={{
                 padding: "12px 18px", background: "var(--bg)",
                 borderBottom: "1px solid var(--border)",
-                display: "flex", gap: 12, transition: "background 0.1s",
+                transition: "background 0.1s",
               }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg)"; }}
               >
-                <div style={{ flex: "0 0 240px", minWidth: 0 }}>
+                <div style={{ marginBottom: 4 }}>
                   <div style={{ fontWeight: 700, fontSize: "0.85rem", marginBottom: 4 }}>
                     {p.website
                       ? <a href={p.website} target="_blank" rel="noopener noreferrer" style={{ color: "var(--green-mid)", textDecoration: "none", borderBottom: "1px solid rgba(30,107,10,0.2)" }}>{p.name} ↗</a>
@@ -249,23 +249,19 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
                     <span style={{ fontSize: "0.65rem", color: "var(--text-tertiary)" }}>
                       {(p.province || []).filter(x => x !== "National").join(", ") || (p.province?.includes("National") ? "National" : "—")}
                     </span>
+                    {p.stage && p.stage.length > 0 && p.stage.map(st => (
+                      <span key={st} style={{
+                        fontSize: "0.58rem", fontWeight: 600, background: "var(--bg-tertiary)",
+                        padding: "1px 7px", borderRadius: 4, color: "var(--text-tertiary)",
+                      }}>{STAGE_LABELS[st] || st}</span>
+                    ))}
                   </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                {p.description && (
                   <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                    {p.description || "—"}
+                    {p.description}
                   </div>
-                  {p.stage && p.stage.length > 0 && (
-                    <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginTop: 5 }}>
-                      {p.stage.map(st => (
-                        <span key={st} style={{
-                          fontSize: "0.58rem", fontWeight: 600, background: "var(--bg-tertiary)",
-                          padding: "1px 7px", borderRadius: 4, color: "var(--text-tertiary)",
-                        }}>{STAGE_LABELS[st] || st}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             ))}
           </div>
@@ -653,7 +649,7 @@ export default function Navigator() {
                   display: "flex", gap: 12,
                 }}>
                   <span onClick={() => setShowGapMap(true)} style={{ cursor: "pointer", color: "var(--green-mid)", fontWeight: 600 }}>📊 Gap Map</span>
-                  <span onClick={() => setShowBrowse(true)} style={{ cursor: "pointer", color: "var(--green-mid)", fontWeight: 600 }}>📋 Browse {283} Programs</span>
+                  <span onClick={() => setShowBrowse(true)} style={{ cursor: "pointer", color: "var(--green-mid)", fontWeight: 600 }}>📋 Browse All Programs</span>
                 </div>
               </div>
             </div>
@@ -710,7 +706,7 @@ export default function Navigator() {
           {/* Eco suggestion chips above input when no messages yet */}
           {isEco && messages.length > 0 && messages.length < 4 && (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-              {ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content.includes(s.label))).slice(0, 3).map((s, i) => (
+              {ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q)).slice(0, 3).map((s, i) => (
                 <button key={i} onClick={() => send(s.q)} style={{
                   padding: "5px 12px", borderRadius: 100,
                   border: "1px solid var(--border)", background: "var(--bg-secondary)",
