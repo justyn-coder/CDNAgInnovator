@@ -3,13 +3,14 @@ import { useState } from "react";
 interface WizardResult {
   description: string;
   companyUrl: string;
+  productType: string;
   stage: string;
   provinces: string[];
   need: string;
 }
 
 interface Props {
-  onComplete: (prompt: string, snapshot: { stage: string; provinces: string[]; need: string; companyUrl?: string }) => void;
+  onComplete: (prompt: string, snapshot: { stage: string; provinces: string[]; need: string; companyUrl?: string; productType?: string }) => void;
 }
 
 const STAGES = [
@@ -71,7 +72,7 @@ const btn = (active: boolean, small = false) => ({
 
 export default function Wizard({ onComplete }: Props) {
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<WizardResult>({ description: "", companyUrl: "", stage: "", provinces: [], need: "" });
+  const [data, setData] = useState<WizardResult>({ description: "", companyUrl: "", productType: "", stage: "", provinces: [], need: "" });
 
   function toggleProvince(p: string) {
     setData(d => ({
@@ -86,9 +87,10 @@ export default function Wizard({ onComplete }: Props) {
       ? "I want to see all relevant programs across funding, pilot sites, accelerators, and first customer opportunities"
       : `My biggest need right now is ${ALL_NEEDS.find(n => n.key === needKey)?.label?.toLowerCase() || data.need}`;
     const stageLabel = STAGES.find(s => s.key === data.stage)?.label || data.stage;
+    const productTypeStr = data.productType ? ` My product is ${data.productType}.` : "";
 
-    const prompt = `I'm building ${data.description}. I'm at the ${stageLabel} stage, based in ${provinceStr}. ${needStr}. What are the best programs for my situation?`;
-    onComplete(prompt, { stage: data.stage, provinces: data.provinces, need: needKey, companyUrl: data.companyUrl || undefined });
+    const prompt = `I'm building ${data.description}.${productTypeStr} I'm at the ${stageLabel} stage, based in ${provinceStr}. ${needStr}. What are the best programs for my situation?`;
+    onComplete(prompt, { stage: data.stage, provinces: data.provinces, need: needKey, companyUrl: data.companyUrl || undefined, productType: data.productType || undefined });
   }
 
   const canProceed = [
@@ -142,9 +144,32 @@ export default function Wizard({ onComplete }: Props) {
           onBlur={e => (e.target.style.borderColor = "var(--border)")}
         />
       </div>
+      <div style={{ marginTop: 14 }}>
+        <label style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--text-tertiary)", marginBottom: 6, display: "block" }}>
+          What best describes your product?
+        </label>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {[
+            { key: "software/SaaS", label: "Software / SaaS" },
+            { key: "hardware/equipment", label: "Hardware / Equipment" },
+            { key: "biologicals/inputs", label: "Biologicals / Inputs" },
+            { key: "services/consulting", label: "Services" },
+          ].map(pt => (
+            <button key={pt.key} onClick={() => setData(d => ({ ...d, productType: d.productType === pt.key ? "" : pt.key }))}
+              style={{
+                padding: "6px 12px", borderRadius: 6,
+                border: data.productType === pt.key ? "2px solid var(--green-mid)" : "1.5px solid var(--border)",
+                background: data.productType === pt.key ? "var(--green-mid)" : "var(--bg)",
+                color: data.productType === pt.key ? "#fff" : "var(--text-secondary)",
+                fontWeight: 600, fontSize: "0.75rem",
+                fontFamily: "var(--font-text)",
+                transition: "all 0.1s",
+              }}
+            >{pt.label}</button>
+          ))}
+        </div>
+      </div>
     </div>,
-
-    // Step 1: Stage
     <div key="1">
       <p style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 10 }}>Step 2 of 4</p>
       <h2 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.02em" }}>What stage are you at?</h2>
