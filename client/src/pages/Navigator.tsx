@@ -325,14 +325,6 @@ export default function Navigator() {
   const [showPathway, setShowPathway] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
-  const [showBetaWelcome, setShowBetaWelcome] = useState(() => {
-    try {
-      // Skip welcome if returning via URL params or if already dismissed
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("stage")) return false;
-      return !sessionStorage.getItem("ag_beta_seen");
-    } catch { return true; }
-  });
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -499,54 +491,7 @@ export default function Navigator() {
         {/* Messages */}
         <div style={{ flex: 1, overflowY: "auto", paddingTop: 20, paddingBottom: 12 }}>
 
-          {/* Beta welcome screen */}
-          {!isEco && showBetaWelcome && (
-            <div style={{
-              margin: "16px", padding: "24px 22px",
-              background: "var(--bg)", border: "1px solid var(--border)",
-              borderRadius: "var(--radius)", boxShadow: "var(--shadow-md)",
-              animation: "fadeInUp 0.5s ease",
-            }}>
-              <div style={{
-                fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                color: "#fff", background: "var(--green-mid)", display: "inline-block",
-                padding: "3px 10px", borderRadius: 100, marginBottom: 14,
-              }}>Beta Preview</div>
-              <h2 style={{ fontSize: "1.15rem", fontWeight: 700, color: "var(--text)", marginBottom: 8, letterSpacing: "-0.02em" }}>
-                Welcome — you're one of the first to try this.
-              </h2>
-              <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 16 }}>
-                <p style={{ marginBottom: 10 }}>
-                  This tool matches Canadian agtech companies to the accelerators, funding, pilot sites, and programs that actually fit their stage and province. It was born from real conversations with Bioenterprise, AgSphere, and dozens of founders who told us the same thing: <strong style={{ color: "var(--text)" }}>"I don't know what I don't know."</strong>
-                </p>
-                <p style={{ marginBottom: 10 }}>
-                  We track <strong style={{ color: "var(--text)" }}>283 programs</strong> across every province, updated regularly. The AI generates a personalized pathway — not a list, but a sequenced plan with specific next steps.
-                </p>
-                <p style={{ marginBottom: 0 }}>
-                  <strong style={{ color: "var(--text)" }}>Your honest feedback is what makes this better.</strong> If something's wrong, missing, or off-base — tell us. There's a quick feedback button after your results.
-                </p>
-              </div>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <button
-                  onClick={() => {
-                    try { sessionStorage.setItem("ag_beta_seen", "1"); } catch {}
-                    setShowBetaWelcome(false);
-                  }}
-                  style={{
-                    background: "var(--green-mid)", color: "#fff", border: "none",
-                    borderRadius: "var(--radius-sm)", padding: "11px 24px",
-                    fontWeight: 700, fontSize: "0.85rem",
-                    boxShadow: "0 2px 8px rgba(30,107,10,0.2)",
-                  }}
-                >Let's go →</button>
-                <div style={{ fontSize: "0.68rem", color: "var(--text-tertiary)", alignSelf: "center" }}>
-                  Takes about 30 seconds
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!isEco && !showBetaWelcome && showWizard && (
+          {!isEco && showWizard && (
             <Wizard onComplete={handleWizardComplete} />
           )}
 
@@ -587,7 +532,7 @@ export default function Navigator() {
           <div ref={bottomRef} />
         </div>
 
-        {(!showWizard || isEco) && !showBetaWelcome && (
+        {(!showWizard || isEco) && (
         <div style={{
           background: "var(--bg)", borderTop: "1px solid var(--border-strong)",
           padding: "14px 16px", flexShrink: 0,
