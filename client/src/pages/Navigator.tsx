@@ -360,7 +360,7 @@ export default function Navigator() {
 
   useEffect(() => {
     if (isEco) {
-      setMessages([{ role: "assistant", content: "Welcome, ecosystem operator.\n\nI can help you analyze the Canadian agtech support landscape — coverage gaps, stage distribution, provincial blind spots, or strategic opportunities. What would you like to explore?" }]);
+      setMessages([{ role: "assistant", content: "Welcome — you're in **Ecosystem Operator** mode.\n\nI can help you analyze Canada's agtech support landscape. Here's what I'm most useful for:\n\n### Quick starts:\n- **\"Show me coverage gaps in Alberta\"** — where are founders underserved?\n- **\"What programs exist for MVP-stage companies in Ontario?\"** — filter by stage + province\n- **\"Compare Prairie provinces for pilot site availability\"** — cross-province analysis\n- **\"What's missing for biologicals companies nationally?\"** — product-type gap analysis\n\nYou can also click **Gap Map** above for a visual Province × Category heatmap, or **Browse All** to review the full program database.\n\nWhat would you like to explore?" }]);
     }
   }, [mode]);
 
@@ -433,54 +433,59 @@ export default function Navigator() {
 
         {/* Top bar */}
         <div style={{
-          height: 52, padding: "0 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
-          background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+          height: 56, padding: "0 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
+          background: "rgba(250,250,248,0.88)", backdropFilter: "saturate(180%) blur(20px)", WebkitBackdropFilter: "saturate(180%) blur(20px)",
           borderBottom: "1px solid var(--border)", flexShrink: 0, zIndex: 10,
         }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 7, textDecoration: "none" }}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 8L6 4M6 12l4-4" stroke="var(--text-secondary)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 8L6 4M6 12l4-4" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round"/></svg>
             <div style={{
-              width: 24, height: 24,
+              width: 26, height: 26,
               background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-              borderRadius: 6,
+              borderRadius: 7,
               display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 1px 4px rgba(30,107,10,0.15)",
             }}>
-              <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                 <path d="M7 1.5C5 1.5 3 3 3 5.5c0 2 1.5 3.5 4 6 2.5-2.5 4-4 4-6 0-2.5-2-4-4-4z" fill="rgba(255,255,255,0.9)"/>
               </svg>
             </div>
-            <span style={{ fontWeight: 700, fontSize: "0.82rem", color: "var(--text)", letterSpacing: "-0.02em" }}>Navigator</span>
+            <span style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--text)", letterSpacing: "-0.02em" }}>Navigator</span>
           </Link>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => setShowBrowse(true)} style={{
-              background: "var(--bg-secondary)", border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)", padding: "5px 12px",
-              fontSize: "0.75rem", fontWeight: 500, color: "var(--text)",
-            }}>Browse All</button>
-            <button onClick={() => setShowGapMap(true)} style={{
-              background: "var(--bg-secondary)", border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)", padding: "5px 12px",
-              fontSize: "0.75rem", fontWeight: 500, color: "var(--text)",
-            }}>Gap Map</button>
-            <button onClick={() => setShowSubmit(s => !s)} style={{
-              background: showSubmit ? "var(--green-mid)" : "var(--bg-secondary)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)", padding: "5px 12px",
-              fontSize: "0.75rem", fontWeight: 500,
-              color: showSubmit ? "#fff" : "var(--text)",
-            }}>+ Submit</button>
+          <div style={{ display: "flex", gap: 6 }}>
+            {[
+              { label: "Browse All", onClick: () => setShowBrowse(true), active: false },
+              { label: "Gap Map", onClick: () => setShowGapMap(true), active: false },
+              { label: "+ Submit", onClick: () => setShowSubmit(s => !s), active: showSubmit },
+            ].map(btn => (
+              <button key={btn.label} onClick={btn.onClick} style={{
+                background: btn.active ? "var(--green-mid)" : "var(--bg-secondary)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius-sm)", padding: "6px 14px",
+                fontSize: "0.75rem", fontWeight: 600,
+                color: btn.active ? "#fff" : "var(--text-secondary)",
+                transition: "all 0.12s",
+              }}
+              onMouseEnter={e => { if (!btn.active) { (e.currentTarget as HTMLElement).style.background = "var(--bg-tertiary)"; } }}
+              onMouseLeave={e => { if (!btn.active) { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; } }}
+              >{btn.label}</button>
+            ))}
           </div>
         </div>
 
         {/* Mode indicator */}
         <div style={{
-          padding: "5px 16px", flexShrink: 0,
-          background: isEco ? "#0f1923" : "var(--green-mid)",
-          display: "flex", alignItems: "center", gap: 6,
+          padding: "6px 18px", flexShrink: 0,
+          background: isEco ? "linear-gradient(90deg, #0c1829, #132038)" : "linear-gradient(90deg, var(--green), var(--green-mid))",
+          display: "flex", alignItems: "center", gap: 8,
         }}>
-          <div style={{ width: 5, height: 5, borderRadius: "50%", background: isEco ? "#4a9eff" : "rgba(255,255,255,0.5)" }} />
-          <span style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: isEco ? "rgba(74,158,255,0.8)" : "rgba(255,255,255,0.65)" }}>
-            {isEco ? "Ecosystem Operator Mode" : "Founder Mode"} · AI-Powered
+          <div style={{
+            width: 6, height: 6, borderRadius: "50%",
+            background: isEco ? "#60a5fa" : "#4ade80",
+            boxShadow: isEco ? "0 0 6px rgba(96,165,250,0.4)" : "0 0 6px rgba(74,222,128,0.4)",
+          }} />
+          <span style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: isEco ? "rgba(96,165,250,0.7)" : "rgba(255,255,255,0.6)" }}>
+            {isEco ? "Ecosystem Operator" : "Founder Mode"} · AI-Powered
           </span>
         </div>
 
@@ -582,38 +587,56 @@ export default function Navigator() {
           <div ref={bottomRef} />
         </div>
 
-        {(!showWizard || isEco) && (
+        {(!showWizard || isEco) && !showBetaWelcome && (
         <div style={{
-          background: "var(--bg)", borderTop: "1px solid var(--border)",
-          padding: "10px 12px", display: "flex", gap: 8, flexShrink: 0,
+          background: "var(--bg)", borderTop: "1px solid var(--border-strong)",
+          padding: "14px 16px", flexShrink: 0,
+          boxShadow: "0 -2px 12px rgba(0,0,0,0.04)",
         }}>
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-            placeholder={isEco ? "e.g. What's the biggest gap in Prairie agtech support?" : "e.g. I'm building precision livestock monitoring, pre-revenue, in Manitoba…"}
-            rows={2}
-            style={{
-              flex: 1, resize: "none", border: "1px solid var(--border)", borderRadius: "var(--radius)",
-              padding: "9px 12px", fontSize: "0.82rem", lineHeight: 1.45, outline: "none",
-              background: "var(--bg-secondary)",
-              transition: "border-color 0.15s",
-            }}
-            onFocus={e => (e.target.style.borderColor = "var(--green-mid)")}
-            onBlur={e => (e.target.style.borderColor = "var(--border)")}
-          />
-          <button
-            onClick={send}
-            disabled={loading || !input.trim()}
-            style={{
-              background: loading || !input.trim() ? "var(--bg-tertiary)" : "var(--green-mid)",
-              color: loading || !input.trim() ? "var(--text-tertiary)" : "#fff",
-              border: "none", borderRadius: "var(--radius)",
-              padding: "0 18px", fontWeight: 600, fontSize: "0.9rem",
-              transition: "background 0.15s",
-              minWidth: 44,
-            }}
-          >→</button>
+          {/* Label */}
+          <div style={{
+            fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+            color: "var(--text-tertiary)", marginBottom: 8,
+            display: "flex", alignItems: "center", gap: 5,
+          }}>
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+              <path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            {isEco ? "Ask about the ecosystem" : "Continue the conversation"}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+              placeholder={isEco ? "e.g. What's the biggest gap in Prairie agtech support?" : "Ask anything about your pathway, programs, or next steps…"}
+              rows={2}
+              style={{
+                flex: 1, resize: "none",
+                border: "1.5px solid var(--border)",
+                borderRadius: "var(--radius)",
+                padding: "10px 14px", fontSize: "0.85rem", lineHeight: 1.5, outline: "none",
+                background: "var(--bg-secondary)",
+                transition: "border-color 0.15s, box-shadow 0.15s",
+                fontFamily: "var(--font-text)",
+              }}
+              onFocus={e => { e.target.style.borderColor = "var(--green-mid)"; e.target.style.boxShadow = "0 0 0 3px rgba(30,107,10,0.08)"; }}
+              onBlur={e => { e.target.style.borderColor = "var(--border)"; e.target.style.boxShadow = "none"; }}
+            />
+            <button
+              onClick={send}
+              disabled={loading || !input.trim()}
+              style={{
+                background: loading || !input.trim() ? "var(--bg-tertiary)" : "linear-gradient(135deg, var(--green-mid), var(--green-light))",
+                color: loading || !input.trim() ? "var(--text-tertiary)" : "#fff",
+                border: "none", borderRadius: "var(--radius)",
+                padding: "0 20px", fontWeight: 700, fontSize: "0.9rem",
+                transition: "all 0.15s",
+                minWidth: 48,
+                boxShadow: loading || !input.trim() ? "none" : "0 2px 8px rgba(30,107,10,0.2)",
+              }}
+            >→</button>
+          </div>
         </div>
         )}
 
