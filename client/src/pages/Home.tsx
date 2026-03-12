@@ -46,42 +46,56 @@ export default function Home() {
         }}>
           <div style={{
             background: "var(--bg)", borderRadius: "var(--radius-lg)",
-            maxWidth: 520, width: "100%",
+            maxWidth: 480, width: "100%",
             boxShadow: "0 24px 80px rgba(0,0,0,0.2)",
             overflow: "hidden",
             animation: "slideUp 0.4s ease",
           }}>
-            {/* Header */}
+            {/* Header — tight, scannable */}
             <div style={{
               background: "linear-gradient(145deg, #0a1f08, #14330c, #1e5510)",
-              padding: "24px 28px 20px",
+              padding: "28px 28px 22px",
               color: "#fff",
             }}>
               <div style={{
-                fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
-                color: "rgba(255,255,255,0.4)", marginBottom: 8,
-              }}>Beta Preview</div>
+                fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                color: "rgba(255,255,255,0.35)", marginBottom: 10,
+              }}>Early Access</div>
               <h2 style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "1.4rem", fontWeight: 400, lineHeight: 1.2, marginBottom: 8,
-              }}>Welcome — you're one of the first to try this.</h2>
-              <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.55 }}>
-                This tool matches Canadian agtech companies to the right programs — accelerators, funding, pilot sites — based on stage and province.
-              </p>
+                fontSize: "1.5rem", fontWeight: 400, lineHeight: 1.15, marginBottom: 0,
+              }}>Canada's ag ecosystem,<br />mapped for you.</h2>
             </div>
 
-            {/* Body */}
-            <div style={{ padding: "22px 28px 28px" }}>
-              <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 20 }}>
-                <p style={{ marginBottom: 10 }}>
-                  We track <strong style={{ color: "var(--text)" }}>{count || 283} programs</strong> across every province, updated regularly. Born from conversations with Bioenterprise, AgSphere, and dozens of founders who said: <strong style={{ color: "var(--text)" }}>"I don't know what I don't know."</strong>
-                </p>
-                <p>
-                  <strong style={{ color: "var(--text)" }}>Your honest feedback is what makes this better.</strong> If something's wrong, missing, or off-base — tell us.
-                </p>
-              </div>
+            {/* Stats strip — scannable at a glance */}
+            <div style={{
+              display: "flex", borderBottom: "1px solid var(--border)",
+            }}>
+              {[
+                { num: count || 283, label: "Programs" },
+                { num: "10", label: "Provinces" },
+                { num: "AI", label: "Personalized" },
+              ].map((stat, i) => (
+                <div key={i} style={{
+                  flex: 1, padding: "12px 0", textAlign: "center",
+                  borderRight: i < 2 ? "1px solid var(--border)" : "none",
+                }}>
+                  <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--green-mid)" }}>{stat.num}</div>
+                  <div style={{ fontSize: "0.62rem", fontWeight: 600, color: "var(--text-tertiary)", letterSpacing: "0.04em", textTransform: "uppercase" }}>{stat.label}</div>
+                </div>
+              ))}
+            </div>
 
-              {/* Two clear paths */}
+            {/* Body — minimal copy, straight to action */}
+            <div style={{ padding: "20px 28px 26px" }}>
+              <p style={{
+                fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.55,
+                marginBottom: 18,
+              }}>
+                We'd love your feedback — does this match your experience of the ecosystem?
+              </p>
+
+              {/* Two paths */}
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <button onClick={() => dismissModal("e")}
                   style={{
@@ -113,8 +127,8 @@ export default function Home() {
                 </button>
               </div>
 
-              <div style={{ fontSize: "0.68rem", color: "var(--text-tertiary)", marginTop: 14, textAlign: "center" }}>
-                No signup required · Free during beta
+              <div style={{ fontSize: "0.65rem", color: "var(--text-tertiary)", marginTop: 14, textAlign: "center" }}>
+                No signup · Free during beta · Your feedback shapes the product
               </div>
             </div>
           </div>
