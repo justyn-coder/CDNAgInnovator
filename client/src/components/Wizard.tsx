@@ -2,13 +2,14 @@ import { useState } from "react";
 
 interface WizardResult {
   description: string;
+  companyUrl: string;
   stage: string;
   provinces: string[];
   need: string;
 }
 
 interface Props {
-  onComplete: (prompt: string, snapshot: { stage: string; provinces: string[]; need: string }) => void;
+  onComplete: (prompt: string, snapshot: { stage: string; provinces: string[]; need: string; companyUrl?: string }) => void;
 }
 
 const STAGES = [
@@ -45,7 +46,7 @@ const btn = (active: boolean, small = false) => ({
 
 export default function Wizard({ onComplete }: Props) {
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<WizardResult>({ description: "", stage: "", provinces: [], need: "" });
+  const [data, setData] = useState<WizardResult>({ description: "", companyUrl: "", stage: "", provinces: [], need: "" });
 
   function toggleProvince(p: string) {
     setData(d => ({
@@ -62,7 +63,7 @@ export default function Wizard({ onComplete }: Props) {
     const stageLabel = STAGES.find(s => s.key === data.stage)?.label || data.stage;
 
     const prompt = `I'm building ${data.description}. I'm at the ${stageLabel} stage, based in ${provinceStr}. ${needStr}. What are the best programs for my situation?`;
-    onComplete(prompt, { stage: data.stage, provinces: data.provinces, need: needKey });
+    onComplete(prompt, { stage: data.stage, provinces: data.provinces, need: needKey, companyUrl: data.companyUrl || undefined });
   }
 
   const canProceed = [
@@ -96,6 +97,26 @@ export default function Wizard({ onComplete }: Props) {
         onBlur={e => (e.target.style.borderColor = "var(--border)")}
         onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && canProceed) { e.preventDefault(); setStep(1); } }}
       />
+      <div style={{ marginTop: 12 }}>
+        <label style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--text-tertiary)", display: "flex", alignItems: "center", gap: 4 }}>
+          Company website
+          <span style={{ fontWeight: 400, fontStyle: "italic" }}>(optional — helps us personalize)</span>
+        </label>
+        <input
+          value={data.companyUrl}
+          onChange={e => setData(d => ({ ...d, companyUrl: e.target.value }))}
+          placeholder="e.g. https://yourcompany.com"
+          style={{
+            width: "100%", padding: "8px 12px", borderRadius: 8, marginTop: 4,
+            border: "1.5px solid var(--border)", fontSize: "0.82rem",
+            outline: "none", background: "var(--bg-secondary)",
+            transition: "border-color 0.15s",
+            fontFamily: "var(--font-text)",
+          }}
+          onFocus={e => (e.target.style.borderColor = "var(--green-mid)")}
+          onBlur={e => (e.target.style.borderColor = "var(--border)")}
+        />
+      </div>
     </div>,
 
     // Step 1: Stage
@@ -178,7 +199,7 @@ export default function Wizard({ onComplete }: Props) {
               border: "none",
             }}
           >
-            {step === 3 ? "Find Programs →" : "Next →"}
+            {step === 2 ? "Next →" : "Next →"}
           </button>
         </div>
       )}

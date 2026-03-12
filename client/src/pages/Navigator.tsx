@@ -319,6 +319,8 @@ export default function Navigator() {
   const [wizardSnapshot, setWizardSnapshot] = useState<WizardSnapshot | null>(null);
   const [wizardDescription, setWizardDescription] = useState("");
   const [showPathway, setShowPathway] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackSent, setFeedbackSent] = useState(false);
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -359,6 +361,10 @@ export default function Navigator() {
     const descMatch = prompt.match(/I'm building (.+?)\. I'm at/);
     setWizardDescription(descMatch ? descMatch[1] : "an agtech company");
     setShowPathway(true);
+    // Show feedback prompt after 8 seconds
+    if (!feedbackSent) {
+      setTimeout(() => setShowFeedback(true), 8000);
+    }
   }
 
   function handlePathwayFollowUp(question: string) {
@@ -422,14 +428,16 @@ export default function Navigator() {
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 7, textDecoration: "none" }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 8L6 4M6 12l4-4" stroke="var(--text-secondary)" strokeWidth="1.5" strokeLinecap="round"/></svg>
             <div style={{
-              width: 24, height: 24, background: "var(--green-mid)", borderRadius: 6,
+              width: 24, height: 24,
+              background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
+              borderRadius: 6,
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
               <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
                 <path d="M7 1.5C5 1.5 3 3 3 5.5c0 2 1.5 3.5 4 6 2.5-2.5 4-4 4-6 0-2.5-2-4-4-4z" fill="rgba(255,255,255,0.9)"/>
               </svg>
             </div>
-            <span style={{ fontWeight: 600, fontSize: "0.82rem", color: "var(--text)", letterSpacing: "-0.01em" }}>Navigator</span>
+            <span style={{ fontWeight: 700, fontSize: "0.82rem", color: "var(--text)", letterSpacing: "-0.02em" }}>Navigator</span>
           </Link>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => setShowBrowse(true)} style={{
@@ -460,7 +468,7 @@ export default function Navigator() {
         }}>
           <div style={{ width: 5, height: 5, borderRadius: "50%", background: isEco ? "#4a9eff" : "rgba(255,255,255,0.5)" }} />
           <span style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: isEco ? "rgba(74,158,255,0.8)" : "rgba(255,255,255,0.65)" }}>
-            {isEco ? "Ecosystem Operator Mode" : "Founder Mode"} · AI-Powered · 275 Programs
+            {isEco ? "Ecosystem Operator Mode" : "Founder Mode"} · AI-Powered
           </span>
         </div>
 
@@ -556,6 +564,65 @@ export default function Navigator() {
           }
         `}</style>
       </div>
+
+      {/* Feedback slide-up */}
+      {showFeedback && !feedbackSent && (
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, right: 0,
+          background: "var(--bg)", borderTop: "1px solid var(--border)",
+          boxShadow: "0 -4px 24px rgba(0,0,0,0.08)",
+          padding: "16px 20px", zIndex: 50,
+          animation: "slideUp 0.4s ease",
+          display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+        }}>
+          <div style={{ flex: "1 1 200px", minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--text)", marginBottom: 2 }}>
+              Was this useful? 🤔
+            </div>
+            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+              Quick reaction — help us improve
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {[
+              { emoji: "🔥", label: "Nailed it", value: "great" },
+              { emoji: "👍", label: "Decent", value: "ok" },
+              { emoji: "🤷", label: "Off-base", value: "miss" },
+            ].map(opt => (
+              <button key={opt.value} onClick={() => {
+                // Submit feedback
+                fetch("/api/submissions", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    programName: `FEEDBACK: ${opt.value}`,
+                    bestFor: `Stage: ${wizardSnapshot?.stage}, Prov: ${wizardSnapshot?.provinces.join(",")}, Need: ${wizardSnapshot?.need}`,
+                    submitterName: "anonymous",
+                    submitterEmail: `feedback-${Date.now()}@anon`,
+                  }),
+                }).catch(() => {});
+                setFeedbackSent(true);
+                setShowFeedback(false);
+              }}
+                style={{
+                  background: "var(--bg-secondary)", border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-sm)", padding: "8px 14px",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                  transition: "transform 0.1s, border-color 0.1s",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--green-mid)"; (e.currentTarget as HTMLElement).style.transform = "scale(1.05)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+              >
+                <span style={{ fontSize: "1.2rem" }}>{opt.emoji}</span>
+                <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "var(--text-secondary)" }}>{opt.label}</span>
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setShowFeedback(false)} style={{
+            background: "none", border: "none", fontSize: "0.75rem",
+            color: "var(--text-tertiary)", padding: "4px",
+          }}>✕</button>
+        </div>
+      )}
     </>
   );
 }

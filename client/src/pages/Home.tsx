@@ -1,6 +1,184 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 
+// Simulated demo steps for the auto-play preview
+const DEMO_STEPS = [
+  { label: "What are you building?", value: "AI-powered crop disease detection for Prairie grain farmers", delay: 0 },
+  { label: "Stage", value: "MVP", delay: 1800 },
+  { label: "Province", value: "AB, SK", delay: 3000 },
+  { label: "Need", value: "Pilot Site", delay: 4000 },
+];
+
+const DEMO_PATHWAY = [
+  { name: "Olds College Smart Farm", cat: "Pilot", timing: "Do now", action: "Apply for field trial access on their 2,500-acre connected farm" },
+  { name: "Farming Smarter", cat: "Pilot", timing: "Do now", action: "Contact Lewis Baarda about their crop monitoring trial plots in Lethbridge" },
+  { name: "Alberta Innovates — Voucher", cat: "Fund", timing: "This month", action: "Apply for $100K product validation voucher" },
+  { name: "SVG Thrive Academy", cat: "Accel", timing: "Next quarter", action: "Apply to the Alberta-based agtech accelerator cohort" },
+];
+
+const CAT_COLORS: Record<string, { color: string; bg: string }> = {
+  Pilot: { color: "#1a6b2a", bg: "#e8f5e9" },
+  Fund: { color: "#1a4b8c", bg: "#e8f0fe" },
+  Accel: { color: "#8c5a1a", bg: "#fff3e0" },
+};
+
+function DemoPreview() {
+  const [step, setStep] = useState(0);
+  const [showPathway, setShowPathway] = useState(false);
+  const [visibleSteps, setVisibleSteps] = useState(0);
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    // Animate through wizard steps
+    timers.push(setTimeout(() => setStep(1), 1800));
+    timers.push(setTimeout(() => setStep(2), 3000));
+    timers.push(setTimeout(() => setStep(3), 4000));
+    timers.push(setTimeout(() => setShowPathway(true), 5200));
+    // Stagger pathway steps
+    timers.push(setTimeout(() => setVisibleSteps(1), 5600));
+    timers.push(setTimeout(() => setVisibleSteps(2), 6000));
+    timers.push(setTimeout(() => setVisibleSteps(3), 6400));
+    timers.push(setTimeout(() => setVisibleSteps(4), 6800));
+    // Loop
+    timers.push(setTimeout(() => {
+      setStep(0); setShowPathway(false); setVisibleSteps(0);
+    }, 12000));
+    return () => timers.forEach(clearTimeout);
+  }, [step === 0 && !showPathway ? Date.now() : 0]);
+
+  return (
+    <div style={{
+      background: "var(--bg-dark)",
+      borderRadius: "var(--radius-lg)",
+      padding: "2px",
+      boxShadow: "var(--shadow-lg), 0 0 60px rgba(30,107,10,0.08)",
+      maxWidth: 520,
+      width: "100%",
+      overflow: "hidden",
+    }}>
+      {/* Browser chrome */}
+      <div style={{
+        background: "#1a2418",
+        borderRadius: "18px 18px 0 0",
+        padding: "10px 14px",
+        display: "flex", alignItems: "center", gap: 7,
+      }}>
+        <div style={{ display: "flex", gap: 5 }}>
+          {["#ff5f57", "#ffbd2e", "#28c840"].map(c => (
+            <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c, opacity: 0.8 }} />
+          ))}
+        </div>
+        <div style={{
+          flex: 1, background: "rgba(255,255,255,0.06)", borderRadius: 6,
+          padding: "4px 10px", fontSize: "0.65rem", color: "rgba(255,255,255,0.35)",
+          textAlign: "center", fontFamily: "monospace",
+        }}>cdn-ag-innovator.vercel.app</div>
+      </div>
+
+      {/* Demo content */}
+      <div style={{
+        background: "var(--bg)",
+        padding: "16px",
+        minHeight: 280,
+        borderRadius: "0 0 18px 18px",
+        position: "relative",
+      }}>
+        {!showPathway ? (
+          <div style={{ animation: "fadeIn 0.3s ease" }}>
+            {/* Mini wizard */}
+            <div style={{
+              fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.08em",
+              textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 8,
+            }}>Step {Math.min(step + 1, 4)} of 4</div>
+            <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>
+              {DEMO_STEPS[Math.min(step, 3)].label}
+            </div>
+            {/* Filled steps */}
+            {DEMO_STEPS.slice(0, step + 1).map((s, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "center", gap: 8, marginBottom: 6,
+                animation: "fadeInUp 0.4s ease",
+                opacity: i <= step ? 1 : 0.3,
+              }}>
+                <div style={{
+                  width: 18, height: 18, borderRadius: "50%",
+                  background: i < step ? "var(--green-mid)" : (i === step ? "var(--green-soft)" : "var(--bg-tertiary)"),
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  {i < step && (
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 6l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+                <div>
+                  <div style={{ fontSize: "0.62rem", color: "var(--text-tertiary)", fontWeight: 600 }}>{s.label}</div>
+                  {i <= step && <div style={{ fontSize: "0.72rem", color: "var(--text)", fontWeight: 500 }}>{s.value}</div>}
+                </div>
+              </div>
+            ))}
+            {/* Progress bar */}
+            <div style={{ display: "flex", gap: 3, marginTop: 14 }}>
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} style={{
+                  flex: 1, height: 3, borderRadius: 2,
+                  background: i <= step ? "var(--green-mid)" : "var(--bg-tertiary)",
+                  transition: "background 0.3s",
+                }} />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div style={{ animation: "fadeInUp 0.5s ease" }}>
+            {/* Mini pathway result */}
+            <div style={{
+              background: "linear-gradient(135deg, #0d1a0a 0%, #1a3a0a 100%)",
+              borderRadius: 10, padding: "10px 12px", marginBottom: 10, color: "#fff",
+            }}>
+              <div style={{ fontSize: "0.55rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>
+                Your Innovation Pathway
+              </div>
+              <div style={{ fontSize: "0.78rem", fontWeight: 700 }}>
+                MVP → Pilot Pathway
+              </div>
+              <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.55)", marginTop: 2 }}>
+                4 steps · 3 programs analyzed
+              </div>
+            </div>
+            {/* Pathway steps */}
+            {DEMO_PATHWAY.slice(0, visibleSteps).map((s, i) => {
+              const cat = CAT_COLORS[s.cat] || CAT_COLORS.Pilot;
+              return (
+                <div key={i} style={{
+                  display: "flex", gap: 8, padding: "6px 0",
+                  borderBottom: i < visibleSteps - 1 ? "1px solid var(--border)" : "none",
+                  animation: "fadeInUp 0.3s ease",
+                }}>
+                  <div style={{
+                    width: 18, height: 18, borderRadius: "50%",
+                    background: cat.bg, border: `1.5px solid ${cat.color}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "0.55rem", fontWeight: 800, color: cat.color,
+                    flexShrink: 0, marginTop: 1,
+                  }}>{i + 1}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--green-mid)" }}>{s.name}</span>
+                      <span style={{ fontSize: "0.5rem", fontWeight: 700, padding: "1px 5px", borderRadius: 100, background: cat.bg, color: cat.color }}>{s.cat}</span>
+                    </div>
+                    <div style={{ fontSize: "0.6rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>{s.action}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [count, setCount] = useState<number | null>(null);
 
@@ -11,130 +189,154 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
-  const cardHover = (e: React.MouseEvent, enter: boolean) => {
-    const el = e.currentTarget as HTMLElement;
-    el.style.transform = enter ? "translateY(-2px)" : "translateY(0)";
-    el.style.boxShadow = enter ? "var(--shadow-lg)" : "";
-  };
-
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column", fontFamily: "var(--font)" }}>
       {/* Nav */}
       <nav style={{
-        padding: "0 32px", height: 52,
+        padding: "0 32px", height: 56,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         borderBottom: "1px solid var(--border)",
         position: "sticky", top: 0,
-        background: "rgba(255,255,255,0.85)",
+        background: "rgba(250,250,248,0.88)",
         backdropFilter: "saturate(180%) blur(20px)",
         WebkitBackdropFilter: "saturate(180%) blur(20px)",
         zIndex: 100,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
-            width: 26, height: 26, background: "var(--green-mid)", borderRadius: 6,
+            width: 28, height: 28,
+            background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
+            borderRadius: 8,
             display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(30,107,10,0.2)",
           }}>
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M7 1.5C5 1.5 3 3 3 5.5c0 2 1.5 3.5 4 6 2.5-2.5 4-4 4-6 0-2.5-2-4-4-4z" fill="rgba(255,255,255,0.9)"/>
             </svg>
           </div>
-          <span style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--text)", letterSpacing: "-0.01em" }}>
-            Ag Innovation Navigator
+          <span style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--text)", letterSpacing: "-0.02em" }}>
+            CDN Ag Innovator
           </span>
         </div>
-        <span style={{ fontSize: "0.72rem", color: "var(--text-tertiary)", fontWeight: 500 }}>Canada</span>
+        <span style={{ fontSize: "0.7rem", color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.02em" }}>
+          🇨🇦 Canada
+        </span>
       </nav>
 
       {/* Hero */}
       <main style={{
         flex: 1, display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        padding: "72px 24px 56px", textAlign: "center",
+        alignItems: "center",
+        padding: "56px 24px 48px",
       }}>
         {/* Status pill */}
         <div style={{
-          display: "inline-flex", alignItems: "center", gap: 6,
-          background: "var(--bg-secondary)", border: "1px solid var(--border)",
-          borderRadius: 100, padding: "4px 14px", marginBottom: 32,
+          display: "inline-flex", alignItems: "center", gap: 7,
+          background: "var(--green-soft)", border: "1px solid rgba(30,107,10,0.12)",
+          borderRadius: 100, padding: "5px 16px", marginBottom: 28,
+          animation: "fadeInUp 0.6s ease",
         }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#34c759" }} />
-          <span style={{ fontSize: "0.72rem", fontWeight: 500, color: "var(--text-secondary)", letterSpacing: "0.01em" }}>
-            {count !== null ? `${count} programs · updated regularly` : "Loading…"}
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--green-accent)", boxShadow: "0 0 8px rgba(61,204,26,0.4)" }} />
+          <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--green-mid)", letterSpacing: "0.01em" }}>
+            {count !== null ? `${count} programs tracked across Canada` : "Loading…"}
           </span>
         </div>
 
         {/* Headline */}
         <h1 style={{
-          fontFamily: "var(--font)",
-          fontSize: "clamp(1.9rem, 4.5vw, 3rem)",
-          fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.1,
-          color: "var(--text)", maxWidth: 580, marginBottom: 18,
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(2rem, 5vw, 3.4rem)",
+          fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.12,
+          color: "var(--text)", maxWidth: 640, marginBottom: 18,
+          textAlign: "center",
+          animation: "fadeInUp 0.6s ease 0.1s both",
         }}>
-          Find the right programs<br />
-          <span style={{ color: "var(--green-mid)" }}>for your agtech company.</span>
+          Your agtech company<br />
+          <span style={{ color: "var(--green-mid)" }}>deserves a roadmap.</span>
         </h1>
 
         <p style={{
-          fontSize: "1rem", color: "var(--text-secondary)",
-          maxWidth: 440, lineHeight: 1.65, marginBottom: 52, fontWeight: 400,
+          fontSize: "1.05rem", color: "var(--text-secondary)",
+          maxWidth: 480, lineHeight: 1.65, marginBottom: 40,
+          textAlign: "center", fontWeight: 400,
+          animation: "fadeInUp 0.6s ease 0.2s both",
         }}>
-          Accelerators, funding, pilot sites, and industry organizations — matched to your stage and province.
+          Tell us your stage, province, and biggest need.
+          Get a personalized pathway to the accelerators, funding, and pilot sites that actually fit.
         </p>
 
-        {/* Mode cards */}
-        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", maxWidth: 660, width: "100%", marginBottom: 64 }}>
-
-          {/* Founder */}
+        {/* CTA buttons */}
+        <div style={{
+          display: "flex", gap: 12, marginBottom: 56, flexWrap: "wrap", justifyContent: "center",
+          animation: "fadeInUp 0.6s ease 0.3s both",
+        }}>
           <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); } catch {} }}
             style={{
-              flex: "1 1 280px", background: "var(--green-mid)", borderRadius: "var(--radius)",
-              padding: "26px 22px", textDecoration: "none", textAlign: "left",
-              boxShadow: "0 4px 20px rgba(45,80,22,0.25)", transition: "transform 0.15s, box-shadow 0.15s",
+              background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
+              color: "#fff", borderRadius: "var(--radius)", padding: "14px 32px",
+              fontWeight: 700, fontSize: "0.92rem", letterSpacing: "-0.01em",
+              textDecoration: "none",
+              boxShadow: "0 4px 20px rgba(30,107,10,0.3), inset 0 1px 0 rgba(255,255,255,0.1)",
+              transition: "transform 0.15s, box-shadow 0.15s",
             }}
-            onMouseEnter={e => cardHover(e, true)}
-            onMouseLeave={e => cardHover(e, false)}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
           >
-            <div style={{ fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: 10 }}>For Founders</div>
-            <div style={{ fontSize: "1rem", fontWeight: 600, color: "#fff", marginBottom: 8, letterSpacing: "-0.02em", lineHeight: 1.3 }}>I'm building an agtech company</div>
-            <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.55, marginBottom: 22 }}>
-              Get matched to accelerators, funding, and pilot sites for your stage and region.
-            </div>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              background: "rgba(255,255,255,0.18)", borderRadius: 7, padding: "7px 13px",
-              fontSize: "0.78rem", fontWeight: 600, color: "#fff",
-            }}>
-              Find My Fit
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
+            Build My Pathway →
           </Link>
-
-          {/* Ecosystem */}
           <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "ec"); } catch {} }}
             style={{
-              flex: "1 1 280px", background: "var(--bg-secondary)", border: "1px solid var(--border)",
-              borderRadius: "var(--radius)", padding: "26px 22px",
-              textDecoration: "none", textAlign: "left",
-              boxShadow: "var(--shadow-sm)", transition: "transform 0.15s, box-shadow 0.15s",
+              background: "var(--bg-secondary)", color: "var(--text)",
+              border: "1px solid var(--border-strong)",
+              borderRadius: "var(--radius)", padding: "14px 28px",
+              fontWeight: 600, fontSize: "0.92rem",
+              textDecoration: "none",
+              transition: "transform 0.15s",
             }}
-            onMouseEnter={e => cardHover(e, true)}
-            onMouseLeave={e => cardHover(e, false)}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
           >
-            <div style={{ fontSize: "0.62rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 10 }}>For Ecosystem Operators</div>
-            <div style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text)", marginBottom: 8, letterSpacing: "-0.02em", lineHeight: 1.3 }}>I work in ag innovation support</div>
-            <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.55, marginBottom: 22 }}>
-              Analyze coverage gaps, stage distribution, and strategic opportunities across Canada.
-            </div>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              background: "var(--green-mid)", borderRadius: 7, padding: "7px 13px",
-              fontSize: "0.78rem", fontWeight: 600, color: "#fff",
-            }}>
-              Explore Ecosystem
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
+            Ecosystem Operator View
           </Link>
+        </div>
+
+        {/* Demo preview */}
+        <div style={{
+          animation: "fadeInUp 0.8s ease 0.4s both",
+          marginBottom: 56,
+          position: "relative",
+        }}>
+          <DemoPreview />
+          <div style={{
+            position: "absolute", bottom: -28, left: "50%", transform: "translateX(-50%)",
+            fontSize: "0.68rem", color: "var(--text-tertiary)", fontWeight: 500,
+            whiteSpace: "nowrap",
+          }}>
+            ↑ Live preview — takes 30 seconds for real results
+          </div>
+        </div>
+
+        {/* What you get */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: 16, maxWidth: 700, width: "100%", marginBottom: 48,
+          animation: "fadeInUp 0.6s ease 0.5s both",
+        }}>
+          {[
+            { icon: "🎯", title: "Matched to you", desc: "Programs filtered by your stage, province, and actual needs" },
+            { icon: "🗺", title: "Ordered pathway", desc: "Not a list — a sequence of what to do first, next, and later" },
+            { icon: "⚠️", title: "Gap warnings", desc: "We flag when your province is missing critical support" },
+          ].map((item, i) => (
+            <div key={i} style={{
+              background: "var(--bg-secondary)", border: "1px solid var(--border)",
+              borderRadius: "var(--radius)", padding: "18px 16px",
+            }}>
+              <div style={{ fontSize: "1.2rem", marginBottom: 8 }}>{item.icon}</div>
+              <div style={{ fontWeight: 700, fontSize: "0.82rem", color: "var(--text)", marginBottom: 4 }}>{item.title}</div>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>{item.desc}</div>
+            </div>
+          ))}
         </div>
 
         {/* Category tags */}
@@ -143,13 +345,15 @@ export default function Home() {
             <span key={cat} style={{
               fontSize: "0.7rem", color: "var(--text-tertiary)", fontWeight: 500,
               background: "var(--bg-secondary)", border: "1px solid var(--border)",
-              borderRadius: 100, padding: "3px 10px",
+              borderRadius: 100, padding: "4px 12px",
             }}>{cat}</span>
           ))}
         </div>
 
-        <p style={{ fontSize: "0.72rem", color: "var(--text-tertiary)", marginTop: 8 }}>
-          A <a href="mailto:justyn@bestinshow.ag" style={{ color: "var(--green-mid)", fontWeight: 500 }}>BestInShow</a> project
+        <p style={{ fontSize: "0.72rem", color: "var(--text-tertiary)", marginTop: 12 }}>
+          Built by{" "}
+          <a href="https://bestinshow.ag" target="_blank" rel="noopener noreferrer" style={{ color: "var(--green-mid)", fontWeight: 600 }}>BestInShow</a>
+          {" "}· Powered by AI · Free during beta
         </p>
       </main>
     </div>
