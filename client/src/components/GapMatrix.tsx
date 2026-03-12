@@ -51,12 +51,12 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 const CAT_LABELS: Record<string, string> = {
-  Fund:  "Funding",
-  Accel: "Accelerator",
-  Pilot: "Pilot Site",
+  Fund:  "Fund",
+  Accel: "Accel",
+  Pilot: "Pilot",
   Event: "Event",
-  Org:   "Industry Org",
-  Train: "Training",
+  Org:   "Org",
+  Train: "Train",
 };
 
 const PROV_LABELS: Record<string, string> = {
@@ -428,7 +428,7 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
         background: "rgba(250,250,248,0.92)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
       }}>
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1.05rem", color: "var(--text)" }}>Ecosystem Gap Map</span>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1.05rem", color: "var(--text)" }}>Gap Map</span>
         <button onClick={onClose} style={{
           background: "var(--bg-secondary)", border: "1px solid var(--border)",
           borderRadius: "var(--radius-sm)", padding: "6px 16px",
@@ -437,85 +437,48 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
         }}>Done</button>
       </div>
 
-      {/* Inline onboarding — shows once */}
-      {showGuide && !loading && data && (
-        <div style={{
-          padding: "14px 18px", borderBottom: "1px solid var(--border)",
-          background: "linear-gradient(90deg, #eff6ff, #dbeafe)",
-          display: "flex", gap: 12, alignItems: "flex-start",
-          animation: "fadeInUp 0.3s ease",
-        }}>
-          <span style={{ fontSize: "1.2rem", flexShrink: 0, marginTop: 2 }}>💡</span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: "0.82rem", color: "#1e40af", marginBottom: 4 }}>
-              How to read this map
-            </div>
-            <div style={{ fontSize: "0.75rem", color: "#3b82f6", lineHeight: 1.55 }}>
-              Each cell shows how many programs exist for that Province × Category combination. <strong style={{ color: "#1e40af" }}>Red = gap</strong> (no programs), <strong style={{ color: "#1e40af" }}>yellow = weak</strong> (only 1). Tap any cell to see the programs and get an <strong style={{ color: "#1e40af" }}>AI-powered analysis</strong> of why the gap exists and what could fill it.
-            </div>
-          </div>
-          <button onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }} style={{
-            background: "none", border: "none", fontSize: "0.75rem", color: "#3b82f6", padding: "2px 4px",
-            fontWeight: 600, flexShrink: 0,
-          }}>Got it ✕</button>
-        </div>
-      )}
-
+      {/* Compact filter + legend bar */}
       <div style={{
-        padding: "10px 16px", borderBottom: "1px solid var(--border)",
+        padding: "8px 16px", borderBottom: "1px solid var(--border)",
         background: "var(--bg-secondary)", flexShrink: 0,
-        display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap",
+        display: "flex", alignItems: "center", gap: 10,
       }}>
-        <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-          {STAGES.map(s => (
-            <button key={s} onClick={() => setStage(s)} style={{
-              padding: "4px 11px", borderRadius: 100, fontSize: "0.7rem", fontWeight: 600,
-              border: "1px solid",
-              borderColor: stage === s ? "var(--green-mid)" : "var(--border)",
-              background: stage === s ? "var(--green-mid)" : "var(--bg)",
-              color: stage === s ? "#fff" : "var(--text-secondary)",
-              transition: "all 0.12s",
-            }}>{STAGE_LABELS[s] || s}</button>
-          ))}
-        </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <select value={stage} onChange={e => setStage(e.target.value)} style={{
+          padding: "5px 10px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
+          fontSize: "0.75rem", fontWeight: 600, background: "var(--bg)", color: "var(--text)",
+          fontFamily: "var(--font-text)",
+        }}>
+          {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
+        </select>
+        <div style={{ display: "flex", gap: 4, alignItems: "center", marginLeft: "auto" }}>
           {[
-            { label: "Gap", bg: "#fde8e8", text: "#b91c1c", border: "#fca5a5" },
-            { label: "Weak", bg: "#fef9c3", text: "#854d0e", border: "#fde047" },
-            { label: "Fair", bg: "#dcfce7", text: "#166534", border: "#86efac" },
-            { label: "Strong", bg: "#d1fae5", text: "#064e3b", border: "#34d399" },
+            { label: "Gap", bg: "#fde8e8", text: "#b91c1c" },
+            { label: "Weak", bg: "#fef9c3", text: "#854d0e" },
+            { label: "OK", bg: "#dcfce7", text: "#166534" },
+            { label: "Strong", bg: "#d1fae5", text: "#064e3b" },
           ].map(l => (
             <span key={l.label} style={{
-              fontSize: "0.6rem", fontWeight: 700, padding: "2px 7px",
-              borderRadius: 100, background: l.bg, color: l.text,
-              border: `1px solid ${l.border}`,
+              fontSize: "0.58rem", fontWeight: 700, padding: "2px 6px",
+              borderRadius: 4, background: l.bg, color: l.text,
             }}>{l.label}</span>
           ))}
         </div>
       </div>
 
-      {data && !loading && (
+      {/* Inline tip — one line */}
+      {showGuide && !loading && data && (
         <div style={{
-          padding: "8px 18px", borderBottom: "1px solid var(--border)",
-          background: "var(--bg)", flexShrink: 0,
-          display: "flex", gap: 16, alignItems: "center",
+          padding: "7px 16px", borderBottom: "1px solid var(--border)",
+          background: "#eff6ff", flexShrink: 0,
+          display: "flex", alignItems: "center", gap: 8,
+          fontSize: "0.72rem", color: "#1e40af",
         }}>
-          {[
-            { label: "gaps", value: data.summary.emptyCells, color: "#b91c1c" },
-            { label: "weak", value: data.summary.weakCells, color: "#854d0e" },
-            { label: "covered", value: data.summary.coveredCells, color: "#166534" },
-          ].map(s => (
-            <span key={s.label} style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-              <strong style={{ color: s.color, fontWeight: 700 }}>{s.value}</strong> {s.label}
-            </span>
-          ))}
-          <span style={{
-            fontSize: "0.72rem", color: "var(--text-tertiary)", marginLeft: "auto",
-            display: "flex", alignItems: "center", gap: 4,
-          }}>
-            <span style={{ display: "inline-block", width: 18, height: 18, borderRadius: 4, background: "#fde8e8", border: "1px solid #fca5a5", lineHeight: "18px", textAlign: "center", fontSize: "0.6rem", fontWeight: 700, color: "#b91c1c" }}>0</span>
-            ← tap any cell to drill down + get AI analysis
-          </span>
+          <span>💡</span>
+          <span style={{ flex: 1 }}>Tap any cell to see programs + AI analysis of the gap.</span>
+          <button onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }} style={{
+            background: "none", border: "none", fontSize: "0.72rem", color: "#3b82f6", padding: "0 4px",
+            fontWeight: 600, flexShrink: 0,
+          }}>✕</button>
         </div>
       )}
 
@@ -562,15 +525,14 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
                       <td key={cat}
                         onClick={() => setSelected({ prov, cat })}
                         style={{
-                          padding: "5px 4px", textAlign: "center", cursor: "pointer",
+                          padding: "6px 4px", textAlign: "center", cursor: "pointer",
                           background: isSelected ? colors.border : colors.bg,
                           transition: "background 0.1s",
                           outline: isSelected ? `2px solid ${colors.text}` : "none",
                           outlineOffset: -2,
                         }}
                       >
-                        <div style={{ fontSize: "0.75rem", fontWeight: 700, color: colors.text, lineHeight: 1, marginBottom: 1 }}>{cell.count}</div>
-                        <div style={{ fontSize: "0.5rem", fontWeight: 600, color: colors.text, opacity: 0.75, letterSpacing: "0.03em" }}>{gapLabel(cell.count)}</div>
+                        <div style={{ fontSize: "0.82rem", fontWeight: 700, color: colors.text, lineHeight: 1 }}>{cell.count}</div>
                       </td>
                     );
                   })}

@@ -355,7 +355,6 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
                   What's working? What's wrong? What's missing? *
                 </label>
                 <textarea value={form.feedback} onChange={e => setForm(f => ({ ...f, feedback: e.target.value }))}
-                  autoFocus
                   placeholder={isEco ? "e.g. My program isn't listed, the gap data is wrong for SK, I'd use this if it had…" : "e.g. The pathway was great but missed X, the loading took too long, I wish it showed…"}
                   rows={3}
                   style={{
@@ -531,7 +530,7 @@ export default function Navigator() {
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
         <div style={{
-          height: 52, padding: "0 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
+          height: 48, padding: "0 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
           background: "rgba(250,250,248,0.92)", backdropFilter: "saturate(180%) blur(20px)", WebkitBackdropFilter: "saturate(180%) blur(20px)",
           borderBottom: "1px solid var(--border)", flexShrink: 0, zIndex: 10,
         }}>
@@ -547,7 +546,7 @@ export default function Navigator() {
               </svg>
             </div>
             <span style={{ fontWeight: 700, fontSize: "0.82rem", color: "var(--text)", letterSpacing: "-0.02em" }}>
-              {isEco ? "Ecosystem View" : "Navigator"}
+              CDN Ag Innovator
             </span>
             <span style={{
               fontSize: "0.55rem", fontWeight: 700, padding: "2px 6px", borderRadius: 4,
@@ -557,44 +556,16 @@ export default function Navigator() {
             }}>{isEco ? "Partner" : "Founder"}</span>
           </Link>
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            {/* Browse — founders get descriptive label, partners get both buttons */}
             <button onClick={() => setShowBrowse(true)} style={{
-              background: "var(--bg-secondary)", border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)", padding: "6px 12px",
+              background: "none", border: "none", padding: "6px 10px",
               fontSize: "0.72rem", fontWeight: 600, color: "var(--text-secondary)",
-              transition: "all 0.12s",
-            }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-tertiary)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; }}
-            >{isEco ? "Browse All" : "Explore All Programs"}</button>
-
-            {/* Gap Map — only for eco operators */}
+            }}>{isEco ? "Programs" : "All Programs"}</button>
             {isEco && (
               <button onClick={() => setShowGapMap(true)} style={{
-                background: "var(--bg-secondary)", border: "1px solid var(--border)",
-                borderRadius: "var(--radius-sm)", padding: "6px 12px",
+                background: "none", border: "none", padding: "6px 10px",
                 fontSize: "0.72rem", fontWeight: 600, color: "var(--text-secondary)",
-                transition: "all 0.12s",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-tertiary)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; }}
-              >Gap Map</button>
+              }}>Gap Map</button>
             )}
-
-            {/* Feedback — amber, prominent */}
-            <button onClick={() => setShowFeedback(true)} style={{
-              background: "linear-gradient(135deg, #f59e0b, #d97706)",
-              border: "none", borderRadius: "var(--radius-sm)", padding: "6px 14px",
-              fontSize: "0.72rem", fontWeight: 700, color: "#fff",
-              boxShadow: "0 2px 8px rgba(245,158,11,0.3)",
-              transition: "all 0.12s",
-              display: "flex", alignItems: "center", gap: 4,
-            }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
-            >
-              <span style={{ fontSize: "0.8rem" }}>💬</span> Feedback
-            </button>
           </div>
         </div>
 
@@ -622,7 +593,7 @@ export default function Navigator() {
                     fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 400,
                     color: "#fff", lineHeight: 1.2, marginBottom: 6,
                   }}>What do you want to know?</h2>
-                  <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>
+                  <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
                     Ask anything about Canada's agtech support landscape — or try a quick start below.
                   </p>
                 </div>
@@ -630,7 +601,7 @@ export default function Navigator() {
                 <div style={{ padding: "14px 16px", display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {ECO_SUGGESTIONS.slice(0, 4).map((s, i) => (
                     <button key={i} onClick={() => send(s.q)} style={{
-                      flex: "1 1 calc(50% - 4px)", minWidth: 160,
+                      flex: "1 1 calc(50% - 4px)", minWidth: 140,
                       padding: "10px 14px", borderRadius: "var(--radius-sm)",
                       border: "1px solid var(--border)", background: "var(--bg)",
                       fontSize: "0.78rem", fontWeight: 600, color: "var(--text)",
@@ -700,7 +671,7 @@ export default function Navigator() {
         {(!showWizard || isEco) && (
         <div style={{
           background: "var(--bg)", borderTop: "1px solid var(--border-strong)",
-          padding: "12px 16px", flexShrink: 0,
+          padding: "12px 16px 40px", flexShrink: 0,
           boxShadow: "0 -2px 12px rgba(0,0,0,0.04)",
         }}>
           {/* Eco suggestion chips above input when no messages yet */}
@@ -819,36 +790,24 @@ export default function Navigator() {
         </div>
       )}
 
-      {/* ── Eco operator engagement CTA ─────────────────────────────── */}
-      {isEco && showEcoCta && !showFeedback && (
+      {/* ── Persistent feedback strip — subtle, above chat input ──────── */}
+      {!showFeedback && !showQuickFeedback && (
         <div style={{
-          position: "fixed", bottom: 80, right: 16, zIndex: 40,
-          animation: "slideUp 0.5s ease, pulse-border 2s ease infinite",
+          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 5,
+          background: "linear-gradient(90deg, #f59e0b, #d97706)",
+          padding: "6px 16px",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          animation: showEcoCta ? "fadeIn 0.5s ease" : "none",
         }}>
-          <button onClick={() => { setShowFeedback(true); setShowEcoCta(false); }} style={{
-            background: "linear-gradient(135deg, #f59e0b, #d97706)",
-            border: "none", borderRadius: "var(--radius)",
-            padding: "12px 18px", color: "#fff",
-            boxShadow: "0 4px 20px rgba(245,158,11,0.4)",
-            display: "flex", alignItems: "center", gap: 8,
-            transition: "transform 0.12s",
-            animation: "glow 2s ease-in-out infinite alternate",
-          }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1.05)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
-          >
-            <span style={{ fontSize: "1.1rem" }}>⚠️</span>
-            <div style={{ textAlign: "left" }}>
-              <div style={{ fontWeight: 700, fontSize: "0.82rem" }}>Share your feedback</div>
-              <div style={{ fontSize: "0.65rem", opacity: 0.75 }}>Help us get this right</div>
-            </div>
+          <button onClick={() => setShowFeedback(true)} style={{
+            background: "none", border: "none", padding: 0,
+            color: "#fff", fontSize: "0.72rem", fontWeight: 600,
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <span>💬</span>
+            <span>Beta — we need your feedback</span>
+            <span style={{ opacity: 0.7 }}>→</span>
           </button>
-          <style>{`
-            @keyframes glow {
-              from { box-shadow: 0 4px 20px rgba(245,158,11,0.3); }
-              to { box-shadow: 0 4px 30px rgba(245,158,11,0.6); }
-            }
-          `}</style>
         </div>
       )}
     </>

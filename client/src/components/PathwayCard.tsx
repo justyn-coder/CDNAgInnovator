@@ -245,7 +245,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
           {/* Summary */}
           <p style={{
-            fontSize: "0.82rem", color: "rgba(255,255,255,0.65)", lineHeight: 1.6,
+            fontSize: "0.85rem", color: "rgba(255,255,255,0.75)", lineHeight: 1.65,
             maxWidth: 520,
           }}>{pathway.summary}</p>
 
