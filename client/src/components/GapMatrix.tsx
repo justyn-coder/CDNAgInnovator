@@ -412,14 +412,17 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
       <div style={{
-        height: 52, padding: "0 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
+        height: 56, padding: "0 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
         borderBottom: "1px solid var(--border)", flexShrink: 0,
+        background: "rgba(250,250,248,0.92)",
+        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
       }}>
-        <span style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--text)" }}>Ecosystem Gap Map</span>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1.05rem", color: "var(--text)" }}>Ecosystem Gap Map</span>
         <button onClick={onClose} style={{
           background: "var(--bg-secondary)", border: "1px solid var(--border)",
-          borderRadius: "var(--radius-sm)", padding: "5px 14px",
+          borderRadius: "var(--radius-sm)", padding: "6px 16px",
           fontSize: "0.78rem", fontWeight: 600, color: "var(--text)",
+          transition: "all 0.12s",
         }}>Done</button>
       </div>
 

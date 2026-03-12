@@ -175,83 +175,116 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
       <div style={{
-        padding: "0 16px", height: 52, display: "flex", justifyContent: "space-between", alignItems: "center",
-        borderBottom: "1px solid var(--border)", background: "var(--bg)", flexShrink: 0,
+        padding: "0 18px", height: 56, display: "flex", justifyContent: "space-between", alignItems: "center",
+        borderBottom: "1px solid var(--border)", background: "rgba(250,250,248,0.92)",
+        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", flexShrink: 0,
       }}>
-        <span style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--text)" }}>
-          {loading ? "Loading…" : `${filtered.length} of ${data.length} programs`}
-        </span>
+        <div>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1.05rem", color: "var(--text)" }}>
+            Program Database
+          </span>
+          {!loading && (
+            <span style={{ fontSize: "0.72rem", color: "var(--text-tertiary)", marginLeft: 10 }}>
+              {filtered.length} of {data.length}
+            </span>
+          )}
+        </div>
         <button onClick={onClose} style={{
           background: "var(--bg-secondary)", border: "1px solid var(--border)",
-          borderRadius: "var(--radius-sm)", padding: "5px 14px",
+          borderRadius: "var(--radius-sm)", padding: "6px 16px",
           fontSize: "0.78rem", fontWeight: 600, color: "var(--text)",
+          transition: "all 0.12s",
         }}>Done</button>
       </div>
+
+      {/* Filters */}
       <div style={{
-        padding: "10px 16px", display: "flex", gap: 8, flexWrap: "wrap",
+        padding: "10px 18px", display: "flex", gap: 8, flexWrap: "wrap",
         background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)", flexShrink: 0,
       }}>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search programs…"
           style={{
-            flex: "1 1 160px", padding: "7px 12px", borderRadius: "var(--radius-sm)",
-            border: "1px solid var(--border)", fontSize: "0.8rem", background: "var(--bg)",
-            outline: "none",
+            flex: "1 1 180px", padding: "8px 14px", borderRadius: "var(--radius-sm)",
+            border: "1.5px solid var(--border)", fontSize: "0.82rem", background: "var(--bg)",
+            outline: "none", fontFamily: "var(--font-text)",
+            transition: "border-color 0.15s",
           }}
+          onFocus={e => (e.target.style.borderColor = "var(--green-mid)")}
+          onBlur={e => (e.target.style.borderColor = "var(--border)")}
         />
         <select value={catFilter} onChange={e => setCatFilter(e.target.value)} style={{
-          padding: "7px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)",
+          padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
           fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)",
+          fontFamily: "var(--font-text)",
         }}>
           <option value="All">All Types</option>
           {CATEGORIES.map(c => <option key={c} value={c}>{CAT_META[c].label}</option>)}
         </select>
         <select value={stageFilter} onChange={e => setStageFilter(e.target.value)} style={{
-          padding: "7px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)",
+          padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
           fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)",
+          fontFamily: "var(--font-text)",
         }}>
           <option value="All">All Stages</option>
           {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
         </select>
       </div>
-      <div style={{ flex: 1, overflowY: "auto" }}>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
         {loading ? (
-          <div style={{ padding: 40, textAlign: "center", color: "var(--text-tertiary)", fontSize: "0.85rem" }}>Loading programs…</div>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)", fontSize: "0.85rem" }}>Loading programs…</div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)", fontSize: "0.85rem" }}>No programs match your filters.</div>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" }}>
-            <thead>
-              <tr style={{ background: "var(--bg-secondary)", position: "sticky", top: 0 }}>
-                {["Name", "Type", "Province", "Description"].map(h => (
-                  <th key={h} style={{ padding: "9px 12px", textAlign: "left", fontWeight: 600, fontSize: "0.72rem", color: "var(--text-secondary)", letterSpacing: "0.03em", borderBottom: "1px solid var(--border)" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p, i) => (
-                <tr key={p.id} style={{ borderBottom: "1px solid var(--border)", background: i % 2 === 0 ? "var(--bg)" : "var(--bg-secondary)" }}>
-                  <td style={{ padding: "8px 12px", fontWeight: 600, verticalAlign: "top", color: "var(--text)" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            {filtered.map(p => (
+              <div key={p.id} style={{
+                padding: "12px 18px",
+                background: "var(--bg)",
+                borderBottom: "1px solid var(--border)",
+                display: "flex", gap: 12,
+                transition: "background 0.1s",
+              }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg)"; }}
+              >
+                {/* Left: name + meta */}
+                <div style={{ flex: "0 0 240px", minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.85rem", marginBottom: 4 }}>
                     {p.website
-                      ? <a href={p.website} target="_blank" rel="noopener noreferrer" style={{ color: "var(--green-mid)", textDecoration: "underline", textDecorationColor: "rgba(45,80,22,0.3)" }}>{p.name}</a>
-                      : p.name}
-                  </td>
-                  <td style={{ padding: "8px 12px", verticalAlign: "top" }}><CategoryPill cat={p.category} /></td>
-                  <td style={{ padding: "8px 12px", color: "var(--text-secondary)", verticalAlign: "top", whiteSpace: "nowrap" }}>
-                    {(p.province || []).filter(x => x !== "National").join(", ") || (p.province?.includes("National") ? "Nat'l" : "—")}
-                  </td>
-                  <td style={{ padding: "8px 12px", color: "var(--text-secondary)", lineHeight: 1.45, verticalAlign: "top", maxWidth: 400 }}>
+                      ? <a href={p.website} target="_blank" rel="noopener noreferrer" style={{ color: "var(--green-mid)", textDecoration: "none", borderBottom: "1px solid rgba(30,107,10,0.2)" }}>{p.name} ↗</a>
+                      : <span style={{ color: "var(--text)" }}>{p.name}</span>}
+                  </div>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+                    <CategoryPill cat={p.category} />
+                    <span style={{ fontSize: "0.65rem", color: "var(--text-tertiary)" }}>
+                      {(p.province || []).filter(x => x !== "National").join(", ") || (p.province?.includes("National") ? "National" : "—")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right: description + stages */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
                     {p.description || "—"}
-                    {p.stage && p.stage.length > 0 && (
-                      <div style={{ marginTop: 4, display: "flex", gap: 3, flexWrap: "wrap" }}>
-                        {p.stage.map(st => (
-                          <span key={st} style={{ fontSize: "0.6rem", background: "var(--bg-tertiary)", padding: "1px 6px", borderRadius: 4, color: "var(--text-secondary)" }}>{st}</span>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                  {p.stage && p.stage.length > 0 && (
+                    <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginTop: 5 }}>
+                      {p.stage.map(st => (
+                        <span key={st} style={{
+                          fontSize: "0.58rem", fontWeight: 600, background: "var(--bg-tertiary)",
+                          padding: "1px 7px", borderRadius: 4, color: "var(--text-tertiary)",
+                        }}>{STAGE_LABELS[st] || st}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
