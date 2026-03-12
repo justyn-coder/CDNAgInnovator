@@ -46,7 +46,16 @@ const NEED_META: Record<string, { label: string; color: string; bg: string }> = 
   "all":                         { label: "All Programs", color: "#6a1a8c", bg: "#f3e5f5" },
 };
 
-// Simple markdown renderer
+// ── Eco operator quick-start prompts ────────────────────────────────────────
+const ECO_SUGGESTIONS = [
+  { label: "Coverage gaps in Alberta", q: "Show me coverage gaps in Alberta — where are founders underserved?" },
+  { label: "MVP programs in Ontario", q: "What programs exist for MVP-stage companies in Ontario?" },
+  { label: "Prairie pilot site comparison", q: "Compare Prairie provinces for pilot site availability" },
+  { label: "Missing for biologicals", q: "What's missing for biologicals companies nationally?" },
+  { label: "National funding landscape", q: "Give me an overview of the national funding landscape for early-stage agtech" },
+];
+
+// ── Markdown renderer ───────────────────────────────────────────────────────
 function renderMarkdown(text: string): string {
   return text
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
@@ -99,22 +108,15 @@ function WizardSummary({ snapshot, onReset }: { snapshot: WizardSnapshot; onRese
   const needMeta = snapshot.need ? NEED_META[snapshot.need] : null;
   return (
     <div style={{
-      margin: "0 16px 14px",
-      padding: "8px 12px",
-      background: "var(--bg-secondary)",
-      border: "1px solid var(--border)",
+      margin: "0 16px 14px", padding: "8px 12px",
+      background: "var(--bg-secondary)", border: "1px solid var(--border)",
       borderRadius: "var(--radius)",
-      display: "flex",
-      alignItems: "center",
-      gap: 6,
-      flexWrap: "wrap",
-      fontSize: "0.72rem",
+      display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", fontSize: "0.72rem",
     }}>
       {snapshot.stage && (
         <span style={{
           background: "var(--green-mid)", color: "#fff",
-          padding: "2px 8px", borderRadius: 100, fontWeight: 700,
-          fontSize: "0.65rem", letterSpacing: "0.02em",
+          padding: "2px 8px", borderRadius: 100, fontWeight: 700, fontSize: "0.65rem",
         }}>{STAGE_LABELS[snapshot.stage] || snapshot.stage}</span>
       )}
       {snapshot.provinces.map(p => (
@@ -131,15 +133,11 @@ function WizardSummary({ snapshot, onReset }: { snapshot: WizardSnapshot; onRese
         }}>{needMeta.label}</span>
       )}
       <span style={{ flex: 1 }} />
-      <button
-        onClick={onReset}
-        style={{
-          background: "none", border: "none", padding: 0,
-          fontSize: "0.65rem", color: "var(--text-tertiary)",
-          cursor: "pointer", textDecoration: "underline",
-          textDecorationColor: "var(--border)",
-        }}
-      >Start over</button>
+      <button onClick={onReset} style={{
+        background: "none", border: "none", padding: 0,
+        fontSize: "0.65rem", color: "var(--text-tertiary)",
+        cursor: "pointer", textDecoration: "underline",
+      }}>Start over</button>
     </div>
   );
 }
@@ -175,7 +173,6 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
       <div style={{
         padding: "0 18px", height: 56, display: "flex", justifyContent: "space-between", alignItems: "center",
         borderBottom: "1px solid var(--border)", background: "rgba(250,250,248,0.92)",
@@ -195,11 +192,8 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
           background: "var(--bg-secondary)", border: "1px solid var(--border)",
           borderRadius: "var(--radius-sm)", padding: "6px 16px",
           fontSize: "0.78rem", fontWeight: 600, color: "var(--text)",
-          transition: "all 0.12s",
         }}>Done</button>
       </div>
-
-      {/* Filters */}
       <div style={{
         padding: "10px 18px", display: "flex", gap: 8, flexWrap: "wrap",
         background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)", flexShrink: 0,
@@ -209,49 +203,41 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
             flex: "1 1 180px", padding: "8px 14px", borderRadius: "var(--radius-sm)",
             border: "1.5px solid var(--border)", fontSize: "0.82rem", background: "var(--bg)",
             outline: "none", fontFamily: "var(--font-text)",
-            transition: "border-color 0.15s",
           }}
           onFocus={e => (e.target.style.borderColor = "var(--green-mid)")}
           onBlur={e => (e.target.style.borderColor = "var(--border)")}
         />
         <select value={catFilter} onChange={e => setCatFilter(e.target.value)} style={{
           padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
-          fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)",
-          fontFamily: "var(--font-text)",
+          fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-text)",
         }}>
           <option value="All">All Types</option>
           {CATEGORIES.map(c => <option key={c} value={c}>{CAT_META[c].label}</option>)}
         </select>
         <select value={stageFilter} onChange={e => setStageFilter(e.target.value)} style={{
           padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
-          fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)",
-          fontFamily: "var(--font-text)",
+          fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-text)",
         }}>
           <option value="All">All Stages</option>
           {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
         </select>
       </div>
-
-      {/* Content */}
       <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
         {loading ? (
-          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)", fontSize: "0.85rem" }}>Loading programs…</div>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)" }}>Loading programs…</div>
         ) : filtered.length === 0 ? (
-          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)", fontSize: "0.85rem" }}>No programs match your filters.</div>
+          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)" }}>No programs match your filters.</div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
             {filtered.map(p => (
               <div key={p.id} style={{
-                padding: "12px 18px",
-                background: "var(--bg)",
+                padding: "12px 18px", background: "var(--bg)",
                 borderBottom: "1px solid var(--border)",
-                display: "flex", gap: 12,
-                transition: "background 0.1s",
+                display: "flex", gap: 12, transition: "background 0.1s",
               }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg)"; }}
               >
-                {/* Left: name + meta */}
                 <div style={{ flex: "0 0 240px", minWidth: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: "0.85rem", marginBottom: 4 }}>
                     {p.website
@@ -265,8 +251,6 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
                     </span>
                   </div>
                 </div>
-
-                {/* Right: description + stages */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
                     {p.description || "—"}
@@ -291,60 +275,126 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
   );
 }
 
-function SubmitForm({ onClose }: { onClose: () => void }) {
-  const [form, setForm] = useState({ programName: "", bestFor: "", submitterName: "", submitterEmail: "" });
+// ── Feedback Modal (replaces old Submit form) ───────────────────────────────
+function FeedbackModal({ onClose, isEco }: { onClose: () => void; isEco: boolean }) {
+  const [form, setForm] = useState({ feedback: "", email: "", name: "" });
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function submit() {
-    if (!form.programName || !form.bestFor || !form.submitterName || !form.submitterEmail) { alert("Please fill in all fields."); return; }
+    if (!form.feedback.trim()) { alert("Please share some feedback."); return; }
     setBusy(true);
     try {
-      await fetch("/api/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      await fetch("/api/submissions", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          programName: `FEEDBACK: ${isEco ? "operator" : "founder"}`,
+          bestFor: form.feedback,
+          submitterName: form.name || "anonymous",
+          submitterEmail: form.email || `anon-${Date.now()}@feedback`,
+        }),
+      });
       setDone(true);
     } catch { alert("Something went wrong."); }
     setBusy(false);
   }
 
-  const inputStyle = {
-    width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
-    border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 4,
-    outline: "none", background: "var(--bg)",
-  };
-
-  if (done) return (
-    <div style={{ padding: "20px 16px", textAlign: "center" }}>
-      <div style={{ fontSize: "1.4rem", marginBottom: 8 }}>✓</div>
-      <p style={{ fontWeight: 600, fontSize: "0.88rem", marginBottom: 4 }}>Submitted — thanks!</p>
-      <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: 16 }}>We'll review and add it to the database.</p>
-      <button onClick={onClose} style={{ background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: "var(--radius-sm)", padding: "8px 20px", fontWeight: 600, fontSize: "0.8rem" }}>Done</button>
-    </div>
-  );
-
   return (
-    <div style={{ padding: "14px 16px" }}>
-      <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: 12 }}>Know a program we're missing?</p>
-      {[
-        { key: "programName", label: "Program name *", placeholder: "e.g. Lakeland College Smart Farm" },
-        { key: "bestFor", label: "Best for *", placeholder: "e.g. MVP-stage livestock tech in AB" },
-        { key: "submitterName", label: "Your name *", placeholder: "" },
-        { key: "submitterEmail", label: "Your email *", placeholder: "" },
-      ].map(({ key, label, placeholder }) => (
-        <div key={key} style={{ marginBottom: 10 }}>
-          <label style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--text-secondary)" }}>{label}</label>
-          <input value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder={placeholder} style={inputStyle} />
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 300,
+      background: "rgba(0,0,0,0.45)",
+      backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 20, animation: "fadeIn 0.2s ease",
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: "var(--bg)", borderRadius: "var(--radius-lg)",
+        maxWidth: 440, width: "100%",
+        boxShadow: "0 24px 80px rgba(0,0,0,0.2)",
+        overflow: "hidden", animation: "slideUp 0.3s ease",
+      }}>
+        {/* Amber header */}
+        <div style={{
+          background: "linear-gradient(135deg, #92400e, #b45309, #d97706)",
+          padding: "18px 24px",
+          display: "flex", alignItems: "center", gap: 10,
+        }}>
+          <span style={{ fontSize: "1.3rem" }}>⚠️</span>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: "0.92rem", color: "#fff" }}>
+              Beta Feedback
+            </div>
+            <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.65)" }}>
+              Help us build the tool you actually need
+            </div>
+          </div>
         </div>
-      ))}
-      <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-        <button onClick={submit} disabled={busy} style={{ flex: 1, background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: "var(--radius-sm)", padding: "9px", fontWeight: 600, fontSize: "0.8rem" }}>
-          {busy ? "Submitting…" : "Submit Program"}
-        </button>
-        <button onClick={onClose} style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "9px 16px", fontWeight: 600, fontSize: "0.8rem", color: "var(--text)" }}>Cancel</button>
+
+        <div style={{ padding: "20px 24px 24px" }}>
+          {done ? (
+            <div style={{ textAlign: "center", padding: "12px 0" }}>
+              <div style={{ fontSize: "1.4rem", marginBottom: 8 }}>✓</div>
+              <p style={{ fontWeight: 700, fontSize: "0.88rem", marginBottom: 4 }}>Thanks — that's genuinely helpful.</p>
+              <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: 16 }}>We'll reach out if we have questions.</p>
+              <button onClick={onClose} style={{ background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: "var(--radius-sm)", padding: "8px 20px", fontWeight: 600, fontSize: "0.82rem" }}>Close</button>
+            </div>
+          ) : (
+            <>
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--text-secondary)" }}>
+                  What's working? What's wrong? What's missing? *
+                </label>
+                <textarea value={form.feedback} onChange={e => setForm(f => ({ ...f, feedback: e.target.value }))}
+                  placeholder={isEco ? "e.g. My program isn't listed, the gap data is wrong for SK, I'd use this if it had…" : "e.g. The pathway was great but missed X, the loading took too long, I wish it showed…"}
+                  rows={3}
+                  style={{
+                    width: "100%", padding: "10px 12px", borderRadius: "var(--radius-sm)",
+                    border: "1.5px solid var(--border)", fontSize: "0.82rem", marginTop: 4,
+                    outline: "none", background: "var(--bg-secondary)", resize: "none",
+                    fontFamily: "var(--font-text)",
+                  }}
+                  onFocus={e => (e.target.style.borderColor = "#d97706")}
+                  onBlur={e => (e.target.style.borderColor = "var(--border)")}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--text-tertiary)" }}>Your name</label>
+                  <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Optional"
+                    style={{
+                      width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
+                      border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 3,
+                      outline: "none", background: "var(--bg-secondary)", fontFamily: "var(--font-text)",
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--text-tertiary)" }}>Email <span style={{ color: "#d97706" }}>(so we can follow up)</span></label>
+                  <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@company.com"
+                    style={{
+                      width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
+                      border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 3,
+                      outline: "none", background: "var(--bg-secondary)", fontFamily: "var(--font-text)",
+                    }}
+                  />
+                </div>
+              </div>
+              <button onClick={submit} disabled={busy} style={{
+                width: "100%", padding: "11px",
+                background: "linear-gradient(135deg, #d97706, #b45309)",
+                color: "#fff", border: "none", borderRadius: "var(--radius-sm)",
+                fontWeight: 700, fontSize: "0.85rem",
+                boxShadow: "0 2px 8px rgba(217,119,6,0.3)",
+              }}>{busy ? "Sending…" : "Send Feedback"}</button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
+// ── Main component ──────────────────────────────────────────────────────────
 export default function Navigator() {
   const [mode] = useState<"e" | "ec">(() => { try { return (localStorage.getItem("ag_nav_mode") as "e" | "ec") || "e"; } catch { return "e"; } });
   const [messages, setMessages] = useState<Message[]>([]);
@@ -352,12 +402,15 @@ export default function Navigator() {
   const [loading, setLoading] = useState(false);
   const [showBrowse, setShowBrowse] = useState(false);
   const [showGapMap, setShowGapMap] = useState(false);
-  const [showSubmit, setShowSubmit] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [wizardSnapshot, setWizardSnapshot] = useState<WizardSnapshot | null>(null);
   const [wizardDescription, setWizardDescription] = useState("");
   const [showPathway, setShowPathway] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [quickFeedbackSent, setQuickFeedbackSent] = useState(false);
+  const [showQuickFeedback, setShowQuickFeedback] = useState(false);
+  // Partner engagement: show CTA after they've sent 2+ messages or been idle 20s
+  const [ecoMsgCount, setEcoMsgCount] = useState(0);
+  const [showEcoCta, setShowEcoCta] = useState(false);
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -370,11 +423,7 @@ export default function Navigator() {
       const urlProv = params.get("prov");
       const urlNeed = params.get("need");
       if (urlStage && urlProv) {
-        const snapshot = {
-          stage: urlStage,
-          provinces: urlProv.split(","),
-          need: urlNeed || "all",
-        };
+        const snapshot = { stage: urlStage, provinces: urlProv.split(","), need: urlNeed || "all" };
         setWizardSnapshot(snapshot);
         setWizardDescription(params.get("desc") || "an agtech company");
         setShowWizard(false);
@@ -383,29 +432,31 @@ export default function Navigator() {
     } catch {}
   }, []);
 
+  // Eco operator: show engagement CTA after 20s
   useEffect(() => {
     if (isEco) {
-      setMessages([{ role: "assistant", content: "Welcome — you're in **Ecosystem Operator** mode.\n\nI can help you analyze Canada's agtech support landscape. Here's what I'm most useful for:\n\n### Quick starts:\n- **\"Show me coverage gaps in Alberta\"** — where are founders underserved?\n- **\"What programs exist for MVP-stage companies in Ontario?\"** — filter by stage + province\n- **\"Compare Prairie provinces for pilot site availability\"** — cross-province analysis\n- **\"What's missing for biologicals companies nationally?\"** — product-type gap analysis\n\nYou can also click **Gap Map** above for a visual Province × Category heatmap, or **Browse All** to review the full program database.\n\nWhat would you like to explore?" }]);
+      const timer = setTimeout(() => setShowEcoCta(true), 20000);
+      return () => clearTimeout(timer);
     }
-  }, [mode]);
+  }, [isEco]);
+
+  // Show eco CTA after 2 messages
+  useEffect(() => {
+    if (isEco && ecoMsgCount >= 2 && !showEcoCta) setShowEcoCta(true);
+  }, [ecoMsgCount]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
 
   function handleWizardComplete(prompt: string, snapshot: WizardSnapshot) {
     setShowWizard(false);
     setWizardSnapshot(snapshot);
-    // Extract description from the prompt (everything before "I'm at the")
     const descMatch = prompt.match(/I'm building (.+?)\. I'm at/);
     setWizardDescription(descMatch ? descMatch[1] : "an agtech company");
     setShowPathway(true);
-    // Show feedback prompt after 8 seconds
-    if (!feedbackSent) {
-      setTimeout(() => setShowFeedback(true), 8000);
-    }
+    if (!quickFeedbackSent) setTimeout(() => setShowQuickFeedback(true), 8000);
   }
 
   function handlePathwayFollowUp(question: string) {
-    // Transition from pathway view to chat with the follow-up question
     const newMessages: Message[] = [{ role: "user", content: question }];
     setMessages(newMessages);
     setLoading(true);
@@ -430,13 +481,14 @@ export default function Navigator() {
     setInput("");
   }
 
-  async function send() {
-    const text = input.trim();
+  async function send(overrideText?: string) {
+    const text = (overrideText || input).trim();
     if (!text || loading) return;
-    setInput("");
+    if (!overrideText) setInput("");
     const newMessages: Message[] = [...messages, { role: "user", content: text }];
     setMessages(newMessages);
     setLoading(true);
+    if (isEco) setEcoMsgCount(c => c + 1);
     try {
       const res = await fetch("/api/chat", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -454,75 +506,135 @@ export default function Navigator() {
     <>
       {showBrowse && <BrowsePanel onClose={() => setShowBrowse(false)} />}
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} mode={mode === "ec" ? "ec" : "founder"} />}
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} />}
+
       <div style={{ position: "fixed", inset: 0, background: "var(--bg)", display: "flex", flexDirection: "column", fontFamily: "var(--font-text)" }}>
 
-        {/* Top bar */}
+        {/* ── Top bar ──────────────────────────────────────────────── */}
         <div style={{
-          height: 56, padding: "0 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
-          background: "rgba(250,250,248,0.88)", backdropFilter: "saturate(180%) blur(20px)", WebkitBackdropFilter: "saturate(180%) blur(20px)",
+          height: 52, padding: "0 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
+          background: "rgba(250,250,248,0.92)", backdropFilter: "saturate(180%) blur(20px)", WebkitBackdropFilter: "saturate(180%) blur(20px)",
           borderBottom: "1px solid var(--border)", flexShrink: 0, zIndex: 10,
         }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 8L6 4M6 12l4-4" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round"/></svg>
             <div style={{
               width: 26, height: 26,
               background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-              borderRadius: 7,
-              display: "flex", alignItems: "center", justifyContent: "center",
+              borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center",
               boxShadow: "0 1px 4px rgba(30,107,10,0.15)",
             }}>
               <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                 <path d="M7 1.5C5 1.5 3 3 3 5.5c0 2 1.5 3.5 4 6 2.5-2.5 4-4 4-6 0-2.5-2-4-4-4z" fill="rgba(255,255,255,0.9)"/>
               </svg>
             </div>
-            <span style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--text)", letterSpacing: "-0.02em" }}>Navigator</span>
+            <span style={{ fontWeight: 700, fontSize: "0.82rem", color: "var(--text)", letterSpacing: "-0.02em" }}>
+              {isEco ? "Ecosystem View" : "Navigator"}
+            </span>
+            <span style={{
+              fontSize: "0.55rem", fontWeight: 700, padding: "2px 6px", borderRadius: 4,
+              background: isEco ? "#dbeafe" : "var(--green-soft)",
+              color: isEco ? "#1e40af" : "var(--green-mid)",
+              letterSpacing: "0.04em", textTransform: "uppercase",
+            }}>{isEco ? "Partner" : "Founder"}</span>
           </Link>
-          <div style={{ display: "flex", gap: 6 }}>
-            {[
-              { label: "Browse All", onClick: () => setShowBrowse(true), active: false },
-              { label: "Gap Map", onClick: () => setShowGapMap(true), active: false },
-              { label: "+ Submit", onClick: () => setShowSubmit(s => !s), active: showSubmit },
-            ].map(btn => (
-              <button key={btn.label} onClick={btn.onClick} style={{
-                background: btn.active ? "var(--green-mid)" : "var(--bg-secondary)",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--radius-sm)", padding: "6px 14px",
-                fontSize: "0.75rem", fontWeight: 600,
-                color: btn.active ? "#fff" : "var(--text-secondary)",
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            {/* Browse — founders get descriptive label, partners get both buttons */}
+            <button onClick={() => setShowBrowse(true)} style={{
+              background: "var(--bg-secondary)", border: "1px solid var(--border)",
+              borderRadius: "var(--radius-sm)", padding: "6px 12px",
+              fontSize: "0.72rem", fontWeight: 600, color: "var(--text-secondary)",
+              transition: "all 0.12s",
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-tertiary)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; }}
+            >{isEco ? "Browse All" : "Explore All Programs"}</button>
+
+            {/* Gap Map — only for eco operators */}
+            {isEco && (
+              <button onClick={() => setShowGapMap(true)} style={{
+                background: "var(--bg-secondary)", border: "1px solid var(--border)",
+                borderRadius: "var(--radius-sm)", padding: "6px 12px",
+                fontSize: "0.72rem", fontWeight: 600, color: "var(--text-secondary)",
                 transition: "all 0.12s",
               }}
-              onMouseEnter={e => { if (!btn.active) { (e.currentTarget as HTMLElement).style.background = "var(--bg-tertiary)"; } }}
-              onMouseLeave={e => { if (!btn.active) { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; } }}
-              >{btn.label}</button>
-            ))}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-tertiary)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; }}
+              >Gap Map</button>
+            )}
+
+            {/* Feedback — amber, prominent */}
+            <button onClick={() => setShowFeedback(true)} style={{
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              border: "none", borderRadius: "var(--radius-sm)", padding: "6px 14px",
+              fontSize: "0.72rem", fontWeight: 700, color: "#fff",
+              boxShadow: "0 2px 8px rgba(245,158,11,0.3)",
+              transition: "all 0.12s",
+              display: "flex", alignItems: "center", gap: 4,
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+            >
+              <span style={{ fontSize: "0.8rem" }}>💬</span> Feedback
+            </button>
           </div>
         </div>
 
-        {/* Mode indicator */}
-        <div style={{
-          padding: "6px 18px", flexShrink: 0,
-          background: isEco ? "linear-gradient(90deg, #0c1829, #132038)" : "linear-gradient(90deg, var(--green), var(--green-mid))",
-          display: "flex", alignItems: "center", gap: 8,
-        }}>
-          <div style={{
-            width: 6, height: 6, borderRadius: "50%",
-            background: isEco ? "#60a5fa" : "#4ade80",
-            boxShadow: isEco ? "0 0 6px rgba(96,165,250,0.4)" : "0 0 6px rgba(74,222,128,0.4)",
-          }} />
-          <span style={{ fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: isEco ? "rgba(96,165,250,0.7)" : "rgba(255,255,255,0.6)" }}>
-            {isEco ? "Ecosystem Operator" : "Founder Mode"} · AI-Powered
-          </span>
-        </div>
+        {/* ── Messages area ────────────────────────────────────────── */}
+        <div style={{ flex: 1, overflowY: "auto", paddingTop: 16, paddingBottom: 12 }}>
 
-        {/* Submit inline */}
-        {showSubmit && (
-          <div style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-            <SubmitForm onClose={() => setShowSubmit(false)} />
-          </div>
-        )}
-
-        {/* Messages */}
-        <div style={{ flex: 1, overflowY: "auto", paddingTop: 20, paddingBottom: 12 }}>
+          {/* Eco operator welcome — clean, scannable, with visual hierarchy */}
+          {isEco && messages.length === 0 && !loading && (
+            <div style={{ padding: "24px 20px", animation: "fadeInUp 0.4s ease" }}>
+              <div style={{
+                background: "var(--bg)", border: "1px solid var(--border)",
+                borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-md)",
+                overflow: "hidden",
+              }}>
+                {/* Header */}
+                <div style={{
+                  background: "linear-gradient(145deg, #0c1829, #1a2940)",
+                  padding: "22px 24px 18px",
+                }}>
+                  <div style={{
+                    fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                    color: "rgba(96,165,250,0.5)", marginBottom: 8,
+                  }}>Ecosystem Intelligence</div>
+                  <h2 style={{
+                    fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 400,
+                    color: "#fff", lineHeight: 1.2, marginBottom: 6,
+                  }}>What do you want to know?</h2>
+                  <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>
+                    Ask anything about Canada's agtech support landscape — or try a quick start below.
+                  </p>
+                </div>
+                {/* Quick-start grid */}
+                <div style={{ padding: "14px 16px", display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {ECO_SUGGESTIONS.slice(0, 4).map((s, i) => (
+                    <button key={i} onClick={() => send(s.q)} style={{
+                      flex: "1 1 calc(50% - 4px)", minWidth: 160,
+                      padding: "10px 14px", borderRadius: "var(--radius-sm)",
+                      border: "1px solid var(--border)", background: "var(--bg)",
+                      fontSize: "0.78rem", fontWeight: 600, color: "var(--text)",
+                      textAlign: "left", transition: "all 0.12s",
+                      boxShadow: "var(--shadow-sm)",
+                    }}
+                      onMouseEnter={e => { const t = e.currentTarget as HTMLElement; t.style.borderColor = "#60a5fa"; t.style.transform = "translateY(-1px)"; }}
+                      onMouseLeave={e => { const t = e.currentTarget as HTMLElement; t.style.borderColor = "var(--border)"; t.style.transform = "translateY(0)"; }}
+                    >{s.label}</button>
+                  ))}
+                </div>
+                {/* Tools pointer */}
+                <div style={{
+                  padding: "10px 20px 14px", borderTop: "1px solid var(--border)",
+                  fontSize: "0.72rem", color: "var(--text-tertiary)",
+                  display: "flex", gap: 12,
+                }}>
+                  <span onClick={() => setShowGapMap(true)} style={{ cursor: "pointer", color: "var(--green-mid)", fontWeight: 600 }}>📊 Gap Map</span>
+                  <span onClick={() => setShowBrowse(true)} style={{ cursor: "pointer", color: "var(--green-mid)", fontWeight: 600 }}>📋 Browse {283} Programs</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {!isEco && showWizard && (
             <Wizard onComplete={handleWizardComplete} />
@@ -532,7 +644,6 @@ export default function Navigator() {
             <WizardSummary snapshot={wizardSnapshot} onReset={handleReset} />
           )}
 
-          {/* Pathway Card — shown after wizard, before chat */}
           {!isEco && showPathway && wizardSnapshot && (
             <PathwayCard
               description={wizardDescription}
@@ -543,7 +654,8 @@ export default function Navigator() {
             />
           )}
 
-          {(!showWizard || isEco) && messages.map((m, i) => <ChatBubble key={i} msg={m} />)}
+          {/* Chat messages — only show after eco welcome or wizard done */}
+          {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => <ChatBubble key={i} msg={m} />)}
           {loading && (
             <div style={{ padding: "0 16px 4px" }}>
               <div style={{
@@ -565,34 +677,39 @@ export default function Navigator() {
           <div ref={bottomRef} />
         </div>
 
+        {/* ── Chat input ───────────────────────────────────────────── */}
         {(!showWizard || isEco) && (
         <div style={{
           background: "var(--bg)", borderTop: "1px solid var(--border-strong)",
-          padding: "14px 16px", flexShrink: 0,
+          padding: "12px 16px", flexShrink: 0,
           boxShadow: "0 -2px 12px rgba(0,0,0,0.04)",
         }}>
-          {/* Label */}
-          <div style={{
-            fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-            color: "var(--text-tertiary)", marginBottom: 8,
-            display: "flex", alignItems: "center", gap: 5,
-          }}>
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-              <path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            {isEco ? "Ask about the ecosystem" : "Continue the conversation"}
-          </div>
+          {/* Eco suggestion chips above input when no messages yet */}
+          {isEco && messages.length > 0 && messages.length < 4 && (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+              {ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content.includes(s.label))).slice(0, 3).map((s, i) => (
+                <button key={i} onClick={() => send(s.q)} style={{
+                  padding: "5px 12px", borderRadius: 100,
+                  border: "1px solid var(--border)", background: "var(--bg-secondary)",
+                  fontSize: "0.7rem", fontWeight: 600, color: "var(--text-secondary)",
+                  transition: "all 0.1s",
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--green-mid)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
+                >{s.label}</button>
+              ))}
+            </div>
+          )}
           <div style={{ display: "flex", gap: 8 }}>
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder={isEco ? "e.g. What's the biggest gap in Prairie agtech support?" : "Ask anything about your pathway, programs, or next steps…"}
+              placeholder={isEco ? "Ask about the ecosystem…" : "Ask about your pathway, programs, or next steps…"}
               rows={2}
               style={{
                 flex: 1, resize: "none",
-                border: "1.5px solid var(--border)",
-                borderRadius: "var(--radius)",
+                border: "1.5px solid var(--border)", borderRadius: "var(--radius)",
                 padding: "10px 14px", fontSize: "0.85rem", lineHeight: 1.5, outline: "none",
                 background: "var(--bg-secondary)",
                 transition: "border-color 0.15s, box-shadow 0.15s",
@@ -602,15 +719,14 @@ export default function Navigator() {
               onBlur={e => { e.target.style.borderColor = "var(--border)"; e.target.style.boxShadow = "none"; }}
             />
             <button
-              onClick={send}
+              onClick={() => send()}
               disabled={loading || !input.trim()}
               style={{
                 background: loading || !input.trim() ? "var(--bg-tertiary)" : "linear-gradient(135deg, var(--green-mid), var(--green-light))",
                 color: loading || !input.trim() ? "var(--text-tertiary)" : "#fff",
                 border: "none", borderRadius: "var(--radius)",
                 padding: "0 20px", fontWeight: 700, fontSize: "0.9rem",
-                transition: "all 0.15s",
-                minWidth: 48,
+                transition: "all 0.15s", minWidth: 48,
                 boxShadow: loading || !input.trim() ? "none" : "0 2px 8px rgba(30,107,10,0.2)",
               }}
             >→</button>
@@ -626,22 +742,22 @@ export default function Navigator() {
         `}</style>
       </div>
 
-      {/* Feedback slide-up */}
-      {showFeedback && !feedbackSent && (
+      {/* ── Quick feedback slide-up (founder) ──────────────────────── */}
+      {showQuickFeedback && !quickFeedbackSent && !isEco && (
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0,
-          background: "var(--bg)", borderTop: "1px solid var(--border)",
+          background: "var(--bg)", borderTop: "2px solid #f59e0b",
           boxShadow: "0 -4px 24px rgba(0,0,0,0.08)",
-          padding: "16px 20px", zIndex: 50,
+          padding: "14px 20px", zIndex: 50,
           animation: "slideUp 0.4s ease",
           display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
         }}>
           <div style={{ flex: "1 1 200px", minWidth: 0 }}>
             <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--text)", marginBottom: 2 }}>
-              Was this useful? 🤔
+              Was this useful?
             </div>
-            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-              Quick reaction — help us improve
+            <div style={{ fontSize: "0.72rem", color: "var(--text-secondary)" }}>
+              Quick reaction — we're still in beta
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -651,7 +767,6 @@ export default function Navigator() {
               { emoji: "🤷", label: "Off-base", value: "miss" },
             ].map(opt => (
               <button key={opt.value} onClick={() => {
-                // Submit feedback
                 fetch("/api/submissions", {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -661,8 +776,8 @@ export default function Navigator() {
                     submitterEmail: `feedback-${Date.now()}@anon`,
                   }),
                 }).catch(() => {});
-                setFeedbackSent(true);
-                setShowFeedback(false);
+                setQuickFeedbackSent(true);
+                setShowQuickFeedback(false);
               }}
                 style={{
                   background: "var(--bg-secondary)", border: "1px solid var(--border)",
@@ -670,7 +785,7 @@ export default function Navigator() {
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
                   transition: "transform 0.1s, border-color 0.1s",
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--green-mid)"; (e.currentTarget as HTMLElement).style.transform = "scale(1.05)"; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#d97706"; (e.currentTarget as HTMLElement).style.transform = "scale(1.05)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
               >
                 <span style={{ fontSize: "1.2rem" }}>{opt.emoji}</span>
@@ -678,10 +793,43 @@ export default function Navigator() {
               </button>
             ))}
           </div>
-          <button onClick={() => setShowFeedback(false)} style={{
+          <button onClick={() => setShowQuickFeedback(false)} style={{
             background: "none", border: "none", fontSize: "0.75rem",
             color: "var(--text-tertiary)", padding: "4px",
           }}>✕</button>
+        </div>
+      )}
+
+      {/* ── Eco operator engagement CTA ─────────────────────────────── */}
+      {isEco && showEcoCta && !showFeedback && (
+        <div style={{
+          position: "fixed", bottom: 80, right: 16, zIndex: 40,
+          animation: "slideUp 0.5s ease, pulse-border 2s ease infinite",
+        }}>
+          <button onClick={() => { setShowFeedback(true); setShowEcoCta(false); }} style={{
+            background: "linear-gradient(135deg, #f59e0b, #d97706)",
+            border: "none", borderRadius: "var(--radius)",
+            padding: "12px 18px", color: "#fff",
+            boxShadow: "0 4px 20px rgba(245,158,11,0.4)",
+            display: "flex", alignItems: "center", gap: 8,
+            transition: "transform 0.12s",
+            animation: "glow 2s ease-in-out infinite alternate",
+          }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1.05)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+          >
+            <span style={{ fontSize: "1.1rem" }}>⚠️</span>
+            <div style={{ textAlign: "left" }}>
+              <div style={{ fontWeight: 700, fontSize: "0.82rem" }}>Share your feedback</div>
+              <div style={{ fontSize: "0.65rem", opacity: 0.75 }}>Help us get this right</div>
+            </div>
+          </button>
+          <style>{`
+            @keyframes glow {
+              from { box-shadow: 0 4px 20px rgba(245,158,11,0.3); }
+              to { box-shadow: 0 4px 30px rgba(245,158,11,0.6); }
+            }
+          `}</style>
         </div>
       )}
     </>
