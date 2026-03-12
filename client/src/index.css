@@ -96,3 +96,12 @@ input, select, textarea { font-family: var(--font-text); }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  :root {
+    --radius: 12px;
+    --radius-lg: 16px;
+  }
+  body { font-size: 14px; }
+}
