@@ -572,9 +572,40 @@ export default function Navigator() {
         {/* ── Messages area ────────────────────────────────────────── */}
         <div style={{ flex: 1, overflowY: "auto", paddingTop: 16, paddingBottom: 12 }}>
 
-          {/* Eco operator welcome — clean, scannable, with visual hierarchy */}
+          {/* Eco operator welcome */}
           {isEco && messages.length === 0 && !loading && (
-            <div style={{ padding: "24px 20px", animation: "fadeInUp 0.4s ease" }}>
+            <div style={{ padding: "20px 16px", animation: "fadeInUp 0.4s ease", display: "flex", flexDirection: "column", gap: 14 }}>
+
+              {/* First-visit onboarding tip */}
+              {(() => { try { return !sessionStorage.getItem("ag_eco_onboarded"); } catch { return true; } })() && (
+                <div style={{
+                  background: "linear-gradient(135deg, #eff6ff, #dbeafe)",
+                  border: "1px solid #bfdbfe",
+                  borderRadius: "var(--radius)", padding: "14px 16px",
+                  display: "flex", gap: 10, alignItems: "flex-start",
+                }}>
+                  <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>👋</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: "0.82rem", color: "#1e40af", marginBottom: 4 }}>
+                      Welcome — start by finding yourself
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: "#3b82f6", lineHeight: 1.55, marginBottom: 10 }}>
+                      Tap <strong>Programs</strong> above and search your organization's name. See how you appear to founders — then hit the feedback button to tell us what we got wrong. We built this from public data and we know we're missing things.
+                    </div>
+                    <button onClick={() => { setShowBrowse(true); try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }} style={{
+                      background: "#1e40af", color: "#fff", border: "none",
+                      borderRadius: "var(--radius-sm)", padding: "7px 14px",
+                      fontSize: "0.75rem", fontWeight: 600,
+                    }}>Search programs →</button>
+                  </div>
+                  <button onClick={() => { try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }} style={{
+                    background: "none", border: "none", fontSize: "0.72rem", color: "#3b82f6", padding: "0 4px",
+                    fontWeight: 600, flexShrink: 0,
+                  }}>✕</button>
+                </div>
+              )}
+
+              {/* Main welcome card */}
               <div style={{
                 background: "var(--bg)", border: "1px solid var(--border)",
                 borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-md)",
@@ -594,7 +625,7 @@ export default function Navigator() {
                     color: "#fff", lineHeight: 1.2, marginBottom: 6,
                   }}>What do you want to know?</h2>
                   <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
-                    Ask anything about Canada's agtech support landscape — or try a quick start below.
+                    We've catalogued what we could find — ask a question, or poke holes in our data. Seriously, we need that.
                   </p>
                 </div>
                 {/* Quick-start grid */}
@@ -797,7 +828,7 @@ export default function Navigator() {
           background: "linear-gradient(90deg, #f59e0b, #d97706)",
           padding: "6px 16px",
           display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-          animation: showEcoCta ? "fadeIn 0.5s ease" : "none",
+          animation: "feedbackPulse 2s ease-in-out 3",
         }}>
           <button onClick={() => setShowFeedback(true)} style={{
             background: "none", border: "none", padding: 0,
@@ -810,6 +841,12 @@ export default function Navigator() {
           </button>
         </div>
       )}
+      <style>{`
+        @keyframes feedbackPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
+        }
+      `}</style>
     </>
   );
 }

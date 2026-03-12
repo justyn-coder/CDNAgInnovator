@@ -339,10 +339,10 @@ function CellDetail({
             borderRadius: "var(--radius)", textAlign: "center",
             border: "1px dashed var(--border)",
           }}>
-            <div style={{ fontSize: "1.2rem", marginBottom: 6 }}>⚠️</div>
-            <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--text)", marginBottom: 4 }}>No programs found</div>
-            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-              This is a confirmed gap in the Canadian agtech support landscape.
+            <div style={{ fontSize: "1.2rem", marginBottom: 6 }}>🤔</div>
+            <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--text)", marginBottom: 4 }}>We didn't find any programs here</div>
+            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+              This looks like a gap — but we might be missing something. If you know of a program that belongs here, we'd love to hear about it.
             </div>
           </div>
         ) : (
@@ -474,7 +474,7 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
           fontSize: "0.72rem", color: "#1e40af",
         }}>
           <span>💡</span>
-          <span style={{ flex: 1 }}>Tap any cell to see programs + AI analysis of the gap.</span>
+          <span style={{ flex: 1 }}>Tap any cell to see what we found — and tell us what we missed.</span>
           <button onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }} style={{
             background: "none", border: "none", fontSize: "0.72rem", color: "#3b82f6", padding: "0 4px",
             fontWeight: 600, flexShrink: 0,

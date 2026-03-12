@@ -475,6 +475,14 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--text)"; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)"; }}
         >📋 Copy shareable link</button>
+
+        {/* Disclaimer */}
+        <div style={{
+          fontSize: "0.65rem", color: "var(--text-tertiary)", lineHeight: 1.5,
+          marginTop: 4, fontStyle: "italic",
+        }}>
+          Built from public data — we're probably missing things. If a recommendation looks off, that's useful feedback too.
+        </div>
       </div>
     </div>
   );
