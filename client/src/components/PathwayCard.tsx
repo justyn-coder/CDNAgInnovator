@@ -14,6 +14,8 @@ interface PathwayStep {
   category: string;
   action: string;
   why: string;
+  fit_confidence?: "high" | "medium" | "exploratory";
+  prepare?: string;
   timing: "now" | "next_month" | "next_quarter" | "horizon";
   horizon?: boolean;
 }
@@ -271,6 +273,15 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
                     fontSize: "0.58rem", fontWeight: 700, padding: "2px 7px", borderRadius: 100,
                     background: timing.bg, color: timing.color,
                   }}>{timing.label}</span>
+                  {step.fit_confidence && (
+                    <span style={{
+                      fontSize: "0.55rem", fontWeight: 600, padding: "2px 7px", borderRadius: 100,
+                      background: step.fit_confidence === "high" ? "#dcfce7" : step.fit_confidence === "medium" ? "#fef9c3" : "#f0f0ec",
+                      color: step.fit_confidence === "high" ? "#166534" : step.fit_confidence === "medium" ? "#854d0e" : "#6e6e73",
+                    }}>
+                      {step.fit_confidence === "high" ? "Strong fit" : step.fit_confidence === "medium" ? "Likely fit" : "Exploratory"}
+                    </span>
+                  )}
                 </div>
 
                 {/* Action */}
@@ -288,6 +299,17 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
                 }}>
                   {step.why}
                 </div>
+
+                {/* Prepare / access path */}
+                {step.prepare && (
+                  <div style={{
+                    fontSize: "0.68rem", color: "var(--text-tertiary)",
+                    lineHeight: 1.45, marginTop: 4,
+                    fontStyle: "italic",
+                  }}>
+                    📋 {step.prepare}
+                  </div>
+                )}
               </div>
             </div>
           );

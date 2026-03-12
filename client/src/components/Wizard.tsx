@@ -39,7 +39,8 @@ const MID_NEEDS = [
 ];
 
 const GROWTH_NEEDS = [
-  { key: "market-expansion", label: "Market Expansion", sub: "New regions, export, channel partnerships, adoption", icon: "🌍" },
+  { key: "channel-distribution", label: "Dealers & Distribution", sub: "Find channel partners, dealers, resellers, installers", icon: "🤝" },
+  { key: "market-expansion", label: "New Markets & Regions", sub: "Expand into new provinces, crop types, or export markets", icon: "🌍" },
   { key: "growth-capital", label: "Growth Capital", sub: "Series A+, growth debt, strategic investment", icon: "📈" },
   { key: "industry-connections", label: "Industry Connections", sub: "Associations, advisor networks, trade events", icon: "🏛" },
   { key: "all", label: "Show me everything", sub: "", icon: "✦" },

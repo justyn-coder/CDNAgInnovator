@@ -10,7 +10,8 @@ const NEED_TO_CATEGORIES: Record<string, string[]> = {
   "pilot-site-field-validation": ["Pilot", "Accel", "Org"],
   "first-customers": ["Org", "Event", "Accel", "Fund"],
   "accelerator": ["Accel", "Fund", "Event"],
-  "market-expansion": ["Org", "Event", "Fund", "Pilot"],
+  "channel-distribution": ["Org", "Event", "Train"],
+  "market-expansion": ["Org", "Event", "Fund", "Pilot", "Train"],
   "growth-capital": ["Fund", "Accel", "Org"],
   "industry-connections": ["Org", "Event", "Train", "Fund"],
   "all": ["Fund", "Accel", "Pilot", "Event", "Org", "Train"],
@@ -69,8 +70,12 @@ CRITICAL RULES:
 - If their province has gaps (few/no programs in a category they need), say so directly and suggest the best alternative.
 - Be specific about what the founder should DO — not "explore this program" but "apply to X" or "contact Y and ask about Z."
 - For timing: "now" = do this week, "next_month" = within 30 days, "next_quarter" = 1-3 months, "horizon" = 3-6 months or next stage.
+- TIMING HONESTY: Use approximate language for event dates and deadlines. Say "typically held in [month]" or "applications usually open in [season]" — do NOT assert exact dates unless they are in the program data. If you don't know the exact deadline, say so.
 - Only include program_website if the URL is provided in the program data. If no URL is listed, set program_website to null. NEVER invent URLs.
 - For Comm and Scale stage companies: these founders are sophisticated. Don't recommend basic accelerators unless they have scale-specific tracks. Focus on growth capital, market expansion, strategic partnerships, and resources they're less likely to already know about.
+- CONFIDENCE: For each step, honestly assess fit_confidence as "high" (strong match to their specific product/market), "medium" (relevant category but not product-specific), or "exploratory" (strategic but indirect path). Do NOT mark everything as high.
+- ACCESS PATH: For each step, include a brief "prepare" field noting what the founder should have ready (pitch deck, pilot data, partnership proposal, etc.) and the best way in (direct application, warm intro, event attendance, membership).
+- CHANNEL/DISTRIBUTION NEED: If the need is "channel-distribution", focus on organizations and events where dealers, distributors, equipment resellers, or service partners can be found. Think about who installs, services, and maintains technology for farmers — not just who funds it.
 - ADVISOR CHANNEL CHECK: For any founder at MVP, Pilot, or Comm stage whose product will be used by farmers/growers, check whether the pathway includes at least one program with advisor-channel access (use_case includes "advisor-channel"). If not, set gap_warning to explain: "Your pathway currently lacks engagement with the agronomist/CCA advisor channel. In Canadian agriculture, growers rarely adopt new technology without endorsement from their trusted crop advisor. Organizations like AgSphere, Farming Smarter, CCA networks, and provincial agrologist institutes are how agtech companies get vetted before reaching farmers." Name specific programs from the list that could fill this gap.
 
 Respond ONLY with a JSON object, no markdown, no backticks, no preamble:
@@ -85,6 +90,8 @@ Respond ONLY with a JSON object, no markdown, no backticks, no preamble:
       "category": "Fund|Accel|Pilot|Event|Org|Train",
       "action": "Specific action to take — 1 sentence, imperative voice.",
       "why": "Why this matters for their specific product/market — 1-2 sentences.",
+      "fit_confidence": "high|medium|exploratory",
+      "prepare": "What to have ready + best way in (1 sentence).",
       "timing": "now|next_month|next_quarter|horizon",
       "horizon": false
     }
@@ -212,7 +219,7 @@ Generate the pathway now. Remember: prioritize programs whose description closel
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 1500,
+        max_tokens: 2000,
         system: SYSTEM_PROMPT,
         messages: [{ role: "user", content: userMessage }],
       }),
