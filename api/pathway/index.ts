@@ -26,6 +26,12 @@ const NEXT_STAGE: Record<string, string> = {
   Idea: "MVP", MVP: "Pilot", Pilot: "Comm", Comm: "Scale", Scale: "Scale",
 };
 
+// ── Stage display labels (for LLM output) ────────────────────────────────
+const STAGE_DISPLAY: Record<string, string> = {
+  Idea: "Idea", MVP: "MVP", Pilot: "Pilot",
+  Comm: "First Customers", Scale: "Scale",
+};
+
 // ── Stage-specific framing guidance ──────────────────────────────────────
 const STAGE_FRAMING: Record<string, string> = {
   Idea: "This founder is pre-product. They need validation, mentorship, and seed funding. Recommend programs that help them test their idea with real farmers before building.",
@@ -161,15 +167,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .map(([cat, count]) => `${cat}: ${count} programs`)
       .join(", ");
 
+    const stageDisplay = STAGE_DISPLAY[stage] || stage;
+    const nextStageDisplay = STAGE_DISPLAY[nextStage] || nextStage;
+
+    // Identify advisor-channel programs in the result set for the gap warning
+    const advisorPrograms = (rows as any[])
+      .filter((p: any) => p.use_case && p.use_case.includes("advisor-channel"))
+      .map((p: any) => p.name);
+
     const userMessage = `FOUNDER PROFILE:
 Description: ${description}
-Current Stage: ${stage}
-Next Stage: ${nextStage}
+Current Stage: ${stageDisplay} (internal code: ${stage})
+Next Stage: ${nextStageDisplay}
 Province(s): ${provinces.join(", ") || "Not specified"}
 Primary Need: ${need}
 
+IMPORTANT: Use "${stageDisplay}" and "${nextStageDisplay}" in the pathway_title (e.g., "Your ${stageDisplay} → ${nextStageDisplay} Pathway"), NOT the internal stage codes.
+
 STAGE-SPECIFIC GUIDANCE:
 ${stageFraming}
+
+${advisorPrograms.length > 0 ? `ADVISOR-CHANNEL PROGRAMS AVAILABLE IN THIS LIST:\n${advisorPrograms.join(", ")}\nIf the gap_warning fires, reference THESE specific programs as the solution.` : "NOTE: No advisor-channel programs are available for this province/stage combination."}
 
 AVAILABLE PROGRAMS (${(rows as any[]).length} matching):
 ${programList || "No programs found matching these criteria."}
