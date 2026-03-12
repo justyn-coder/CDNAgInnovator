@@ -237,8 +237,8 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
                   <td style={{ padding: "8px 12px", color: "var(--text-secondary)", verticalAlign: "top", whiteSpace: "nowrap" }}>
                     {(p.province || []).filter(x => x !== "National").join(", ") || (p.province?.includes("National") ? "Nat'l" : "—")}
                   </td>
-                  <td style={{ padding: "8px 12px", color: "var(--text-secondary)", lineHeight: 1.45, verticalAlign: "top" }}>
-                    {p.description?.slice(0, 140) || "—"}
+                  <td style={{ padding: "8px 12px", color: "var(--text-secondary)", lineHeight: 1.45, verticalAlign: "top", maxWidth: 400 }}>
+                    {p.description || "—"}
                     {p.stage && p.stage.length > 0 && (
                       <div style={{ marginTop: 4, display: "flex", gap: 3, flexWrap: "wrap" }}>
                         {p.stage.map(st => (
