@@ -86,13 +86,14 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Body — minimal copy, straight to action */}
+            {/* Body */}
             <div style={{ padding: "20px 28px 26px" }}>
               <p style={{
-                fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.55,
+                fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.6,
                 marginBottom: 18,
               }}>
-                We'd love your feedback — does this match your experience of the ecosystem?
+                We built this because finding the right programs shouldn't require a spreadsheet and six phone calls.
+                We're keeping it current — and we're counting on ecosystem partners like you to help us get it right for the founders and farmers who need it most.
               </p>
 
               {/* Two paths */}
@@ -127,23 +128,27 @@ export default function Home() {
                 </button>
               </div>
 
-              <div style={{ fontSize: "0.65rem", color: "var(--text-tertiary)", marginTop: 14, textAlign: "center" }}>
-                No signup · Free during beta · Your feedback shapes the product
+              <div style={{
+                marginTop: 16, padding: "8px 12px",
+                background: "var(--green-soft)", borderRadius: "var(--radius-sm)",
+                fontSize: "0.65rem", color: "var(--green-mid)", fontWeight: 600,
+                textAlign: "center", letterSpacing: "0.01em",
+              }}>
+                Your feedback shapes the product
               </div>
-              <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--border)", textAlign: "center" }}>
-                <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer"
-                  style={{ display: "inline-block", opacity: 0.75, transition: "opacity 0.15s" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.75"; }}
-                >
-                  <img src="/bestinshow-tagline-logo.png" alt="BestInShow"
-                    style={{ height: 18 }}
-                  />
-                </a>
-                <div style={{ fontSize: "0.6rem", color: "var(--text-tertiary)", marginTop: 6, letterSpacing: "0.02em" }}>
-                  Built by{" "}
-                  <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer" style={{ color: "var(--green-mid)", fontWeight: 600, textDecoration: "none" }}>BestInShow</a>
-                  {" "}· Powered by AI · Beta v1.0
+              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--border)", textAlign: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: "0.6rem", color: "var(--text-tertiary)", letterSpacing: "0.02em" }}>
+                  <span>Built by</span>
+                  <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer"
+                    style={{ display: "inline-flex", opacity: 0.75, transition: "opacity 0.15s" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.75"; }}
+                  >
+                    <img src="/bestinshow-tagline-logo.png" alt="BestInShow"
+                      style={{ height: 14 }}
+                    />
+                  </a>
+                  <span>· Free, no signup · Beta v1.0</span>
                 </div>
               </div>
             </div>
@@ -164,34 +169,35 @@ export default function Home() {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
-            width: 28, height: 28,
+            width: 32, height: 32,
             background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-            borderRadius: 8,
+            borderRadius: 9,
             display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 2px 8px rgba(30,107,10,0.2)",
           }}>
-            <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
-              <g transform="translate(8, 10) scale(0.6)">
-                <ellipse cx="22" cy="24" rx="12" ry="7" fill="white"/>
-                <path d="M32 20L36 12L38 13L35 10L37 8" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                <line x1="14" y1="31" x2="13" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="18" y1="31" x2="19" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="26" y1="31" x2="25" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="30" y1="31" x2="31" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M35 10L32 5L30 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M35 10L38 5L40 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              </g>
-              <circle cx="8" cy="32" r="1.5" fill="#3dcc1a" opacity="0.3"/>
-              <circle cx="13" cy="30" r="1.5" fill="#3dcc1a" opacity="0.5"/>
-              <circle cx="18" cy="28" r="1.5" fill="#3dcc1a" opacity="0.7"/>
+            <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+              <ellipse cx="18" cy="22" rx="11" ry="6.5" fill="white"/>
+              <path d="M27 18L30 11L31.5 12L29.5 9" stroke="white" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
+              <path d="M29.5 9L26 4L24 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+              <path d="M29.5 9L33 4L35 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+              <line x1="10" y1="28" x2="9" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="14" y1="28.5" x2="14.5" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="22" y1="28.5" x2="21.5" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="26" y1="28" x2="27" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M15 19.5L16 17.5L15.2 18L14.5 16.5L14.8 18L13.5 17.5L14.5 19L13.5 19L15 20.5L16.5 19L15.5 19L16.5 17.5L15 19.5Z" fill="#dc2626" opacity="0.85"/>
             </svg>
           </div>
-          <span style={{ fontWeight: 800, fontSize: "0.92rem", color: "var(--text)", letterSpacing: "-0.03em" }}>
-            moose<span style={{ color: "var(--green-mid)" }}>path</span>
-          </span>
+          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+            <span style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--text)", letterSpacing: "-0.03em" }}>
+              moose<span style={{ color: "var(--green-mid)" }}>path</span>
+            </span>
+            <span style={{ fontSize: "0.55rem", color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.01em", marginTop: 1 }}>
+              Agtech, faster to farm.
+            </span>
+          </div>
         </div>
-        <span style={{ fontSize: "0.65rem", color: "var(--text-tertiary)", fontWeight: 500, fontStyle: "italic" }}>
-          Better agtech, faster to farm
+        <span style={{ fontSize: "0.7rem", color: "var(--text-tertiary)", fontWeight: 500 }}>
+          🇨🇦
         </span>
       </nav>
 
@@ -228,13 +234,12 @@ export default function Home() {
         </h1>
 
         <p style={{
-          fontSize: "1.05rem", color: "var(--text-secondary)",
+          fontSize: "1.1rem", color: "var(--text-secondary)",
           maxWidth: 480, lineHeight: 1.65, marginBottom: 44,
           textAlign: "center", fontWeight: 400,
           animation: "fadeInUp 0.6s ease 0.2s both",
         }}>
-          Better agtech, faster to farm.
-          Tell us your stage and province — we'll map your path.
+          A clearer path to farm.
         </p>
 
         {/* ── Two clear CTA cards ─────────────────────────────── */}

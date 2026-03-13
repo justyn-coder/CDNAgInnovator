@@ -582,36 +582,39 @@ export default function Navigator() {
         }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
             <div style={{
-              width: 26, height: 26,
+              width: 28, height: 28,
               background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
               borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center",
               boxShadow: "0 1px 4px rgba(30,107,10,0.15)",
             }}>
-              <svg width="16" height="16" viewBox="0 0 40 40" fill="none">
-                <g transform="translate(8, 10) scale(0.6)">
-                  <ellipse cx="22" cy="24" rx="12" ry="7" fill="white"/>
-                  <path d="M32 20L36 12L38 13L35 10L37 8" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                  <line x1="14" y1="31" x2="13" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                  <line x1="18" y1="31" x2="19" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                  <line x1="26" y1="31" x2="25" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                  <line x1="30" y1="31" x2="31" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M35 10L32 5L30 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                  <path d="M35 10L38 5L40 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                </g>
-                <circle cx="8" cy="32" r="1.5" fill="#3dcc1a" opacity="0.3"/>
-                <circle cx="13" cy="30" r="1.5" fill="#3dcc1a" opacity="0.5"/>
-                <circle cx="18" cy="28" r="1.5" fill="#3dcc1a" opacity="0.7"/>
+              <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
+                <ellipse cx="18" cy="22" rx="11" ry="6.5" fill="white"/>
+                <path d="M27 18L30 11L31.5 12L29.5 9" stroke="white" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
+                <path d="M29.5 9L26 4L24 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                <path d="M29.5 9L33 4L35 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                <line x1="10" y1="28" x2="9" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="14" y1="28.5" x2="14.5" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="22" y1="28.5" x2="21.5" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="26" y1="28" x2="27" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M15 19.5L16 17.5L15.2 18L14.5 16.5L14.8 18L13.5 17.5L14.5 19L13.5 19L15 20.5L16.5 19L15.5 19L16.5 17.5L15 19.5Z" fill="#dc2626" opacity="0.85"/>
               </svg>
             </div>
-            <span style={{ fontWeight: 800, fontSize: "0.85rem", color: "var(--text)", letterSpacing: "-0.03em" }}>
-              moose<span style={{ color: "var(--green-mid)" }}>path</span>
-            </span>
-            <span style={{
-              fontSize: "0.55rem", fontWeight: 700, padding: "2px 6px", borderRadius: 4,
-              background: isEco ? "#dbeafe" : "var(--green-soft)",
-              color: isEco ? "#1e40af" : "var(--green-mid)",
-              letterSpacing: "0.04em", textTransform: "uppercase",
-            }}>{isEco ? "Partner" : "Founder"}</span>
+            <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontWeight: 800, fontSize: "0.85rem", color: "var(--text)", letterSpacing: "-0.03em" }}>
+                  moose<span style={{ color: "var(--green-mid)" }}>path</span>
+                </span>
+                <span style={{
+                  fontSize: "0.5rem", fontWeight: 700, padding: "1px 5px", borderRadius: 3,
+                  background: isEco ? "#dbeafe" : "var(--green-soft)",
+                  color: isEco ? "#1e40af" : "var(--green-mid)",
+                  letterSpacing: "0.04em", textTransform: "uppercase",
+                }}>{isEco ? "Partner" : "Founder"}</span>
+              </div>
+              <span style={{ fontSize: "0.5rem", color: "var(--text-tertiary)", fontWeight: 500, marginTop: 1 }}>
+                Agtech, faster to farm.
+              </span>
+            </div>
           </Link>
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <button onClick={() => setShowBrowse(true)} style={{
