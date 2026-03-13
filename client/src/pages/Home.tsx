@@ -169,35 +169,37 @@ export default function Home() {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
-            width: 32, height: 32,
+            width: 36, height: 36,
             background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-            borderRadius: 9,
+            borderRadius: 10,
             display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 2px 8px rgba(30,107,10,0.2)",
           }}>
-            <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-              <ellipse cx="18" cy="22" rx="11" ry="6.5" fill="white"/>
-              <path d="M27 18L30 11L31.5 12L29.5 9" stroke="white" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
-              <path d="M29.5 9L26 4L24 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M29.5 9L33 4L35 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-              <line x1="10" y1="28" x2="9" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="14" y1="28.5" x2="14.5" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="22" y1="28.5" x2="21.5" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="26" y1="28" x2="27" y2="35" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M15 19.5L16 17.5L15.2 18L14.5 16.5L14.8 18L13.5 17.5L14.5 19L13.5 19L15 20.5L16.5 19L15.5 19L16.5 17.5L15 19.5Z" fill="#dc2626" opacity="0.85"/>
+            <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
+              {/* Trunk — path */}
+              <path d="M20 34L20 18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+              {/* Antler branches — diverging paths */}
+              <path d="M20 18L14 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M20 18L26 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M14 10L10 8" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M14 10L14 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M26 10L30 8" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M26 10L26 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              {/* You are here dot */}
+              <circle cx="20" cy="34" r="2.5" fill="#3dcc1a"/>
             </svg>
           </div>
           <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
-            <span style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--text)", letterSpacing: "-0.03em" }}>
+            <span style={{ fontWeight: 800, fontSize: "clamp(0.95rem, 1.5vw, 1.2rem)", color: "var(--text)", letterSpacing: "-0.03em" }}>
               moose<span style={{ color: "var(--green-mid)" }}>path</span>
             </span>
-            <span style={{ fontSize: "0.55rem", color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.01em", marginTop: 1 }}>
-              Agtech, faster to farm.
+            <span style={{ fontSize: "clamp(0.52rem, 0.8vw, 0.65rem)", color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.01em", marginTop: 2 }}>
+              Better agtech, guided to farm.
             </span>
           </div>
         </div>
-        <span style={{ fontSize: "0.7rem", color: "var(--text-tertiary)", fontWeight: 500 }}>
-          🇨🇦
+        <span style={{ fontSize: "0.85rem" }}>
+          🍁
         </span>
       </nav>
 
@@ -239,7 +241,7 @@ export default function Home() {
           textAlign: "center", fontWeight: 400,
           animation: "fadeInUp 0.6s ease 0.2s both",
         }}>
-          A clearer path to farm.
+          Let's build a path to farm.
         </p>
 
         {/* ── Two clear CTA cards ─────────────────────────────── */}
