@@ -170,16 +170,28 @@ export default function Home() {
             display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 2px 8px rgba(30,107,10,0.2)",
           }}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1.5C5 1.5 3 3 3 5.5c0 2 1.5 3.5 4 6 2.5-2.5 4-4 4-6 0-2.5-2-4-4-4z" fill="rgba(255,255,255,0.9)"/>
+            <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
+              <g transform="translate(8, 10) scale(0.6)">
+                <ellipse cx="22" cy="24" rx="12" ry="7" fill="white"/>
+                <path d="M32 20L36 12L38 13L35 10L37 8" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
+                <line x1="14" y1="31" x2="13" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="18" y1="31" x2="19" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="26" y1="31" x2="25" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="30" y1="31" x2="31" y2="38" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M35 10L32 5L30 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M35 10L38 5L40 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              </g>
+              <circle cx="8" cy="32" r="1.5" fill="#3dcc1a" opacity="0.3"/>
+              <circle cx="13" cy="30" r="1.5" fill="#3dcc1a" opacity="0.5"/>
+              <circle cx="18" cy="28" r="1.5" fill="#3dcc1a" opacity="0.7"/>
             </svg>
           </div>
-          <span style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--text)", letterSpacing: "-0.02em" }}>
-            Ag Innovation Ecosystem
+          <span style={{ fontWeight: 800, fontSize: "0.92rem", color: "var(--text)", letterSpacing: "-0.03em" }}>
+            moose<span style={{ color: "var(--green-mid)" }}>path</span>
           </span>
         </div>
-        <span style={{ fontSize: "0.7rem", color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.02em" }}>
-          🇨🇦 Canada
+        <span style={{ fontSize: "0.65rem", color: "var(--text-tertiary)", fontWeight: 500, fontStyle: "italic" }}>
+          Better agtech, faster to farm
         </span>
       </nav>
 
@@ -205,14 +217,14 @@ export default function Home() {
         {/* Headline */}
         <h1 style={{
           fontFamily: "var(--font-display)",
-          fontSize: "clamp(2rem, 5vw, 3.4rem)",
-          fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.12,
+          fontSize: "clamp(1.8rem, 4.5vw, 3rem)",
+          fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.15,
           color: "var(--text)", maxWidth: 640, marginBottom: 18,
           textAlign: "center",
           animation: "fadeInUp 0.6s ease 0.1s both",
         }}>
-          Stop Googling.<br />
-          <span style={{ color: "var(--green-mid)" }}>Start navigating.</span>
+          Canada's ag innovation ecosystem is powerful.{" "}
+          <span style={{ color: "var(--green-mid)" }}>It's also a maze.</span>
         </h1>
 
         <p style={{
@@ -221,8 +233,8 @@ export default function Home() {
           textAlign: "center", fontWeight: 400,
           animation: "fadeInUp 0.6s ease 0.2s both",
         }}>
-          Canada's agtech support ecosystem in one place.
-          Four questions. One pathway. Zero spreadsheets.
+          Better agtech, faster to farm.
+          Tell us your stage and province — we'll map your path.
         </p>
 
         {/* ── Two clear CTA cards ─────────────────────────────── */}
