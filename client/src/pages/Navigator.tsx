@@ -66,11 +66,11 @@ const NEED_META: Record<string, { label: string; color: string; bg: string }> = 
 
 // ── Eco operator quick-start prompts ────────────────────────────────────────
 const ECO_SUGGESTIONS = [
-  { label: "Coverage gaps in Alberta", q: "Show me coverage gaps in Alberta — where are founders underserved?" },
-  { label: "MVP programs in Ontario", q: "What programs exist for MVP-stage companies in Ontario?" },
-  { label: "Prairie pilot site comparison", q: "Compare Prairie provinces for pilot site availability" },
-  { label: "Missing for biologicals", q: "What's missing for biologicals companies nationally?" },
-  { label: "National funding landscape", q: "Give me an overview of the national funding landscape for early-stage agtech" },
+  { label: "Where are founders getting stuck?", q: "Where are pilot-stage agtech companies getting stuck between validation and first revenue? What's the bottleneck by province?" },
+  { label: "Advisor channel coverage", q: "Which provinces have the worst agronomist/CCA advisor channel coverage for farmer-facing agtech? Where are the named access points?" },
+  { label: "Capital gaps by stage", q: "Show me where the capital gaps are between early-stage grants (RDAR, Alberta Innovates) and Series A readiness. What falls through the cracks?" },
+  { label: "Programs missing in the West", q: "What types of agtech companies have no clear program pathway in Western Canada? Where would you invest if you were filling gaps?" },
+  { label: "Biologicals ecosystem", q: "Map the biologicals/inputs ecosystem in Canada — who supports these companies at each stage and where are the holes?" },
 ];
 
 // ── Markdown renderer ───────────────────────────────────────────────────────
@@ -741,7 +741,69 @@ export default function Navigator() {
                   <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
                     We've catalogued what we could find — ask a question, or poke holes in our data. Seriously, we need that.
                   </p>
+
+                  {/* Stats strip */}
+                  <div style={{
+                    display: "flex", gap: 0, marginTop: 16,
+                    background: "rgba(255,255,255,0.06)", borderRadius: 8,
+                    overflow: "hidden",
+                  }}>
+                    {[
+                      { num: "283", label: "Programs" },
+                      { num: "85", label: "Insights" },
+                      { num: "10", label: "Provinces" },
+                      { num: "6", label: "Categories" },
+                    ].map((s, i) => (
+                      <div key={i} style={{
+                        flex: 1, padding: "10px 0", textAlign: "center",
+                        borderRight: i < 3 ? "1px solid rgba(255,255,255,0.08)" : "none",
+                      }}>
+                        <div style={{ fontSize: "1rem", fontWeight: 800, color: "#60a5fa" }}>{s.num}</div>
+                        <div style={{ fontSize: "0.5rem", fontWeight: 600, color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Gap insight preview cards */}
+                <div style={{
+                  padding: "12px 16px", background: "var(--bg-secondary)",
+                  borderBottom: "1px solid var(--border)",
+                }}>
+                  <div style={{
+                    fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.06em",
+                    textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 8,
+                  }}>Live coverage gaps</div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {[
+                      { prov: "NB", gap: "0 pilot sites, 0 events", severity: "high" },
+                      { prov: "NL", gap: "0 pilot sites, 0 events, 0 orgs", severity: "high" },
+                      { prov: "QC", gap: "0 events, 1 industry org", severity: "medium" },
+                      { prov: "BC", gap: "1 training, 2 events", severity: "medium" },
+                    ].map((g, i) => (
+                      <div key={i} onClick={() => send(`Show me the full coverage analysis for ${g.prov} — what's missing and what would you recommend?`)}
+                        style={{
+                          flex: "1 1 calc(50% - 4px)", minWidth: 130,
+                          padding: "8px 10px", borderRadius: "var(--radius-sm)",
+                          background: "var(--bg)", border: "1px solid var(--border)",
+                          cursor: "pointer", transition: "all 0.12s",
+                        }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = g.severity === "high" ? "#ef4444" : "#f59e0b"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 3 }}>
+                          <span style={{
+                            width: 6, height: 6, borderRadius: "50%",
+                            background: g.severity === "high" ? "#ef4444" : "#f59e0b",
+                          }} />
+                          <span style={{ fontWeight: 700, fontSize: "0.75rem", color: "var(--text)" }}>{g.prov}</span>
+                        </div>
+                        <div style={{ fontSize: "0.65rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>{g.gap}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Quick-start grid */}
                 <div style={{ padding: "14px 16px", display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {ECO_SUGGESTIONS.slice(0, 4).map((s, i) => (
@@ -842,7 +904,7 @@ export default function Navigator() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder={isEco ? "Ask about the ecosystem…" : "Ask about your pathway, programs, or next steps…"}
+              placeholder={isEco ? "e.g., What's missing for biologicals companies in Saskatchewan?" : "Ask about your pathway, programs, or next steps…"}
               rows={2}
               style={{
                 flex: 1, resize: "none",
