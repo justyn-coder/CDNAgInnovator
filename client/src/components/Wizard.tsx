@@ -185,6 +185,7 @@ export default function Wizard({ onComplete }: Props) {
           value={data.companyUrl}
           onChange={e => setData(d => ({ ...d, companyUrl: e.target.value }))}
           placeholder="https://yourcompany.com"
+          type="url" autoComplete="url" autoCapitalize="off" autoCorrect="off" spellCheck={false}
           style={{
             width: "100%", padding: "9px 14px", borderRadius: "var(--radius-sm)", marginTop: 4,
             border: "1.5px solid var(--border)", fontSize: "0.82rem",

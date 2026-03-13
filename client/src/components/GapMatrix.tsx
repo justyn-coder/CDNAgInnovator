@@ -422,6 +422,65 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
+
+      {/* ── Tutorial overlay — shows on first visit ──────────────── */}
+      {showGuide && !loading && data && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 300,
+          background: "rgba(0,0,0,0.6)",
+          backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 20, animation: "fadeIn 0.3s ease",
+        }} onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: "var(--bg)", borderRadius: "var(--radius-lg)",
+            maxWidth: 400, width: "100%",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.25)",
+            overflow: "hidden", animation: "slideUp 0.4s ease",
+          }}>
+            <div style={{ padding: "24px 24px 16px" }}>
+              <div style={{ fontSize: "1.8rem", marginBottom: 10 }}>🗺</div>
+              <h3 style={{
+                fontFamily: "var(--font-display)", fontSize: "1.15rem", fontWeight: 400,
+                color: "var(--text)", marginBottom: 8,
+              }}>How to read the Gap Map</h3>
+              <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.65 }}>
+                <p style={{ marginBottom: 10 }}>
+                  Each cell shows how many programs we've found for that province and category.
+                </p>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+                  {[
+                    { label: "Gap (0)", bg: "#fde8e8", color: "#b91c1c" },
+                    { label: "Weak (1)", bg: "#fef9c3", color: "#854d0e" },
+                    { label: "Fair (2)", bg: "#dcfce7", color: "#166534" },
+                    { label: "Strong (3+)", bg: "#d1fae5", color: "#064e3b" },
+                  ].map(l => (
+                    <span key={l.label} style={{
+                      fontSize: "0.7rem", fontWeight: 700, padding: "3px 10px",
+                      borderRadius: 6, background: l.bg, color: l.color,
+                    }}>{l.label}</span>
+                  ))}
+                </div>
+                <p style={{ marginBottom: 10 }}>
+                  <strong style={{ color: "var(--text)" }}>Tap any cell</strong> to see the programs inside it — and get an AI perspective on why gaps exist.
+                </p>
+                <p style={{ fontSize: "0.75rem", color: "var(--text-tertiary)" }}>
+                  Scroll right → to see all categories. Use the stage filter to narrow by company maturity.
+                </p>
+              </div>
+            </div>
+            <div style={{ padding: "0 24px 20px" }}>
+              <button onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }} style={{
+                width: "100%", padding: "12px",
+                background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
+                color: "#fff", border: "none", borderRadius: "var(--radius-sm)",
+                fontWeight: 700, fontSize: "0.85rem",
+                boxShadow: "0 2px 8px rgba(30,107,10,0.2)",
+              }}>Got it — show me the map</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{
         height: 56, padding: "0 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
         borderBottom: "1px solid var(--border)", flexShrink: 0,
@@ -464,23 +523,6 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
           ))}
         </div>
       </div>
-
-      {/* Inline tip — one line */}
-      {showGuide && !loading && data && (
-        <div style={{
-          padding: "7px 16px", borderBottom: "1px solid var(--border)",
-          background: "#eff6ff", flexShrink: 0,
-          display: "flex", alignItems: "center", gap: 8,
-          fontSize: "0.72rem", color: "#1e40af",
-        }}>
-          <span>💡</span>
-          <span style={{ flex: 1 }}>Tap any cell to drill down. Scroll right → to see all categories.</span>
-          <button onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }} style={{
-            background: "none", border: "none", fontSize: "0.72rem", color: "#3b82f6", padding: "0 4px",
-            fontWeight: 600, flexShrink: 0,
-          }}>✕</button>
-        </div>
-      )}
 
       <div style={{ flex: 1, overflowY: "auto", overflowX: "auto" }}>
         {loading && (

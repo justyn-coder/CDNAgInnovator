@@ -159,7 +159,7 @@ function CategoryPill({ cat }: { cat: string }) {
   );
 }
 
-function BrowsePanel({ onClose }: { onClose: () => void }) {
+function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?: () => void }) {
   const [data, setData] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -274,6 +274,21 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
+      {/* Feedback prompt */}
+      {onFeedback && (
+        <div style={{
+          padding: "8px 18px", borderTop: "1px solid var(--border)",
+          background: "linear-gradient(90deg, #f59e0b, #d97706)",
+          flexShrink: 0, textAlign: "center",
+        }}>
+          <button onClick={onFeedback} style={{
+            background: "none", border: "none", color: "#fff",
+            fontSize: "0.72rem", fontWeight: 600, padding: 0,
+          }}>
+            💬 Something wrong or missing? Tell us →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -553,7 +568,7 @@ export default function Navigator() {
 
   return (
     <>
-      {showBrowse && <BrowsePanel onClose={() => setShowBrowse(false)} />}
+      {showBrowse && <BrowsePanel onClose={() => setShowBrowse(false)} onFeedback={() => { setShowBrowse(false); setShowFeedback(true); }} />}
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
 
@@ -577,7 +592,7 @@ export default function Navigator() {
               </svg>
             </div>
             <span style={{ fontWeight: 700, fontSize: "0.82rem", color: "var(--text)", letterSpacing: "-0.02em" }}>
-              CDN Ag Innovator
+              Ag Innovation Ecosystem
             </span>
             <span style={{
               fontSize: "0.55rem", fontWeight: 700, padding: "2px 6px", borderRadius: 4,

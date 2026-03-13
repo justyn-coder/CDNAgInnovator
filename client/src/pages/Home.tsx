@@ -130,16 +130,21 @@ export default function Home() {
               <div style={{ fontSize: "0.65rem", color: "var(--text-tertiary)", marginTop: 14, textAlign: "center" }}>
                 No signup · Free during beta · Your feedback shapes the product
               </div>
-              <div style={{ marginTop: 16, textAlign: "center" }}>
+              <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--border)", textAlign: "center" }}>
                 <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer"
-                  style={{ display: "inline-block", opacity: 0.7, transition: "opacity 0.15s" }}
+                  style={{ display: "inline-block", opacity: 0.75, transition: "opacity 0.15s" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.75"; }}
                 >
-                  <img src="/bestinshow-tagline-logo.png" alt="BestInShow — Trade Show Better"
-                    style={{ height: 22 }}
+                  <img src="/bestinshow-tagline-logo.png" alt="BestInShow"
+                    style={{ height: 18 }}
                   />
                 </a>
+                <div style={{ fontSize: "0.6rem", color: "var(--text-tertiary)", marginTop: 6, letterSpacing: "0.02em" }}>
+                  Built by{" "}
+                  <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer" style={{ color: "var(--green-mid)", fontWeight: 600, textDecoration: "none" }}>BestInShow</a>
+                  {" "}· Powered by AI · Beta v1.0
+                </div>
               </div>
             </div>
           </div>
@@ -170,7 +175,7 @@ export default function Home() {
             </svg>
           </div>
           <span style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--text)", letterSpacing: "-0.02em" }}>
-            CDN Ag Innovator
+            Ag Innovation Ecosystem
           </span>
         </div>
         <span style={{ fontSize: "0.7rem", color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.02em" }}>
@@ -206,8 +211,8 @@ export default function Home() {
           textAlign: "center",
           animation: "fadeInUp 0.6s ease 0.1s both",
         }}>
-          Your agtech company<br />
-          <span style={{ color: "var(--green-mid)" }}>deserves a roadmap.</span>
+          Stop Googling.<br />
+          <span style={{ color: "var(--green-mid)" }}>Start navigating.</span>
         </h1>
 
         <p style={{
@@ -216,8 +221,8 @@ export default function Home() {
           textAlign: "center", fontWeight: 400,
           animation: "fadeInUp 0.6s ease 0.2s both",
         }}>
-          Tell us your stage, province, and biggest need.
-          Get a personalized pathway to the programs that actually fit.
+          Canada's agtech support ecosystem in one place.
+          Four questions. One pathway. Zero spreadsheets.
         </p>
 
         {/* ── Two clear CTA cards ─────────────────────────────── */}
