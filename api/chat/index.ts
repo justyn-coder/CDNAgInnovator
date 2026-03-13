@@ -20,6 +20,34 @@ const SYSTEM_EC = `You are a Canadian agtech ecosystem analyst. Today's date is 
 
 Be analytical. Surface gaps, overlaps, and strategic insights. Use data when available. Format findings clearly with headers.`;
 
+// ── Extract search terms from message for knowledge matching ──────────────
+function extractSearchTerms(message: string): string[] {
+  const stopWords = new Set([
+    "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
+    "have", "has", "had", "do", "does", "did", "will", "would", "could",
+    "should", "may", "might", "can", "shall", "to", "of", "in", "for",
+    "on", "with", "at", "by", "from", "as", "into", "through", "during",
+    "before", "after", "above", "below", "between", "out", "off", "over",
+    "under", "again", "further", "then", "once", "here", "there", "when",
+    "where", "why", "how", "all", "each", "every", "both", "few", "more",
+    "most", "other", "some", "such", "no", "not", "only", "own", "same",
+    "so", "than", "too", "very", "just", "about", "what", "which", "who",
+    "this", "that", "these", "those", "am", "but", "and", "or", "if",
+    "my", "me", "i", "we", "our", "you", "your", "they", "them", "their",
+    "it", "its", "he", "she", "his", "her", "any", "also", "get", "got",
+    "like", "know", "think", "want", "need", "look", "help", "tell",
+    "show", "find", "give", "make", "go", "come", "see", "take",
+    "programs", "program", "best", "good", "right", "new", "first",
+  ]);
+
+  return message
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !stopWords.has(w))
+    .slice(0, 15); // Cap at 15 terms
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).end();
 
@@ -31,13 +59,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const provMap: Record<string, string> = {
       alberta: "AB", "ab ": "AB", ontario: "ON", "on ": "ON",
       saskatchewan: "SK", " sk ": "SK", manitoba: "MB", " mb ": "MB",
-      "british columbia": "BC", " bc ": "BC", quebec: "QC",
+      "british columbia": "BC", " bc ": "BC", quebec: "QC", " qc ": "QC",
+      atlantic: "NB", "new brunswick": "NB", "nova scotia": "NS",
+      "prince edward": "PE", newfoundland: "NL", national: "National",
     };
     const msgLower = message.toLowerCase();
-    let provFilter = "";
+    const detectedProvs: string[] = [];
     for (const [k, v] of Object.entries(provMap)) {
-      if (msgLower.includes(k)) { provFilter = v; break; }
+      if (msgLower.includes(k) && !detectedProvs.includes(v)) {
+        detectedProvs.push(v);
+      }
     }
+    const provFilter = detectedProvs[0] || "";
 
     // Fetch relevant programs
     const rows = await client.unsafe(
@@ -47,15 +80,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       provFilter ? [provFilter] : []
     );
 
-    // Fetch knowledge
-    const knowledge = await client.unsafe(
-      `SELECT title, body FROM knowledge ORDER BY confidence DESC LIMIT 8`
-    );
+    // ── Smart knowledge retrieval ──────────────────────────────────────
+    // Strategy: pull entries that match by province OR by tag overlap with message keywords
+    // This replaces the old LIMIT 8 approach that ignored relevance
+    const searchTerms = extractSearchTerms(message);
+    const provArray = detectedProvs.length > 0 ? detectedProvs : [];
+
+    let knowledge: any[];
+
+    if (searchTerms.length > 0 || provArray.length > 0) {
+      // Build a relevance-scored query
+      // Score = (number of matching tags) + (province match bonus)
+      const tagPattern = searchTerms.length > 0 ? searchTerms.join("|") : "NOMATCH";
+      const provClause = provArray.length > 0
+        ? `OR province && $2::text[] OR 'National' = ANY(province)`
+        : "";
+
+      knowledge = await client.unsafe(
+        `SELECT title, body,
+          (SELECT COUNT(*) FROM unnest(tags) AS t WHERE t ~* $1) AS tag_score,
+          CASE WHEN ${provArray.length > 0 ? `province && $2::text[] OR 'National' = ANY(province)` : "FALSE"} THEN 2 ELSE 0 END AS prov_score
+        FROM knowledge
+        ORDER BY
+          (SELECT COUNT(*) FROM unnest(tags) AS t WHERE t ~* $1)
+          + CASE WHEN ${provArray.length > 0 ? `province && $2::text[] OR 'National' = ANY(province)` : "FALSE"} THEN 2 ELSE 0 END
+          DESC,
+          confidence DESC
+        LIMIT 12`,
+        provArray.length > 0
+          ? [tagPattern, `{${provArray.join(",")}}`]
+          : [tagPattern]
+      );
+    } else {
+      // Fallback: just get top by confidence
+      knowledge = await client.unsafe(
+        `SELECT title, body FROM knowledge ORDER BY confidence DESC LIMIT 10`
+      );
+    }
+
+    // Filter out zero-relevance entries if we have enough good ones
+    const scored = knowledge as any[];
+    const relevant = scored.filter((k: any) => (k.tag_score || 0) + (k.prov_score || 0) > 0);
+    const finalKnowledge = relevant.length >= 4 ? relevant : scored.slice(0, 10);
 
     const context = `ECOSYSTEM DATA (${rows.length} programs${provFilter ? ` in ${provFilter}` : ""}):
 ${rows.map((p: any) => `- ${p.name} [${p.category}] | Stages: ${(p.stage || []).join(",")} | Province: ${(p.province || []).join(",")} | ${p.description?.slice(0, 120) || ""}`).join("\n")}
 
-${knowledge.length ? `ECOSYSTEM INTELLIGENCE:\n${knowledge.map((k: any) => `[${k.title}]: ${k.body}`).join("\n\n")}` : ""}`;
+${finalKnowledge.length ? `ECOSYSTEM INTELLIGENCE:\n${finalKnowledge.map((k: any) => `[${k.title}]: ${k.body}`).join("\n\n")}` : ""}`;
 
     const apiRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",

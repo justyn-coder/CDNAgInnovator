@@ -36,6 +36,17 @@ const STAGE_LABELS: Record<string, string> = {
   Comm: "First Customers", Scale: "Scale",
 };
 
+const PROVINCES_LIST = [
+  { key: "AB", label: "Alberta" },
+  { key: "SK", label: "Saskatchewan" },
+  { key: "MB", label: "Manitoba" },
+  { key: "ON", label: "Ontario" },
+  { key: "BC", label: "British Columbia" },
+  { key: "QC", label: "Quebec" },
+  { key: "Atlantic", label: "Atlantic" },
+  { key: "National", label: "National" },
+];
+
 const NEED_META: Record<string, { label: string; color: string; bg: string }> = {
   "non-dilutive-capital":        { label: "Funding",       color: "#1a4b8c", bg: "#e8f0fe" },
   "validate-with-farmers":      { label: "Validation",    color: "#1a6b2a", bg: "#e8f5e9" },
@@ -64,22 +75,28 @@ const ECO_SUGGESTIONS = [
 
 // ── Markdown renderer ───────────────────────────────────────────────────────
 function renderMarkdown(text: string): string {
-  return text
+  let html = text
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
     .replace(/^---$/gm, '<hr>')
     .replace(/\n\n/g, '</p><p>')
-    .replace(/^(?!<[h|u|l|h])/gm, '')
-    .replace(/(<\/h[123]>|<\/li>|<hr>)\n/g, '$1')
-    || text;
+    .replace(/(<\/h[123]>|<\/li>|<hr>)\n/g, '$1');
+
+  // Wrap consecutive <li> groups in <ul> tags (handles multiple list blocks)
+  html = html.replace(/((?:<li>.*?<\/li>\s*)+)/g, '<ul>$1</ul>');
+
+  // Convert remaining single newlines to <br> for better formatting
+  html = html.replace(/\n/g, '<br>');
+
+  return html || text;
 }
 
 function ChatBubble({ msg }: { msg: Message }) {
+  const [copied, setCopied] = useState(false);
   const isUser = msg.role === "user";
   if (isUser) {
     return (
@@ -94,6 +111,8 @@ function ChatBubble({ msg }: { msg: Message }) {
   }
   const html = renderMarkdown(msg.content);
   const isPlain = !msg.content.includes("###") && !msg.content.includes("**") && !msg.content.includes("##");
+  // Show copy button for longer responses (emails, detailed answers)
+  const showCopy = msg.content.length > 200;
   return (
     <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10, padding: "0 16px" }}>
       <div style={{
@@ -101,11 +120,34 @@ function ChatBubble({ msg }: { msg: Message }) {
         borderRadius: "16px 16px 16px 4px", padding: "12px 16px",
         fontSize: "0.82rem", lineHeight: 1.6,
         border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)",
+        position: "relative",
       }}>
         {isPlain
           ? <span style={{ whiteSpace: "pre-wrap" }}>{msg.content}</span>
           : <div className="md-body" dangerouslySetInnerHTML={{ __html: `<p>${html}</p>` }} />
         }
+        {showCopy && (
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(msg.content).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }).catch(() => {});
+            }}
+            style={{
+              position: "absolute", top: 8, right: 8,
+              background: copied ? "var(--green-mid)" : "var(--bg-secondary)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-sm)", padding: "3px 8px",
+              fontSize: "0.6rem", fontWeight: 600,
+              color: copied ? "#fff" : "var(--text-tertiary)",
+              transition: "all 0.15s",
+              opacity: 0.7,
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; }}
+          >{copied ? "✓ Copied" : "📋 Copy"}</button>
+        )}
       </div>
     </div>
   );
@@ -165,6 +207,7 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("All");
   const [stageFilter, setStageFilter] = useState("All");
+  const [provFilter, setProvFilter] = useState("All");
 
   useEffect(() => {
     fetch("/api/programs").then(r => r.json()).then((d: Program[]) => { setData(d); setLoading(false); }).catch(() => setLoading(false));
@@ -175,7 +218,8 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
     const matchText = !q || [p.name, p.description || "", (p.province || []).join(" ")].some(f => f.toLowerCase().includes(q));
     const matchCat = catFilter === "All" || p.category === catFilter;
     const matchStage = stageFilter === "All" || (p.stage || []).includes(stageFilter);
-    return matchText && matchCat && matchStage;
+    const matchProv = provFilter === "All" || (p.province || []).includes(provFilter) || (p.province || []).includes("National");
+    return matchText && matchCat && matchStage && matchProv;
   });
 
   return (
@@ -227,6 +271,13 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
         }}>
           <option value="All">All Stages</option>
           {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
+        </select>
+        <select value={provFilter} onChange={e => setProvFilter(e.target.value)} style={{
+          padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
+          fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-text)",
+        }}>
+          <option value="All">All Provinces</option>
+          {PROVINCES_LIST.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
         </select>
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
@@ -453,6 +504,8 @@ export default function Navigator() {
   // Partner engagement: show CTA after they've sent 2+ messages or been idle 20s
   const [ecoMsgCount, setEcoMsgCount] = useState(0);
   const [showEcoCta, setShowEcoCta] = useState(false);
+  // Feedback strip minimized state
+  const [feedbackMinimized, setFeedbackMinimized] = useState(false);
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -487,12 +540,13 @@ export default function Navigator() {
     if (isEco && ecoMsgCount >= 2 && !showEcoCta) setShowEcoCta(true);
   }, [ecoMsgCount]);
 
-  const lastUserRef = useRef<HTMLDivElement>(null);
-
-  // Scroll to latest user message (top of new exchange) when response arrives
+  // FIX: Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (!loading && messages.length > 0) {
-      lastUserRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (messages.length > 0) {
+      // Small delay to ensure DOM has updated
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     }
   }, [messages.length, loading]);
 
@@ -736,11 +790,9 @@ export default function Navigator() {
           )}
 
           {/* Chat messages — only show after eco welcome or wizard done */}
-          {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => {
-            // Attach ref to the last user message so we scroll there
-            const isLastUser = m.role === "user" && !messages.slice(i + 1).some(x => x.role === "user");
-            return <div key={i} ref={isLastUser ? lastUserRef : undefined}><ChatBubble msg={m} /></div>;
-          })}
+          {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => (
+            <div key={i}><ChatBubble msg={m} /></div>
+          ))}
           {loading && (
             <div style={{ padding: "0 16px 4px" }}>
               <div style={{
@@ -766,7 +818,7 @@ export default function Navigator() {
         {(!showWizard || isEco) && (
         <div style={{
           background: "var(--bg)", borderTop: "1px solid var(--border-strong)",
-          padding: "12px 16px 40px", flexShrink: 0,
+          padding: "12px 16px 16px", flexShrink: 0,
           boxShadow: "0 -2px 12px rgba(0,0,0,0.04)",
         }}>
           {/* Eco suggestion chips above input when no messages yet */}
@@ -830,16 +882,18 @@ export default function Navigator() {
       {/* ── Quick feedback (founder) — compact, auto-collapses ──────── */}
       {showQuickFeedback && !quickFeedbackSent && !isEco && (
         <div style={{
-          position: "fixed", bottom: 28, left: 0, right: 0,
+          position: "fixed", bottom: 80, left: 0, right: 0,
           display: "flex", justifyContent: "center",
-          zIndex: 50, animation: "slideUp 0.4s ease",
+          zIndex: 4, animation: "slideUp 0.4s ease",
           padding: "0 16px",
+          pointerEvents: "none",
         }}>
           <div style={{
             background: "var(--bg)", border: "1.5px solid #f59e0b",
             borderRadius: 100, padding: "6px 8px",
             boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
             display: "inline-flex", alignItems: "center", gap: 6,
+            pointerEvents: "auto",
           }}>
             <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--text-secondary)", padding: "0 6px", whiteSpace: "nowrap" }}>Useful?</span>
             {[
@@ -878,32 +932,29 @@ export default function Navigator() {
         </div>
       )}
 
-      {/* ── Persistent feedback strip — subtle, above chat input ──────── */}
-      {!showFeedback && !showQuickFeedback && (
-        <div style={{
-          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 5,
-          background: "linear-gradient(90deg, #f59e0b, #d97706)",
-          padding: "6px 16px",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-          animation: "feedbackPulse 2s ease-in-out 3",
-        }}>
-          <button onClick={() => setShowFeedback(true)} style={{
-            background: "none", border: "none", padding: 0,
-            color: "#fff", fontSize: "0.72rem", fontWeight: 600,
-            display: "flex", alignItems: "center", gap: 6,
-          }}>
-            <span>💬</span>
-            <span>Beta — we need your feedback</span>
-            <span style={{ opacity: 0.7 }}>→</span>
-          </button>
-        </div>
+      {/* ── Persistent feedback button — small, out of the way ──────── */}
+      {!showFeedback && !showQuickFeedback && !feedbackMinimized && (
+        <button
+          onClick={() => setShowFeedback(true)}
+          style={{
+            position: "fixed", bottom: 80, right: 16,
+            zIndex: 4,
+            background: "linear-gradient(135deg, #f59e0b, #d97706)",
+            color: "#fff", border: "none",
+            borderRadius: 100, padding: "8px 14px",
+            fontSize: "0.7rem", fontWeight: 700,
+            boxShadow: "0 2px 12px rgba(217,119,6,0.3)",
+            display: "flex", alignItems: "center", gap: 5,
+            animation: "fadeIn 0.3s ease",
+          }}
+        >
+          <span>💬</span> Feedback
+          <span
+            onClick={(e) => { e.stopPropagation(); setFeedbackMinimized(true); }}
+            style={{ marginLeft: 4, opacity: 0.7, fontSize: "0.65rem" }}
+          >✕</span>
+        </button>
       )}
-      <style>{`
-        @keyframes feedbackPulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.6; }
-        }
-      `}</style>
     </>
   );
 }

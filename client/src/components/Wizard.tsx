@@ -72,7 +72,9 @@ const PRODUCT_TYPES = [
 
 export default function Wizard({ onComplete }: Props) {
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<WizardResult>({ description: "", companyUrl: "", productType: "", stage: "", provinces: [], need: "" });
+  const [data, setData] = useState<WizardResult & { needs: string[] }>({
+    description: "", companyUrl: "", productType: "", stage: "", provinces: [], need: "", needs: [],
+  });
 
   function toggleProvince(p: string) {
     setData(d => ({
@@ -81,28 +83,58 @@ export default function Wizard({ onComplete }: Props) {
     }));
   }
 
-  function finish(needKey: string) {
+  function toggleNeed(key: string) {
+    setData(d => {
+      // "Show me everything" is exclusive — clears others
+      if (key === "all") {
+        return { ...d, needs: d.needs.includes("all") ? [] : ["all"], need: "all" };
+      }
+      // Selecting a specific need removes "all"
+      const without = d.needs.filter(n => n !== "all");
+      const updated = without.includes(key)
+        ? without.filter(n => n !== key)
+        : [...without, key];
+      return { ...d, needs: updated, need: updated[0] || "" };
+    });
+  }
+
+  function finish() {
+    const needs = data.needs;
+    const primaryNeed = needs.includes("all") ? "all" : needs[0] || "all";
     const provinceStr = data.provinces.length > 0 ? data.provinces.join(" and ") : "Canada";
-    const needStr = needKey === "all"
-      ? "I want to see all relevant programs across funding, pilot sites, accelerators, and first customer opportunities"
-      : `My biggest need right now is ${ALL_NEEDS.find(n => n.key === needKey)?.label?.toLowerCase() || data.need}`;
     const stageLabel = STAGES.find(s => s.key === data.stage)?.label || data.stage;
     const productTypeStr = data.productType ? ` My product is ${data.productType}.` : "";
 
+    let needStr: string;
+    if (primaryNeed === "all") {
+      needStr = "I want to see all relevant programs across funding, pilot sites, accelerators, and first customer opportunities";
+    } else if (needs.length === 1) {
+      needStr = `My biggest need right now is ${ALL_NEEDS.find(n => n.key === primaryNeed)?.label?.toLowerCase() || primaryNeed}`;
+    } else {
+      const needLabels = needs.map(n => ALL_NEEDS.find(x => x.key === n)?.label?.toLowerCase() || n);
+      needStr = `My needs are: ${needLabels.join(", ")}. My primary bottleneck is ${ALL_NEEDS.find(n => n.key === primaryNeed)?.label?.toLowerCase() || primaryNeed}`;
+    }
+
     const prompt = `I'm building ${data.description}.${productTypeStr} I'm at the ${stageLabel} stage, based in ${provinceStr}. ${needStr}. What are the best programs for my situation?`;
-    onComplete(prompt, { stage: data.stage, provinces: data.provinces, need: needKey, companyUrl: data.companyUrl || undefined, productType: data.productType || undefined });
+    onComplete(prompt, {
+      stage: data.stage,
+      provinces: data.provinces,
+      need: primaryNeed,
+      companyUrl: data.companyUrl || undefined,
+      productType: data.productType || undefined,
+    });
   }
 
   const canProceed = [
     data.description.trim().length > 8,
     !!data.stage,
     data.provinces.length > 0,
-    !!data.need,
+    data.needs.length > 0,
   ][step];
 
   // Shared option button style
   const optBtn = (active: boolean) => ({
-    width: "100%",
+    width: "100%" as const,
     padding: "12px 16px",
     borderRadius: "var(--radius-sm)" as const,
     border: active ? "2px solid var(--green-mid)" : "1.5px solid var(--border)" as const,
@@ -263,34 +295,67 @@ export default function Wizard({ onComplete }: Props) {
       </div>
     </div>,
 
-    // ── Step 3: Need ──
+    // ── Step 3: Need (MULTI-SELECT) ──
     <div key="3" style={{ animation: "fadeInUp 0.3s ease" }}>
       <h2 style={{
         fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 400,
         color: "var(--text)", marginBottom: 6,
-      }}>What's the biggest thing holding you back?</h2>
+      }}>What's holding you back?</h2>
       <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: 16 }}>
-        Pick the bottleneck — we'll build your pathway around it.
+        Select all that apply — we'll build your pathway around the biggest bottlenecks.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {getNeedsForStage(data.stage).map(n => (
-          <button key={n.key}
-            onClick={() => { setData(d => ({ ...d, need: n.key })); finish(n.key); }}
-            style={optBtn(data.need === n.key)}
-          >
-            <span style={{ fontSize: "1.2rem", flexShrink: 0 }}>{n.icon}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700 }}>{n.label}</div>
-              {n.sub && (
-                <div style={{
-                  fontSize: "0.72rem", fontWeight: 400, marginTop: 2,
-                  color: data.need === n.key ? "rgba(255,255,255,0.65)" : "var(--text-tertiary)",
-                }}>{n.sub}</div>
+        {getNeedsForStage(data.stage).map(n => {
+          const isActive = data.needs.includes(n.key);
+          const isFirst = data.needs.length > 0 && data.needs[0] === n.key && data.needs.length > 1;
+          return (
+            <button key={n.key}
+              onClick={() => toggleNeed(n.key)}
+              style={{
+                ...optBtn(isActive),
+                position: "relative" as const,
+              }}
+            >
+              <span style={{ fontSize: "1.2rem", flexShrink: 0 }}>{n.icon}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700 }}>{n.label}</div>
+                {n.sub && (
+                  <div style={{
+                    fontSize: "0.72rem", fontWeight: 400, marginTop: 2,
+                    color: isActive ? "rgba(255,255,255,0.65)" : "var(--text-tertiary)",
+                  }}>{n.sub}</div>
+                )}
+              </div>
+              {isFirst && (
+                <span style={{
+                  fontSize: "0.55rem", fontWeight: 700, padding: "2px 6px",
+                  borderRadius: 4, background: "rgba(255,255,255,0.2)", color: "#fff",
+                  letterSpacing: "0.05em", textTransform: "uppercase",
+                  flexShrink: 0,
+                }}>Primary</span>
               )}
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
+
+      {/* Generate button */}
+      {data.needs.length > 0 && (
+        <button
+          onClick={finish}
+          style={{
+            width: "100%", marginTop: 18,
+            background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
+            color: "#fff", border: "none", borderRadius: "var(--radius-sm)",
+            padding: "14px 24px", fontSize: "0.92rem", fontWeight: 700,
+            fontFamily: "var(--font-text)", transition: "all 0.15s",
+            boxShadow: "0 4px 16px rgba(30,107,10,0.25)",
+            animation: "fadeInUp 0.3s ease",
+          }}
+        >
+          Generate my pathway →
+        </button>
+      )}
     </div>,
   ];
 
@@ -317,7 +382,7 @@ export default function Wizard({ onComplete }: Props) {
 
       {stepContent[step]}
 
-      {/* Navigation */}
+      {/* Navigation — shown for steps 0 and 2 */}
       {(step === 0 || step === 2) && (
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 22 }}>
           {step > 0 ? (
@@ -342,7 +407,18 @@ export default function Wizard({ onComplete }: Props) {
         </div>
       )}
 
-      {(step === 1 || step === 3) && (
+      {/* Back button for steps 1 and 3 */}
+      {step === 1 && (
+        <button onClick={() => setStep(s => s - 1)} style={{
+          marginTop: 16, background: "none", border: "1px solid var(--border)",
+          borderRadius: "var(--radius-sm)", padding: "8px 16px",
+          fontSize: "0.82rem", fontWeight: 600, color: "var(--text-secondary)",
+          fontFamily: "var(--font-text)", transition: "all 0.12s",
+        }}>← Back</button>
+      )}
+
+      {/* Step 3 back button — only if needs not yet selected (button is at top when generating) */}
+      {step === 3 && (
         <button onClick={() => setStep(s => s - 1)} style={{
           marginTop: 16, background: "none", border: "1px solid var(--border)",
           borderRadius: "var(--radius-sm)", padding: "8px 16px",
