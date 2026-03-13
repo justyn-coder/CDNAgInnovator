@@ -33,26 +33,26 @@ const PROVINCES = [
 ];
 
 const EARLY_NEEDS = [
-  { key: "non-dilutive-capital", label: "Funding", sub: "Grants, vouchers, non-dilutive capital", icon: "💰" },
-  { key: "pilot-site-field-validation", label: "Pilot Site", sub: "Test with real farmers or on research farms", icon: "🌾" },
-  { key: "accelerator", label: "Accelerator / Incubator", sub: "Structured programs with mentorship + cohort", icon: "🚀" },
-  { key: "all", label: "Show me everything", sub: "", icon: "✦" },
+  { key: "non-dilutive-capital", label: "Money to build", sub: "Grants, vouchers, pre-seed — non-dilutive capital to get started", icon: "💰" },
+  { key: "validate-with-farmers", label: "Prove it works", sub: "Access to farms, research stations, or growers willing to test", icon: "🌾" },
+  { key: "structured-program", label: "Structure & mentorship", sub: "Accelerator, incubator, or cohort — someone to keep you honest", icon: "🚀" },
+  { key: "all", label: "Show me everything", sub: "I'll sort through it myself", icon: "✦" },
 ];
 
 const MID_NEEDS = [
-  { key: "non-dilutive-capital", label: "Funding", sub: "Grants, vouchers, growth capital", icon: "💰" },
-  { key: "pilot-site-field-validation", label: "Pilot Site", sub: "Test with real farmers or on research farms", icon: "🌾" },
-  { key: "first-customers", label: "First Customers", sub: "Events, intros, advisor channels to reach growers", icon: "🤝" },
-  { key: "accelerator", label: "Accelerator", sub: "Structured programs with mentorship + cohort", icon: "🚀" },
-  { key: "all", label: "Show me everything", sub: "", icon: "✦" },
+  { key: "non-dilutive-capital", label: "Funding for trials", sub: "Grants, vouchers, pilot-stage capital", icon: "💰" },
+  { key: "pilot-site-field-validation", label: "Pilot site access", sub: "Commercial farms, applied research orgs, or controlled trial environments", icon: "🌾" },
+  { key: "credibility-validation", label: "Build credibility", sub: "Third-party validation, advisor endorsement, proof points buyers trust", icon: "✅" },
+  { key: "first-customers", label: "Find first buyers", sub: "Events, intros, and advisor channels to reach actual growers", icon: "🤝" },
+  { key: "all", label: "Show me everything", sub: "I'll sort through it myself", icon: "✦" },
 ];
 
 const GROWTH_NEEDS = [
-  { key: "channel-distribution", label: "Dealers & Distribution", sub: "Find channel partners, dealers, resellers, installers", icon: "🤝" },
-  { key: "market-expansion", label: "New Markets & Regions", sub: "Expand into new provinces, crop types, or export markets", icon: "🌍" },
-  { key: "growth-capital", label: "Growth Capital", sub: "Series A+, growth debt, strategic investment", icon: "📈" },
-  { key: "industry-connections", label: "Industry Connections", sub: "Associations, advisor networks, trade events", icon: "🏛" },
-  { key: "all", label: "Show me everything", sub: "", icon: "✦" },
+  { key: "channel-distribution", label: "Dealers & distribution", sub: "Resellers, equipment dealers, channel partners, installers", icon: "🤝" },
+  { key: "go-to-market", label: "Go-to-market strategy", sub: "Market entry, positioning, commercial packaging, new segments", icon: "🎯" },
+  { key: "growth-capital", label: "Growth capital", sub: "Series A+, growth debt, strategic investment", icon: "📈" },
+  { key: "industry-connections", label: "Industry access", sub: "Associations, trade events, policy networks, export programs", icon: "🏛" },
+  { key: "all", label: "Show me everything", sub: "I'll sort through it myself", icon: "✦" },
 ];
 
 function getNeedsForStage(stage: string) {
@@ -131,7 +131,6 @@ export default function Wizard({ onComplete }: Props) {
         A sentence is enough — product type, who it's for.
       </p>
       <textarea
-        autoFocus
         value={data.description}
         onChange={e => setData(d => ({ ...d, description: e.target.value }))}
         placeholder="e.g. AI-powered soil sampling software for Prairie grain farmers"
@@ -268,9 +267,9 @@ export default function Wizard({ onComplete }: Props) {
       <h2 style={{
         fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 400,
         color: "var(--text)", marginBottom: 6,
-      }}>What do you need most right now?</h2>
+      }}>What's the biggest thing holding you back?</h2>
       <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: 16 }}>
-        Pick one — this prioritizes your recommendations.
+        Pick the bottleneck — we'll build your pathway around it.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {getNeedsForStage(data.stage).map(n => (

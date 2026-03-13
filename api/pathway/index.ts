@@ -7,13 +7,18 @@ const client = postgres(conn, { ssl: "require", max: 1 });
 // ── Need → Category mapping (broadened for later stages) ─────────────────
 const NEED_TO_CATEGORIES: Record<string, string[]> = {
   "non-dilutive-capital": ["Fund", "Accel"],
+  "validate-with-farmers": ["Pilot", "Accel", "Org"],
+  "structured-program": ["Accel", "Fund", "Train"],
   "pilot-site-field-validation": ["Pilot", "Accel", "Org"],
+  "credibility-validation": ["Org", "Pilot", "Event", "Accel"],
   "first-customers": ["Org", "Event", "Accel", "Fund"],
-  "accelerator": ["Accel", "Fund", "Event"],
   "channel-distribution": ["Org", "Event", "Train"],
-  "market-expansion": ["Org", "Event", "Fund", "Pilot", "Train"],
+  "go-to-market": ["Org", "Event", "Fund", "Train"],
   "growth-capital": ["Fund", "Accel", "Org"],
   "industry-connections": ["Org", "Event", "Train", "Fund"],
+  // Legacy keys for backward compat
+  "accelerator": ["Accel", "Fund", "Event"],
+  "market-expansion": ["Org", "Event", "Fund", "Pilot", "Train"],
   "all": ["Fund", "Accel", "Pilot", "Event", "Org", "Train"],
 };
 
@@ -83,6 +88,10 @@ CRITICAL RULES:
 - CONFIDENCE: For each step, honestly assess fit_confidence as "high" (strong match to their specific product/market), "medium" (relevant category but not product-specific), or "exploratory" (strategic but indirect path). Do NOT mark everything as high.
 - ACCESS PATH: For each step, include a brief "prepare" field noting what the founder should have ready (pitch deck, pilot data, partnership proposal, etc.) and the best way in (direct application, warm intro, event attendance, membership).
 - CHANNEL/DISTRIBUTION NEED: If the need is "channel-distribution", focus on organizations and events where dealers, distributors, equipment resellers, or service partners can be found. Think about who installs, services, and maintains technology for farmers — not just who funds it.
+- CREDIBILITY/VALIDATION NEED: If the need is "credibility-validation", the founder's bottleneck is trust, not access. They need third-party proof points — applied research orgs that can validate performance claims, advisor networks (CCA/agrologists) who can endorse the product, industry associations that provide credibility by association, or events where they can present results. The output should be "who can vouch for you" not "who can fund you."
+- GO-TO-MARKET NEED: If the need is "go-to-market", the founder has a working product but no clear commercial strategy. Focus on market entry support: events where they can reach buyers, organizations that provide market intelligence, training programs for commercial readiness, and associations that connect them to distribution channels. This is the REALM "Deploy" stage — they need commercial packaging, not more validation.
+- EARLY VALIDATION NEED: If the need is "validate-with-farmers", focus on early-access research farms, applied research associations, and programs that specifically connect pre-product or early-product companies with willing farm testers. This is earlier than "pilot" — they need a farmer who'll let them try something, not a formal trial.
+- STRUCTURED PROGRAM NEED: If the need is "structured-program", recommend accelerators, incubators, and cohort programs — but prioritize ones with ag-specific tracks, demo day exposure, or direct connections to the farming community. Generic tech accelerators are lower value.
 - PRODUCT TYPE AWARENESS: Pay close attention to whether the founder describes hardware/equipment, software/SaaS, biologicals/inputs, or services. This fundamentally changes recommendations:
   * Hardware companies need: pilot sites for field testing, dealer/distributor networks, SR&ED for R&D costs, equipment shows, installation partner strategies
   * SaaS companies need: integration partnerships, data validation pilots, channel partnerships, digital ag events

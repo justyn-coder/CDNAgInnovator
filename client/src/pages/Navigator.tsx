@@ -17,6 +17,8 @@ interface WizardSnapshot {
   stage: string;
   provinces: string[];
   need: string;
+  companyUrl?: string;
+  productType?: string;
 }
 
 const CAT_META: Record<string, { label: string; color: string; bg: string }> = {
@@ -278,8 +280,10 @@ function BrowsePanel({ onClose }: { onClose: () => void }) {
 
 // ── Feedback Modal (replaces old Submit form) ───────────────────────────────
 function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; isEco: boolean; pageContext?: string }) {
+  const [hasIdentity] = useState(() => {
+    try { return !!sessionStorage.getItem("ag_fb_email"); } catch { return false; }
+  });
   const [form, setForm] = useState(() => {
-    // Load saved identity from sessionStorage
     let email = "", name = "";
     try {
       email = sessionStorage.getItem("ag_fb_email") || "";
@@ -287,7 +291,6 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
     } catch {}
     return { feedback: "", email, name };
   });
-  const hasIdentity = !!form.email;
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -388,6 +391,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--text-tertiary)" }}>Email <span style={{ color: "#d97706" }}>(so we can follow up)</span></label>
                     <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@company.com"
+                      type="email" autoComplete="email" autoCapitalize="off" autoCorrect="off" spellCheck={false}
                       style={{
                         width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
                         border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 3,
@@ -468,12 +472,19 @@ export default function Navigator() {
     if (isEco && ecoMsgCount >= 2 && !showEcoCta) setShowEcoCta(true);
   }, [ecoMsgCount]);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
+  const lastUserRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to latest user message (top of new exchange) when response arrives
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      lastUserRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [messages.length, loading]);
 
   function handleWizardComplete(prompt: string, snapshot: WizardSnapshot) {
     setShowWizard(false);
     setWizardSnapshot(snapshot);
-    const descMatch = prompt.match(/I'm building (.+?)\. I'm at/);
+    const descMatch = prompt.match(/I'm building (.+?)\.(?:\s*My product is|\s*I'm at)/);
     setWizardDescription(descMatch ? descMatch[1] : "an agtech company");
     setShowPathway(true);
     if (!quickFeedbackSent) setTimeout(() => setShowQuickFeedback(true), 8000);
@@ -512,10 +523,25 @@ export default function Navigator() {
     setMessages(newMessages);
     setLoading(true);
     if (isEco) setEcoMsgCount(c => c + 1);
+
+    // Build context prefix from wizard data so AI always knows who the user is
+    let contextPrefix = "";
+    if (wizardSnapshot && !isEco) {
+      const parts = [`Stage: ${wizardSnapshot.stage}`, `Province: ${wizardSnapshot.provinces.join(", ")}`, `Need: ${wizardSnapshot.need}`];
+      if (wizardDescription) parts.unshift(`Building: ${wizardDescription}`);
+      if (wizardSnapshot.productType) parts.push(`Product type: ${wizardSnapshot.productType}`);
+      if (wizardSnapshot.companyUrl) parts.push(`Website: ${wizardSnapshot.companyUrl}`);
+      contextPrefix = `[Founder context: ${parts.join(". ")}]\n\n`;
+    }
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, mode, history: newMessages.slice(-8).map(m => ({ role: m.role, content: m.content })) }),
+        body: JSON.stringify({
+          message: contextPrefix + text,
+          mode,
+          history: newMessages.slice(-8).map(m => ({ role: m.role, content: m.content })),
+        }),
       });
       const data = await res.json();
       setMessages(m => [...m, { role: "assistant", content: data.reply || "Something went wrong." }]);
@@ -681,7 +707,11 @@ export default function Navigator() {
           )}
 
           {/* Chat messages — only show after eco welcome or wizard done */}
-          {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => <ChatBubble key={i} msg={m} />)}
+          {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => {
+            // Attach ref to the last user message so we scroll there
+            const isLastUser = m.role === "user" && !messages.slice(i + 1).some(x => x.role === "user");
+            return <div key={i} ref={isLastUser ? lastUserRef : undefined}><ChatBubble msg={m} /></div>;
+          })}
           {loading && (
             <div style={{ padding: "0 16px 4px" }}>
               <div style={{
@@ -768,29 +798,25 @@ export default function Navigator() {
         `}</style>
       </div>
 
-      {/* ── Quick feedback slide-up (founder) ──────────────────────── */}
+      {/* ── Quick feedback (founder) — compact, auto-collapses ──────── */}
       {showQuickFeedback && !quickFeedbackSent && !isEco && (
         <div style={{
-          position: "fixed", bottom: 0, left: 0, right: 0,
-          background: "var(--bg)", borderTop: "2px solid #f59e0b",
-          boxShadow: "0 -4px 24px rgba(0,0,0,0.08)",
-          padding: "14px 20px", zIndex: 50,
-          animation: "slideUp 0.4s ease",
-          display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+          position: "fixed", bottom: 28, left: 0, right: 0,
+          display: "flex", justifyContent: "center",
+          zIndex: 50, animation: "slideUp 0.4s ease",
+          padding: "0 16px",
         }}>
-          <div style={{ flex: "1 1 200px", minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--text)", marginBottom: 2 }}>
-              Was this useful?
-            </div>
-            <div style={{ fontSize: "0.72rem", color: "var(--text-secondary)" }}>
-              Quick reaction — we're still in beta
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{
+            background: "var(--bg)", border: "1.5px solid #f59e0b",
+            borderRadius: 100, padding: "6px 8px",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+            display: "inline-flex", alignItems: "center", gap: 6,
+          }}>
+            <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--text-secondary)", padding: "0 6px", whiteSpace: "nowrap" }}>Useful?</span>
             {[
-              { emoji: "🔥", label: "Nailed it", value: "great" },
-              { emoji: "👍", label: "Decent", value: "ok" },
-              { emoji: "🤷", label: "Off-base", value: "miss" },
+              { emoji: "🔥", value: "great" },
+              { emoji: "👍", value: "ok" },
+              { emoji: "🤷", value: "miss" },
             ].map(opt => (
               <button key={opt.value} onClick={() => {
                 fetch("/api/submissions", {
@@ -806,23 +832,20 @@ export default function Navigator() {
                 setShowQuickFeedback(false);
               }}
                 style={{
+                  width: 36, height: 36, borderRadius: "50%",
                   background: "var(--bg-secondary)", border: "1px solid var(--border)",
-                  borderRadius: "var(--radius-sm)", padding: "8px 14px",
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-                  transition: "transform 0.1s, border-color 0.1s",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1rem", transition: "transform 0.1s",
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#d97706"; (e.currentTarget as HTMLElement).style.transform = "scale(1.05)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
-              >
-                <span style={{ fontSize: "1.2rem" }}>{opt.emoji}</span>
-                <span style={{ fontSize: "0.62rem", fontWeight: 600, color: "var(--text-secondary)" }}>{opt.label}</span>
-              </button>
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1.15)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+              >{opt.emoji}</button>
             ))}
+            <button onClick={() => setShowQuickFeedback(false)} style={{
+              background: "none", border: "none", fontSize: "0.7rem",
+              color: "var(--text-tertiary)", padding: "0 4px",
+            }}>✕</button>
           </div>
-          <button onClick={() => setShowQuickFeedback(false)} style={{
-            background: "none", border: "none", fontSize: "0.75rem",
-            color: "var(--text-tertiary)", padding: "4px",
-          }}>✕</button>
         </div>
       )}
 

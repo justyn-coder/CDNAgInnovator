@@ -51,12 +51,12 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 const CAT_LABELS: Record<string, string> = {
-  Fund:  "Fund",
-  Accel: "Accel",
-  Pilot: "Pilot",
+  Fund:  "Funding",
+  Accel: "Accelerator",
+  Pilot: "Pilot Site",
   Event: "Event",
-  Org:   "Org",
-  Train: "Train",
+  Org:   "Industry Org",
+  Train: "Training",
 };
 
 const PROV_LABELS: Record<string, string> = {
@@ -155,8 +155,8 @@ function ExplainCard({
           </svg>
         </div>
         <div style={{ textAlign: "left" }}>
-          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#e2e8f0" }}>AI Gap Analysis</div>
-          <div style={{ fontSize: "0.6rem", color: "#94a3b8", marginTop: 1 }}>Why does this gap exist? What can be done?</div>
+          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#e2e8f0" }}>🤖 Ask AI: why this gap?</div>
+          <div style={{ fontSize: "0.6rem", color: "#94a3b8", marginTop: 1 }}>Our best guess — we're still learning this landscape</div>
         </div>
       </button>
     );
@@ -474,7 +474,7 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
           fontSize: "0.72rem", color: "#1e40af",
         }}>
           <span>💡</span>
-          <span style={{ flex: 1 }}>Tap any cell to see what we found — and tell us what we missed.</span>
+          <span style={{ flex: 1 }}>Tap any cell to drill down. Scroll right → to see all categories.</span>
           <button onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }} style={{
             background: "none", border: "none", fontSize: "0.72rem", color: "#3b82f6", padding: "0 4px",
             fontWeight: 600, flexShrink: 0,
