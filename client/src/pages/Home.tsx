@@ -241,7 +241,7 @@ export default function Home() {
           textAlign: "center", fontWeight: 400,
           animation: "fadeInUp 0.6s ease 0.2s both",
         }}>
-          Let's build a path to farm.
+          Guiding your path to farm.
         </p>
 
         {/* ── Two clear CTA cards ─────────────────────────────── */}
