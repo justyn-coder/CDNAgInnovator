@@ -642,20 +642,19 @@ export default function Navigator() {
               boxShadow: "0 1px 4px rgba(30,107,10,0.15)",
             }}>
               <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-                <path d="M20 34L20 18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                <path d="M20 18L14 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M20 18L26 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M14 10L10 8" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M14 10L14 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M26 10L30 8" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M26 10L26 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="20" cy="34" r="2.5" fill="#3dcc1a"/>
+                <path d="M4 30 Q12 24 20 26 Q28 28 36 24" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/>
+                <path d="M4 34 Q12 28 20 30 Q28 32 36 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.25"/>
+                <path d="M20 35 L20 12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M14 18 L20 10 L26 18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <path d="M20 28 Q24 25 26 22" stroke="#3dcc1a" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                <path d="M20 28 Q16 25 14 22" stroke="#3dcc1a" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                <circle cx="20" cy="35" r="2" fill="#3dcc1a"/>
               </svg>
             </div>
             <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontWeight: 800, fontSize: "0.85rem", color: "var(--text)", letterSpacing: "-0.03em" }}>
-                  moose<span style={{ color: "var(--green-mid)" }}>path</span>
+                  Ag<span style={{ color: "var(--green-mid)" }}>Path</span>
                 </span>
                 <span style={{
                   fontSize: "0.5rem", fontWeight: 700, padding: "1px 5px", borderRadius: 3,
@@ -665,7 +664,7 @@ export default function Navigator() {
                 }}>{isEco ? "Partner" : "Founder"}</span>
               </div>
               <span style={{ fontSize: "0.5rem", color: "var(--text-tertiary)", fontWeight: 500, marginTop: 1 }}>
-                Better agtech, guided to farm.
+                Navigate Canada's agtech ecosystem
               </span>
             </div>
           </Link>

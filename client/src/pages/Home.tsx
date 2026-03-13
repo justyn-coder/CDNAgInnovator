@@ -138,17 +138,7 @@ export default function Home() {
               </div>
               <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--border)", textAlign: "center" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: "0.6rem", color: "var(--text-tertiary)", letterSpacing: "0.02em" }}>
-                  <span>Built by</span>
-                  <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer"
-                    style={{ display: "inline-flex", opacity: 0.75, transition: "opacity 0.15s" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.75"; }}
-                  >
-                    <img src="/bestinshow-tagline-logo.png" alt="BestInShow"
-                      style={{ height: 14 }}
-                    />
-                  </a>
-                  <span>· Free, no signup · Beta v1.0</span>
+                  <span>Powered by AI · Free, no signup · Beta v1.1</span>
                 </div>
               </div>
             </div>
@@ -176,31 +166,25 @@ export default function Home() {
             boxShadow: "0 2px 8px rgba(30,107,10,0.2)",
           }}>
             <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
-              {/* Trunk — path */}
-              <path d="M20 34L20 18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-              {/* Antler branches — diverging paths */}
-              <path d="M20 18L14 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M20 18L26 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M14 10L10 8" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M14 10L14 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M26 10L30 8" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M26 10L26 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              {/* You are here dot */}
-              <circle cx="20" cy="34" r="2.5" fill="#3dcc1a"/>
+              <path d="M4 30 Q12 24 20 26 Q28 28 36 24" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/>
+              <path d="M4 34 Q12 28 20 30 Q28 32 36 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.25"/>
+              <path d="M20 35 L20 12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+              <path d="M14 18 L20 10 L26 18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <path d="M20 28 Q24 25 26 22" stroke="#3dcc1a" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+              <path d="M20 28 Q16 25 14 22" stroke="#3dcc1a" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+              <circle cx="20" cy="35" r="2" fill="#3dcc1a"/>
             </svg>
           </div>
           <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
             <span style={{ fontWeight: 800, fontSize: "clamp(0.95rem, 1.5vw, 1.2rem)", color: "var(--text)", letterSpacing: "-0.03em" }}>
-              moose<span style={{ color: "var(--green-mid)" }}>path</span>
+              Ag<span style={{ color: "var(--green-mid)" }}>Path</span> <span style={{ fontWeight: 400, fontSize: "0.7em", color: "var(--text-tertiary)" }}>Canada</span>
             </span>
             <span style={{ fontSize: "clamp(0.52rem, 0.8vw, 0.65rem)", color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.01em", marginTop: 2 }}>
-              Better agtech, guided to farm.
+              Navigate Canada's agtech ecosystem
             </span>
           </div>
         </div>
-        <span style={{ fontSize: "0.85rem" }}>
-          🍁
-        </span>
+        <svg width="24" height="14" viewBox="0 0 24 14" style={{ flexShrink: 0 }}><rect x="0" y="0" width="6" height="14" fill="#FF0000"/><rect x="6" y="0" width="12" height="14" fill="#FFFFFF"/><rect x="18" y="0" width="6" height="14" fill="#FF0000"/><path d="M12 2.5 L12.8 5 L11.2 5 Z M12 5 L13.5 4 L13 5.5 L14.5 5.5 L13 6.5 L13.5 8 L12 7 L10.5 8 L11 6.5 L9.5 5.5 L11 5.5 L10.5 4 Z M12 8 L12 11" fill="#FF0000" stroke="#FF0000" strokeWidth="0.3"/></svg>
       </nav>
 
       {/* ── Hero ─────────────────────────────────────────────── */}
@@ -340,9 +324,7 @@ export default function Home() {
         </div>
 
         <p style={{ fontSize: "0.72rem", color: "var(--text-tertiary)", marginTop: 12 }}>
-          Built by{" "}
-          <a href="https://bestinshow.ag" target="_blank" rel="noopener noreferrer" style={{ color: "var(--green-mid)", fontWeight: 600 }}>BestInShow</a>
-          {" "}· Powered by AI · Free during beta
+          Powered by AI · Free during beta
         </p>
       </main>
     </div>
