@@ -331,12 +331,14 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
           padding: "8px 18px", borderTop: "1px solid var(--border)",
           background: "linear-gradient(90deg, #f59e0b, #d97706)",
           flexShrink: 0, textAlign: "center",
+          animation: "feedbackPulse 2s ease-in-out 5s 1, feedbackPulse 2s ease-in-out 30s 1",
         }}>
+          <style>{`@keyframes feedbackPulse { 0%,100% { transform: translateY(0); box-shadow: none; } 30% { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(245,158,11,0.4); } 60% { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(245,158,11,0.2); } }`}</style>
           <button onClick={onFeedback} style={{
             background: "none", border: "none", color: "#fff",
             fontSize: "0.72rem", fontWeight: 600, padding: 0,
           }}>
-            💬 Something wrong or missing? Tell us →
+            💬 See something missing? Tell us →
           </button>
         </div>
       )}
@@ -487,6 +489,48 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
   );
 }
 
+// ── Loading Messages ─────────────────────────────────────────────────────────
+const LOADING_MSGS = [
+  "Searching across 347 programs…",
+  "This usually takes 10–15 seconds — hang tight.",
+  "Cross-referencing with ecosystem insights…",
+  "Almost there…",
+];
+function LoadingMessages() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setIdx(1), 4000),
+      setTimeout(() => setIdx(2), 8000),
+      setTimeout(() => setIdx(3), 12000),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+  return (
+    <div style={{ padding: "0 16px 4px" }}>
+      <div style={{
+        display: "inline-flex", alignItems: "center", gap: 8,
+        background: "var(--bg)", border: "1px solid var(--border)",
+        borderRadius: "16px 16px 16px 4px",
+        padding: "10px 16px", boxShadow: "var(--shadow-sm)",
+      }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{
+            width: 5, height: 5, borderRadius: "50%",
+            background: "var(--text-tertiary)",
+            animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
+          }} />
+        ))}
+        <span style={{
+          fontSize: "0.75rem", color: "var(--text-secondary)",
+          fontFamily: "var(--font-text)", fontWeight: 500,
+          transition: "opacity 0.3s ease",
+        }}>{LOADING_MSGS[idx]}</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ──────────────────────────────────────────────────────────
 export default function Navigator() {
   const [mode] = useState<"e" | "ec">(() => { try { return (localStorage.getItem("ag_nav_mode") as "e" | "ec") || "e"; } catch { return "e"; } });
@@ -540,12 +584,19 @@ export default function Navigator() {
     if (isEco && ecoMsgCount >= 2 && !showEcoCta) setShowEcoCta(true);
   }, [ecoMsgCount]);
 
-  // FIX: Auto-scroll to bottom when new messages arrive
+  // FIX: Auto-scroll — when loading starts, scroll to loading indicator (bottom);
+  // when response arrives, scroll to top of newest assistant message
+  const lastMsgRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (messages.length > 0) {
-      // Small delay to ensure DOM has updated
       setTimeout(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (loading) {
+          // While loading, keep bottom in view
+          bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        } else {
+          // Response arrived — scroll to top of last message
+          lastMsgRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       }, 100);
     }
   }, [messages.length, loading]);
@@ -748,8 +799,8 @@ export default function Navigator() {
                     overflow: "hidden",
                   }}>
                     {[
-                      { num: "283", label: "Programs" },
-                      { num: "85", label: "Insights" },
+                      { num: "347", label: "Programs" },
+                      { num: "127", label: "Insights" },
                       { num: "10", label: "Provinces" },
                       { num: "6", label: "Categories" },
                     ].map((s, i) => (
@@ -852,26 +903,9 @@ export default function Navigator() {
 
           {/* Chat messages — only show after eco welcome or wizard done */}
           {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => (
-            <div key={i}><ChatBubble msg={m} /></div>
+            <div key={i} ref={i === messages.length - 1 ? lastMsgRef : undefined}><ChatBubble msg={m} /></div>
           ))}
-          {loading && (
-            <div style={{ padding: "0 16px 4px" }}>
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                background: "var(--bg)", border: "1px solid var(--border)",
-                borderRadius: "16px 16px 16px 4px",
-                padding: "10px 16px", boxShadow: "var(--shadow-sm)",
-              }}>
-                {[0, 1, 2].map(i => (
-                  <div key={i} style={{
-                    width: 6, height: 6, borderRadius: "50%",
-                    background: "var(--text-tertiary)",
-                    animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
-                  }} />
-                ))}
-              </div>
-            </div>
-          )}
+          {loading && <LoadingMessages />}
           <div ref={bottomRef} />
         </div>
 

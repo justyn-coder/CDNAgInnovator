@@ -240,13 +240,15 @@ export default function Wizard({ onComplete }: Props) {
       <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: 16 }}>
         Be honest — this determines which programs are actually open to you.
       </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 480 }}>
         {STAGES.map(s => (
           <button key={s.key}
             onClick={() => { setData(d => ({ ...d, stage: s.key })); setTimeout(() => setStep(2), 150); }}
             style={{
               ...optBtn(data.stage === s.key),
-              justifyContent: "space-between",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: "2px",
             }}
           >
             <span style={{ fontWeight: 700 }}>{s.label}</span>

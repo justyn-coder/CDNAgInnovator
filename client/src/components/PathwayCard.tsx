@@ -132,20 +132,20 @@ function StageJourney({ current, next }: { current: string; next: string }) {
                 {isCurrent ? STAGE_ICONS[s] : isPast ? "✓" : isNext ? STAGE_ICONS[s] : ""}
               </div>
               <span style={{
-                fontSize: "0.5rem",
+                fontSize: "0.65rem",
                 fontWeight: isCurrent ? 700 : isNext ? 600 : 400,
                 color: isCurrent
                   ? "#fff"
                   : isNext
-                    ? "rgba(255,255,255,0.65)"
+                    ? "rgba(255,255,255,0.75)"
                     : isPast
-                      ? "rgba(255,255,255,0.35)"
-                      : "rgba(255,255,255,0.18)",
+                      ? "rgba(255,255,255,0.45)"
+                      : "rgba(255,255,255,0.25)",
                 whiteSpace: "nowrap",
               }}>{SL[s] || s}</span>
               {isCurrent && (
                 <span style={{
-                  fontSize: "0.42rem", fontWeight: 700,
+                  fontSize: "0.55rem", fontWeight: 700,
                   color: "var(--green-accent)",
                   letterSpacing: "0.1em", textTransform: "uppercase",
                   marginTop: -2,
@@ -373,7 +373,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       }}>
         <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         <div style={{ position: "relative" }}>
-          <div style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 6 }}>Your Innovation Pathway</div>
+          <div style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", marginBottom: 6 }}>Your Innovation Pathway</div>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.35rem", fontWeight: 400, letterSpacing: "-0.01em", color: "#fff", marginBottom: 10, lineHeight: 1.2 }}>{titleOverride}</h2>
           <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.75)", lineHeight: 1.65, maxWidth: 520 }}>{pathway.summary}</p>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
