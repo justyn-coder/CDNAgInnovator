@@ -397,8 +397,19 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
         </div>
       )}
 
+      {/* ── Shareable link ─────────────────────────────────────────────── */}
+      <div className="mt-4">
+        <button onClick={() => {
+          const url = new URL(window.location.origin + "/navigator");
+          url.searchParams.set("stage", stage); url.searchParams.set("prov", provinces.join(",")); url.searchParams.set("need", need);
+          navigator.clipboard.writeText(url.toString()).then(() => alert("Link copied! Share it with your advisor or team."), () => alert("Couldn't copy — try manually."));
+        }}
+          className="self-start px-3.5 py-[7px] bg-transparent text-text-tertiary border border-border rounded-sm font-medium text-[0.72rem] transition-colors duration-150 hover:text-text"
+        >📋 Copy shareable link</button>
+      </div>
+
       {/* ── Follow-up chips ───────────────────────────────────────────── */}
-      <div className="mt-4 flex flex-col gap-2.5">
+      <div className="mt-3 flex flex-col gap-2.5">
         <div className="text-[0.68rem] font-bold text-text-tertiary tracking-[0.08em] uppercase">
           Continue the conversation
         </div>
@@ -428,18 +439,6 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
               >{chip.label}</button>
             ));
           })()}
-        </div>
-
-        <button onClick={() => {
-          const url = new URL(window.location.origin + "/navigator");
-          url.searchParams.set("stage", stage); url.searchParams.set("prov", provinces.join(",")); url.searchParams.set("need", need);
-          navigator.clipboard.writeText(url.toString()).then(() => alert("Link copied! Share it with your advisor or team."), () => alert("Couldn't copy — try manually."));
-        }}
-          className="self-start px-3.5 py-[7px] bg-transparent text-text-tertiary border border-border rounded-sm font-medium text-[0.72rem] transition-colors duration-150 hover:text-text"
-        >📋 Copy shareable link</button>
-
-        <div className="text-[0.65rem] text-text-tertiary leading-[1.5] mt-1 italic">
-          Built from public data — we're probably missing things. If a recommendation looks off, that's useful feedback too.
         </div>
       </div>
     </div>

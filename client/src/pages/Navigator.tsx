@@ -759,6 +759,12 @@ export default function Navigator() {
               )}
             >→</button>
           </div>
+          {/* Disclaimer */}
+          {!isEco && showPathway && (
+            <div className="text-[0.65rem] text-text-tertiary leading-[1.5] mt-2 italic text-center">
+              Built from public data — we're probably missing things. If a recommendation looks off, that's useful feedback too.
+            </div>
+          )}
         </div>
         )}
       </div>
