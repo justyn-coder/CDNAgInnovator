@@ -28,7 +28,7 @@ vercel dev           # Full local dev with API functions
 | Routing | wouter |
 | ORM | drizzle-orm (schema definition only — most queries use raw `postgres` client) |
 | Email | nodemailer (Gmail SMTP for feedback notifications) |
-| Styling | CSS variables + inline styles. DM Serif Display headings, warm amber/gold palette |
+| Styling | Tailwind CSS v4 (`@tailwindcss/vite`), `clsx` for conditional classes. DM Serif Display headings, warm amber/gold palette |
 
 ## Deploy Workflow
 
@@ -70,4 +70,4 @@ NOTIFY_EMAIL                  # Recipient for feedback notifications
 - **Build order:** Logic → UI → AI. Define what counts as a gap/output before building the surface, build the surface before wiring AI calls.
 - **Batch deploys:** Group related changes into single commits. Don't deploy one file at a time.
 - **Test after deploy:** Hard refresh (`Cmd+Shift+R`) on live URL.
-- **Design language:** Apple-esque polish, DM Serif Display headings, warm amber/gold accents, card-based layouts, generous whitespace.
+- **Design language:** Apple-esque polish, DM Serif Display headings, warm amber/gold accents, card-based layouts, generous whitespace. Tailwind utility classes throughout — use `cn()` from `client/src/lib/cn.ts` for conditional styling.

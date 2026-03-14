@@ -24,7 +24,9 @@ CDNAgInnovator/
 │   └── src/
 │       ├── main.tsx                   # React entry point
 │       ├── App.tsx                    # Router (wouter), mode switching
-│       ├── index.css                  # CSS variables, global styles, animations
+│       ├── index.css                  # Tailwind v4 setup, @theme tokens, keyframes, base styles
+│       ├── lib/
+│       │   └── cn.ts                  # clsx wrapper for conditional class composition
 │       ├── pages/
 │       │   ├── Home.tsx               # Landing page — beta modal, founder/operator CTA
 │       │   └── Navigator.tsx          # Main app page (god component — see below)
@@ -62,7 +64,7 @@ This is the god component. It manages both user modes, all state, chat, browse, 
 3. **Province** — Multi-select: 2-column grid of provinces + "Atlantic" shortcut + National
 4. **Need** — Multi-select with "Generate my pathway →" button. Options: non-dilutive capital, validate with farmers, structured program, pilot site/field validation, credibility/validation, first customers, channel/distribution, go-to-market, growth capital, industry connections
 
-Design: DM Serif Display headers, card-style option buttons, gradient Next button.
+Design: DM Serif Display headers, card-style option buttons, gradient Next button. Uses `cn()` for conditional Tailwind classes (e.g., active/inactive option buttons).
 
 ### PathwayCard.tsx (AI Pathway Display)
 
@@ -143,7 +145,11 @@ Home (CTA) → Navigator (mode=ec)
 
 ## Styling Architecture
 
-No CSS framework. Styling is a mix of:
-- **`index.css`** — CSS custom properties (colors, radii, shadows, fonts), global resets, keyframe animations (`fadeInUp`, `pulse`, etc.)
-- **Inline styles** — Components use inline `style={{}}` objects. This is intentional for rapid iteration, not a tech debt flag.
-- **Design tokens** via CSS variables: `--bg`, `--text`, `--border`, `--shadow-sm/md/lg`, `--radius-sm/md/lg`, `--font-display` (DM Serif Display), `--accent` (amber).
+**Tailwind CSS v4** with CSS-first configuration (no `tailwind.config.js`).
+
+- **`index.css`** — Tailwind v4 entry point with `@import "tailwindcss"`, `@theme` block defining custom design tokens, `@keyframes` for animations, `@layer base` for resets, plus `.md-body` markdown styles and scrollbar styling.
+- **`@theme` tokens** — Custom colors (`bg`, `bg-secondary`, `text`, `green-mid`, `green-light`, `gold`, `amber`, `border`, etc.), shadows (`sm`, `md`, `lg`, `glow`, `green`), border radius (`sm`=8px, default=14px, `lg`=20px), fonts (`display`=DM Serif Display, `sans`=DM Sans), and animations (`fade-in-up`, `fade-in`, `pulse-dot`, `shimmer`, `slide-up`, `stage-pulse`).
+- **Utility classes** — All components use Tailwind utility classes via `className`. Conditional classes use `cn()` helper (thin `clsx` wrapper from `client/src/lib/cn.ts`).
+- **Hover/focus** — Pure CSS via Tailwind pseudo-class utilities (`hover:`, `focus:`). No DOM style mutations.
+- **Dynamic values** — Arbitrary value syntax (`bg-[#hex]`, `text-[clamp(...)]`) for values not in the theme. Inline `style={{}}` only for truly dynamic runtime values (computed animation delays, data-driven progress bar widths).
+- **Vite plugin** — `@tailwindcss/vite` configured in `vite.config.ts`.
