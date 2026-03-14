@@ -91,7 +91,7 @@ function StageJourney({ current, next }: { current: string; next: string }) {
   const currentIdx = STAGE_ORDER.indexOf(current);
 
   return (
-    <div className="flex items-start px-1 mt-4">
+    <div className="flex items-start px-1 mt-4 max-w-full overflow-hidden">
       {STAGE_ORDER.map((s, i) => {
         const isCurrent = s === current;
         const isNext = s === next && s !== current;
@@ -114,7 +114,7 @@ function StageJourney({ current, next }: { current: string; next: string }) {
                 {isCurrent ? STAGE_ICONS[s] : isPast ? "✓" : isNext ? STAGE_ICONS[s] : ""}
               </div>
               <span className={cn(
-                "whitespace-nowrap text-[0.65rem]",
+                "text-[0.6rem] sm:text-[0.65rem] text-center leading-tight",
                 isCurrent && "font-bold text-white",
                 isNext && "font-semibold text-white/90",
                 isPast && "font-normal text-white/[0.82]",
@@ -154,7 +154,7 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp }: {
   return (
     <div
       className={cn(
-        "px-[22px] py-4 flex gap-3.5",
+        "px-3.5 md:px-[22px] py-4 flex gap-3.5 min-w-0",
         !isLast && "border-b border-border",
         isHorizon ? "opacity-75 bg-bg-secondary" : "bg-bg",
       )}
@@ -293,19 +293,19 @@ function EmailCapture({ stage, provinces, description, productType }: {
       <div style={{ fontSize: 14, fontWeight: 500, color: "#1a1a18", marginBottom: 8 }}>
         Want updates when new programs match your profile?
       </div>
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center flex-wrap">
         <input
           value={email}
           onChange={e => setEmail(e.target.value)}
           placeholder="your@email.com"
           type="email"
-          className="outline-none font-sans"
+          className="outline-none font-sans flex-1 min-w-0"
           style={{
             border: "0.5px solid #E5E5E0",
             borderRadius: 6,
             padding: "8px 12px",
             fontSize: 13,
-            width: 200,
+            maxWidth: 200,
             background: "white",
           }}
           onKeyDown={e => { if (e.key === "Enter") submit(); }}
@@ -404,7 +404,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
   if (loading) {
     return (
-      <div className="m-4 px-6 py-9 bg-bg border border-border rounded-lg shadow-md">
+      <div className="m-4 px-4 md:px-6 py-9 bg-bg border border-border rounded-lg shadow-md max-w-full overflow-hidden box-border">
         <div className="h-[3px] bg-bg-tertiary rounded-[2px] overflow-hidden mb-6">
           <div
             className="h-full bg-brand-green rounded-[2px] transition-[width] duration-2000 ease-in-out"
@@ -462,10 +462,10 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
   const futureSteps = pathway.steps.filter(s => s.horizon || s.timing === "horizon");
 
   return (
-    <div className="mx-4 mt-3 flex flex-col animate-fade-in-up">
+    <div className="mx-4 mt-3 flex flex-col animate-fade-in-up max-w-full overflow-hidden box-border">
 
       {/* ── Header with Stage Journey ──────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] rounded-t-lg px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] rounded-t-lg px-4 md:px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         <div className="relative">
           <div className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-white/[0.82] mb-1.5">
@@ -493,7 +493,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
       {/* ── Gap warning ───────────────────────────────────────────────── */}
       {pathway.gap_warning && (
-        <div className="px-[22px] py-3 bg-[#fffbeb] border-l-[3px] border-l-amber text-[0.78rem] text-[#78350f] leading-[1.55]">
+        <div className="px-4 md:px-[22px] py-3 bg-[#fffbeb] border-l-[3px] border-l-amber text-[0.78rem] text-[#78350f] leading-[1.55]">
           <strong className="font-bold">⚠ Gap detected:</strong> {pathway.gap_warning}
         </div>
       )}
@@ -501,7 +501,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       {/* ── Current Stage Steps ───────────────────────────────────────── */}
       {currentSteps.length > 0 && (
         <div className="bg-bg border border-border border-t-0">
-          <div className="px-[22px] py-2.5 bg-gradient-to-r from-green-soft to-bg border-b border-border flex items-center gap-2">
+          <div className="px-4 md:px-[22px] py-2.5 bg-gradient-to-r from-green-soft to-bg border-b border-border flex items-center gap-2">
             <span className="text-[0.85rem]">🎯</span>
             <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-brand-green">Your next moves</span>
             <span className="text-[0.6rem] text-text-tertiary font-medium">— {stageLabel} stage</span>
@@ -515,7 +515,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       {/* ── Future Stage Steps ────────────────────────────────────────── */}
       {futureSteps.length > 0 && (
         <div className={cn("bg-bg-secondary border border-border", currentSteps.length > 0 && "border-t-0")}>
-          <div className="px-[22px] py-2.5 bg-gradient-to-r from-[#f3e8ff] to-bg-secondary border-b border-border flex items-center gap-2">
+          <div className="px-4 md:px-[22px] py-2.5 bg-gradient-to-r from-[#f3e8ff] to-bg-secondary border-b border-border flex items-center gap-2">
             <span className="text-[0.85rem]">🔭</span>
             <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-[#6b21a8]">Looking ahead</span>
             <span className="text-[0.6rem] text-text-tertiary font-medium">— {nextStageLabel} stage</span>
@@ -528,7 +528,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
       {/* ── Next stage note ───────────────────────────────────────────── */}
       {pathway.next_stage_note && (
-        <div className="px-[22px] py-3 bg-bg-secondary border border-border border-t-0 rounded-b-lg text-[0.78rem] text-text-secondary leading-[1.55]">
+        <div className="px-4 md:px-[22px] py-3 bg-bg-secondary border border-border border-t-0 rounded-b-lg text-[0.78rem] text-text-secondary leading-[1.55]">
           <strong className="font-bold text-text">When you reach {nextStageLabel}:</strong>{" "}
           {pathway.next_stage_note}
         </div>
@@ -590,11 +590,11 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       })()}
 
       {/* ── Follow-up chips (stage-aware) ────────────────────────────── */}
-      <div className="mt-3 mb-4 flex flex-col gap-2.5">
+      <div className="mt-3 mb-4 flex flex-col gap-2.5 max-w-full overflow-hidden">
         <div className="text-[0.68rem] font-bold text-text-tertiary tracking-[0.08em] uppercase">
           Continue the conversation
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap max-w-full">
           {getStageChips(
             stage,
             pathway.steps[0]?.program_name || "",

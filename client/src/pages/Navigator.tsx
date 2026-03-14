@@ -1213,7 +1213,7 @@ export default function Navigator() {
             ✦ Ask the AI anything about Canada's agtech ecosystem
           </span>
         </div>
-        <div className="bg-bg border-t border-border-strong px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] shrink-0 shadow-[0_-2px_12px_rgba(0,0,0,0.04)]">
+        <div className="bg-bg border-t border-border-strong px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] shrink-0 shadow-[0_-2px_12px_rgba(0,0,0,0.04)] max-w-full overflow-hidden box-border">
           {/* Eco suggestion chips above input when messages exist */}
           {isEco && messages.length > 0 && messages.length < 4 && (
             <div className="flex gap-1.5 flex-wrap mb-2.5">
@@ -1231,7 +1231,7 @@ export default function Navigator() {
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
               placeholder="Ask a question..."
               rows={2}
-              className="flex-1 resize-none border-[1.5px] border-border rounded px-3.5 py-2.5 text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
+              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded px-3.5 py-2.5 text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
             <button
               onClick={() => send()}
@@ -1247,7 +1247,7 @@ export default function Navigator() {
           </div>
           {/* Disclaimer */}
           {!isEco && showPathway && (
-            <div className="text-[0.65rem] text-text-tertiary leading-[1.5] mt-2 italic text-center">
+            <div className="text-[0.65rem] text-text-tertiary leading-[1.5] mt-2 italic text-center max-w-full">
               Built from public data — we're probably missing things. If a recommendation looks off, that's useful feedback too.
             </div>
           )}
