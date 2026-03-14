@@ -278,6 +278,8 @@ function CellDetail({
           >Close</button>
         </div>
 
+        <ExplainCard prov={prov} cat={cat} stage={stage} mode={mode} />
+
         {cell.count === 0 ? (
           <div className="px-4 py-5 bg-bg-secondary rounded text-center border border-dashed border-border">
             <div className="text-[1.2rem] mb-1.5">🤔</div>
@@ -315,8 +317,6 @@ function CellDetail({
             ))}
           </div>
         )}
-
-        <ExplainCard prov={prov} cat={cat} stage={stage} mode={mode} />
       </div>
     </div>
   );

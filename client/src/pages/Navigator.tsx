@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { cn } from "../lib/cn";
+import { TrellisLogo } from "../components/TrellisLogo";
 import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
 import PathwayCard from "../components/PathwayCard";
@@ -569,7 +570,7 @@ export default function Navigator() {
         {/* ── Top bar ──────────────────────────────────────────────── */}
         <div className="h-12 px-4 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
           <Link href="/" className="flex items-center gap-2 no-underline">
-            <img src="/brand/trellis-nav-wordmark.svg" alt="Trellis" className="h-5" />
+            <TrellisLogo className="h-5" />
             <span className={cn(
               "text-[0.5rem] font-bold px-[5px] py-px rounded-[3px] tracking-[0.04em] uppercase",
               isEco ? "bg-eco-pill-bg text-eco-pill-text" : "bg-founder-pill-bg text-founder-pill-text"
