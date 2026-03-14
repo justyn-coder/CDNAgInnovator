@@ -3,7 +3,7 @@ import { useState } from "react";
 interface WizardResult {
   description: string;
   companyUrl: string;
-  productType: string;
+  productTypes: string[];
   stage: string;
   provinces: string[];
   need: string;
@@ -73,7 +73,7 @@ const PRODUCT_TYPES = [
 export default function Wizard({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<WizardResult & { needs: string[] }>({
-    description: "", companyUrl: "", productType: "", stage: "", provinces: [], need: "", needs: [],
+    description: "", companyUrl: "", productTypes: [], stage: "", provinces: [], need: "", needs: [],
   });
 
   function toggleProvince(p: string) {
@@ -103,7 +103,9 @@ export default function Wizard({ onComplete }: Props) {
     const primaryNeed = needs.includes("all") ? "all" : needs[0] || "all";
     const provinceStr = data.provinces.length > 0 ? data.provinces.join(" and ") : "Canada";
     const stageLabel = STAGES.find(s => s.key === data.stage)?.label || data.stage;
-    const productTypeStr = data.productType ? ` My product is ${data.productType}.` : "";
+    const productTypeStr = data.productTypes.length > 0
+      ? ` My product type${data.productTypes.length > 1 ? 's are' : ' is'} ${data.productTypes.join(", ")}.`
+      : "";
 
     let needStr: string;
     if (primaryNeed === "all") {
@@ -121,7 +123,7 @@ export default function Wizard({ onComplete }: Props) {
       provinces: data.provinces,
       need: primaryNeed,
       companyUrl: data.companyUrl || undefined,
-      productType: data.productType || undefined,
+      productType: data.productTypes.length > 0 ? data.productTypes.join(", ") : undefined,
     });
   }
 
@@ -186,14 +188,21 @@ export default function Wizard({ onComplete }: Props) {
           Product type
         </label>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {PRODUCT_TYPES.map(pt => (
+          {PRODUCT_TYPES.map(pt => {
+            const active = data.productTypes.includes(pt.key);
+            return (
             <button key={pt.key}
-              onClick={() => setData(d => ({ ...d, productType: d.productType === pt.key ? "" : pt.key }))}
+              onClick={() => setData(d => ({
+                ...d,
+                productTypes: d.productTypes.includes(pt.key)
+                  ? d.productTypes.filter(t => t !== pt.key)
+                  : [...d.productTypes, pt.key],
+              }))}
               style={{
                 padding: "7px 14px", borderRadius: "var(--radius-sm)",
-                border: data.productType === pt.key ? "2px solid var(--green-mid)" : "1.5px solid var(--border)",
-                background: data.productType === pt.key ? "var(--green-mid)" : "var(--bg)",
-                color: data.productType === pt.key ? "#fff" : "var(--text-secondary)",
+                border: active ? "2px solid var(--green-mid)" : "1.5px solid var(--border)",
+                background: active ? "var(--green-mid)" : "var(--bg)",
+                color: active ? "#fff" : "var(--text-secondary)",
                 fontWeight: 600, fontSize: "0.78rem",
                 fontFamily: "var(--font-text)",
                 transition: "all 0.12s",
@@ -203,7 +212,8 @@ export default function Wizard({ onComplete }: Props) {
               <span style={{ fontSize: "0.9rem" }}>{pt.icon}</span>
               {pt.label}
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 
