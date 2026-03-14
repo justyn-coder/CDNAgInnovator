@@ -897,8 +897,11 @@ export default function Navigator() {
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
         <div className="h-11 md:h-14 px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
-          <Link href="/" className="flex items-center no-underline">
+          <Link href="/" className="flex items-center gap-2 no-underline">
             <TrellisLogo className="h-6 md:h-8" showTagline />
+            <span style={{ fontSize: 11, color: "#999", fontWeight: 400 }}>
+              · {isEco ? "for partners" : "for founders"}
+            </span>
           </Link>
           <div className="flex gap-1.5 items-center">
             <button onClick={() => { setBrowseInitialSearch(""); setOrgParam(null); setShowBrowse(true); }}
