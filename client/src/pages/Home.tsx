@@ -102,7 +102,7 @@ export default function Home() {
       {showPopup && (
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center p-5"
-          style={{ background: "rgba(245, 243, 237, 0.97)" }}
+          style={{ background: "#F5F3ED" }}
         >
           <div
             className="bg-white w-full max-w-[460px] animate-slide-up"
