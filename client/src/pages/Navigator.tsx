@@ -752,8 +752,6 @@ export default function Navigator() {
   const [wizardSnapshot, setWizardSnapshot] = useState<WizardSnapshot | null>(null);
   const [wizardDescription, setWizardDescription] = useState("");
   const [showPathway, setShowPathway] = useState(false);
-  const [quickFeedbackSent, setQuickFeedbackSent] = useState(false);
-  const [showQuickFeedback, setShowQuickFeedback] = useState(false);
   const [ecoMsgCount, setEcoMsgCount] = useState(0);
   // showEcoCta removed — was set but never used in JSX
   const [showNudgeBanner, setShowNudgeBanner] = useState(false);
@@ -864,7 +862,6 @@ export default function Navigator() {
     setWizardDescription(descMatch ? descMatch[1] : "an agtech company");
     setShowPathway(true);
     nudgeFeedbackFooter();
-    if (!quickFeedbackSent) setTimeout(() => setShowQuickFeedback(true), 8000);
   }
 
   function handlePathwayFollowUp(question: string) {
@@ -954,7 +951,7 @@ export default function Navigator() {
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
 
-      <div className="fixed inset-0 bg-bg flex flex-col font-sans">
+      <div className="fixed inset-0 bg-bg flex flex-col font-sans" style={{ paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
         <div className="h-16 md:h-[72px] px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
@@ -1045,7 +1042,7 @@ export default function Navigator() {
         )}
 
         {/* ── Messages area ────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto overscroll-contain pt-4 pb-3" role="log" aria-live="polite">
+        <div data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain pt-4 pb-3" role="log" aria-live="polite">
 
           {/* Eco operator welcome */}
           {isEco && messages.length === 0 && !loading && (
@@ -1269,39 +1266,6 @@ export default function Navigator() {
           </span>
         </button>
       </div>
-
-      {/* ── Quick feedback (founder) — compact, auto-collapses ──────── */}
-      {showQuickFeedback && !quickFeedbackSent && !isEco && (
-        <div className="fixed bottom-20 left-0 right-0 flex justify-center z-[4] animate-slide-up px-4 pointer-events-none">
-          <div className="bg-bg border-[1.5px] border-amber rounded-full px-2 py-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.12)] inline-flex items-center gap-1.5 pointer-events-auto">
-            <span className="text-[0.7rem] font-semibold text-text-secondary px-1.5 whitespace-nowrap">Useful?</span>
-            {[
-              { emoji: "🔥", value: "great" },
-              { emoji: "👍", value: "ok" },
-              { emoji: "🤷", value: "miss" },
-            ].map(opt => (
-              <button key={opt.value} onClick={() => {
-                fetch("/api/submissions", {
-                  method: "POST", headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    programName: `FEEDBACK: ${opt.value}${(() => { try { const r = localStorage.getItem("trellis_ref"); return r ? ` [ref:${r}]` : ""; } catch { return ""; } })()}`,
-                    bestFor: `Stage: ${wizardSnapshot?.stage}, Prov: ${wizardSnapshot?.provinces.join(",")}, Need: ${wizardSnapshot?.need}`,
-                    submitterName: "anonymous",
-                    submitterEmail: `feedback-${Date.now()}@anon`,
-                  }),
-                }).catch(() => {});
-                setQuickFeedbackSent(true);
-                setShowQuickFeedback(false);
-              }}
-                className="w-9 h-9 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-base transition-transform hover:scale-[1.15]"
-              >{opt.emoji}</button>
-            ))}
-            <button onClick={() => setShowQuickFeedback(false)} className="bg-transparent border-none text-[0.72rem] text-text-tertiary px-2 py-1" aria-label="Dismiss">
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
 
     </>
   );
