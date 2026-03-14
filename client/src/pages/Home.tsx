@@ -131,7 +131,7 @@ export default function Home() {
             className="bg-white w-full max-w-[460px] animate-slide-up"
             style={{
               borderRadius: 16,
-              padding: "40px 32px 28px",
+              padding: "32px 24px 24px",
               border: "1px solid #E5E5E0",
             }}
           >

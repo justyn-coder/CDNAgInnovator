@@ -483,21 +483,21 @@ function BrowsePanel({
 
       {/* Operator org header bar */}
       {orgLabel && (
-        <div className="px-[18px] py-2.5 flex justify-between items-center border-b border-border bg-bg-secondary shrink-0">
-          <div className="flex items-baseline gap-2">
-            <span className="font-display text-[1.1rem] text-text">
+        <div className="px-3 md:px-[18px] py-2.5 flex justify-between items-center gap-2 flex-wrap border-b border-border bg-bg-secondary shrink-0">
+          <div className="flex items-baseline gap-2 min-w-0">
+            <span className="font-display text-[1rem] md:text-[1.1rem] text-text truncate">
               Your {orgLabel.toUpperCase()} programs
             </span>
-            <span style={{ fontSize: 13, color: "#999" }}>
+            <span className="shrink-0" style={{ fontSize: 13, color: "#999" }}>
               · {filtered.length} results
             </span>
           </div>
           <button
             onClick={() => setSearch("")}
-            className="bg-transparent border-none cursor-pointer"
+            className="bg-transparent border-none cursor-pointer shrink-0"
             style={{ fontSize: 13, color: "#2D7A4F" }}
           >
-            View all {data.length} programs →
+            View all {data.length} →
           </button>
         </div>
       )}
@@ -505,18 +505,18 @@ function BrowsePanel({
       {/* Bridge banner */}
       {showBridge && (
         <div
-          className="mx-[18px] mt-2.5 flex items-center justify-between"
+          className="mx-3 md:mx-[18px] mt-2.5 flex items-center justify-between gap-2 flex-wrap"
           style={{
             background: "#1B4332",
             borderRadius: 10,
-            padding: "12px 20px",
+            padding: "10px 14px",
             animation: "slideDown 0.3s ease both, fadeIn 0.3s ease both",
           }}
         >
           <span style={{ fontSize: 13, color: "white" }}>
             Curious how founders discover these programs?
           </span>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <a
               href="/navigator"
               onClick={() => {
@@ -565,7 +565,7 @@ function BrowsePanel({
       </div>
 
       {/* Program list */}
-      <div className="flex-1 overflow-y-auto py-2">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden py-2">
         {loading ? (
           <div className="p-12 text-center text-text-tertiary">Loading programs…</div>
         ) : sorted.length === 0 ? (
@@ -641,7 +641,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
     >
       <div onClick={e => e.stopPropagation()} className="bg-bg rounded-lg max-w-[440px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-hidden animate-slide-up">
         {/* Amber header */}
-        <div className="bg-gradient-to-br from-[#8B6914] via-[#D4A828] to-[#BF9624] px-6 py-[18px] flex items-center gap-2.5">
+        <div className="bg-gradient-to-br from-[#8B6914] via-[#D4A828] to-[#BF9624] px-4 md:px-6 py-[18px] flex items-center gap-2.5">
           <span className="text-[1.3rem]">⚠️</span>
           <div>
             <div className="font-bold text-[0.92rem] text-white">
@@ -653,7 +653,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
           </div>
         </div>
 
-        <div className="px-6 pt-5 pb-6">
+        <div className="px-4 md:px-6 pt-5 pb-6">
           {done ? (
             <div className="text-center py-3">
               <div className="text-[1.4rem] mb-2">✓</div>
@@ -1009,7 +1009,8 @@ export default function Navigator() {
             style={{
               background: "#FFF8E7",
               borderBottom: "1px solid rgba(212,168,40,0.27)",
-              padding: "12px 24px",
+              paddingTop: 12,
+              paddingBottom: 12,
               animation: "slideDown 0.3s ease both",
             }}
           >
@@ -1075,7 +1076,7 @@ export default function Navigator() {
               {/* Main welcome card */}
               <div className="bg-bg border border-border rounded-lg shadow-md overflow-hidden">
                 {/* Header */}
-                <div className="bg-gradient-to-br from-[#122b1f] to-[#1B4332] px-6 pt-[22px] pb-[18px]">
+                <div className="bg-gradient-to-br from-[#122b1f] to-[#1B4332] px-4 md:px-6 pt-[22px] pb-[18px]">
                   <div className="text-[0.65rem] font-bold tracking-[0.12em] uppercase text-brand-gold/70 mb-2">
                     Ecosystem Intelligence
                   </div>

@@ -147,6 +147,7 @@
 .md-body h1 { font-size: 1rem; }
 .md-body h2 { font-size: 0.9rem; }
 .md-body h3 { font-size: 0.85rem; color: var(--color-green-mid); }
+.md-body { overflow-wrap: break-word; word-break: break-word; }
 .md-body p { margin-bottom: 8px; }
 .md-body ul, .md-body ol { padding-left: 18px; margin-bottom: 8px; }
 .md-body li { margin-bottom: 3px; }

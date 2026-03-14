@@ -584,7 +584,7 @@ export default function Wizard({ onComplete }: Props) {
   };
 
   return (
-    <div ref={wizardRef} className="m-4 p-6 bg-bg border border-border rounded-lg shadow-md">
+    <div ref={wizardRef} className="m-4 p-4 md:p-6 bg-bg border border-border rounded-lg shadow-md overflow-hidden">
       {/* Progress — always 4 segments */}
       <div className="flex gap-1 mb-1.5">
         {[0, 1, 2, 3].map(i => (
