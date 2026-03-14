@@ -252,7 +252,7 @@ export default function Wizard({ onComplete }: Props) {
     // ── Step 0: What are you building? ──
     what: (
       <div key="what" className="animate-fade-in-up">
-        <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
           What are you building?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">
@@ -332,7 +332,7 @@ export default function Wizard({ onComplete }: Props) {
     // ── Step 1: Stage ──
     stage: (
       <div key="stage" className="animate-fade-in-up">
-        <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
           What stage are you at?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">
@@ -372,7 +372,7 @@ export default function Wizard({ onComplete }: Props) {
     // ── Step 2: Province ──
     province: (
       <div key="province" className="animate-fade-in-up">
-        <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
           Where are you operating?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">
@@ -405,7 +405,7 @@ export default function Wizard({ onComplete }: Props) {
     // ── Step 3b: Expansion Provinces (FC/Scale only) ──
     expansion: (
       <div key="expansion" className="animate-fade-in-up">
-        <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
           Expanding into new territory?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">
@@ -445,7 +445,7 @@ export default function Wizard({ onComplete }: Props) {
     // ── Step 3c: Completed Programs (Pilot/FC only) ──
     completed: (
       <div key="completed" className="animate-fade-in-up">
-        <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
           Been through any programs already?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">
@@ -514,7 +514,7 @@ export default function Wizard({ onComplete }: Props) {
     // ── Step 3: Need (MULTI-SELECT) ──
     need: (
       <div key="need" className="animate-fade-in-up">
-        <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
           What's holding you back?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">

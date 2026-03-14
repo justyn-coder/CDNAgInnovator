@@ -303,7 +303,7 @@ function ProgramCard({ p }: { p: Program }) {
   return (
     <div className="px-[18px] py-3 bg-bg border-b border-border transition-colors hover:bg-bg-secondary">
       <div className="mb-1">
-        <div className="font-bold text-[0.85rem] mb-1">
+        <div className="font-medium text-[0.94rem] md:text-[1rem] mb-1">
           {p.website
             ? <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-brand-green no-underline border-b border-[rgba(45,122,79,0.2)]">{p.name} ↗</a>
             : <span className="text-text">{p.name}</span>}
@@ -319,7 +319,7 @@ function ProgramCard({ p }: { p: Program }) {
         </div>
       </div>
       {p.description && (
-        <div className="text-[0.78rem] text-text-secondary leading-[1.5]">
+        <div className="text-[0.82rem] md:text-[0.875rem] text-text-secondary leading-[1.5]">
           {p.description}
         </div>
       )}
