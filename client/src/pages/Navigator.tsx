@@ -1206,7 +1206,7 @@ export default function Navigator() {
       {!isEco && !showFeedback && !showQuickFeedback && !feedbackMinimized && (
         <button
           onClick={() => setShowFeedback(true)}
-          className="fixed bottom-20 right-4 z-[4] bg-brand-gold text-white border-none rounded-full px-3.5 py-2 text-[0.7rem] font-bold shadow-gold flex items-center gap-[5px] animate-fade-in"
+          className="fixed bottom-20 left-4 md:left-auto md:right-4 z-[4] bg-brand-gold text-white border-none rounded-full px-3.5 py-2 text-[0.7rem] font-bold shadow-gold flex items-center gap-[5px] animate-fade-in"
         >
           <span>💬</span> Feedback
           <span
