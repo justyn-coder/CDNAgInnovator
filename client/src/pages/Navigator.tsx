@@ -1207,17 +1207,26 @@ export default function Navigator() {
         </div>
 
         {/* ── Chat input ───────────────────────────────────────────── */}
-        {(!showWizard || isEco) && (<>
-        {/* AI chat label — sits above the input */}
-        <div className="px-4 md:px-6 pt-2 pb-1 shrink-0">
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#999", letterSpacing: "0.03em" }}>
-            ✦ Ask the AI anything about Canada's agtech ecosystem
-          </span>
-        </div>
-        <div className="bg-bg border-t border-border-strong px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] shrink-0 shadow-[0_-2px_12px_rgba(0,0,0,0.04)] max-w-full overflow-hidden box-border">
-          {/* Eco suggestion chips above input when messages exist */}
+        {(!showWizard || isEco) && (
+        <div className="shrink-0 border-t border-border-strong shadow-[0_-2px_12px_rgba(0,0,0,0.04)] max-w-full overflow-hidden box-border">
+          {/* Label strip */}
+          <div className="px-4 md:px-6 py-[6px] bg-gradient-to-r from-[#E8F0EB] to-[#F5F3ED] flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="shrink-0">
+              <path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 13l-1.5-4.5L2 7l4.5-1.5L8 1z" fill="#2D7A4F" opacity="0.7"/>
+              <path d="M12.5 1l.75 2.25L15.5 4l-2.25.75L12.5 7l-.75-2.25L9.5 4l2.25-.75L12.5 1z" fill="#8CC63F" opacity="0.6"/>
+            </svg>
+            <span className="text-[0.68rem] font-semibold text-brand-green tracking-[0.01em]">
+              AI-powered
+            </span>
+            <span className="text-[0.68rem] text-text-tertiary">·</span>
+            <span className="text-[0.68rem] text-text-tertiary">
+              Ask follow-ups, drill into programs, or explore gaps
+            </span>
+          </div>
+
+          {/* Eco suggestion chips */}
           {isEco && messages.length > 0 && messages.length < 4 && (
-            <div className="flex gap-1.5 flex-wrap mb-2.5">
+            <div className="flex gap-1.5 flex-wrap px-4 md:px-6 pt-2.5 pb-1">
               {ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q)).slice(0, 3).map((s, i) => (
                 <button key={i} onClick={() => send(s.q)}
                   className="px-3 py-1.5 rounded-full border border-border bg-bg-secondary text-[0.72rem] font-semibold text-text-secondary transition-all hover:border-brand-green active:bg-bg-tertiary"
@@ -1225,35 +1234,42 @@ export default function Navigator() {
               ))}
             </div>
           )}
-          <div className="flex gap-2">
+
+          {/* Input row */}
+          <div className="px-4 md:px-6 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder="Ask a question..."
-              rows={2}
-              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded px-3.5 py-2.5 text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
+              placeholder={isEco ? "e.g., Where are the gaps in Saskatchewan?" : "e.g., Tell me more about the first program"}
+              rows={1}
+              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3.5 py-2.5 text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
             <button
               onClick={() => send()}
               disabled={loading || !input.trim()}
               className={cn(
-                "border-none rounded px-5 font-bold text-[0.9rem] transition-all min-w-[48px]",
+                "border-none rounded-lg px-4 font-bold text-[0.9rem] transition-all min-w-[44px]",
                 loading || !input.trim()
                   ? "bg-bg-tertiary text-text-tertiary"
-                  : "bg-brand-gold text-brand-forest shadow-gold"
+                  : "bg-brand-green text-white shadow-green"
               )}
               aria-label="Send message"
-            >→</button>
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
           </div>
+
           {/* Disclaimer */}
           {!isEco && showPathway && (
-            <div className="text-[0.65rem] text-text-tertiary leading-[1.5] mt-2 italic text-center max-w-full">
-              Built from public data — we're probably missing things. If a recommendation looks off, that's useful feedback too.
+            <div className="text-[0.6rem] text-text-tertiary leading-[1.5] px-4 md:px-6 pb-2 italic text-center max-w-full">
+              Built from public data · Beta — your feedback shapes what we build next
             </div>
           )}
         </div>
-        </>)}
+        )}
 
         {/* ── Feedback bar — tappable, always visible ──────── */}
         <button
