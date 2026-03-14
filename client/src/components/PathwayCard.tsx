@@ -91,21 +91,17 @@ function StageJourney({ current, next }: { current: string; next: string }) {
   const currentIdx = STAGE_ORDER.indexOf(current);
 
   return (
-    <div className="flex items-start px-1 mt-4 max-w-full overflow-hidden">
-      {STAGE_ORDER.map((s, i) => {
-        const isCurrent = s === current;
-        const isNext = s === next && s !== current;
-        const isPast = i < currentIdx;
-
-        return (
-          <div key={s} className={cn("flex items-start min-w-0", i < STAGE_ORDER.length - 1 ? "flex-1" : "shrink-0")}>
-            {/* Stage dot */}
-            <div className={cn(
-              "flex flex-col items-center gap-[3px]",
-              isCurrent ? "pt-0" : "pt-[5px]"
-            )}>
+    <div className="mt-4 px-1 max-w-full overflow-hidden">
+      {/* Row 1: circles + connector lines — fixed height, vertically centered */}
+      <div className="flex items-center" style={{ height: 36 }}>
+        {STAGE_ORDER.map((s, i) => {
+          const isCurrent = s === current;
+          const isNext = s === next && s !== current;
+          const isPast = i < currentIdx;
+          return (
+            <div key={s} className={cn("flex items-center min-w-0", i < STAGE_ORDER.length - 1 ? "flex-1" : "shrink-0")}>
               <div className={cn(
-                "rounded-full flex items-center justify-center transition-all duration-300",
+                "rounded-full flex items-center justify-center shrink-0 transition-all duration-300",
                 isCurrent && "w-9 h-9 bg-brand-green border-[2.5px] border-brand-chartreuse text-[0.85rem] shadow-[0_0_16px_rgba(140,198,63,0.35)] text-white/70",
                 isPast && "w-[26px] h-[26px] bg-white/35 border-2 border-white/50 text-[0.6rem] text-white/[0.87]",
                 isNext && "w-[26px] h-[26px] bg-transparent border-2 border-dashed border-white/60 text-[0.6rem] text-white/70 animate-stage-pulse",
@@ -113,6 +109,26 @@ function StageJourney({ current, next }: { current: string; next: string }) {
               )}>
                 {isCurrent ? STAGE_ICONS[s] : isPast ? "✓" : isNext ? STAGE_ICONS[s] : ""}
               </div>
+              {i < STAGE_ORDER.length - 1 && (
+                <div className={cn(
+                  "flex-1 h-0.5 min-w-2",
+                  i < currentIdx && "bg-white/50",
+                  i === currentIdx && "bg-gradient-to-r from-brand-chartreuse to-white/30",
+                  i > currentIdx && "bg-white/20",
+                )} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {/* Row 2: labels — aligned under each circle */}
+      <div className="flex mt-1">
+        {STAGE_ORDER.map((s, i) => {
+          const isCurrent = s === current;
+          const isNext = s === next && s !== current;
+          const isPast = i < currentIdx;
+          return (
+            <div key={s} className={cn("flex flex-col items-center min-w-0", i < STAGE_ORDER.length - 1 ? "flex-1" : "shrink-0")} style={{ width: isCurrent ? 36 : 26 }}>
               <span className={cn(
                 "text-[0.6rem] sm:text-[0.65rem] text-center leading-tight",
                 isCurrent && "font-bold text-white",
@@ -121,23 +137,14 @@ function StageJourney({ current, next }: { current: string; next: string }) {
                 !isCurrent && !isNext && !isPast && "font-normal text-white/70",
               )}>{SL[s] || s}</span>
               {isCurrent && (
-                <span className="text-[0.55rem] font-bold text-brand-chartreuse tracking-[0.1em] uppercase -mt-0.5">
+                <span className="text-[0.5rem] font-bold text-brand-chartreuse tracking-[0.08em] uppercase mt-px">
                   YOU ARE HERE
                 </span>
               )}
             </div>
-            {/* Connector line */}
-            {i < STAGE_ORDER.length - 1 && (
-              <div className={cn(
-                "flex-1 h-0.5 min-w-2 mt-[17px]",
-                i < currentIdx && "bg-white/50",
-                i === currentIdx && "bg-gradient-to-r from-brand-chartreuse to-white/30",
-                i > currentIdx && "bg-white/20",
-              )} />
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
