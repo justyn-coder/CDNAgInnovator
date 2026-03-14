@@ -177,7 +177,13 @@ function CategoryPill({ cat }: { cat: string }) {
 // ── Inline Correction Form ──────────────────────────────────────────────────
 function CorrectionForm({ programName, onClose }: { programName: string; onClose: () => void }) {
   const [text, setText] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => {
+    try { return sessionStorage.getItem("ag_fb_email") || ""; } catch { return ""; }
+  });
+  const [name, setName] = useState(() => {
+    try { return sessionStorage.getItem("ag_fb_name") || ""; } catch { return ""; }
+  });
+  const hasIdentity = !!(email || name);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -191,10 +197,14 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
         body: JSON.stringify({
           programName: `CORRECTION: ${programName}`,
           bestFor: text.trim() + ((() => { try { const r = localStorage.getItem("trellis_ref"); return r ? ` [ref:${r}]` : ""; } catch { return ""; } })()),
-          submitterName: "operator",
+          submitterName: name.trim() || "operator",
           submitterEmail: email.trim() || `correction-${Date.now()}@anon`,
         }),
       });
+      try {
+        if (email.trim()) sessionStorage.setItem("ag_fb_email", email.trim());
+        if (name.trim()) sessionStorage.setItem("ag_fb_name", name.trim());
+      } catch {}
       setDone(true);
       setTimeout(onClose, 3000);
     } catch {
@@ -207,7 +217,7 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
     return (
       <div
         className="mt-2.5 px-3 py-2.5 rounded-lg text-center"
-        style={{ background: "#FFF8E7", border: "0.5px solid rgba(212,168,40,0.27)", fontSize: 13, color: "#6b6b6b" }}
+        style={{ background: "#FFF8E7", border: "1px solid rgba(212,168,40,0.27)", fontSize: 13, color: "#6b6b6b" }}
       >
         Thanks — we'll review this
       </div>
@@ -217,7 +227,7 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
   return (
     <div
       className="mt-2.5 rounded-lg"
-      style={{ background: "#FFF8E7", border: "0.5px solid rgba(212,168,40,0.27)", padding: 12 }}
+      style={{ background: "#FFF8E7", border: "1px solid rgba(212,168,40,0.27)", padding: 12 }}
     >
       <div style={{ fontSize: 12, fontWeight: 500, color: "#8B6914", marginBottom: 8 }}>
         Correction for {programName}
@@ -229,7 +239,7 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
         rows={2}
         className="w-full outline-none resize-none font-sans"
         style={{
-          border: "0.5px solid #D0D0CA",
+          border: "1px solid #D0D0CA",
           borderRadius: 6,
           background: "white",
           fontSize: 13,
@@ -238,25 +248,50 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
           marginBottom: 6,
         }}
       />
-      <input
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        placeholder="Your email (optional — for follow-up)"
-        type="email"
-        className="w-full outline-none font-sans"
-        style={{
-          border: "0.5px solid #D0D0CA",
-          borderRadius: 6,
-          background: "white",
-          fontSize: 13,
-          fontFamily: "'DM Sans', system-ui, sans-serif",
-          padding: "8px 10px",
-          marginBottom: 4,
-        }}
-      />
-      <div style={{ fontSize: 11, color: "#999", marginBottom: 8 }}>
-        We'll only use this to confirm corrections with you.
-      </div>
+      {hasIdentity ? (
+        <div style={{ fontSize: 11, color: "#999", marginBottom: 8 }}>
+          Sending as <strong style={{ color: "#6b6b6b" }}>{name || email}</strong>
+        </div>
+      ) : (
+        <>
+          <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Your name (optional)"
+              className="w-full outline-none font-sans"
+              style={{
+                border: "1px solid #D0D0CA",
+                borderRadius: 6,
+                background: "white",
+                fontSize: 13,
+                fontFamily: "'DM Sans', system-ui, sans-serif",
+                padding: "8px 10px",
+                flex: 1,
+              }}
+            />
+            <input
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="Email (optional)"
+              type="email"
+              className="w-full outline-none font-sans"
+              style={{
+                border: "1px solid #D0D0CA",
+                borderRadius: 6,
+                background: "white",
+                fontSize: 13,
+                fontFamily: "'DM Sans', system-ui, sans-serif",
+                padding: "8px 10px",
+                flex: 1,
+              }}
+            />
+          </div>
+          <div style={{ fontSize: 11, color: "#999", marginBottom: 8 }}>
+            So we can follow up — only used for this.
+          </div>
+        </>
+      )}
       <div className="flex items-center gap-3">
         <button
           onClick={submit}
@@ -266,7 +301,7 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
             color: "#1B4332",
             fontSize: 12,
             fontWeight: 500,
-            padding: "6px 16px",
+            padding: "8px 16px",
             borderRadius: 6,
             border: "none",
             cursor: submitting ? "wait" : "pointer",
