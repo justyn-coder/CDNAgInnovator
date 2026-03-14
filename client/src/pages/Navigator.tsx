@@ -756,11 +756,22 @@ export default function Navigator() {
   const [showQuickFeedback, setShowQuickFeedback] = useState(false);
   const [ecoMsgCount, setEcoMsgCount] = useState(0);
   // showEcoCta removed — was set but never used in JSX
-  const [feedbackMinimized, setFeedbackMinimized] = useState(false);
   const [showNudgeBanner, setShowNudgeBanner] = useState(false);
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const feedbackFooterRef = useRef<HTMLDivElement>(null);
+  const feedbackBounceCount = useRef(0);
+
+  function nudgeFeedbackFooter() {
+    if (feedbackBounceCount.current >= 3) return;
+    feedbackBounceCount.current += 1;
+    const el = feedbackFooterRef.current;
+    if (!el) return;
+    el.style.transition = "transform 0.3s ease";
+    el.style.transform = "translateY(-4px)";
+    setTimeout(() => { el.style.transform = "translateY(0)"; }, 300);
+  }
 
   // Dynamic counts for operator dashboard
   const [programCount, setProgramCount] = useState<number | null>(null);
@@ -852,6 +863,7 @@ export default function Navigator() {
     const descMatch = prompt.match(/I'm building (.+?)\.(?:\s*My product is|\s*I'm at)/);
     setWizardDescription(descMatch ? descMatch[1] : "an agtech company");
     setShowPathway(true);
+    nudgeFeedbackFooter();
     if (!quickFeedbackSent) setTimeout(() => setShowQuickFeedback(true), 8000);
   }
 
@@ -922,6 +934,7 @@ export default function Navigator() {
       });
       const data = await res.json();
       setMessages(m => [...m, { role: "assistant", content: data.reply || "Something went wrong." }]);
+      nudgeFeedbackFooter();
     } catch {
       setMessages(m => [...m, { role: "assistant", content: "Network error — please try again." }]);
     }
@@ -1084,7 +1097,7 @@ export default function Navigator() {
                 {/* Action buttons — Search Programs + View Gap Map */}
                 <div className="px-4 py-3 flex gap-2 border-b border-border">
                   <button
-                    onClick={() => { setBrowseInitialSearch(""); setOrgParam(null); setShowBrowse(true); }}
+                    onClick={() => { setBrowseInitialSearch(""); setOrgParam(null); setShowBrowse(true); nudgeFeedbackFooter(); }}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-bg border border-border rounded-sm text-[0.82rem] font-semibold text-text transition-all hover:border-brand-green hover:-translate-y-px shadow-sm"
                   >
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -1094,7 +1107,7 @@ export default function Navigator() {
                     Search Programs
                   </button>
                   <button
-                    onClick={() => setShowGapMap(true)}
+                    onClick={() => { setShowGapMap(true); nudgeFeedbackFooter(); }}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-bg border border-border rounded-sm text-[0.82rem] font-semibold text-text transition-all hover:border-brand-green hover:-translate-y-px shadow-sm"
                   >
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -1224,6 +1237,23 @@ export default function Navigator() {
           )}
         </div>
         )}
+
+        {/* ── Feedback footer — always visible, never dismissable ──────── */}
+        <div
+          ref={feedbackFooterRef}
+          className="shrink-0 flex items-center justify-between px-4 md:px-6 border-t border-border bg-bg-secondary"
+          style={{ height: 34 }}
+        >
+          <span className="text-[0.68rem] text-text-tertiary">
+            Was something wrong or missing?
+          </span>
+          <button
+            onClick={() => setShowFeedback(true)}
+            className="bg-transparent border-none cursor-pointer text-[0.68rem] font-semibold text-brand-green hover:text-brand-forest transition-colors"
+          >
+            Send feedback →
+          </button>
+        </div>
       </div>
 
       {/* ── Quick feedback (founder) — compact, auto-collapses ──────── */}
@@ -1259,25 +1289,6 @@ export default function Navigator() {
         </div>
       )}
 
-      {/* ── Persistent feedback button ──────── */}
-      {!showFeedback && !feedbackMinimized && (
-        <div
-          className="fixed bottom-4 right-4 z-[250] flex items-center gap-1"
-          style={{ animation: messages.length <= 3 ? "fadeIn 0.4s ease 1s both" : "none" }}
-        >
-          <button
-            onClick={() => setShowFeedback(true)}
-            className="bg-brand-gold/90 text-white border-none rounded-full w-10 h-10 flex items-center justify-center text-[1rem] shadow-gold"
-            aria-label="Send feedback"
-            title="Send feedback"
-          >💬</button>
-          <button
-            onClick={() => setFeedbackMinimized(true)}
-            className="bg-text-tertiary/30 text-text-tertiary border-none rounded-full w-5 h-5 flex items-center justify-center text-[0.6rem]"
-            aria-label="Dismiss feedback button"
-          >✕</button>
-        </div>
-      )}
     </>
   );
 }
