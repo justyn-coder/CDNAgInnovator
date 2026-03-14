@@ -104,7 +104,7 @@ function StageJourney({ current, next }: { current: string; next: string }) {
             )}>
               <div className={cn(
                 "rounded-full flex items-center justify-center transition-all duration-300",
-                isCurrent && "w-9 h-9 bg-green-mid border-[2.5px] border-green-accent text-[0.85rem] shadow-[0_0_16px_rgba(61,204,26,0.35)] text-white/70",
+                isCurrent && "w-9 h-9 bg-brand-green border-[2.5px] border-brand-chartreuse text-[0.85rem] shadow-[0_0_16px_rgba(140,198,63,0.35)] text-white/70",
                 isPast && "w-[26px] h-[26px] bg-white/35 border-2 border-white/50 text-[0.6rem] text-white/[0.87]",
                 isNext && "w-[26px] h-[26px] bg-transparent border-2 border-dashed border-white/60 text-[0.6rem] text-white/70 animate-stage-pulse",
                 !isCurrent && !isPast && !isNext && "w-[26px] h-[26px] bg-white/10 border-2 border-white/30 text-[0.6rem] text-white/70",
@@ -119,7 +119,7 @@ function StageJourney({ current, next }: { current: string; next: string }) {
                 !isCurrent && !isNext && !isPast && "font-normal text-white/70",
               )}>{SL[s] || s}</span>
               {isCurrent && (
-                <span className="text-[0.55rem] font-bold text-green-accent tracking-[0.1em] uppercase -mt-0.5">
+                <span className="text-[0.55rem] font-bold text-brand-chartreuse tracking-[0.1em] uppercase -mt-0.5">
                   YOU ARE HERE
                 </span>
               )}
@@ -129,7 +129,7 @@ function StageJourney({ current, next }: { current: string; next: string }) {
               <div className={cn(
                 "flex-1 h-0.5 min-w-2 mt-[17px]",
                 i < currentIdx && "bg-white/50",
-                i === currentIdx && "bg-gradient-to-r from-green-accent to-white/30",
+                i === currentIdx && "bg-gradient-to-r from-brand-chartreuse to-white/30",
                 i > currentIdx && "bg-white/20",
               )} />
             )}
@@ -182,7 +182,7 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp }: {
           <span className="font-bold text-[0.88rem]">
             {step.program_website ? (
               <a href={step.program_website} target="_blank" rel="noopener noreferrer"
-                className="text-green-mid no-underline border-b border-[rgba(30,107,10,0.2)] hover:border-green-mid">
+                className="text-brand-green no-underline border-b border-[rgba(45,122,79,0.2)] hover:border-brand-green">
                 {step.program_name} ↗
               </a>
             ) : <span className="text-text">{step.program_name}</span>}
@@ -226,7 +226,7 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp }: {
         {step.order === 1 && !isHorizon && (
           <button
             onClick={() => onFollowUp(`Tell me more about ${step.program_name}. What exactly should I prepare before reaching out, and who should I contact?`)}
-            className="mt-2 px-3 py-[5px] bg-transparent border border-green-mid rounded-full text-[0.68rem] font-semibold text-green-mid transition-all duration-150 hover:bg-green-mid hover:text-white"
+            className="mt-2 px-3 py-[5px] bg-transparent border border-brand-gold rounded-full text-[0.68rem] font-semibold text-brand-gold transition-all duration-150 hover:bg-brand-gold hover:text-brand-forest"
           >
             Tell me how to approach this →
           </button>
@@ -270,7 +270,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       <div className="m-4 px-6 py-9 bg-bg border border-border rounded-lg shadow-md">
         <div className="h-[3px] bg-bg-tertiary rounded-[2px] overflow-hidden mb-6">
           <div
-            className="h-full bg-green-mid rounded-[2px] transition-[width] duration-2000 ease-in-out"
+            className="h-full bg-brand-green rounded-[2px] transition-[width] duration-2000 ease-in-out"
             style={{ width: `${Math.min(25 + loadingStep * 25, 95)}%` }}
           />
         </div>
@@ -282,12 +282,12 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
             )}>
               <div className={cn(
                 "w-5 h-5 rounded-full shrink-0 flex items-center justify-center transition-all duration-300",
-                i < loadingStep && "bg-green-mid",
-                i === loadingStep && "bg-bg-tertiary border-2 border-green-mid",
+                i < loadingStep && "bg-brand-green",
+                i === loadingStep && "bg-bg-tertiary border-2 border-brand-green",
                 i > loadingStep && "bg-bg-secondary",
               )}>
                 {i < loadingStep && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                {i === loadingStep && <div className="w-1.5 h-1.5 rounded-full bg-green-mid animate-pulse-dot" />}
+                {i === loadingStep && <div className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse-dot" />}
               </div>
               <span className={cn(
                 "text-[0.82rem]",
@@ -308,7 +308,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
         </div>
         <button
           onClick={() => { setError(""); setLoading(true); }}
-          className="bg-green-mid text-white border-none rounded-sm px-5 py-2.5 font-semibold text-[0.82rem]"
+          className="bg-brand-gold text-brand-forest border-none rounded-sm px-5 py-2.5 font-semibold text-[0.82rem]"
         >
           Try Again
         </button>
@@ -328,7 +328,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
     <div className="mx-4 mt-3 flex flex-col animate-fade-in-up">
 
       {/* ── Header with Stage Journey ──────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-[#0a1f08] via-[#14330c] to-[#1e5510] rounded-t-lg px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] rounded-t-lg px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         <div className="relative">
           <div className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-white/[0.82] mb-1.5">
@@ -366,7 +366,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
         <div className="bg-bg border border-border border-t-0">
           <div className="px-[22px] py-2.5 bg-gradient-to-r from-green-soft to-bg border-b border-border flex items-center gap-2">
             <span className="text-[0.85rem]">🎯</span>
-            <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-green-mid">Your next moves</span>
+            <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-brand-green">Your next moves</span>
             <span className="text-[0.6rem] text-text-tertiary font-medium">— {stageLabel} stage</span>
           </div>
           {currentSteps.map((step, i) => (
@@ -424,7 +424,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
               <button
                 key={i}
                 onClick={() => onChatFollowUp(chip.q)}
-                className="bg-bg border border-border rounded-sm px-3.5 py-2 text-[0.78rem] font-medium text-text transition-all duration-150 shadow-sm hover:border-green-mid hover:shadow-md hover:-translate-y-px"
+                className="bg-bg border border-border rounded-sm px-3.5 py-2 text-[0.78rem] font-medium text-text transition-all duration-150 shadow-sm hover:border-brand-green hover:shadow-md hover:-translate-y-px"
               >{chip.label}</button>
             ));
           })()}

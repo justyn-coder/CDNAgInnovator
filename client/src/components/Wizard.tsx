@@ -78,7 +78,7 @@ const optBtnCls = (active: boolean) =>
     "transition-all duration-100 font-sans text-left",
     "flex items-center gap-3 border-2",
     active
-      ? "border-green-mid bg-green-mid text-white shadow-green"
+      ? "border-brand-green bg-brand-green text-white shadow-[0_2px_8px_rgba(45,122,79,0.15)]"
       : "border-border bg-bg text-text shadow-sm hover:border-border-strong"
   );
 
@@ -167,7 +167,7 @@ export default function Wizard({ onComplete }: Props) {
           "w-full px-3.5 py-3 rounded-sm border-[1.5px] border-border",
           "text-[0.88rem] leading-relaxed resize-none outline-none",
           "bg-bg-secondary transition-all duration-150 font-sans",
-          "focus:border-green-mid focus:shadow-[0_0_0_3px_rgba(30,107,10,0.06)]"
+          "focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
         )}
         onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && canProceed) { e.preventDefault(); setStep(1); } }}
       />
@@ -192,7 +192,7 @@ export default function Wizard({ onComplete }: Props) {
                   "px-3.5 py-1.5 rounded-sm font-semibold text-[0.78rem]",
                   "font-sans transition-all duration-100 flex items-center gap-1.5 border-2",
                   active
-                    ? "border-green-mid bg-green-mid text-white"
+                    ? "border-brand-green bg-brand-green text-white"
                     : "border-border bg-bg text-text-secondary hover:border-border-strong"
                 )}
               >
@@ -219,7 +219,7 @@ export default function Wizard({ onComplete }: Props) {
             "w-full px-3.5 py-2 rounded-sm mt-1",
             "border-[1.5px] border-border text-[0.82rem]",
             "outline-none bg-bg-secondary transition-all duration-150 font-sans",
-            "focus:border-green-mid"
+            "focus:border-brand-green"
           )}
         />
       </div>
@@ -270,7 +270,7 @@ export default function Wizard({ onComplete }: Props) {
                 "px-3.5 py-2.5 rounded-sm font-semibold text-[0.82rem]",
                 "font-sans transition-all duration-100 text-left border-2",
                 active
-                  ? "border-green-mid bg-green-mid text-white shadow-green"
+                  ? "border-brand-green bg-brand-green text-white shadow-[0_2px_8px_rgba(45,122,79,0.15)]"
                   : "border-border bg-bg text-text shadow-sm hover:border-border-strong"
               )}
             >
@@ -328,10 +328,10 @@ export default function Wizard({ onComplete }: Props) {
           onClick={finish}
           className={cn(
             "w-full mt-4.5 border-none rounded-sm px-6 py-3.5",
-            "text-[0.92rem] font-bold font-sans text-white",
-            "bg-linear-to-br from-green-mid to-green-light",
+            "text-[0.92rem] font-bold font-sans",
+            "bg-brand-gold text-brand-forest",
             "transition-all duration-150",
-            "shadow-[0_4px_16px_rgba(30,107,10,0.25)]",
+            "shadow-gold",
             "animate-fade-in-up hover:brightness-110"
           )}
         >
@@ -348,7 +348,7 @@ export default function Wizard({ onComplete }: Props) {
         {[0, 1, 2, 3].map(i => (
           <div key={i} className={cn(
             "flex-1 h-[3px] rounded-full transition-colors duration-300",
-            i <= step ? "bg-green-mid" : "bg-bg-tertiary"
+            i <= step ? "bg-brand-green" : "bg-bg-tertiary"
           )} />
         ))}
       </div>
@@ -373,7 +373,7 @@ export default function Wizard({ onComplete }: Props) {
               "border-none rounded-sm px-6 py-2.5 text-[0.85rem] font-bold",
               "font-sans transition-all duration-150",
               canProceed
-                ? "bg-linear-to-br from-green-mid to-green-light text-white shadow-green hover:brightness-110"
+                ? "bg-brand-gold text-brand-forest shadow-gold hover:brightness-110"
                 : "bg-bg-tertiary text-text-tertiary"
             )}
           >Next →</button>

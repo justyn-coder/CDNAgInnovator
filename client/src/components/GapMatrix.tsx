@@ -139,16 +139,16 @@ function ExplainCard({
     return (
       <button
         onClick={fetchExplain}
-        className="w-full px-3.5 py-2.5 bg-gradient-to-br from-[#0f172a] to-[#1e293b] border border-[#334155] rounded-[10px] flex items-center gap-2 cursor-pointer mt-2.5 transition-all duration-150"
+        className="w-full px-3.5 py-2.5 bg-gradient-to-br from-[#2D2438] to-[#3D3248] border border-[#4D4458] rounded-[10px] flex items-center gap-2 cursor-pointer mt-2.5 transition-all duration-150"
       >
-        <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0">
+        <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
           <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
             <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
         </div>
         <div className="text-left">
-          <div className="text-[0.72rem] font-bold text-[#e2e8f0]">Ask AI: why this gap?</div>
-          <div className="text-[0.6rem] text-[#a8b5c4] mt-px">Our best guess — we're still learning this landscape</div>
+          <div className="text-[0.72rem] font-bold text-[#EDE9F0]">Ask AI: why this gap?</div>
+          <div className="text-[0.6rem] text-[#C0B8C8] mt-px">Our best guess — we're still learning this landscape</div>
         </div>
       </button>
     );
@@ -156,13 +156,13 @@ function ExplainCard({
 
   if (loading) {
     return (
-      <div className="w-full p-3.5 bg-gradient-to-br from-[#0f172a] to-[#1e293b] border border-[#334155] rounded-[10px] mt-2.5 flex items-center gap-2">
-        <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0">
+      <div className="w-full p-3.5 bg-gradient-to-br from-[#2D2438] to-[#3D3248] border border-[#4D4458] rounded-[10px] mt-2.5 flex items-center gap-2">
+        <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
           <div className="w-2.5 h-2.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
         </div>
         <div>
-          <div className="text-[0.72rem] font-bold text-[#e2e8f0]">Analyzing…</div>
-          <div className="text-[0.6rem] text-[#a8b5c4] mt-px">Reasoning about this ecosystem gap</div>
+          <div className="text-[0.72rem] font-bold text-[#EDE9F0]">Analyzing…</div>
+          <div className="text-[0.6rem] text-[#C0B8C8] mt-px">Reasoning about this ecosystem gap</div>
         </div>
       </div>
     );
@@ -183,15 +183,15 @@ function ExplainCard({
   if (!data) return null;
 
   return (
-    <div className="mt-2.5 bg-gradient-to-br from-[#0f172a] to-[#1e293b] border border-[#334155] rounded-[10px] overflow-hidden">
+    <div className="mt-2.5 bg-gradient-to-br from-[#2D2438] to-[#3D3248] border border-[#4D4458] rounded-[10px] overflow-hidden">
       {/* Header */}
-      <div className="px-3.5 pt-2.5 pb-2 flex items-center gap-2 border-b border-white/[0.06]">
-        <div className="w-[18px] h-[18px] rounded-[5px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0">
+      <div className="px-3.5 pt-2.5 pb-2 flex items-center gap-2 border-b border-white/[0.08]">
+        <div className="w-[18px] h-[18px] rounded-[5px] bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
           <svg width="9" height="9" viewBox="0 0 16 16" fill="none">
             <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
         </div>
-        <span className="text-[0.68rem] font-bold text-[#e2e8f0]">AI Analysis</span>
+        <span className="text-[0.68rem] font-bold text-[#EDE9F0]">AI Analysis</span>
         {typeClasses && (
           <span className={cn(
             "text-[0.58rem] font-bold px-[7px] py-[2px] rounded-full border ml-auto",
@@ -202,26 +202,26 @@ function ExplainCard({
 
       {/* Why */}
       <div className="px-3.5 pt-2.5 pb-1.5">
-        <div className="text-[0.6rem] font-bold text-[#6366f1] tracking-[0.06em] uppercase mb-1">Why</div>
-        <div className="text-[0.73rem] text-[#cbd5e1] leading-[1.55]">{data.explanation.why}</div>
+        <div className="text-[0.6rem] font-bold text-[#8A7A9A] tracking-[0.06em] uppercase mb-1">Why</div>
+        <div className="text-[0.73rem] text-[#D8D0E0] leading-[1.55]">{data.explanation.why}</div>
       </div>
 
       {/* Action */}
       <div className="px-3.5 pt-1.5 pb-3">
-        <div className="text-[0.6rem] font-bold text-[#22c55e] tracking-[0.06em] uppercase mb-1">
+        <div className="text-[0.6rem] font-bold text-[#48B87A] tracking-[0.06em] uppercase mb-1">
           {mode === "ec" ? "Opportunity" : "What to do"}
         </div>
-        <div className="text-[0.73rem] text-[#cbd5e1] leading-[1.55]">{data.explanation.action}</div>
+        <div className="text-[0.73rem] text-[#D8D0E0] leading-[1.55]">{data.explanation.action}</div>
       </div>
 
       {/* Meta */}
       <div className="px-3.5 pb-2.5">
         <button
           onClick={() => setShowMeta(!showMeta)}
-          className="bg-transparent border-none p-0 text-[0.6rem] text-[#8394a8] cursor-pointer underline decoration-[#334155]"
+          className="bg-transparent border-none p-0 text-[0.6rem] text-[#A098A8] cursor-pointer underline decoration-[#4D4458]"
         >{showMeta ? "Hide" : "Show"} context</button>
         {showMeta && (
-          <div className="mt-1.5 px-2.5 py-1.5 bg-white/[0.04] rounded-[6px] text-[0.63rem] text-[#8394a8] leading-[1.6]">
+          <div className="mt-1.5 px-2.5 py-1.5 bg-white/[0.06] rounded-[6px] text-[0.63rem] text-[#A098A8] leading-[1.6]">
             {Object.keys(data.meta.neighborCounts).length > 0 && (
               <div>Neighbors: {Object.entries(data.meta.neighborCounts).map(([p, c]) => `${p} ${c}`).join(" · ")}</div>
             )}
@@ -293,7 +293,7 @@ function CellDetail({
                 <div className="font-semibold text-[0.82rem] mb-[3px]">
                   {p.website
                     ? <a href={p.website} target="_blank" rel="noopener noreferrer"
-                        className="text-green-mid no-underline">{p.name} ↗</a>
+                        className="text-brand-green no-underline">{p.name} ↗</a>
                     : <span className="text-text">{p.name}</span>
                   }
                 </div>
@@ -403,7 +403,7 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
             <div className="px-6 pb-5">
               <button
                 onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }}
-                className="w-full py-3 bg-gradient-to-br from-green-mid to-green-light text-white border-none rounded-sm font-bold text-[0.85rem] shadow-green"
+                className="w-full py-3 bg-brand-gold text-brand-forest border-none rounded-sm font-bold text-[0.85rem] shadow-gold"
               >Got it — show me the map</button>
             </div>
           </div>

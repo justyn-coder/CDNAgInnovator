@@ -40,7 +40,7 @@ export default function Home() {
         <div className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-[8px] flex items-center justify-center p-5 animate-fade-in">
           <div className="bg-bg rounded-lg max-w-[480px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-hidden animate-slide-up">
             {/* Header — tight, scannable */}
-            <div className="bg-gradient-to-br from-[#0a1f08] via-[#14330c] to-[#1e5510] px-7 pt-7 pb-5.5 text-white">
+            <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] px-7 pt-7 pb-5.5 text-white">
               <div className="text-[0.58rem] font-bold tracking-[0.12em] uppercase text-white/60 mb-2.5">
                 Early Access
               </div>
@@ -60,7 +60,7 @@ export default function Home() {
                   "flex-1 py-3 text-center",
                   i < 2 && "border-r border-border"
                 )}>
-                  <div className="text-[1.1rem] font-extrabold text-green-mid">{stat.num}</div>
+                  <div className="text-[1.1rem] font-extrabold text-brand-green">{stat.num}</div>
                   <div className="text-[0.62rem] font-semibold text-text-tertiary tracking-[0.04em] uppercase">{stat.label}</div>
                 </div>
               ))}
@@ -76,7 +76,7 @@ export default function Home() {
               {/* Two paths */}
               <div className="flex flex-col gap-2.5">
                 <button onClick={() => dismissModal("e")}
-                  className="bg-gradient-to-br from-green-mid to-green-light text-white border-none rounded px-5 py-3.5 text-left shadow-[0_4px_16px_rgba(30,107,10,0.25)] transition-transform duration-[120ms] hover:-translate-y-px"
+                  className="bg-brand-gold text-brand-forest border-none rounded px-5 py-3.5 text-left shadow-gold transition-transform duration-[120ms] hover:-translate-y-px"
                 >
                   <div className="font-bold text-[0.88rem] mb-0.5">I'm building an agtech company →</div>
                   <div className="text-[0.75rem] opacity-80">Get a personalized pathway in 30 seconds</div>
@@ -90,7 +90,7 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="mt-4 px-3 py-2 bg-green-soft rounded-sm text-[0.65rem] text-green-mid font-semibold text-center tracking-[0.01em]">
+              <div className="mt-4 px-3 py-2 bg-green-soft rounded-sm text-[0.65rem] text-brand-green font-semibold text-center tracking-[0.01em]">
                 Your feedback shapes the product
               </div>
               <div className="mt-3.5 pt-3 border-t border-border text-center">
@@ -106,35 +106,16 @@ export default function Home() {
       {/* ── Nav ─────────────────────────────────────────────── */}
       <nav className="px-8 h-14 flex items-center justify-between border-b border-border sticky top-0 bg-[rgba(250,250,248,0.88)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-gradient-to-br from-green-mid to-green-light rounded-[10px] flex items-center justify-center shadow-green">
-            <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
-              <path d="M4 30 Q12 24 20 26 Q28 28 36 24" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/>
-              <path d="M4 34 Q12 28 20 30 Q28 32 36 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.25"/>
-              <path d="M20 35 L20 12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-              <path d="M14 18 L20 10 L26 18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <path d="M20 28 Q24 25 26 22" stroke="#3dcc1a" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-              <path d="M20 28 Q16 25 14 22" stroke="#3dcc1a" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-              <circle cx="20" cy="35" r="2" fill="#3dcc1a"/>
-            </svg>
-          </div>
-          <div className="flex flex-col leading-none">
-            <span className="font-extrabold text-[clamp(0.95rem,1.5vw,1.2rem)] text-text tracking-[-0.03em]">
-              Ag<span className="text-green-mid">Path</span> <span className="font-normal text-[0.7em] text-text-tertiary">Canada</span>
-            </span>
-            <span className="text-[clamp(0.52rem,0.8vw,0.65rem)] text-text-tertiary font-medium tracking-[0.01em] mt-0.5">
-              Navigate Canada's agtech ecosystem
-            </span>
-          </div>
+          <img src="/brand/trellis-nav-wordmark.svg" alt="Trellis" className="h-6" />
         </div>
-        <svg width="24" height="14" viewBox="0 0 24 14" className="shrink-0"><rect x="0" y="0" width="6" height="14" fill="#FF0000"/><rect x="6" y="0" width="12" height="14" fill="#FFFFFF"/><rect x="18" y="0" width="6" height="14" fill="#FF0000"/><path d="M12 2.5 L12.8 5 L11.2 5 Z M12 5 L13.5 4 L13 5.5 L14.5 5.5 L13 6.5 L13.5 8 L12 7 L10.5 8 L11 6.5 L9.5 5.5 L11 5.5 L10.5 4 Z M12 8 L12 11" fill="#FF0000" stroke="#FF0000" strokeWidth="0.3"/></svg>
       </nav>
 
       {/* ── Hero ─────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col items-center px-6 pt-14 pb-12">
         {/* Status pill */}
-        <div className="inline-flex items-center gap-[7px] bg-green-soft border border-[rgba(30,107,10,0.12)] rounded-full px-4 py-[5px] mb-7 animate-fade-in-up">
-          <div className="w-[7px] h-[7px] rounded-full bg-green-accent shadow-[0_0_8px_rgba(61,204,26,0.4)]" />
-          <span className="text-[0.72rem] font-semibold text-green-mid tracking-[0.01em]">
+        <div className="inline-flex items-center gap-[7px] bg-green-soft border border-[rgba(45,122,79,0.12)] rounded-full px-4 py-[5px] mb-7 animate-fade-in-up">
+          <div className="w-[7px] h-[7px] rounded-full bg-brand-chartreuse shadow-[0_0_8px_rgba(140,198,63,0.4)]" />
+          <span className="text-[0.72rem] font-semibold text-brand-green tracking-[0.01em]">
             {count !== null ? `${count} programs tracked across Canada` : "Loading…"}
           </span>
         </div>
@@ -145,7 +126,7 @@ export default function Home() {
           style={{ animation: "fadeInUp 0.6s ease 0.1s both" }}
         >
           Canada's ag innovation ecosystem is powerful.{" "}
-          <span className="text-green-mid">It's also a maze.</span>
+          <span className="text-brand-green">It's also a maze.</span>
         </h1>
 
         <p
@@ -162,7 +143,7 @@ export default function Home() {
         >
           {/* Founder card */}
           <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); } catch {} }}
-            className="flex-[1_1_280px] bg-gradient-to-br from-green-mid to-green-light rounded px-5.5 py-6 no-underline text-left shadow-[0_4px_24px_rgba(30,107,10,0.25),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-150 text-white hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(30,107,10,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]"
+            className="flex-[1_1_280px] bg-brand-gold text-brand-forest rounded px-5.5 py-6 no-underline text-left shadow-[0_4px_24px_rgba(212,168,40,0.25),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(212,168,40,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]"
           >
             <div className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-white/60 mb-2.5">For AgTech Companies</div>
             <div className="text-[1.05rem] font-bold mb-1.5 tracking-[-0.02em] leading-[1.3]">I'm building an agtech product</div>
@@ -183,7 +164,7 @@ export default function Home() {
             <div className="text-[0.8rem] text-text-secondary leading-[1.55] mb-4.5">
               Review your listing, explore coverage gaps, check how you appear in founder pathways, and submit updates.
             </div>
-            <div className="inline-flex items-center gap-[5px] bg-green-mid rounded-[7px] px-3.5 py-2 text-[0.78rem] font-bold text-white">
+            <div className="inline-flex items-center gap-[5px] bg-brand-forest rounded-[7px] px-3.5 py-2 text-[0.78rem] font-bold text-white">
               Explore Ecosystem →
             </div>
           </Link>

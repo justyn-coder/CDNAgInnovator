@@ -124,7 +124,7 @@ function ChatBubble({ msg }: { msg: Message }) {
             }}
             className={cn(
               "absolute top-2 right-2 border border-border rounded-sm px-2 py-0.5 text-[0.6rem] font-semibold transition-all opacity-70 hover:opacity-100",
-              copied ? "bg-green-mid text-white" : "bg-bg-secondary text-text-tertiary"
+              copied ? "bg-brand-green text-white" : "bg-bg-secondary text-text-tertiary"
             )}
           >{copied ? "✓ Copied" : "📋 Copy"}</button>
         )}
@@ -138,7 +138,7 @@ function WizardSummary({ snapshot, onReset }: { snapshot: WizardSnapshot; onRese
   return (
     <div className="mx-4 mb-3.5 px-3 py-2 bg-bg-secondary border border-border rounded flex items-center gap-1.5 flex-wrap text-[0.72rem]">
       {snapshot.stage && (
-        <span className="bg-green-mid text-white px-2 py-0.5 rounded-full font-bold text-[0.65rem]">
+        <span className="bg-brand-green text-white px-2 py-0.5 rounded-full font-bold text-[0.65rem]">
           {STAGE_LABELS[snapshot.stage] || snapshot.stage}
         </span>
       )}
@@ -212,7 +212,7 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
       {/* Filters */}
       <div className="px-[18px] py-2.5 flex gap-2 flex-wrap bg-bg-secondary border-b border-border shrink-0">
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search programs…"
-          className="flex-[1_1_180px] px-3.5 py-2 rounded-sm border-[1.5px] border-border text-[0.82rem] bg-bg outline-none font-sans focus:border-green-mid"
+          className="flex-[1_1_180px] px-3.5 py-2 rounded-sm border-[1.5px] border-border text-[0.82rem] bg-bg outline-none font-sans focus:border-brand-green"
         />
         <select value={catFilter} onChange={e => setCatFilter(e.target.value)}
           className="px-3 py-2 rounded-sm border-[1.5px] border-border text-[0.78rem] bg-bg text-text font-sans">
@@ -246,7 +246,7 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
                 <div className="mb-1">
                   <div className="font-bold text-[0.85rem] mb-1">
                     {p.website
-                      ? <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-green-mid no-underline border-b border-[rgba(30,107,10,0.2)]">{p.name} ↗</a>
+                      ? <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-brand-green no-underline border-b border-[rgba(45,122,79,0.2)]">{p.name} ↗</a>
                       : <span className="text-text">{p.name}</span>}
                   </div>
                   <div className="flex gap-[5px] flex-wrap items-center">
@@ -274,7 +274,7 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
 
       {/* Feedback prompt */}
       {onFeedback && (
-        <div className="px-[18px] py-2 border-t border-border bg-gradient-to-r from-amber to-[#d97706] shrink-0 text-center">
+        <div className="px-[18px] py-2 border-t border-border bg-brand-gold shrink-0 text-center">
           <button onClick={onFeedback} className="bg-transparent border-none text-white text-[0.72rem] font-semibold p-0">
             💬 See something missing? Tell us →
           </button>
@@ -329,7 +329,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
     >
       <div onClick={e => e.stopPropagation()} className="bg-bg rounded-lg max-w-[440px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-hidden animate-slide-up">
         {/* Amber header */}
-        <div className="bg-gradient-to-br from-[#92400e] via-[#b45309] to-[#d97706] px-6 py-[18px] flex items-center gap-2.5">
+        <div className="bg-gradient-to-br from-[#8B6914] via-[#D4A828] to-[#BF9624] px-6 py-[18px] flex items-center gap-2.5">
           <span className="text-[1.3rem]">⚠️</span>
           <div>
             <div className="font-bold text-[0.92rem] text-white">
@@ -347,7 +347,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
               <div className="text-[1.4rem] mb-2">✓</div>
               <p className="font-bold text-[0.88rem] mb-1">Thanks — that's genuinely helpful.</p>
               <p className="text-[0.78rem] text-text-secondary mb-4">We'll reach out if we have questions.</p>
-              <button onClick={onClose} className="bg-green-mid text-white border-none rounded-sm px-5 py-2 font-semibold text-[0.82rem]">Close</button>
+              <button onClick={onClose} className="bg-brand-green text-white border-none rounded-sm px-5 py-2 font-semibold text-[0.82rem]">Close</button>
             </div>
           ) : (
             <>
@@ -358,7 +358,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
                 <textarea value={form.feedback} onChange={e => setForm(f => ({ ...f, feedback: e.target.value }))}
                   placeholder={isEco ? "e.g. My program isn't listed, the gap data is wrong for SK, I'd use this if it had…" : "e.g. The pathway was great but missed X, the loading took too long, I wish it showed…"}
                   rows={3}
-                  className="w-full px-3 py-2.5 rounded-sm border-[1.5px] border-border text-[0.82rem] mt-1 outline-none bg-bg-secondary resize-none font-sans focus:border-[#d97706]"
+                  className="w-full px-3 py-2.5 rounded-sm border-[1.5px] border-border text-[0.82rem] mt-1 outline-none bg-bg-secondary resize-none font-sans focus:border-brand-gold"
                 />
               </div>
               {!hasIdentity && (
@@ -370,7 +370,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[0.68rem] font-semibold text-text-tertiary">Email <span className="text-[#d97706]">(so we can follow up)</span></label>
+                    <label className="text-[0.68rem] font-semibold text-text-tertiary">Email <span className="text-brand-gold">(so we can follow up)</span></label>
                     <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@company.com"
                       type="email" autoComplete="email" autoCapitalize="off" autoCorrect="off" spellCheck={false}
                       className="w-full px-2.5 py-2 rounded-sm border border-border text-[0.8rem] mt-[3px] outline-none bg-bg-secondary font-sans"
@@ -384,7 +384,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
                 </div>
               )}
               <button onClick={submit} disabled={busy}
-                className="w-full py-[11px] bg-gradient-to-br from-[#d97706] to-[#b45309] text-white border-none rounded-sm font-bold text-[0.85rem] shadow-[0_2px_8px_rgba(217,119,6,0.3)]"
+                className="w-full py-[11px] bg-brand-gold text-brand-forest border-none rounded-sm font-bold text-[0.85rem] shadow-gold"
               >{busy ? "Sending…" : "Send Feedback"}</button>
             </>
           )}
@@ -569,31 +569,11 @@ export default function Navigator() {
         {/* ── Top bar ──────────────────────────────────────────────── */}
         <div className="h-12 px-4 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
           <Link href="/" className="flex items-center gap-2 no-underline">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-mid to-green-light rounded-[8px] flex items-center justify-center shadow-green">
-              <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-                <path d="M4 30 Q12 24 20 26 Q28 28 36 24" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/>
-                <path d="M4 34 Q12 28 20 30 Q28 32 36 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.25"/>
-                <path d="M20 35 L20 12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                <path d="M14 18 L20 10 L26 18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                <path d="M20 28 Q24 25 26 22" stroke="#3dcc1a" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                <path d="M20 28 Q16 25 14 22" stroke="#3dcc1a" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                <circle cx="20" cy="35" r="2" fill="#3dcc1a"/>
-              </svg>
-            </div>
-            <div className="flex flex-col leading-none">
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-[0.85rem] text-text tracking-[-0.03em]">
-                  Ag<span className="text-green-mid">Path</span>
-                </span>
-                <span className={cn(
-                  "text-[0.5rem] font-bold px-[5px] py-px rounded-[3px] tracking-[0.04em] uppercase",
-                  isEco ? "bg-[#dbeafe] text-[#1e40af]" : "bg-green-soft text-green-mid"
-                )}>{isEco ? "Partner" : "Founder"}</span>
-              </div>
-              <span className="text-[0.5rem] text-text-tertiary font-medium mt-px">
-                Navigate Canada's agtech ecosystem
-              </span>
-            </div>
+            <img src="/brand/trellis-nav-wordmark.svg" alt="Trellis" className="h-5" />
+            <span className={cn(
+              "text-[0.5rem] font-bold px-[5px] py-px rounded-[3px] tracking-[0.04em] uppercase",
+              isEco ? "bg-eco-pill-bg text-eco-pill-text" : "bg-founder-pill-bg text-founder-pill-text"
+            )}>{isEco ? "Partner" : "Founder"}</span>
           </Link>
           <div className="flex gap-1.5 items-center">
             <button onClick={() => setShowBrowse(true)} className="bg-transparent border-none px-2.5 py-1.5 text-[0.72rem] font-semibold text-text-secondary">
@@ -616,22 +596,22 @@ export default function Navigator() {
 
               {/* First-visit onboarding tip */}
               {(() => { try { return !sessionStorage.getItem("ag_eco_onboarded"); } catch { return true; } })() && (
-                <div className="bg-gradient-to-br from-[#eff6ff] to-[#dbeafe] border border-[#bfdbfe] rounded px-4 py-3.5 flex gap-2.5 items-start">
+                <div className="bg-gradient-to-br from-eco-accent-bg to-[#d8e5db] border border-[#b8ccbc] rounded px-4 py-3.5 flex gap-2.5 items-start">
                   <span className="text-[1.1rem] shrink-0">👋</span>
                   <div className="flex-1">
-                    <div className="font-bold text-[0.82rem] text-[#1e40af] mb-1">
+                    <div className="font-bold text-[0.82rem] text-brand-forest mb-1">
                       Welcome — start by finding yourself
                     </div>
-                    <div className="text-[0.75rem] text-[#1d4ed8] leading-[1.55] mb-2.5">
+                    <div className="text-[0.75rem] text-brand-green leading-[1.55] mb-2.5">
                       Tap <strong>Programs</strong> above and search your organization's name. See how you appear to founders — then hit the feedback button to tell us what we got wrong. We built this from public data and we know we're missing things.
                     </div>
                     <button onClick={() => { setShowBrowse(true); try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }}
-                      className="bg-[#1e40af] text-white border-none rounded-sm px-3.5 py-[7px] text-[0.75rem] font-semibold">
+                      className="bg-brand-forest text-white border-none rounded-sm px-3.5 py-[7px] text-[0.75rem] font-semibold">
                       Search programs →
                     </button>
                   </div>
                   <button onClick={() => { try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }}
-                    className="bg-transparent border-none text-[0.72rem] text-[#3b82f6] px-1 font-semibold shrink-0">
+                    className="bg-transparent border-none text-[0.72rem] text-brand-green px-1 font-semibold shrink-0">
                     ✕
                   </button>
                 </div>
@@ -640,8 +620,8 @@ export default function Navigator() {
               {/* Main welcome card */}
               <div className="bg-bg border border-border rounded-lg shadow-md overflow-hidden">
                 {/* Header */}
-                <div className="bg-gradient-to-br from-[#0c1829] to-[#1a2940] px-6 pt-[22px] pb-[18px]">
-                  <div className="text-[0.55rem] font-bold tracking-[0.12em] uppercase text-[rgba(96,165,250,0.7)] mb-2">
+                <div className="bg-gradient-to-br from-[#122b1f] to-[#1B4332] px-6 pt-[22px] pb-[18px]">
+                  <div className="text-[0.55rem] font-bold tracking-[0.12em] uppercase text-brand-gold/70 mb-2">
                     Ecosystem Intelligence
                   </div>
                   <h2 className="font-display text-[1.2rem] font-normal text-white leading-[1.2] mb-1.5">
@@ -663,7 +643,7 @@ export default function Navigator() {
                         "flex-1 py-2.5 text-center",
                         i < 3 && "border-r border-white/[0.08]"
                       )}>
-                        <div className="text-base font-extrabold text-[#60a5fa]">{s.num}</div>
+                        <div className="text-base font-extrabold text-brand-gold">{s.num}</div>
                         <div className="text-[0.5rem] font-semibold text-white/55 tracking-[0.08em] uppercase">{s.label}</div>
                       </div>
                     ))}
@@ -705,15 +685,15 @@ export default function Navigator() {
                 <div className="p-4 flex gap-2 flex-wrap">
                   {ECO_SUGGESTIONS.slice(0, 4).map((s, i) => (
                     <button key={i} onClick={() => send(s.q)}
-                      className="flex-[1_1_calc(50%-4px)] min-w-[140px] px-3.5 py-2.5 rounded-sm border border-border bg-bg text-[0.78rem] font-semibold text-text text-left transition-all shadow-sm hover:border-[#60a5fa] hover:-translate-y-px"
+                      className="flex-[1_1_calc(50%-4px)] min-w-[140px] px-3.5 py-2.5 rounded-sm border border-border bg-bg text-[0.78rem] font-semibold text-text text-left transition-all shadow-sm hover:border-brand-green hover:-translate-y-px"
                     >{s.label}</button>
                   ))}
                 </div>
 
                 {/* Tools pointer */}
                 <div className="px-5 py-2.5 pb-3.5 border-t border-border text-[0.72rem] text-text-tertiary flex gap-3">
-                  <span onClick={() => setShowGapMap(true)} className="cursor-pointer text-green-mid font-semibold">📊 Gap Map</span>
-                  <span onClick={() => setShowBrowse(true)} className="cursor-pointer text-green-mid font-semibold">📋 Browse All Programs</span>
+                  <span onClick={() => setShowGapMap(true)} className="cursor-pointer text-brand-green font-semibold">📊 Gap Map</span>
+                  <span onClick={() => setShowBrowse(true)} className="cursor-pointer text-brand-green font-semibold">📋 Browse All Programs</span>
                 </div>
               </div>
             </div>
@@ -753,7 +733,7 @@ export default function Navigator() {
             <div className="flex gap-1.5 flex-wrap mb-2.5">
               {ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q)).slice(0, 3).map((s, i) => (
                 <button key={i} onClick={() => send(s.q)}
-                  className="px-3 py-[5px] rounded-full border border-border bg-bg-secondary text-[0.7rem] font-semibold text-text-secondary transition-all hover:border-green-mid"
+                  className="px-3 py-[5px] rounded-full border border-border bg-bg-secondary text-[0.7rem] font-semibold text-text-secondary transition-all hover:border-brand-green"
                 >{s.label}</button>
               ))}
             </div>
@@ -765,7 +745,7 @@ export default function Navigator() {
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
               placeholder={isEco ? "e.g., What's missing for biologicals companies in Saskatchewan?" : "Ask about your pathway, programs, or next steps…"}
               rows={2}
-              className="flex-1 resize-none border-[1.5px] border-border rounded px-3.5 py-2.5 text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-green-mid focus:shadow-[0_0_0_3px_rgba(30,107,10,0.08)]"
+              className="flex-1 resize-none border-[1.5px] border-border rounded px-3.5 py-2.5 text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
             <button
               onClick={() => send()}
@@ -774,7 +754,7 @@ export default function Navigator() {
                 "border-none rounded px-5 font-bold text-[0.9rem] transition-all min-w-[48px]",
                 loading || !input.trim()
                   ? "bg-bg-tertiary text-text-tertiary"
-                  : "bg-gradient-to-br from-green-mid to-green-light text-white shadow-green"
+                  : "bg-brand-gold text-brand-forest shadow-gold"
               )}
             >→</button>
           </div>
@@ -819,7 +799,7 @@ export default function Navigator() {
       {!showFeedback && !showQuickFeedback && !feedbackMinimized && (
         <button
           onClick={() => setShowFeedback(true)}
-          className="fixed bottom-20 right-4 z-[4] bg-gradient-to-br from-amber to-[#d97706] text-white border-none rounded-full px-3.5 py-2 text-[0.7rem] font-bold shadow-[0_2px_12px_rgba(217,119,6,0.3)] flex items-center gap-[5px] animate-fade-in"
+          className="fixed bottom-20 right-4 z-[4] bg-brand-gold text-white border-none rounded-full px-3.5 py-2 text-[0.7rem] font-bold shadow-gold flex items-center gap-[5px] animate-fade-in"
         >
           <span>💬</span> Feedback
           <span
