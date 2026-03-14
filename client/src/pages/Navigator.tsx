@@ -936,9 +936,22 @@ export default function Navigator() {
       <div className="fixed inset-0 bg-bg flex flex-col font-sans">
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
-        <div className="h-14 md:h-16 px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
-          <Link href="/" className="flex items-center no-underline">
+        <div className="h-16 md:h-[72px] px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
+          <Link href="/" className="flex flex-col items-start no-underline">
             <TrellisLogo className="h-8 md:h-9" />
+            <span
+              style={{
+                fontSize: 8,
+                fontWeight: 500,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase" as const,
+                color: "#999",
+                marginTop: 1,
+                paddingLeft: 1,
+              }}
+            >
+              Navigate Canada's AgTech Ecosystem
+            </span>
           </Link>
           <button
             onClick={() => {

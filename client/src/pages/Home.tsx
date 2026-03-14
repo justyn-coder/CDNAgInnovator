@@ -280,9 +280,9 @@ export default function Home() {
       )}
 
       {/* ── Nav ─────────────────────────────────────────────── */}
-      <nav className="px-6 h-16 md:h-20 flex items-center justify-center border-b border-border sticky top-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
+      <nav className="px-6 h-20 md:h-24 flex items-center justify-center border-b border-border sticky top-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
         <div className="flex flex-col items-center">
-          <TrellisLogo className="h-8 md:h-10" />
+          <TrellisLogo className="h-10 md:h-12" />
           <span
             style={{
               fontSize: 9,
@@ -290,7 +290,7 @@ export default function Home() {
               letterSpacing: "0.08em",
               textTransform: "uppercase" as const,
               color: "#999",
-              marginTop: 1,
+              marginTop: 2,
             }}
           >
             Navigate Canada's AgTech Ecosystem
