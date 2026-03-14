@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { TrellisLogo, MapleLeaf } from "../components/TrellisLogo";
+import { TrellisLogo } from "../components/TrellisLogo";
 
 /** Inline trellis icon (no wordmark) for popup header */
 function TrellisIcon({ size = 48 }: { size?: number }) {
@@ -118,7 +118,11 @@ export default function Home() {
       {showPopup && (
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center p-5"
-          style={{ background: "#F5F3ED" }}
+          style={{
+            background: "rgba(245, 243, 237, 0.75)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+          }}
         >
           <div
             className="bg-white w-full max-w-[460px] animate-slide-up"
@@ -273,16 +277,22 @@ export default function Home() {
       )}
 
       {/* ── Nav ─────────────────────────────────────────────── */}
-      <nav className="px-6 md:px-6 h-11 md:h-14 flex items-center justify-between border-b border-border sticky top-0 bg-[rgba(250,250,248,0.88)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
-        <TrellisLogo className="h-6 md:h-7" />
-        <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); } catch {} }}
-          className="flex items-center gap-1.5 no-underline text-text-secondary hover:text-text transition-colors">
-          <MapleLeaf size={14} className="md:w-4 md:h-4" />
-          <span className="text-[0.72rem] md:text-[0.78rem] font-semibold">
-            <span className="hidden md:inline">All Programs</span>
-            <span className="md:hidden">Programs</span>
+      <nav className="px-6 h-16 md:h-20 flex items-center justify-center border-b border-border sticky top-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
+        <div className="flex flex-col items-center">
+          <TrellisLogo className="h-8 md:h-10" />
+          <span
+            style={{
+              fontSize: 9,
+              fontWeight: 500,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase" as const,
+              color: "#999",
+              marginTop: 1,
+            }}
+          >
+            Navigate Canada's AgTech Ecosystem
           </span>
-        </Link>
+        </div>
       </nav>
 
       {/* ── Hero ─────────────────────────────────────────────── */}

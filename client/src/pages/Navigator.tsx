@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { cn } from "../lib/cn";
-import { TrellisLogo, MapleLeaf } from "../components/TrellisLogo";
+import { TrellisLogo } from "../components/TrellisLogo";
 import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
 import PathwayCard from "../components/PathwayCard";
@@ -896,51 +896,30 @@ export default function Navigator() {
       <div className="fixed inset-0 bg-bg flex flex-col font-sans">
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
-        <div className="h-12 md:h-14 px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center no-underline">
-              <TrellisLogo className="h-6 md:h-7" />
-            </Link>
-            <button
-              onClick={() => {
-                localStorage.setItem("ag_nav_mode", isEco ? "e" : "ec");
-                window.location.reload();
-              }}
-              className={cn(
-                "ml-2.5 rounded-full px-3 py-0.5 text-[0.68rem] font-semibold tracking-[0.02em] cursor-pointer transition-all hover:brightness-95 border-none",
-                isEco
-                  ? "bg-eco-pill-bg text-eco-pill-text"
-                  : "bg-founder-pill-bg text-founder-pill-text"
-              )}
-              title={isEco ? "Switch to founder view" : "Switch to partner view"}
-            >
-              {isEco ? "Partners" : "Founders"}
-              <span className="ml-1 opacity-60">▾</span>
-            </button>
-          </div>
-          <div className="flex gap-1 items-center">
-            <button onClick={() => { setBrowseInitialSearch(""); setOrgParam(null); setShowBrowse(true); }}
-              className="bg-transparent border-none flex items-center gap-1.5 px-2 py-1.5 text-text-secondary hover:text-text transition-colors cursor-pointer">
-              <MapleLeaf size={14} className="md:w-4 md:h-4" />
-              <span className="text-[0.75rem] font-semibold">Programs</span>
-            </button>
-            {isEco && (
-              <button onClick={() => setShowGapMap(true)}
-                className="bg-transparent border-none flex items-center gap-1.5 px-2 py-1.5 text-text-secondary hover:text-text transition-colors cursor-pointer">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <rect x="1" y="1" width="6" height="6" rx="1" fill="#D4A828"/>
-                  <rect x="9" y="1" width="6" height="6" rx="1" fill="#48B87A"/>
-                  <rect x="1" y="9" width="6" height="6" rx="1" fill="#48B87A"/>
-                  <rect x="9" y="9" width="6" height="6" rx="1" fill="#D4A828" opacity="0.5"/>
-                </svg>
-                <span className="text-[0.75rem] font-semibold">Gap Map</span>
-              </button>
+        <div className="h-14 md:h-16 px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
+          <Link href="/" className="flex items-center no-underline">
+            <TrellisLogo className="h-8 md:h-9" />
+          </Link>
+          <button
+            onClick={() => {
+              localStorage.setItem("ag_nav_mode", isEco ? "e" : "ec");
+              window.location.reload();
+            }}
+            className={cn(
+              "rounded-full px-3.5 py-1 text-[0.72rem] font-semibold tracking-[0.02em] cursor-pointer transition-all hover:brightness-95 border-none",
+              isEco
+                ? "bg-eco-pill-bg text-eco-pill-text"
+                : "bg-founder-pill-bg text-founder-pill-text"
             )}
-          </div>
+            title={isEco ? "Switch to founder view" : "Switch to partner view"}
+          >
+            {isEco ? "Partners" : "Founders"}
+            <span className="ml-1 opacity-60">▾</span>
+          </button>
         </div>
 
         {/* ── Feedback nudge banner ──────────────────────────────────── */}
-        {showNudgeBanner && (
+        {showNudgeBanner && !isEco && (
           <div
             className="shrink-0 flex items-center justify-between gap-3 px-4 md:px-6"
             style={{
@@ -994,7 +973,7 @@ export default function Navigator() {
                       Welcome — start by finding yourself
                     </div>
                     <div className="text-[0.75rem] text-brand-green leading-[1.55] mb-2.5">
-                      Tap <strong>Programs</strong> above and search your organization's name. See how you appear to founders — then hit the feedback button to tell us what we got wrong. We built this from public data and we know we're missing things.
+                      Search for your organization below. See how you appear to founders — then tell us what we got wrong. We built this from public data and we know we're missing things.
                     </div>
                     <button onClick={() => { setShowBrowse(true); try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }}
                       className="bg-brand-forest text-white border-none rounded-sm px-3.5 py-[7px] text-[0.75rem] font-semibold">
