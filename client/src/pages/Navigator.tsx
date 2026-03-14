@@ -287,6 +287,14 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
   );
 }
 
+function getDomain(url: string): string | null {
+  try { return new URL(url).hostname.replace("www.", ""); } catch { return null; }
+}
+
+function isHomepageOnly(url: string): boolean {
+  try { const path = new URL(url).pathname; return path === "/" || path === ""; } catch { return false; }
+}
+
 // ── Program Card with inline correction ─────────────────────────────────────
 function ProgramCard({ p }: { p: Program }) {
   const [showCorrection, setShowCorrection] = useState(false);
@@ -331,19 +339,26 @@ function ProgramCard({ p }: { p: Program }) {
           </svg>
           Suggest a correction
         </button>
-        {p.website && (
-          <a
-            href={p.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="no-underline flex items-center gap-1"
-            style={{ fontSize: 12, color: "#2D7A4F" }}
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M5 9l4-4M9 5v4h-4" stroke="#2D7A4F" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Visit program page
-          </a>
+        {p.website ? (
+          <div className="flex flex-col">
+            <a
+              href={p.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="no-underline flex items-center gap-1"
+              style={{ fontSize: 12, color: "#2D7A4F" }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M5 9l4-4M9 5v4h-4" stroke="#2D7A4F" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {getDomain(p.website) || "Visit program"} ↗
+            </a>
+            {isHomepageOnly(p.website) && (
+              <span style={{ fontSize: 11, color: "#999", marginLeft: 18 }}>(organization homepage)</span>
+            )}
+          </div>
+        ) : (
+          <span style={{ fontSize: 12, color: "#999" }}>No website</span>
         )}
       </div>
 
@@ -377,8 +392,6 @@ function BrowsePanel({
   const [provFilter, setProvFilter] = useState("All");
   const [programsLoadedAt] = useState(() => Date.now());
 
-  // Operator feedback nudge
-  const [showNudge, setShowNudge] = useState(false);
   // Bridge banner
   const [showBridge, setShowBridge] = useState(false);
 
@@ -387,15 +400,6 @@ function BrowsePanel({
   useEffect(() => {
     fetch("/api/programs").then(r => r.json()).then((d: Program[]) => { setData(d); setLoading(false); }).catch(() => setLoading(false));
   }, []);
-
-  // Feedback nudge timer — 10s after programs load (operator only)
-  useEffect(() => {
-    if (!isOperatorView) return;
-    const nudged = localStorage.getItem("trellis_feedback_nudged");
-    if (nudged) return;
-    const timer = setTimeout(() => setShowNudge(true), 10000);
-    return () => clearTimeout(timer);
-  }, [isOperatorView]);
 
   // Bridge banner timer — 45s after mount (operator only)
   useEffect(() => {
@@ -540,48 +544,6 @@ function BrowsePanel({
         </div>
       )}
 
-      {/* Feedback nudge — operator only, 10s after programs load */}
-      {showNudge && (
-        <div
-          className="fixed z-[250]"
-          style={{
-            bottom: 20,
-            right: 20,
-            maxWidth: 280,
-            background: "white",
-            borderRadius: 12,
-            border: "0.5px solid #E5E5E0",
-            padding: "16px 18px",
-            animation: "slideUp 0.3s ease both, fadeIn 0.3s ease both",
-          }}
-        >
-          <div style={{ fontSize: 14, fontWeight: 500, color: "#1a1a18", marginBottom: 6 }}>
-            Quick thought?
-          </div>
-          <div style={{ fontSize: 13, color: "#6b6b6b", lineHeight: 1.5, marginBottom: 12 }}>
-            You're one of the first people testing Trellis. Use "Suggest a correction" on any program to tell us what we got wrong.
-          </div>
-          <div className="text-center">
-            <button
-              onClick={() => {
-                setShowNudge(false);
-                try { localStorage.setItem("trellis_feedback_nudged", "true"); } catch {}
-              }}
-              style={{
-                fontSize: 12,
-                padding: "6px 20px",
-                background: "#F5F3ED",
-                borderRadius: 8,
-                color: "#6b6b6b",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -747,6 +709,7 @@ export default function Navigator() {
   const [ecoMsgCount, setEcoMsgCount] = useState(0);
   const [showEcoCta, setShowEcoCta] = useState(false);
   const [feedbackMinimized, setFeedbackMinimized] = useState(false);
+  const [showNudgeBanner, setShowNudgeBanner] = useState(false);
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -787,6 +750,14 @@ export default function Navigator() {
         setShowPathway(true);
       }
     } catch {}
+  }, []);
+
+  // Feedback nudge banner — 10s after mount (both modes)
+  useEffect(() => {
+    const nudged = localStorage.getItem("trellis_feedback_nudged");
+    if (nudged) return;
+    const timer = setTimeout(() => setShowNudgeBanner(true), 10000);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -938,6 +909,45 @@ export default function Navigator() {
             )}
           </div>
         </div>
+
+        {/* ── Feedback nudge banner ──────────────────────────────────── */}
+        {showNudgeBanner && (
+          <div
+            className="shrink-0 flex items-center justify-between gap-3 px-4 md:px-6"
+            style={{
+              background: "#FFF8E7",
+              borderBottom: "1px solid rgba(212,168,40,0.27)",
+              padding: "12px 24px",
+              animation: "slideDown 0.3s ease both",
+            }}
+          >
+            <div style={{ fontSize: 13, color: "#1B4332", lineHeight: 1.5 }}>
+              👋 You're one of the first people testing Trellis.{" "}
+              {isEco
+                ? 'Use "Suggest a correction" on any program to tell us what we got wrong.'
+                : "Your feedback shapes what we build next — use the feedback button anytime."}
+            </div>
+            <button
+              onClick={() => {
+                setShowNudgeBanner(false);
+                try { localStorage.setItem("trellis_feedback_nudged", "true"); } catch {}
+              }}
+              style={{
+                fontSize: 12,
+                padding: "6px 16px",
+                background: "#D4A828",
+                color: "#1B4332",
+                borderRadius: 6,
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Got it
+            </button>
+          </div>
+        )}
 
         {/* ── Messages area ────────────────────────────────────────── */}
         <div className="flex-1 overflow-y-auto pt-4 pb-3">
