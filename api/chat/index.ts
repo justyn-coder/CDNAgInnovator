@@ -126,7 +126,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const relevant = scored.filter((k: any) => (k.tag_score || 0) + (k.prov_score || 0) > 0);
     const finalKnowledge = relevant.length >= 4 ? relevant : scored.slice(0, 10);
 
-    const context = `ECOSYSTEM DATA (${rows.length} programs${provFilter ? ` in ${provFilter}` : ""}):
+    const context = `ECOSYSTEM DATA (${rows.length} programs${detectedProvs.length ? ` in ${detectedProvs.join(", ")}` : ""}):
 ${rows.map((p: any) => `- ${p.name} [${p.category}] | Stages: ${(p.stage || []).join(",")} | Province: ${(p.province || []).join(",")} | ${p.description?.slice(0, 120) || ""}`).join("\n")}
 
 ${finalKnowledge.length ? `ECOSYSTEM INTELLIGENCE:\n${finalKnowledge.map((k: any) => `[${k.title}]: ${k.body}`).join("\n\n")}` : ""}`;
