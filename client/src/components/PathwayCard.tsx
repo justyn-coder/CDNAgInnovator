@@ -98,7 +98,7 @@ function StageJourney({ current, next }: { current: string; next: string }) {
         const isPast = i < currentIdx;
 
         return (
-          <div key={s} className={cn("flex items-start", i < STAGE_ORDER.length - 1 ? "flex-1" : "flex-none")}>
+          <div key={s} className={cn("flex items-start min-w-0", i < STAGE_ORDER.length - 1 ? "flex-1" : "shrink-0")}>
             {/* Stage dot */}
             <div className={cn(
               "flex flex-col items-center gap-[3px]",
@@ -277,12 +277,12 @@ function EmailCapture({ stage, provinces, description, productType }: {
 
   return (
     <div
-      className="mx-4 mt-4 relative animate-fade-in-up"
+      className="mt-4 relative animate-fade-in-up"
       style={{
         background: "#FFF8E7",
         border: "0.5px solid rgba(212,168,40,0.2)",
         borderRadius: 10,
-        padding: "16px 20px",
+        padding: "16px 16px",
       }}
     >
       <button
@@ -404,7 +404,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
   if (loading) {
     return (
-      <div className="m-4 px-4 md:px-6 py-9 bg-bg border border-border rounded-lg shadow-md max-w-full overflow-hidden box-border">
+      <div className="m-4 px-4 md:px-6 py-9 bg-bg border border-border rounded-lg shadow-md overflow-hidden box-border" style={{ maxWidth: "calc(100% - 2rem)" }}>
         <div className="h-[3px] bg-bg-tertiary rounded-[2px] overflow-hidden mb-6">
           <div
             className="h-full bg-brand-green rounded-[2px] transition-[width] duration-2000 ease-in-out"
@@ -439,7 +439,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
   if (error || !data) {
     return (
-      <div className="m-4 px-6 py-7 bg-red-soft border border-[#fecaca] rounded-lg text-center">
+      <div className="m-4 px-4 md:px-6 py-7 bg-red-soft border border-[#fecaca] rounded-lg text-center" style={{ maxWidth: "calc(100% - 2rem)" }}>
         <div className="text-[0.88rem] text-[#991b1b] font-semibold mb-2.5">
           {error || "Something went wrong."}
         </div>
@@ -462,7 +462,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
   const futureSteps = pathway.steps.filter(s => s.horizon || s.timing === "horizon");
 
   return (
-    <div className="mx-4 mt-3 flex flex-col animate-fade-in-up max-w-full overflow-hidden box-border">
+    <div className="mx-4 mt-3 flex flex-col animate-fade-in-up overflow-hidden" style={{ maxWidth: "calc(100% - 2rem)" }}>
 
       {/* ── Header with Stage Journey ──────────────────────────────────── */}
       <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] rounded-t-lg px-4 md:px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
@@ -558,7 +558,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
           return (
             <div
               className="mt-4 mx-0"
-              style={{ background: "#F5F3ED", border: "0.5px solid #E5E5E0", borderRadius: 12, padding: 20 }}
+              style={{ background: "#F5F3ED", border: "0.5px solid #E5E5E0", borderRadius: 12, padding: "16px 14px" }}
             >
               <div style={{ fontSize: 14, color: "#6b6b6b", marginBottom: 12 }}>
                 At your stage, structured programs thin out. But Trellis can still help — try asking:
@@ -573,8 +573,8 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
                       background: "white",
                       border: "0.5px solid #E5E5E0",
                       borderRadius: 20,
-                      padding: "8px 16px",
-                      fontSize: 13,
+                      padding: "8px 12px",
+                      fontSize: 12,
                       color: "#1B4332",
                       fontFamily: "'DM Sans', system-ui, sans-serif",
                     }}

@@ -113,7 +113,7 @@ function ChatBubble({ msg }: { msg: Message }) {
   return (
     <div className="flex justify-start mb-2.5 px-4">
       <div className="max-w-[84%] flex flex-col">
-        <div className="bg-bg text-text rounded-[16px_16px_16px_4px] px-4 py-3 text-[0.82rem] leading-[1.6] border border-border shadow-sm">
+        <div className="bg-bg text-text rounded-[16px_16px_16px_4px] px-4 py-3 text-[0.82rem] leading-[1.6] border border-border shadow-sm overflow-hidden" style={{ overflowWrap: "break-word", wordBreak: "break-word" }}>
           {isPlain
             ? <span className="whitespace-pre-wrap">{msg.content}</span>
             : <div className="md-body" dangerouslySetInnerHTML={{ __html: `<p>${html}</p>` }} />
