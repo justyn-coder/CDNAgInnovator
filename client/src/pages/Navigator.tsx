@@ -760,7 +760,7 @@ export default function Navigator() {
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const feedbackFooterRef = useRef<HTMLDivElement>(null);
+  const feedbackFooterRef = useRef<HTMLButtonElement>(null);
   const feedbackBounceCount = useRef(0);
 
   function nudgeFeedbackFooter() {
@@ -1209,7 +1209,13 @@ export default function Navigator() {
         </div>
 
         {/* ── Chat input ───────────────────────────────────────────── */}
-        {(!showWizard || isEco) && (
+        {(!showWizard || isEco) && (<>
+        {/* AI chat label — sits above the input */}
+        <div className="px-4 md:px-6 pt-2 pb-1 shrink-0">
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#999", letterSpacing: "0.03em" }}>
+            ✦ Ask the AI anything about Canada's agtech ecosystem
+          </span>
+        </div>
         <div className="bg-bg border-t border-border-strong px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] shrink-0 shadow-[0_-2px_12px_rgba(0,0,0,0.04)]">
           {/* Eco suggestion chips above input when messages exist */}
           {isEco && messages.length > 0 && messages.length < 4 && (
@@ -1226,7 +1232,7 @@ export default function Navigator() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder={isEco ? "e.g., What's missing for biologicals companies in Saskatchewan?" : "Ask about your pathway, programs, or next steps…"}
+              placeholder="Ask a question..."
               rows={2}
               className="flex-1 resize-none border-[1.5px] border-border rounded px-3.5 py-2.5 text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
@@ -1249,24 +1255,19 @@ export default function Navigator() {
             </div>
           )}
         </div>
-        )}
+        </>)}
 
-        {/* ── Feedback footer — always visible, never dismissable ──────── */}
-        <div
+        {/* ── Feedback bar — tappable, always visible ──────── */}
+        <button
           ref={feedbackFooterRef}
-          className="shrink-0 flex items-center justify-between px-4 md:px-6 border-t border-border bg-bg-secondary"
-          style={{ height: 34 }}
+          onClick={() => setShowFeedback(true)}
+          className="shrink-0 w-full flex items-center justify-center gap-2 bg-bg-secondary cursor-pointer hover:bg-bg-tertiary transition-colors"
+          style={{ height: 38, border: "none", borderTop: "1px solid var(--color-border, #E5E5E0)" }}
         >
-          <span className="text-[0.68rem] text-text-tertiary">
-            Was something wrong or missing?
+          <span style={{ fontSize: 12, color: "#2D7A4F", fontWeight: 600 }}>
+            💬 Something wrong or missing? Tell us →
           </span>
-          <button
-            onClick={() => setShowFeedback(true)}
-            className="bg-transparent border-none cursor-pointer text-[0.68rem] font-semibold text-brand-green hover:text-brand-forest transition-colors"
-          >
-            Send feedback →
-          </button>
-        </div>
+        </button>
       </div>
 
       {/* ── Quick feedback (founder) — compact, auto-collapses ──────── */}
