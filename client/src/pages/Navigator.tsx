@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { cn } from "../lib/cn";
-import { TrellisLogo } from "../components/TrellisLogo";
+
 import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
 import PathwayCard from "../components/PathwayCard";
@@ -958,19 +958,32 @@ export default function Navigator() {
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
         <div className="h-16 md:h-[72px] px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
-          <Link href="/" className="flex flex-col items-start no-underline">
-            <TrellisLogo className="h-8 md:h-9" />
-            <span
-              style={{
-                fontSize: 8,
-                fontWeight: 500,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase" as const,
-                color: "#999",
-                marginTop: 1,
-                paddingLeft: 0,
-              }}
-            >
+          <Link href="/" className="no-underline grid items-center" style={{ gridTemplateColumns: "auto 1fr", gridTemplateRows: "auto auto", columnGap: 6 }}>
+            {/* Icon — spans both rows */}
+            <svg viewBox="0 0 28 34" className="h-8 md:h-9 row-span-2" aria-hidden="true">
+              <g transform="translate(1, 1)">
+                <line x1="4" y1="30" x2="4" y2="6" stroke="#1B4332" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="12" y1="30" x2="12" y2="6" stroke="#1B4332" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="20" y1="30" x2="20" y2="6" stroke="#1B4332" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="0" y1="24" x2="24" y2="24" stroke="#1B4332" strokeWidth="1" strokeLinecap="round"/>
+                <line x1="0" y1="15" x2="24" y2="15" stroke="#1B4332" strokeWidth="1" strokeLinecap="round"/>
+                <circle cx="4" cy="24" r="2.2" fill="#48B87A"/>
+                <circle cx="12" cy="24" r="1.9" fill="#48B87A" opacity="0.9"/>
+                <circle cx="20" cy="24" r="1.6" fill="#48B87A" opacity="0.8"/>
+                <circle cx="4" cy="15" r="2.4" fill="#8CC63F"/>
+                <circle cx="12" cy="15" r="2.1" fill="#8CC63F" opacity="0.9"/>
+                <circle cx="20" cy="15" r="1.7" fill="#8CC63F" opacity="0.7"/>
+                <circle cx="4" cy="6" r="2.1" fill="#D4A828" opacity="0.85"/>
+                <circle cx="12" cy="3" r="1.7" fill="#D4A828" opacity="0.65"/>
+                <circle cx="20" cy="0" r="1.3" fill="#D4A828" opacity="0.5"/>
+              </g>
+            </svg>
+            {/* Wordmark */}
+            <span style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 22, fontWeight: 400, letterSpacing: "0.01em", color: "#1a1a18", lineHeight: 1 }}>
+              Trellis
+            </span>
+            {/* Tagline */}
+            <span style={{ fontSize: 8, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase" as const, color: "#999", lineHeight: 1, marginTop: -1 }}>
               Canada's AgTech Ecosystem
             </span>
           </Link>
