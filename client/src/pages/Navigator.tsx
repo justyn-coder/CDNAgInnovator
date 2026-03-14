@@ -128,7 +128,7 @@ function ChatBubble({ msg }: { msg: Message }) {
               }).catch(() => {});
             }}
             className={cn(
-              "self-start mt-1 border border-border rounded-sm px-2 py-0.5 text-[0.6rem] font-semibold transition-all opacity-70 hover:opacity-100",
+              "self-start mt-1 border border-border rounded-sm px-2.5 py-1 text-[0.7rem] font-semibold transition-all opacity-70 hover:opacity-100",
               copied ? "bg-brand-green text-white" : "bg-bg-secondary text-text-tertiary"
             )}
           >{copied ? "✓ Copied" : "📋 Copy"}</button>
@@ -158,7 +158,7 @@ function WizardSummary({ snapshot, onReset }: { snapshot: WizardSnapshot; onRese
         </span>
       )}
       <span className="flex-1" />
-      <button onClick={onReset} className="bg-transparent border-none p-0 text-[0.65rem] text-text-tertiary cursor-pointer underline">
+      <button onClick={onReset} className="bg-transparent border-none px-2 py-1 text-[0.72rem] text-text-tertiary cursor-pointer underline">
         Start over
       </button>
     </div>
@@ -312,7 +312,7 @@ function ProgramCard({ p }: { p: Program }) {
           <CategoryPill cat={p.category} />
           <span className="text-[0.65rem] text-text-tertiary">{provinces}</span>
           {p.stage && p.stage.length > 0 && p.stage.map(st => (
-            <span key={st} className="text-[0.58rem] font-semibold bg-bg-tertiary px-[7px] py-px rounded text-text-tertiary">
+            <span key={st} className="text-[0.65rem] font-semibold bg-bg-tertiary px-[7px] py-px rounded text-text-tertiary">
               {STAGE_LABELS[st] || st}
             </span>
           ))}
@@ -327,11 +327,11 @@ function ProgramCard({ p }: { p: Program }) {
       {/* Actions row */}
       <div
         className="flex items-center gap-4 mt-2 pt-2"
-        style={{ borderTop: "0.5px solid #E5E5E0" }}
+        style={{ borderTop: "1px solid #E5E5E0" }}
       >
         <button
           onClick={() => setShowCorrection(!showCorrection)}
-          className="bg-transparent border-none cursor-pointer flex items-center gap-1 p-0"
+          className="bg-transparent border-none cursor-pointer flex items-center gap-1 py-1.5 px-1"
           style={{ fontSize: 12, color: "#2D7A4F" }}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -420,7 +420,7 @@ function BrowsePanel({
   });
 
   return (
-    <div className="fixed inset-0 z-[200] bg-bg flex flex-col">
+    <div className="fixed inset-0 z-[200] bg-bg flex flex-col" role="dialog" aria-modal="true" aria-label="Program Database" onKeyDown={e => { if (e.key === "Escape") onClose(); }}>
       {/* Header */}
       <div className="px-[18px] h-14 flex justify-between items-center border-b border-border bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px] shrink-0">
         <div>
@@ -489,8 +489,9 @@ function BrowsePanel({
                 setShowBridge(false);
                 try { localStorage.setItem("trellis_bridge_dismissed", "true"); } catch {}
               }}
-              className="bg-transparent border-none cursor-pointer"
+              className="bg-transparent border-none cursor-pointer px-2 py-1.5"
               style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}
+              aria-label="Dismiss"
             >
               ✕
             </button>
@@ -589,7 +590,11 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
   return (
     <div
       className="fixed inset-0 z-[300] bg-[rgba(0,0,0,0.45)] backdrop-blur-[6px] flex items-center justify-center p-5 animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Beta Feedback"
       onClick={onClose}
+      onKeyDown={e => { if (e.key === "Escape") onClose(); }}
     >
       <div onClick={e => e.stopPropagation()} className="bg-bg rounded-lg max-w-[440px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-hidden animate-slide-up">
         {/* Amber header */}
@@ -707,7 +712,7 @@ export default function Navigator() {
   const [quickFeedbackSent, setQuickFeedbackSent] = useState(false);
   const [showQuickFeedback, setShowQuickFeedback] = useState(false);
   const [ecoMsgCount, setEcoMsgCount] = useState(0);
-  const [showEcoCta, setShowEcoCta] = useState(false);
+  // showEcoCta removed — was set but never used in JSX
   const [feedbackMinimized, setFeedbackMinimized] = useState(false);
   const [showNudgeBanner, setShowNudgeBanner] = useState(false);
   const isEco = mode === "ec";
@@ -782,7 +787,7 @@ export default function Navigator() {
   }, [isEco]);
 
   useEffect(() => {
-    if (isEco && ecoMsgCount >= 2 && !showEcoCta) setShowEcoCta(true);
+    // eco CTA tracking (reserved for future use)
   }, [ecoMsgCount]);
 
   const lastMsgRef = useRef<HTMLDivElement>(null);
@@ -906,7 +911,7 @@ export default function Navigator() {
               window.location.reload();
             }}
             className={cn(
-              "rounded-full px-3.5 py-1 text-[0.72rem] font-semibold tracking-[0.02em] cursor-pointer transition-all hover:brightness-95 border-none",
+              "rounded-full px-3.5 py-1 text-[0.72rem] font-semibold tracking-[0.02em] cursor-pointer transition-all hover:brightness-95 active:brightness-90 border-none",
               isEco
                 ? "bg-eco-pill-bg text-eco-pill-text"
                 : "bg-founder-pill-bg text-founder-pill-text"
@@ -942,7 +947,7 @@ export default function Navigator() {
               }}
               style={{
                 fontSize: 12,
-                padding: "6px 16px",
+                padding: "8px 16px",
                 background: "#D4A828",
                 color: "#1B4332",
                 borderRadius: 6,
@@ -958,7 +963,7 @@ export default function Navigator() {
         )}
 
         {/* ── Messages area ────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto pt-4 pb-3">
+        <div className="flex-1 overflow-y-auto overscroll-contain pt-4 pb-3" role="log" aria-live="polite">
 
           {/* Eco operator welcome */}
           {isEco && messages.length === 0 && !loading && (
@@ -981,7 +986,8 @@ export default function Navigator() {
                     </button>
                   </div>
                   <button onClick={() => { try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }}
-                    className="bg-transparent border-none text-[0.72rem] text-brand-green px-1 font-semibold shrink-0">
+                    className="bg-transparent border-none text-[0.72rem] text-brand-green px-2 py-1.5 font-semibold shrink-0"
+                    aria-label="Dismiss">
                     ✕
                   </button>
                 </div>
@@ -991,7 +997,7 @@ export default function Navigator() {
               <div className="bg-bg border border-border rounded-lg shadow-md overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-br from-[#122b1f] to-[#1B4332] px-6 pt-[22px] pb-[18px]">
-                  <div className="text-[0.55rem] font-bold tracking-[0.12em] uppercase text-brand-gold/70 mb-2">
+                  <div className="text-[0.65rem] font-bold tracking-[0.12em] uppercase text-brand-gold/70 mb-2">
                     Ecosystem Intelligence
                   </div>
                   <h2 className="font-display text-[1.2rem] font-normal text-white leading-[1.2] mb-1.5">
@@ -1013,7 +1019,7 @@ export default function Navigator() {
                         i < 2 && "border-r border-white/[0.08]"
                       )}>
                         <div className="text-base font-extrabold text-brand-gold">{s.num}</div>
-                        <div className="text-[0.5rem] font-semibold text-white/55 tracking-[0.08em] uppercase">{s.label}</div>
+                        <div className="text-[0.62rem] font-semibold text-white/55 tracking-[0.08em] uppercase">{s.label}</div>
                       </div>
                     ))}
                   </div>
@@ -1122,13 +1128,13 @@ export default function Navigator() {
 
         {/* ── Chat input ───────────────────────────────────────────── */}
         {(!showWizard || isEco) && (
-        <div className="bg-bg border-t border-border-strong px-4 pt-3 pb-4 shrink-0 shadow-[0_-2px_12px_rgba(0,0,0,0.04)]">
+        <div className="bg-bg border-t border-border-strong px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] shrink-0 shadow-[0_-2px_12px_rgba(0,0,0,0.04)]">
           {/* Eco suggestion chips above input when messages exist */}
           {isEco && messages.length > 0 && messages.length < 4 && (
             <div className="flex gap-1.5 flex-wrap mb-2.5">
               {ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q)).slice(0, 3).map((s, i) => (
                 <button key={i} onClick={() => send(s.q)}
-                  className="px-3 py-[5px] rounded-full border border-border bg-bg-secondary text-[0.7rem] font-semibold text-text-secondary transition-all hover:border-brand-green"
+                  className="px-3 py-1.5 rounded-full border border-border bg-bg-secondary text-[0.72rem] font-semibold text-text-secondary transition-all hover:border-brand-green active:bg-bg-tertiary"
                 >{s.label}</button>
               ))}
             </div>
@@ -1151,6 +1157,7 @@ export default function Navigator() {
                   ? "bg-bg-tertiary text-text-tertiary"
                   : "bg-brand-gold text-brand-forest shadow-gold"
               )}
+              aria-label="Send message"
             >→</button>
           </div>
           {/* Disclaimer */}
@@ -1189,7 +1196,7 @@ export default function Navigator() {
                 className="w-9 h-9 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-base transition-transform hover:scale-[1.15]"
               >{opt.emoji}</button>
             ))}
-            <button onClick={() => setShowQuickFeedback(false)} className="bg-transparent border-none text-[0.7rem] text-text-tertiary px-1">
+            <button onClick={() => setShowQuickFeedback(false)} className="bg-transparent border-none text-[0.72rem] text-text-tertiary px-2 py-1" aria-label="Dismiss">
               ✕
             </button>
           </div>
@@ -1198,16 +1205,19 @@ export default function Navigator() {
 
       {/* ── Persistent feedback button — founders only (operators use inline corrections) ──────── */}
       {!isEco && !showFeedback && !showQuickFeedback && !feedbackMinimized && (
-        <button
-          onClick={() => setShowFeedback(true)}
-          className="fixed bottom-20 left-4 md:left-auto md:right-4 z-[4] bg-brand-gold text-white border-none rounded-full px-3.5 py-2 text-[0.7rem] font-bold shadow-gold flex items-center gap-[5px] animate-fade-in"
-        >
-          <span>💬</span> Feedback
-          <span
-            onClick={(e) => { e.stopPropagation(); setFeedbackMinimized(true); }}
-            className="ml-1 opacity-70 text-[0.65rem]"
-          >✕</span>
-        </button>
+        <div className="fixed bottom-20 left-4 md:left-auto md:right-4 z-[4] flex items-center gap-1 animate-fade-in">
+          <button
+            onClick={() => setShowFeedback(true)}
+            className="bg-brand-gold text-white border-none rounded-full px-3.5 py-2 text-[0.72rem] font-bold shadow-gold flex items-center gap-[5px]"
+          >
+            <span>💬</span> Feedback
+          </button>
+          <button
+            onClick={() => setFeedbackMinimized(true)}
+            className="bg-brand-gold/80 text-white border-none rounded-full w-7 h-7 flex items-center justify-center text-[0.72rem]"
+            aria-label="Dismiss feedback button"
+          >✕</button>
+        </div>
       )}
     </>
   );

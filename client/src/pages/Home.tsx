@@ -109,7 +109,7 @@ export default function Home() {
     }
   }
 
-  const programCount = count || 350;
+  const programCount = count ?? 350;
 
   return (
     <div className="min-h-screen bg-bg flex flex-col font-sans">
@@ -118,6 +118,9 @@ export default function Home() {
       {showPopup && (
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center p-5"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Welcome to Trellis"
           style={{
             background: "rgba(245, 243, 237, 0.75)",
             backdropFilter: "blur(16px)",
@@ -129,7 +132,7 @@ export default function Home() {
             style={{
               borderRadius: 16,
               padding: "40px 32px 28px",
-              border: "0.5px solid #E5E5E0",
+              border: "1px solid #E5E5E0",
             }}
           >
             {/* Icon */}
