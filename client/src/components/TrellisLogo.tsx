@@ -50,15 +50,17 @@ export function TrellisLogo({ className = "h-8", showTagline = false }: { classN
   );
 }
 
-/** Small inline maple leaf SVG icon */
+/** Maple leaf — uses PNG if available, inline SVG fallback */
 export function MapleLeaf({ size = 16, className }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <path
-        d="M12 2L9.5 7.5L4 6L6.5 11L2 13L7 14L5.5 19L10 16.5L12 22L14 16.5L18.5 19L17 14L22 13L17.5 11L20 6L14.5 7.5L12 2Z"
-        fill="#C41E3A"
-        opacity="0.85"
-      />
-    </svg>
+    <img
+      src="/brand/maple-leaf.svg"
+      alt=""
+      width={size}
+      height={size}
+      className={className}
+      style={{ objectFit: "contain" }}
+      aria-hidden="true"
+    />
   );
 }

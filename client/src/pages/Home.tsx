@@ -291,7 +291,7 @@ export default function Home() {
         <div className="inline-flex items-center gap-[7px] bg-green-soft border border-[rgba(45,122,79,0.12)] rounded-full px-4 py-[5px] mb-7 animate-fade-in-up">
           <div className="w-[7px] h-[7px] rounded-full bg-brand-chartreuse shadow-[0_0_8px_rgba(140,198,63,0.4)]" />
           <span className="text-[0.72rem] font-semibold text-brand-green tracking-[0.01em]">
-            {count !== null ? `🍁 ${count} programs tracked across Canada` : "Loading…"}
+            {count !== null ? `${count} programs tracked across Canada` : "Loading…"}
           </span>
         </div>
 
