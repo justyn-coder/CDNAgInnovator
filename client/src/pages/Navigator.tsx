@@ -714,9 +714,17 @@ export default function Navigator() {
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // Dynamic counts for operator dashboard
+  const [programCount, setProgramCount] = useState<number | null>(null);
+
   // Operator params: ?eco=true&org=fcc or ?browse=true
   const [orgParam, setOrgParam] = useState<string | null>(null);
   const [browseInitialSearch, setBrowseInitialSearch] = useState<string>("");
+
+  // Fetch dynamic counts for operator dashboard
+  useEffect(() => {
+    fetch("/api/programs").then(r => r.json()).then((d: any[]) => setProgramCount(d.length)).catch(() => {});
+  }, []);
 
   // Read URL params on mount
   useEffect(() => {
@@ -996,14 +1004,13 @@ export default function Navigator() {
                   {/* Stats strip */}
                   <div className="flex mt-4 bg-white/[0.06] rounded-[8px] overflow-hidden">
                     {[
-                      { num: "347", label: "Programs" },
-                      { num: "127", label: "Insights" },
+                      { num: programCount !== null ? String(programCount) : "…", label: "Programs" },
                       { num: "10", label: "Provinces" },
                       { num: "6", label: "Categories" },
                     ].map((s, i) => (
                       <div key={i} className={cn(
                         "flex-1 py-2.5 text-center",
-                        i < 3 && "border-r border-white/[0.08]"
+                        i < 2 && "border-r border-white/[0.08]"
                       )}>
                         <div className="text-base font-extrabold text-brand-gold">{s.num}</div>
                         <div className="text-[0.5rem] font-semibold text-white/55 tracking-[0.08em] uppercase">{s.label}</div>
@@ -1012,10 +1019,39 @@ export default function Navigator() {
                   </div>
                 </div>
 
-                {/* Gap insight preview cards */}
+                {/* Action buttons — Search Programs + View Gap Map */}
+                <div className="px-4 py-3 flex gap-2 border-b border-border">
+                  <button
+                    onClick={() => { setBrowseInitialSearch(""); setOrgParam(null); setShowBrowse(true); }}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-bg border border-border rounded-sm text-[0.82rem] font-semibold text-text transition-all hover:border-brand-green hover:-translate-y-px shadow-sm"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <circle cx="7" cy="7" r="5" stroke="#1B4332" strokeWidth="1.5"/>
+                      <path d="M11 11l3 3" stroke="#1B4332" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    Search Programs
+                  </button>
+                  <button
+                    onClick={() => setShowGapMap(true)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-bg border border-border rounded-sm text-[0.82rem] font-semibold text-text transition-all hover:border-brand-green hover:-translate-y-px shadow-sm"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <rect x="1" y="1" width="6" height="6" rx="1" fill="#D4A828"/>
+                      <rect x="9" y="1" width="6" height="6" rx="1" fill="#48B87A"/>
+                      <rect x="1" y="9" width="6" height="6" rx="1" fill="#48B87A"/>
+                      <rect x="9" y="9" width="6" height="6" rx="1" fill="#D4A828" opacity="0.5"/>
+                    </svg>
+                    View Gap Map
+                  </button>
+                </div>
+
+                {/* Coverage gap cards */}
                 <div className="px-4 py-3 bg-bg-secondary border-b border-border">
-                  <div className="text-[0.6rem] font-bold tracking-[0.06em] uppercase text-text-tertiary mb-2">
-                    Live coverage gaps
+                  <div className="text-[0.72rem] font-semibold text-text mb-0.5">
+                    Where coverage looks thin
+                  </div>
+                  <div className="text-[0.65rem] text-text-tertiary mb-2">
+                    Based on our data — help us fill the gaps
                   </div>
                   <div className="flex gap-2 flex-wrap">
                     {[
@@ -1052,11 +1088,6 @@ export default function Navigator() {
                   ))}
                 </div>
 
-                {/* Tools pointer */}
-                <div className="px-5 py-2.5 pb-3.5 border-t border-border text-[0.72rem] text-text-tertiary flex gap-3">
-                  <span onClick={() => setShowGapMap(true)} className="cursor-pointer text-brand-green font-semibold">📊 Gap Map</span>
-                  <span onClick={() => setShowBrowse(true)} className="cursor-pointer text-brand-green font-semibold">📋 Browse All Programs</span>
-                </div>
               </div>
             </div>
           )}
