@@ -823,13 +823,23 @@ export default function Navigator() {
     } catch {}
   }, []);
 
-  // Feedback nudge banner — 10s after mount (both modes)
+  // Feedback tooltip — 3s after mount, auto-dismiss after 8s
   useEffect(() => {
     const nudged = localStorage.getItem("trellis_feedback_nudged");
     if (nudged) return;
-    const timer = setTimeout(() => setShowNudgeBanner(true), 10000);
-    return () => clearTimeout(timer);
+    const show = setTimeout(() => setShowNudgeBanner(true), 3000);
+    return () => clearTimeout(show);
   }, []);
+
+  // Auto-dismiss tooltip after 8s
+  useEffect(() => {
+    if (!showNudgeBanner) return;
+    const auto = setTimeout(() => {
+      setShowNudgeBanner(false);
+      try { localStorage.setItem("trellis_feedback_nudged", "true"); } catch {}
+    }, 8000);
+    return () => clearTimeout(auto);
+  }, [showNudgeBanner]);
 
   useEffect(() => {
     if (isEco) {
@@ -1002,45 +1012,6 @@ export default function Navigator() {
           </button>
         </div>
 
-        {/* ── Feedback nudge banner ──────────────────────────────────── */}
-        {showNudgeBanner && !isEco && (
-          <div
-            className="shrink-0 flex items-center justify-between gap-3 px-4 md:px-6"
-            style={{
-              background: "#FFF8E7",
-              borderBottom: "1px solid rgba(212,168,40,0.27)",
-              paddingTop: 12,
-              paddingBottom: 12,
-              animation: "slideDown 0.3s ease both",
-            }}
-          >
-            <div style={{ fontSize: 13, color: "#1B4332", lineHeight: 1.5 }}>
-              👋 You're one of the first people testing Trellis.{" "}
-              {isEco
-                ? 'Use "Suggest a correction" on any program to tell us what we got wrong.'
-                : "Your feedback shapes what we build next — use the feedback button anytime."}
-            </div>
-            <button
-              onClick={() => {
-                setShowNudgeBanner(false);
-                try { localStorage.setItem("trellis_feedback_nudged", "true"); } catch {}
-              }}
-              style={{
-                fontSize: 12,
-                padding: "8px 16px",
-                background: "#D4A828",
-                color: "#1B4332",
-                borderRadius: 6,
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Got it
-            </button>
-          </div>
-        )}
 
         {/* ── Messages area ────────────────────────────────────────── */}
         <div data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain pt-4 pb-3" role="log" aria-live="polite">
@@ -1271,10 +1242,41 @@ export default function Navigator() {
         </div>
         )}
 
+        {/* ── Feedback tooltip — first visit only ──────── */}
+        {showNudgeBanner && (
+          <div className="shrink-0 px-3 pb-1 z-[250] animate-[slideUp_0.3s_ease-out_both]">
+            <div className="bg-gradient-to-br from-[#122b1f] to-[#1B4332] rounded-lg px-4 py-3 shadow-lg relative">
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-[0.78rem] text-white/90 leading-[1.55]">
+                  👋 You're one of the first testing Trellis — if anything looks off, that button is always there.
+                </div>
+                <button
+                  onClick={() => {
+                    setShowNudgeBanner(false);
+                    try { localStorage.setItem("trellis_feedback_nudged", "true"); } catch {}
+                  }}
+                  className="shrink-0 text-[0.72rem] font-semibold text-brand-chartreuse hover:text-white transition-colors cursor-pointer"
+                  style={{ border: "none", background: "none", padding: "2px 0" }}
+                >
+                  Got it
+                </button>
+              </div>
+              {/* Triangle pointing down to feedback bar */}
+              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1B4332] rotate-45" />
+            </div>
+          </div>
+        )}
+
         {/* ── Feedback bar — tappable, always visible ──────── */}
         <button
           ref={feedbackFooterRef}
-          onClick={() => setShowFeedback(true)}
+          onClick={() => {
+            setShowFeedback(true);
+            if (showNudgeBanner) {
+              setShowNudgeBanner(false);
+              try { localStorage.setItem("trellis_feedback_nudged", "true"); } catch {}
+            }
+          }}
           className="shrink-0 w-full flex items-center justify-center gap-2 bg-bg-secondary cursor-pointer hover:bg-bg-tertiary transition-colors"
           style={{ height: 38, border: "none", borderTop: "1px solid var(--color-border, #E5E5E0)" }}
         >
