@@ -293,7 +293,7 @@ export default function Home() {
               marginTop: 2,
             }}
           >
-            Navigate Canada's AgTech Ecosystem
+            Canada's AgTech Ecosystem
           </span>
         </div>
       </nav>

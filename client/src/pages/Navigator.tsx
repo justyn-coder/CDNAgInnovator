@@ -955,10 +955,10 @@ export default function Navigator() {
                 textTransform: "uppercase" as const,
                 color: "#999",
                 marginTop: 1,
-                paddingLeft: 1,
+                paddingLeft: 0,
               }}
             >
-              Navigate Canada's AgTech Ecosystem
+              Canada's AgTech Ecosystem
             </span>
           </Link>
           <button
