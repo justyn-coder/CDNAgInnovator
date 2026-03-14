@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { cn } from "../lib/cn";
 
 interface WizardResult {
   description: string;
@@ -70,6 +71,20 @@ const PRODUCT_TYPES = [
   { key: "services/consulting", label: "Services", icon: "📋" },
 ];
 
+/** Shared classes for option buttons */
+const optBtnCls = (active: boolean) =>
+  cn(
+    "w-full px-4 py-3 rounded-sm font-semibold text-[0.85rem] cursor-pointer",
+    "transition-all duration-100 font-sans text-left",
+    "flex items-center gap-3 border-2",
+    active
+      ? "border-green-mid bg-green-mid text-white shadow-green"
+      : "border-border bg-bg text-text shadow-sm hover:border-border-strong"
+  );
+
+/** Back button classes */
+const backBtnCls = "bg-transparent border border-border rounded-sm px-4 py-2 text-[0.82rem] font-semibold text-text-secondary font-sans transition-all duration-100 hover:border-border-strong";
+
 export default function Wizard({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<WizardResult & { needs: string[] }>({
@@ -134,34 +149,13 @@ export default function Wizard({ onComplete }: Props) {
     data.needs.length > 0,
   ][step];
 
-  // Shared option button style
-  const optBtn = (active: boolean) => ({
-    width: "100%" as const,
-    padding: "12px 16px",
-    borderRadius: "var(--radius-sm)" as const,
-    border: active ? "2px solid var(--green-mid)" : "1.5px solid var(--border)" as const,
-    background: active ? "var(--green-mid)" : "var(--bg)" as const,
-    color: active ? "#fff" : "var(--text)" as const,
-    fontWeight: 600 as const,
-    fontSize: "0.85rem" as const,
-    cursor: "pointer" as const,
-    transition: "all 0.12s" as const,
-    fontFamily: "var(--font-text)" as const,
-    textAlign: "left" as const,
-    display: "flex" as const,
-    alignItems: "center" as const,
-    gap: "12px" as const,
-    boxShadow: active ? "0 2px 8px rgba(30,107,10,0.15)" : "var(--shadow-sm)" as const,
-  });
-
   const stepContent = [
     // ── Step 0: What are you building? ──
-    <div key="0" style={{ animation: "fadeInUp 0.3s ease" }}>
-      <h2 style={{
-        fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 400,
-        color: "var(--text)", marginBottom: 6,
-      }}>What are you building?</h2>
-      <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: 16 }}>
+    <div key="0" className="animate-fade-in-up">
+      <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        What are you building?
+      </h2>
+      <p className="text-[0.82rem] text-text-secondary mb-4">
         A sentence is enough — product type, who it's for.
       </p>
       <textarea
@@ -169,182 +163,159 @@ export default function Wizard({ onComplete }: Props) {
         onChange={e => setData(d => ({ ...d, description: e.target.value }))}
         placeholder="e.g. AI-powered soil sampling software for Prairie grain farmers"
         rows={3}
-        style={{
-          width: "100%", padding: "12px 14px", borderRadius: "var(--radius-sm)",
-          border: "1.5px solid var(--border)", fontSize: "0.88rem",
-          lineHeight: 1.5, resize: "none", outline: "none",
-          background: "var(--bg-secondary)",
-          transition: "border-color 0.15s, box-shadow 0.15s",
-          fontFamily: "var(--font-text)",
-        }}
-        onFocus={e => { e.target.style.borderColor = "var(--green-mid)"; e.target.style.boxShadow = "0 0 0 3px rgba(30,107,10,0.06)"; }}
-        onBlur={e => { e.target.style.borderColor = "var(--border)"; e.target.style.boxShadow = "none"; }}
+        className={cn(
+          "w-full px-3.5 py-3 rounded-sm border-[1.5px] border-border",
+          "text-[0.88rem] leading-relaxed resize-none outline-none",
+          "bg-bg-secondary transition-all duration-150 font-sans",
+          "focus:border-green-mid focus:shadow-[0_0_0_3px_rgba(30,107,10,0.06)]"
+        )}
         onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && canProceed) { e.preventDefault(); setStep(1); } }}
       />
 
       {/* Product type */}
-      <div style={{ marginTop: 16 }}>
-        <label style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--text-tertiary)", marginBottom: 8, display: "block" }}>
+      <div className="mt-4">
+        <label className="text-[0.72rem] font-semibold text-text-tertiary mb-2 block">
           Product type
         </label>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div className="flex gap-1.5 flex-wrap">
           {PRODUCT_TYPES.map(pt => {
             const active = data.productTypes.includes(pt.key);
             return (
-            <button key={pt.key}
-              onClick={() => setData(d => ({
-                ...d,
-                productTypes: d.productTypes.includes(pt.key)
-                  ? d.productTypes.filter(t => t !== pt.key)
-                  : [...d.productTypes, pt.key],
-              }))}
-              style={{
-                padding: "7px 14px", borderRadius: "var(--radius-sm)",
-                border: active ? "2px solid var(--green-mid)" : "1.5px solid var(--border)",
-                background: active ? "var(--green-mid)" : "var(--bg)",
-                color: active ? "#fff" : "var(--text-secondary)",
-                fontWeight: 600, fontSize: "0.78rem",
-                fontFamily: "var(--font-text)",
-                transition: "all 0.12s",
-                display: "flex", alignItems: "center", gap: 6,
-              }}
-            >
-              <span style={{ fontSize: "0.9rem" }}>{pt.icon}</span>
-              {pt.label}
-            </button>
+              <button key={pt.key}
+                onClick={() => setData(d => ({
+                  ...d,
+                  productTypes: d.productTypes.includes(pt.key)
+                    ? d.productTypes.filter(t => t !== pt.key)
+                    : [...d.productTypes, pt.key],
+                }))}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-sm font-semibold text-[0.78rem]",
+                  "font-sans transition-all duration-100 flex items-center gap-1.5 border-2",
+                  active
+                    ? "border-green-mid bg-green-mid text-white"
+                    : "border-border bg-bg text-text-secondary hover:border-border-strong"
+                )}
+              >
+                <span className="text-[0.9rem]">{pt.icon}</span>
+                {pt.label}
+              </button>
             );
           })}
         </div>
       </div>
 
       {/* Company URL */}
-      <div style={{ marginTop: 14 }}>
-        <label style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--text-tertiary)", display: "flex", alignItems: "center", gap: 4 }}>
+      <div className="mt-3.5">
+        <label className="text-[0.72rem] font-semibold text-text-tertiary flex items-center gap-1">
           Company website
-          <span style={{ fontWeight: 400, fontStyle: "italic" }}>(optional)</span>
+          <span className="font-normal italic">(optional)</span>
         </label>
         <input
           value={data.companyUrl}
           onChange={e => setData(d => ({ ...d, companyUrl: e.target.value }))}
           placeholder="https://yourcompany.com"
           type="url" autoComplete="url" autoCapitalize="off" autoCorrect="off" spellCheck={false}
-          style={{
-            width: "100%", padding: "9px 14px", borderRadius: "var(--radius-sm)", marginTop: 4,
-            border: "1.5px solid var(--border)", fontSize: "0.82rem",
-            outline: "none", background: "var(--bg-secondary)",
-            transition: "border-color 0.15s",
-            fontFamily: "var(--font-text)",
-          }}
-          onFocus={e => (e.target.style.borderColor = "var(--green-mid)")}
-          onBlur={e => (e.target.style.borderColor = "var(--border)")}
+          className={cn(
+            "w-full px-3.5 py-2 rounded-sm mt-1",
+            "border-[1.5px] border-border text-[0.82rem]",
+            "outline-none bg-bg-secondary transition-all duration-150 font-sans",
+            "focus:border-green-mid"
+          )}
         />
       </div>
     </div>,
 
     // ── Step 1: Stage ──
-    <div key="1" style={{ animation: "fadeInUp 0.3s ease" }}>
-      <h2 style={{
-        fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 400,
-        color: "var(--text)", marginBottom: 6,
-      }}>What stage are you at?</h2>
-      <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: 16 }}>
+    <div key="1" className="animate-fade-in-up">
+      <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        What stage are you at?
+      </h2>
+      <p className="text-[0.82rem] text-text-secondary mb-4">
         Be honest — this determines which programs are actually open to you.
       </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 480 }}>
+      <div className="flex flex-col gap-2 max-w-[480px]">
         {STAGES.map(s => (
           <button key={s.key}
             onClick={() => { setData(d => ({ ...d, stage: s.key })); setTimeout(() => setStep(2), 150); }}
-            style={{
-              ...optBtn(data.stage === s.key),
-              flexDirection: "column",
-              alignItems: "flex-start",
-              gap: "2px",
-            }}
+            className={cn(
+              optBtnCls(data.stage === s.key),
+              "flex-col items-start gap-0.5"
+            )}
           >
-            <span style={{ fontWeight: 700 }}>{s.label}</span>
-            <span style={{
-              fontSize: "0.72rem", fontWeight: 400,
-              color: data.stage === s.key ? "rgba(255,255,255,0.7)" : "var(--text-tertiary)",
-            }}>{s.sub}</span>
+            <span className="font-bold">{s.label}</span>
+            <span className={cn(
+              "text-[0.72rem] font-normal",
+              data.stage === s.key ? "text-white/70" : "text-text-tertiary"
+            )}>{s.sub}</span>
           </button>
         ))}
       </div>
     </div>,
 
     // ── Step 2: Province ──
-    <div key="2" style={{ animation: "fadeInUp 0.3s ease" }}>
-      <h2 style={{
-        fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 400,
-        color: "var(--text)", marginBottom: 6,
-      }}>Where are you operating?</h2>
-      <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: 16 }}>
+    <div key="2" className="animate-fade-in-up">
+      <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        Where are you operating?
+      </h2>
+      <p className="text-[0.82rem] text-text-secondary mb-4">
         Select all that apply — many programs are province-specific.
       </p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        {PROVINCES.map(p => (
-          <button key={p.key}
-            onClick={() => toggleProvince(p.key)}
-            style={{
-              padding: "10px 14px",
-              borderRadius: "var(--radius-sm)",
-              border: data.provinces.includes(p.key) ? "2px solid var(--green-mid)" : "1.5px solid var(--border)",
-              background: data.provinces.includes(p.key) ? "var(--green-mid)" : "var(--bg)",
-              color: data.provinces.includes(p.key) ? "#fff" : "var(--text)",
-              fontWeight: 600, fontSize: "0.82rem",
-              fontFamily: "var(--font-text)",
-              transition: "all 0.12s",
-              textAlign: "left" as const,
-              boxShadow: data.provinces.includes(p.key) ? "0 2px 8px rgba(30,107,10,0.15)" : "var(--shadow-sm)",
-            }}
-          >
-            <div style={{ fontWeight: 700 }}>{p.key}</div>
-            <div style={{
-              fontSize: "0.68rem", fontWeight: 400, marginTop: 1,
-              color: data.provinces.includes(p.key) ? "rgba(255,255,255,0.65)" : "var(--text-tertiary)",
-            }}>{p.label}</div>
-          </button>
-        ))}
+      <div className="grid grid-cols-2 gap-2">
+        {PROVINCES.map(p => {
+          const active = data.provinces.includes(p.key);
+          return (
+            <button key={p.key}
+              onClick={() => toggleProvince(p.key)}
+              className={cn(
+                "px-3.5 py-2.5 rounded-sm font-semibold text-[0.82rem]",
+                "font-sans transition-all duration-100 text-left border-2",
+                active
+                  ? "border-green-mid bg-green-mid text-white shadow-green"
+                  : "border-border bg-bg text-text shadow-sm hover:border-border-strong"
+              )}
+            >
+              <div className="font-bold">{p.key}</div>
+              <div className={cn(
+                "text-[0.68rem] font-normal mt-px",
+                active ? "text-white/65" : "text-text-tertiary"
+              )}>{p.label}</div>
+            </button>
+          );
+        })}
       </div>
     </div>,
 
     // ── Step 3: Need (MULTI-SELECT) ──
-    <div key="3" style={{ animation: "fadeInUp 0.3s ease" }}>
-      <h2 style={{
-        fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 400,
-        color: "var(--text)", marginBottom: 6,
-      }}>What's holding you back?</h2>
-      <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: 16 }}>
+    <div key="3" className="animate-fade-in-up">
+      <h2 className="font-display text-[1.25rem] font-normal text-text mb-1.5">
+        What's holding you back?
+      </h2>
+      <p className="text-[0.82rem] text-text-secondary mb-4">
         Select all that apply — we'll build your pathway around the biggest bottlenecks.
       </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div className="flex flex-col gap-2">
         {getNeedsForStage(data.stage).map(n => {
           const isActive = data.needs.includes(n.key);
           const isFirst = data.needs.length > 0 && data.needs[0] === n.key && data.needs.length > 1;
           return (
             <button key={n.key}
               onClick={() => toggleNeed(n.key)}
-              style={{
-                ...optBtn(isActive),
-                position: "relative" as const,
-              }}
+              className={cn(optBtnCls(isActive), "relative")}
             >
-              <span style={{ fontSize: "1.2rem", flexShrink: 0 }}>{n.icon}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700 }}>{n.label}</div>
+              <span className="text-[1.2rem] shrink-0">{n.icon}</span>
+              <div className="flex-1">
+                <div className="font-bold">{n.label}</div>
                 {n.sub && (
-                  <div style={{
-                    fontSize: "0.72rem", fontWeight: 400, marginTop: 2,
-                    color: isActive ? "rgba(255,255,255,0.65)" : "var(--text-tertiary)",
-                  }}>{n.sub}</div>
+                  <div className={cn(
+                    "text-[0.72rem] font-normal mt-0.5",
+                    isActive ? "text-white/65" : "text-text-tertiary"
+                  )}>{n.sub}</div>
                 )}
               </div>
               {isFirst && (
-                <span style={{
-                  fontSize: "0.55rem", fontWeight: 700, padding: "2px 6px",
-                  borderRadius: 4, background: "rgba(255,255,255,0.2)", color: "#fff",
-                  letterSpacing: "0.05em", textTransform: "uppercase",
-                  flexShrink: 0,
-                }}>Primary</span>
+                <span className="text-[0.55rem] font-bold px-1.5 py-0.5 rounded bg-white/20 text-white tracking-wide uppercase shrink-0">
+                  Primary
+                </span>
               )}
             </button>
           );
@@ -355,15 +326,14 @@ export default function Wizard({ onComplete }: Props) {
       {data.needs.length > 0 && (
         <button
           onClick={finish}
-          style={{
-            width: "100%", marginTop: 18,
-            background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-            color: "#fff", border: "none", borderRadius: "var(--radius-sm)",
-            padding: "14px 24px", fontSize: "0.92rem", fontWeight: 700,
-            fontFamily: "var(--font-text)", transition: "all 0.15s",
-            boxShadow: "0 4px 16px rgba(30,107,10,0.25)",
-            animation: "fadeInUp 0.3s ease",
-          }}
+          className={cn(
+            "w-full mt-4.5 border-none rounded-sm px-6 py-3.5",
+            "text-[0.92rem] font-bold font-sans text-white",
+            "bg-linear-to-br from-green-mid to-green-light",
+            "transition-all duration-150",
+            "shadow-[0_4px_16px_rgba(30,107,10,0.25)]",
+            "animate-fade-in-up hover:brightness-110"
+          )}
         >
           Generate my pathway →
         </button>
@@ -372,71 +342,49 @@ export default function Wizard({ onComplete }: Props) {
   ];
 
   return (
-    <div style={{
-      margin: "16px", padding: "24px",
-      background: "var(--bg)", border: "1px solid var(--border)",
-      borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-md)",
-    }}>
+    <div className="m-4 p-6 bg-bg border border-border rounded-lg shadow-md">
       {/* Progress */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 6 }}>
+      <div className="flex gap-1 mb-1.5">
         {[0, 1, 2, 3].map(i => (
-          <div key={i} style={{
-            flex: 1, height: 3, borderRadius: 2,
-            background: i <= step ? "var(--green-mid)" : "var(--bg-tertiary)",
-            transition: "background 0.3s",
-          }} />
+          <div key={i} className={cn(
+            "flex-1 h-[3px] rounded-full transition-colors duration-300",
+            i <= step ? "bg-green-mid" : "bg-bg-tertiary"
+          )} />
         ))}
       </div>
-      <div style={{
-        fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.08em",
-        textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 18,
-      }}>Step {step + 1} of 4</div>
+      <div className="text-[0.65rem] font-semibold tracking-widest uppercase text-text-tertiary mb-4.5">
+        Step {step + 1} of 4
+      </div>
 
       {stepContent[step]}
 
       {/* Navigation — shown for steps 0 and 2 */}
       {(step === 0 || step === 2) && (
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 22 }}>
+        <div className="flex justify-between mt-5.5">
           {step > 0 ? (
-            <button onClick={() => setStep(s => s - 1)} style={{
-              background: "none", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
-              padding: "8px 16px", fontSize: "0.82rem", fontWeight: 600, color: "var(--text-secondary)",
-              fontFamily: "var(--font-text)", transition: "all 0.12s",
-            }}>← Back</button>
+            <button onClick={() => setStep(s => s - 1)} className={backBtnCls}>
+              ← Back
+            </button>
           ) : <div />}
           <button
             onClick={() => step === 2 ? setStep(3) : setStep(s => s + 1)}
             disabled={!canProceed}
-            style={{
-              background: canProceed ? "linear-gradient(135deg, var(--green-mid), var(--green-light))" : "var(--bg-tertiary)",
-              color: canProceed ? "#fff" : "var(--text-tertiary)",
-              border: "none", borderRadius: "var(--radius-sm)",
-              padding: "10px 24px", fontSize: "0.85rem", fontWeight: 700,
-              fontFamily: "var(--font-text)", transition: "all 0.15s",
-              boxShadow: canProceed ? "0 2px 8px rgba(30,107,10,0.2)" : "none",
-            }}
+            className={cn(
+              "border-none rounded-sm px-6 py-2.5 text-[0.85rem] font-bold",
+              "font-sans transition-all duration-150",
+              canProceed
+                ? "bg-linear-to-br from-green-mid to-green-light text-white shadow-green hover:brightness-110"
+                : "bg-bg-tertiary text-text-tertiary"
+            )}
           >Next →</button>
         </div>
       )}
 
       {/* Back button for steps 1 and 3 */}
-      {step === 1 && (
-        <button onClick={() => setStep(s => s - 1)} style={{
-          marginTop: 16, background: "none", border: "1px solid var(--border)",
-          borderRadius: "var(--radius-sm)", padding: "8px 16px",
-          fontSize: "0.82rem", fontWeight: 600, color: "var(--text-secondary)",
-          fontFamily: "var(--font-text)", transition: "all 0.12s",
-        }}>← Back</button>
-      )}
-
-      {/* Step 3 back button — only if needs not yet selected (button is at top when generating) */}
-      {step === 3 && (
-        <button onClick={() => setStep(s => s - 1)} style={{
-          marginTop: 16, background: "none", border: "1px solid var(--border)",
-          borderRadius: "var(--radius-sm)", padding: "8px 16px",
-          fontSize: "0.82rem", fontWeight: 600, color: "var(--text-secondary)",
-          fontFamily: "var(--font-text)", transition: "all 0.12s",
-        }}>← Back</button>
+      {(step === 1 || step === 3) && (
+        <button onClick={() => setStep(s => s - 1)} className={cn(backBtnCls, "mt-4")}>
+          ← Back
+        </button>
       )}
     </div>
   );

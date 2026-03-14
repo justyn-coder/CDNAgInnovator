@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
+import { cn } from "../lib/cn";
 
 export default function Home() {
   const [count, setCount] = useState<number | null>(null);
@@ -32,112 +33,68 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column", fontFamily: "var(--font)" }}>
+    <div className="min-h-screen bg-bg flex flex-col font-sans">
 
       {/* ── Beta Welcome Modal ─────────────────────────────────── */}
       {showBetaModal && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 1000,
-          background: "rgba(0,0,0,0.5)",
-          backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          padding: 20,
-          animation: "fadeIn 0.3s ease",
-        }}>
-          <div style={{
-            background: "var(--bg)", borderRadius: "var(--radius-lg)",
-            maxWidth: 480, width: "100%",
-            boxShadow: "0 24px 80px rgba(0,0,0,0.2)",
-            overflow: "hidden",
-            animation: "slideUp 0.4s ease",
-          }}>
+        <div className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-[8px] flex items-center justify-center p-5 animate-fade-in">
+          <div className="bg-bg rounded-lg max-w-[480px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-hidden animate-slide-up">
             {/* Header — tight, scannable */}
-            <div style={{
-              background: "linear-gradient(145deg, #0a1f08, #14330c, #1e5510)",
-              padding: "28px 28px 22px",
-              color: "#fff",
-            }}>
-              <div style={{
-                fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
-                color: "rgba(255,255,255,0.35)", marginBottom: 10,
-              }}>Early Access</div>
-              <h2 style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "1.5rem", fontWeight: 400, lineHeight: 1.15, marginBottom: 0,
-              }}>Canada's ag ecosystem,<br />mapped for you.</h2>
+            <div className="bg-gradient-to-br from-[#0a1f08] via-[#14330c] to-[#1e5510] px-7 pt-7 pb-5.5 text-white">
+              <div className="text-[0.58rem] font-bold tracking-[0.12em] uppercase text-white/35 mb-2.5">
+                Early Access
+              </div>
+              <h2 className="font-display text-2xl font-normal leading-[1.15]">
+                Canada's ag ecosystem,<br />mapped for you.
+              </h2>
             </div>
 
             {/* Stats strip — scannable at a glance */}
-            <div style={{
-              display: "flex", borderBottom: "1px solid var(--border)",
-            }}>
+            <div className="flex border-b border-border">
               {[
                 { num: count || 283, label: "Programs" },
                 { num: "10", label: "Provinces" },
                 { num: "AI", label: "Personalized" },
               ].map((stat, i) => (
-                <div key={i} style={{
-                  flex: 1, padding: "12px 0", textAlign: "center",
-                  borderRight: i < 2 ? "1px solid var(--border)" : "none",
-                }}>
-                  <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--green-mid)" }}>{stat.num}</div>
-                  <div style={{ fontSize: "0.62rem", fontWeight: 600, color: "var(--text-tertiary)", letterSpacing: "0.04em", textTransform: "uppercase" }}>{stat.label}</div>
+                <div key={i} className={cn(
+                  "flex-1 py-3 text-center",
+                  i < 2 && "border-r border-border"
+                )}>
+                  <div className="text-[1.1rem] font-extrabold text-green-mid">{stat.num}</div>
+                  <div className="text-[0.62rem] font-semibold text-text-tertiary tracking-[0.04em] uppercase">{stat.label}</div>
                 </div>
               ))}
             </div>
 
             {/* Body */}
-            <div style={{ padding: "20px 28px 26px" }}>
-              <p style={{
-                fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.6,
-                marginBottom: 18,
-              }}>
+            <div className="px-7 pt-5 pb-6.5">
+              <p className="text-[0.8rem] text-text-secondary leading-[1.6] mb-4.5">
                 We built this because finding the right programs shouldn't require a spreadsheet and six phone calls.
                 We're keeping it current — and we're counting on ecosystem partners like you to help us get it right for the founders and farmers who need it most.
               </p>
 
               {/* Two paths */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="flex flex-col gap-2.5">
                 <button onClick={() => dismissModal("e")}
-                  style={{
-                    background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-                    color: "#fff", border: "none", borderRadius: "var(--radius)",
-                    padding: "14px 20px", textAlign: "left",
-                    boxShadow: "0 4px 16px rgba(30,107,10,0.25)",
-                    transition: "transform 0.12s",
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+                  className="bg-gradient-to-br from-green-mid to-green-light text-white border-none rounded px-5 py-3.5 text-left shadow-[0_4px_16px_rgba(30,107,10,0.25)] transition-transform duration-[120ms] hover:-translate-y-px"
                 >
-                  <div style={{ fontWeight: 700, fontSize: "0.88rem", marginBottom: 3 }}>I'm building an agtech company →</div>
-                  <div style={{ fontSize: "0.75rem", opacity: 0.7 }}>Get a personalized pathway in 30 seconds</div>
+                  <div className="font-bold text-[0.88rem] mb-0.5">I'm building an agtech company →</div>
+                  <div className="text-[0.75rem] opacity-70">Get a personalized pathway in 30 seconds</div>
                 </button>
 
                 <button onClick={() => dismissModal("ec")}
-                  style={{
-                    background: "var(--bg-secondary)", color: "var(--text)",
-                    border: "1px solid var(--border-strong)", borderRadius: "var(--radius)",
-                    padding: "14px 20px", textAlign: "left",
-                    transition: "transform 0.12s",
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+                  className="bg-bg-secondary text-text border border-border-strong rounded px-5 py-3.5 text-left transition-transform duration-[120ms] hover:-translate-y-px"
                 >
-                  <div style={{ fontWeight: 700, fontSize: "0.88rem", marginBottom: 3 }}>I run a program, accelerator, or funding body →</div>
-                  <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Review ecosystem data, check your listing, find gaps</div>
+                  <div className="font-bold text-[0.88rem] mb-0.5">I run a program, accelerator, or funding body →</div>
+                  <div className="text-[0.75rem] text-text-secondary">Review ecosystem data, check your listing, find gaps</div>
                 </button>
               </div>
 
-              <div style={{
-                marginTop: 16, padding: "8px 12px",
-                background: "var(--green-soft)", borderRadius: "var(--radius-sm)",
-                fontSize: "0.65rem", color: "var(--green-mid)", fontWeight: 600,
-                textAlign: "center", letterSpacing: "0.01em",
-              }}>
+              <div className="mt-4 px-3 py-2 bg-green-soft rounded-sm text-[0.65rem] text-green-mid font-semibold text-center tracking-[0.01em]">
                 Your feedback shapes the product
               </div>
-              <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--border)", textAlign: "center" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: "0.6rem", color: "var(--text-tertiary)", letterSpacing: "0.02em" }}>
+              <div className="mt-3.5 pt-3 border-t border-border text-center">
+                <div className="flex items-center justify-center gap-1.5 text-[0.6rem] text-text-tertiary tracking-[0.02em]">
                   <span>Powered by AI · Free, no signup · Beta v1.1</span>
                 </div>
               </div>
@@ -147,24 +104,9 @@ export default function Home() {
       )}
 
       {/* ── Nav ─────────────────────────────────────────────── */}
-      <nav style={{
-        padding: "0 32px", height: 56,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        borderBottom: "1px solid var(--border)",
-        position: "sticky", top: 0,
-        background: "rgba(250,250,248,0.88)",
-        backdropFilter: "saturate(180%) blur(20px)",
-        WebkitBackdropFilter: "saturate(180%) blur(20px)",
-        zIndex: 100,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 36, height: 36,
-            background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-            borderRadius: 10,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 2px 8px rgba(30,107,10,0.2)",
-          }}>
+      <nav className="px-8 h-14 flex items-center justify-between border-b border-border sticky top-0 bg-[rgba(250,250,248,0.88)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 bg-gradient-to-br from-green-mid to-green-light rounded-[10px] flex items-center justify-center shadow-green">
             <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
               <path d="M4 30 Q12 24 20 26 Q28 28 36 24" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/>
               <path d="M4 34 Q12 28 20 30 Q28 32 36 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.25"/>
@@ -175,155 +117,106 @@ export default function Home() {
               <circle cx="20" cy="35" r="2" fill="#3dcc1a"/>
             </svg>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
-            <span style={{ fontWeight: 800, fontSize: "clamp(0.95rem, 1.5vw, 1.2rem)", color: "var(--text)", letterSpacing: "-0.03em" }}>
-              Ag<span style={{ color: "var(--green-mid)" }}>Path</span> <span style={{ fontWeight: 400, fontSize: "0.7em", color: "var(--text-tertiary)" }}>Canada</span>
+          <div className="flex flex-col leading-none">
+            <span className="font-extrabold text-[clamp(0.95rem,1.5vw,1.2rem)] text-text tracking-[-0.03em]">
+              Ag<span className="text-green-mid">Path</span> <span className="font-normal text-[0.7em] text-text-tertiary">Canada</span>
             </span>
-            <span style={{ fontSize: "clamp(0.52rem, 0.8vw, 0.65rem)", color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.01em", marginTop: 2 }}>
+            <span className="text-[clamp(0.52rem,0.8vw,0.65rem)] text-text-tertiary font-medium tracking-[0.01em] mt-0.5">
               Navigate Canada's agtech ecosystem
             </span>
           </div>
         </div>
-        <svg width="24" height="14" viewBox="0 0 24 14" style={{ flexShrink: 0 }}><rect x="0" y="0" width="6" height="14" fill="#FF0000"/><rect x="6" y="0" width="12" height="14" fill="#FFFFFF"/><rect x="18" y="0" width="6" height="14" fill="#FF0000"/><path d="M12 2.5 L12.8 5 L11.2 5 Z M12 5 L13.5 4 L13 5.5 L14.5 5.5 L13 6.5 L13.5 8 L12 7 L10.5 8 L11 6.5 L9.5 5.5 L11 5.5 L10.5 4 Z M12 8 L12 11" fill="#FF0000" stroke="#FF0000" strokeWidth="0.3"/></svg>
+        <svg width="24" height="14" viewBox="0 0 24 14" className="shrink-0"><rect x="0" y="0" width="6" height="14" fill="#FF0000"/><rect x="6" y="0" width="12" height="14" fill="#FFFFFF"/><rect x="18" y="0" width="6" height="14" fill="#FF0000"/><path d="M12 2.5 L12.8 5 L11.2 5 Z M12 5 L13.5 4 L13 5.5 L14.5 5.5 L13 6.5 L13.5 8 L12 7 L10.5 8 L11 6.5 L9.5 5.5 L11 5.5 L10.5 4 Z M12 8 L12 11" fill="#FF0000" stroke="#FF0000" strokeWidth="0.3"/></svg>
       </nav>
 
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <main style={{
-        flex: 1, display: "flex", flexDirection: "column",
-        alignItems: "center",
-        padding: "56px 24px 48px",
-      }}>
+      <main className="flex-1 flex flex-col items-center px-6 pt-14 pb-12">
         {/* Status pill */}
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: 7,
-          background: "var(--green-soft)", border: "1px solid rgba(30,107,10,0.12)",
-          borderRadius: 100, padding: "5px 16px", marginBottom: 28,
-          animation: "fadeInUp 0.6s ease",
-        }}>
-          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--green-accent)", boxShadow: "0 0 8px rgba(61,204,26,0.4)" }} />
-          <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--green-mid)", letterSpacing: "0.01em" }}>
+        <div className="inline-flex items-center gap-[7px] bg-green-soft border border-[rgba(30,107,10,0.12)] rounded-full px-4 py-[5px] mb-7 animate-fade-in-up">
+          <div className="w-[7px] h-[7px] rounded-full bg-green-accent shadow-[0_0_8px_rgba(61,204,26,0.4)]" />
+          <span className="text-[0.72rem] font-semibold text-green-mid tracking-[0.01em]">
             {count !== null ? `${count} programs tracked across Canada` : "Loading…"}
           </span>
         </div>
 
         {/* Headline */}
-        <h1 style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(1.8rem, 4.5vw, 3rem)",
-          fontWeight: 400, letterSpacing: "-0.02em", lineHeight: 1.15,
-          color: "var(--text)", maxWidth: 640, marginBottom: 18,
-          textAlign: "center",
-          animation: "fadeInUp 0.6s ease 0.1s both",
-        }}>
+        <h1
+          className="font-display text-[clamp(1.8rem,4.5vw,3rem)] font-normal tracking-[-0.02em] leading-[1.15] text-text max-w-[640px] mb-4.5 text-center"
+          style={{ animation: "fadeInUp 0.6s ease 0.1s both" }}
+        >
           Canada's ag innovation ecosystem is powerful.{" "}
-          <span style={{ color: "var(--green-mid)" }}>It's also a maze.</span>
+          <span className="text-green-mid">It's also a maze.</span>
         </h1>
 
-        <p style={{
-          fontSize: "1.1rem", color: "var(--text-secondary)",
-          maxWidth: 480, lineHeight: 1.65, marginBottom: 44,
-          textAlign: "center", fontWeight: 400,
-          animation: "fadeInUp 0.6s ease 0.2s both",
-        }}>
+        <p
+          className="text-[1.1rem] text-text-secondary max-w-[480px] leading-[1.65] mb-11 text-center font-normal"
+          style={{ animation: "fadeInUp 0.6s ease 0.2s both" }}
+        >
           Guiding your path to farm.
         </p>
 
         {/* ── Two clear CTA cards ─────────────────────────────── */}
-        <div style={{
-          display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center",
-          maxWidth: 640, width: "100%", marginBottom: 56,
-          animation: "fadeInUp 0.6s ease 0.3s both",
-        }}>
+        <div
+          className="flex gap-3.5 flex-wrap justify-center max-w-[640px] w-full mb-14"
+          style={{ animation: "fadeInUp 0.6s ease 0.3s both" }}
+        >
           {/* Founder card */}
           <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); } catch {} }}
-            style={{
-              flex: "1 1 280px", background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-              borderRadius: "var(--radius)",
-              padding: "24px 22px", textDecoration: "none", textAlign: "left",
-              boxShadow: "0 4px 24px rgba(30,107,10,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
-              transition: "transform 0.15s, box-shadow 0.15s",
-              color: "#fff",
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+            className="flex-[1_1_280px] bg-gradient-to-br from-green-mid to-green-light rounded px-5.5 py-6 no-underline text-left shadow-[0_4px_24px_rgba(30,107,10,0.25),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-150 text-white hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(30,107,10,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]"
           >
-            <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", marginBottom: 10 }}>For AgTech Companies</div>
-            <div style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: 6, letterSpacing: "-0.02em", lineHeight: 1.3 }}>I'm building an agtech product</div>
-            <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.55, marginBottom: 18 }}>
+            <div className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-white/45 mb-2.5">For AgTech Companies</div>
+            <div className="text-[1.05rem] font-bold mb-1.5 tracking-[-0.02em] leading-[1.3]">I'm building an agtech product</div>
+            <div className="text-[0.8rem] text-white/60 leading-[1.55] mb-4.5">
               Answer 4 questions. Get a personalized pathway to the accelerators, funding, and pilot sites that match your stage and province.
             </div>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              background: "rgba(255,255,255,0.18)", borderRadius: 7, padding: "8px 14px",
-              fontSize: "0.78rem", fontWeight: 700, color: "#fff",
-            }}>
+            <div className="inline-flex items-center gap-[5px] bg-white/18 rounded-[7px] px-3.5 py-2 text-[0.78rem] font-bold text-white">
               Build My Pathway →
             </div>
           </Link>
 
           {/* Ecosystem operator card */}
           <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "ec"); } catch {} }}
-            style={{
-              flex: "1 1 280px", background: "var(--bg)",
-              border: "1.5px solid var(--border-strong)",
-              borderRadius: "var(--radius)", padding: "24px 22px",
-              textDecoration: "none", textAlign: "left",
-              boxShadow: "var(--shadow-md)",
-              transition: "transform 0.15s, box-shadow 0.15s",
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-lg)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-md)"; }}
+            className="flex-[1_1_280px] bg-bg border-[1.5px] border-border-strong rounded px-5.5 py-6 no-underline text-left shadow-md transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg"
           >
-            <div style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 10 }}>For Programs & Ecosystem</div>
-            <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.02em", lineHeight: 1.3 }}>I run a program, fund, or accelerator</div>
-            <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.55, marginBottom: 18 }}>
+            <div className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-text-tertiary mb-2.5">For Programs & Ecosystem</div>
+            <div className="text-[1.05rem] font-bold text-text mb-1.5 tracking-[-0.02em] leading-[1.3]">I run a program, fund, or accelerator</div>
+            <div className="text-[0.8rem] text-text-secondary leading-[1.55] mb-4.5">
               Review your listing, explore coverage gaps, check how you appear in founder pathways, and submit updates.
             </div>
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 5,
-              background: "var(--green-mid)", borderRadius: 7, padding: "8px 14px",
-              fontSize: "0.78rem", fontWeight: 700, color: "#fff",
-            }}>
+            <div className="inline-flex items-center gap-[5px] bg-green-mid rounded-[7px] px-3.5 py-2 text-[0.78rem] font-bold text-white">
               Explore Ecosystem →
             </div>
           </Link>
         </div>
 
         {/* Value props */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: 16, maxWidth: 700, width: "100%", marginBottom: 48,
-          animation: "fadeInUp 0.6s ease 0.4s both",
-        }}>
+        <div
+          className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 max-w-[700px] w-full mb-12"
+          style={{ animation: "fadeInUp 0.6s ease 0.4s both" }}
+        >
           {[
             { icon: "🎯", title: "Matched to you", desc: "Programs filtered by your stage, province, product type, and actual needs" },
             { icon: "🗺", title: "Ordered pathway", desc: "Not a list — a sequence of what to do first, next, and later" },
             { icon: "⚠️", title: "Gap warnings", desc: "We flag when your province is missing critical support" },
           ].map((item, i) => (
-            <div key={i} style={{
-              background: "var(--bg-secondary)", border: "1px solid var(--border)",
-              borderRadius: "var(--radius)", padding: "18px 16px",
-            }}>
-              <div style={{ fontSize: "1.2rem", marginBottom: 8 }}>{item.icon}</div>
-              <div style={{ fontWeight: 700, fontSize: "0.82rem", color: "var(--text)", marginBottom: 4 }}>{item.title}</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>{item.desc}</div>
+            <div key={i} className="bg-bg-secondary border border-border rounded px-4 py-4.5">
+              <div className="text-[1.2rem] mb-2">{item.icon}</div>
+              <div className="font-bold text-[0.82rem] text-text mb-1">{item.title}</div>
+              <div className="text-[0.75rem] text-text-secondary leading-[1.5]">{item.desc}</div>
             </div>
           ))}
         </div>
 
         {/* Category tags */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginBottom: 24 }}>
+        <div className="flex gap-2 flex-wrap justify-center mb-6">
           {["Accelerators", "Funding", "Pilot Sites", "Events", "Industry Orgs", "Training"].map(cat => (
-            <span key={cat} style={{
-              fontSize: "0.7rem", color: "var(--text-tertiary)", fontWeight: 500,
-              background: "var(--bg-secondary)", border: "1px solid var(--border)",
-              borderRadius: 100, padding: "4px 12px",
-            }}>{cat}</span>
+            <span key={cat} className="text-[0.7rem] text-text-tertiary font-medium bg-bg-secondary border border-border rounded-full px-3 py-1">
+              {cat}
+            </span>
           ))}
         </div>
 
-        <p style={{ fontSize: "0.72rem", color: "var(--text-tertiary)", marginTop: 12 }}>
+        <p className="text-[0.72rem] text-text-tertiary mt-3">
           Powered by AI · Free during beta
         </p>
       </main>

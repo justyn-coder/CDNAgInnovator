@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { cn } from "../lib/cn";
 import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
 import PathwayCard from "../components/PathwayCard";
@@ -21,13 +22,13 @@ interface WizardSnapshot {
   productType?: string;
 }
 
-const CAT_META: Record<string, { label: string; color: string; bg: string }> = {
-  Fund:  { label: "Funding",      color: "#1a4b8c", bg: "#e8f0fe" },
-  Accel: { label: "Accelerator",  color: "#8c5a1a", bg: "#fff3e0" },
-  Pilot: { label: "Pilot Site",   color: "#1a6b2a", bg: "#e8f5e9" },
-  Event: { label: "Event",        color: "#8c1a3a", bg: "#fce4ec" },
-  Org:   { label: "Industry Org", color: "#6a1a8c", bg: "#f3e5f5" },
-  Train: { label: "Training",     color: "#1a6b7a", bg: "#e0f7fa" },
+const CAT_META: Record<string, { label: string; textCls: string; bgCls: string }> = {
+  Fund:  { label: "Funding",      textCls: "text-[#1a4b8c]", bgCls: "bg-[#e8f0fe]" },
+  Accel: { label: "Accelerator",  textCls: "text-[#8c5a1a]", bgCls: "bg-[#fff3e0]" },
+  Pilot: { label: "Pilot Site",   textCls: "text-[#1a6b2a]", bgCls: "bg-[#e8f5e9]" },
+  Event: { label: "Event",        textCls: "text-[#8c1a3a]", bgCls: "bg-[#fce4ec]" },
+  Org:   { label: "Industry Org", textCls: "text-[#6a1a8c]", bgCls: "bg-[#f3e5f5]" },
+  Train: { label: "Training",     textCls: "text-[#1a6b7a]", bgCls: "bg-[#e0f7fa]" },
 };
 const CATEGORIES = Object.keys(CAT_META);
 const STAGES = ["Idea", "MVP", "Pilot", "Comm", "Scale"];
@@ -47,21 +48,20 @@ const PROVINCES_LIST = [
   { key: "National", label: "National" },
 ];
 
-const NEED_META: Record<string, { label: string; color: string; bg: string }> = {
-  "non-dilutive-capital":        { label: "Funding",       color: "#1a4b8c", bg: "#e8f0fe" },
-  "validate-with-farmers":      { label: "Validation",    color: "#1a6b2a", bg: "#e8f5e9" },
-  "structured-program":         { label: "Program",       color: "#8c5a1a", bg: "#fff3e0" },
-  "pilot-site-field-validation": { label: "Pilot Site",   color: "#1a6b2a", bg: "#e8f5e9" },
-  "credibility-validation":     { label: "Credibility",   color: "#0e7490", bg: "#cffafe" },
-  "first-customers":             { label: "Customers",    color: "#8c1a3a", bg: "#fce4ec" },
-  "channel-distribution":        { label: "Distribution", color: "#1a6b2a", bg: "#e8f5e9" },
-  "go-to-market":                { label: "GTM Strategy", color: "#1a4b8c", bg: "#e8f0fe" },
-  "growth-capital":              { label: "Growth Capital",color: "#6a1a8c", bg: "#f3e5f5" },
-  "industry-connections":        { label: "Industry",     color: "#8c5a1a", bg: "#fff3e0" },
-  // Legacy keys for backward compat with shared URLs
-  "accelerator":                 { label: "Program",      color: "#8c5a1a", bg: "#fff3e0" },
-  "market-expansion":            { label: "New Markets",  color: "#1a4b8c", bg: "#e8f0fe" },
-  "all":                         { label: "All Programs", color: "#6a1a8c", bg: "#f3e5f5" },
+const NEED_META: Record<string, { label: string; textCls: string; bgCls: string }> = {
+  "non-dilutive-capital":        { label: "Funding",       textCls: "text-[#1a4b8c]", bgCls: "bg-[#e8f0fe]" },
+  "validate-with-farmers":      { label: "Validation",    textCls: "text-[#1a6b2a]", bgCls: "bg-[#e8f5e9]" },
+  "structured-program":         { label: "Program",       textCls: "text-[#8c5a1a]", bgCls: "bg-[#fff3e0]" },
+  "pilot-site-field-validation": { label: "Pilot Site",   textCls: "text-[#1a6b2a]", bgCls: "bg-[#e8f5e9]" },
+  "credibility-validation":     { label: "Credibility",   textCls: "text-[#0e7490]", bgCls: "bg-[#cffafe]" },
+  "first-customers":             { label: "Customers",    textCls: "text-[#8c1a3a]", bgCls: "bg-[#fce4ec]" },
+  "channel-distribution":        { label: "Distribution", textCls: "text-[#1a6b2a]", bgCls: "bg-[#e8f5e9]" },
+  "go-to-market":                { label: "GTM Strategy", textCls: "text-[#1a4b8c]", bgCls: "bg-[#e8f0fe]" },
+  "growth-capital":              { label: "Growth Capital",textCls: "text-[#6a1a8c]", bgCls: "bg-[#f3e5f5]" },
+  "industry-connections":        { label: "Industry",     textCls: "text-[#8c5a1a]", bgCls: "bg-[#fff3e0]" },
+  "accelerator":                 { label: "Program",      textCls: "text-[#8c5a1a]", bgCls: "bg-[#fff3e0]" },
+  "market-expansion":            { label: "New Markets",  textCls: "text-[#1a4b8c]", bgCls: "bg-[#e8f0fe]" },
+  "all":                         { label: "All Programs", textCls: "text-[#6a1a8c]", bgCls: "bg-[#f3e5f5]" },
 };
 
 // ── Eco operator quick-start prompts ────────────────────────────────────────
@@ -86,10 +86,7 @@ function renderMarkdown(text: string): string {
     .replace(/\n\n/g, '</p><p>')
     .replace(/(<\/h[123]>|<\/li>|<hr>)\n/g, '$1');
 
-  // Wrap consecutive <li> groups in <ul> tags (handles multiple list blocks)
   html = html.replace(/((?:<li>.*?<\/li>\s*)+)/g, '<ul>$1</ul>');
-
-  // Convert remaining single newlines to <br> for better formatting
   html = html.replace(/\n/g, '<br>');
 
   return html || text;
@@ -100,30 +97,21 @@ function ChatBubble({ msg }: { msg: Message }) {
   const isUser = msg.role === "user";
   if (isUser) {
     return (
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10, padding: "0 16px" }}>
-        <div style={{
-          maxWidth: "72%", background: "var(--green-mid)", color: "#fff",
-          borderRadius: "16px 16px 4px 16px", padding: "10px 14px",
-          fontSize: "0.82rem", lineHeight: 1.55,
-        }}>{msg.content}</div>
+      <div className="flex justify-end mb-2.5 px-4">
+        <div className="max-w-[72%] bg-green-mid text-white rounded-[16px_16px_4px_16px] px-3.5 py-2.5 text-[0.82rem] leading-[1.55]">
+          {msg.content}
+        </div>
       </div>
     );
   }
   const html = renderMarkdown(msg.content);
   const isPlain = !msg.content.includes("###") && !msg.content.includes("**") && !msg.content.includes("##");
-  // Show copy button for longer responses (emails, detailed answers)
   const showCopy = msg.content.length > 200;
   return (
-    <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10, padding: "0 16px" }}>
-      <div style={{
-        maxWidth: "84%", background: "var(--bg)", color: "var(--text)",
-        borderRadius: "16px 16px 16px 4px", padding: "12px 16px",
-        fontSize: "0.82rem", lineHeight: 1.6,
-        border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)",
-        position: "relative",
-      }}>
+    <div className="flex justify-start mb-2.5 px-4">
+      <div className="relative max-w-[84%] bg-bg text-text rounded-[16px_16px_16px_4px] px-4 py-3 text-[0.82rem] leading-[1.6] border border-border shadow-sm">
         {isPlain
-          ? <span style={{ whiteSpace: "pre-wrap" }}>{msg.content}</span>
+          ? <span className="whitespace-pre-wrap">{msg.content}</span>
           : <div className="md-body" dangerouslySetInnerHTML={{ __html: `<p>${html}</p>` }} />
         }
         {showCopy && (
@@ -134,18 +122,10 @@ function ChatBubble({ msg }: { msg: Message }) {
                 setTimeout(() => setCopied(false), 2000);
               }).catch(() => {});
             }}
-            style={{
-              position: "absolute", top: 8, right: 8,
-              background: copied ? "var(--green-mid)" : "var(--bg-secondary)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)", padding: "3px 8px",
-              fontSize: "0.6rem", fontWeight: 600,
-              color: copied ? "#fff" : "var(--text-tertiary)",
-              transition: "all 0.15s",
-              opacity: 0.7,
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; }}
+            className={cn(
+              "absolute top-2 right-2 border border-border rounded-sm px-2 py-0.5 text-[0.6rem] font-semibold transition-all opacity-70 hover:opacity-100",
+              copied ? "bg-green-mid text-white" : "bg-bg-secondary text-text-tertiary"
+            )}
           >{copied ? "✓ Copied" : "📋 Copy"}</button>
         )}
       </div>
@@ -156,48 +136,36 @@ function ChatBubble({ msg }: { msg: Message }) {
 function WizardSummary({ snapshot, onReset }: { snapshot: WizardSnapshot; onReset: () => void }) {
   const needMeta = snapshot.need ? NEED_META[snapshot.need] : null;
   return (
-    <div style={{
-      margin: "0 16px 14px", padding: "8px 12px",
-      background: "var(--bg-secondary)", border: "1px solid var(--border)",
-      borderRadius: "var(--radius)",
-      display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", fontSize: "0.72rem",
-    }}>
+    <div className="mx-4 mb-3.5 px-3 py-2 bg-bg-secondary border border-border rounded flex items-center gap-1.5 flex-wrap text-[0.72rem]">
       {snapshot.stage && (
-        <span style={{
-          background: "var(--green-mid)", color: "#fff",
-          padding: "2px 8px", borderRadius: 100, fontWeight: 700, fontSize: "0.65rem",
-        }}>{STAGE_LABELS[snapshot.stage] || snapshot.stage}</span>
+        <span className="bg-green-mid text-white px-2 py-0.5 rounded-full font-bold text-[0.65rem]">
+          {STAGE_LABELS[snapshot.stage] || snapshot.stage}
+        </span>
       )}
       {snapshot.provinces.map(p => (
-        <span key={p} style={{
-          background: "var(--bg-tertiary)", color: "var(--text-secondary)",
-          padding: "2px 7px", borderRadius: 100, fontSize: "0.65rem", fontWeight: 600,
-          border: "1px solid var(--border)",
-        }}>{p}</span>
+        <span key={p} className="bg-bg-tertiary text-text-secondary px-[7px] py-0.5 rounded-full text-[0.65rem] font-semibold border border-border">
+          {p}
+        </span>
       ))}
       {needMeta && (
-        <span style={{
-          background: needMeta.bg, color: needMeta.color,
-          padding: "2px 8px", borderRadius: 100, fontSize: "0.65rem", fontWeight: 700,
-        }}>{needMeta.label}</span>
+        <span className={cn("px-2 py-0.5 rounded-full text-[0.65rem] font-bold", needMeta.bgCls, needMeta.textCls)}>
+          {needMeta.label}
+        </span>
       )}
-      <span style={{ flex: 1 }} />
-      <button onClick={onReset} style={{
-        background: "none", border: "none", padding: 0,
-        fontSize: "0.65rem", color: "var(--text-tertiary)",
-        cursor: "pointer", textDecoration: "underline",
-      }}>Start over</button>
+      <span className="flex-1" />
+      <button onClick={onReset} className="bg-transparent border-none p-0 text-[0.65rem] text-text-tertiary cursor-pointer underline">
+        Start over
+      </button>
     </div>
   );
 }
 
 function CategoryPill({ cat }: { cat: string }) {
-  const m = CAT_META[cat] || { label: cat, color: "#555", bg: "#eee" };
+  const m = CAT_META[cat] || { label: cat, textCls: "text-[#555]", bgCls: "bg-[#eee]" };
   return (
-    <span style={{
-      fontSize: "0.65rem", fontWeight: 600, padding: "2px 8px",
-      borderRadius: 100, background: m.bg, color: m.color, whiteSpace: "nowrap",
-    }}>{m.label}</span>
+    <span className={cn("text-[0.65rem] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap", m.bgCls, m.textCls)}>
+      {m.label}
+    </span>
   );
 }
 
@@ -223,100 +191,78 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
   });
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
-      <div style={{
-        padding: "0 18px", height: 56, display: "flex", justifyContent: "space-between", alignItems: "center",
-        borderBottom: "1px solid var(--border)", background: "rgba(250,250,248,0.92)",
-        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", flexShrink: 0,
-      }}>
+    <div className="fixed inset-0 z-[200] bg-bg flex flex-col">
+      {/* Header */}
+      <div className="px-[18px] h-14 flex justify-between items-center border-b border-border bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px] shrink-0">
         <div>
-          <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1.05rem", color: "var(--text)" }}>
+          <span className="font-display font-normal text-[1.05rem] text-text">
             Program Database
           </span>
           {!loading && (
-            <span style={{ fontSize: "0.72rem", color: "var(--text-tertiary)", marginLeft: 10 }}>
+            <span className="text-[0.72rem] text-text-tertiary ml-2.5">
               {filtered.length} of {data.length}
             </span>
           )}
         </div>
-        <button onClick={onClose} style={{
-          background: "var(--bg-secondary)", border: "1px solid var(--border)",
-          borderRadius: "var(--radius-sm)", padding: "6px 16px",
-          fontSize: "0.78rem", fontWeight: 600, color: "var(--text)",
-        }}>Done</button>
+        <button onClick={onClose} className="bg-bg-secondary border border-border rounded-sm px-4 py-1.5 text-[0.78rem] font-semibold text-text">
+          Done
+        </button>
       </div>
-      <div style={{
-        padding: "10px 18px", display: "flex", gap: 8, flexWrap: "wrap",
-        background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)", flexShrink: 0,
-      }}>
+
+      {/* Filters */}
+      <div className="px-[18px] py-2.5 flex gap-2 flex-wrap bg-bg-secondary border-b border-border shrink-0">
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search programs…"
-          style={{
-            flex: "1 1 180px", padding: "8px 14px", borderRadius: "var(--radius-sm)",
-            border: "1.5px solid var(--border)", fontSize: "0.82rem", background: "var(--bg)",
-            outline: "none", fontFamily: "var(--font-text)",
-          }}
-          onFocus={e => (e.target.style.borderColor = "var(--green-mid)")}
-          onBlur={e => (e.target.style.borderColor = "var(--border)")}
+          className="flex-[1_1_180px] px-3.5 py-2 rounded-sm border-[1.5px] border-border text-[0.82rem] bg-bg outline-none font-sans focus:border-green-mid"
         />
-        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} style={{
-          padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
-          fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-text)",
-        }}>
+        <select value={catFilter} onChange={e => setCatFilter(e.target.value)}
+          className="px-3 py-2 rounded-sm border-[1.5px] border-border text-[0.78rem] bg-bg text-text font-sans">
           <option value="All">All Types</option>
           {CATEGORIES.map(c => <option key={c} value={c}>{CAT_META[c].label}</option>)}
         </select>
-        <select value={stageFilter} onChange={e => setStageFilter(e.target.value)} style={{
-          padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
-          fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-text)",
-        }}>
+        <select value={stageFilter} onChange={e => setStageFilter(e.target.value)}
+          className="px-3 py-2 rounded-sm border-[1.5px] border-border text-[0.78rem] bg-bg text-text font-sans">
           <option value="All">All Stages</option>
           {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
         </select>
-        <select value={provFilter} onChange={e => setProvFilter(e.target.value)} style={{
-          padding: "8px 12px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
-          fontSize: "0.78rem", background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-text)",
-        }}>
+        <select value={provFilter} onChange={e => setProvFilter(e.target.value)}
+          className="px-3 py-2 rounded-sm border-[1.5px] border-border text-[0.78rem] bg-bg text-text font-sans">
           <option value="All">All Provinces</option>
           {PROVINCES_LIST.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
         </select>
       </div>
-      <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+
+      {/* Program list */}
+      <div className="flex-1 overflow-y-auto py-2">
         {loading ? (
-          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)" }}>Loading programs…</div>
+          <div className="p-12 text-center text-text-tertiary">Loading programs…</div>
         ) : filtered.length === 0 ? (
-          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)" }}>No programs match your filters.</div>
+          <div className="p-12 text-center text-text-tertiary">No programs match your filters.</div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <div className="flex flex-col gap-px">
             {filtered.map(p => (
-              <div key={p.id} style={{
-                padding: "12px 18px", background: "var(--bg)",
-                borderBottom: "1px solid var(--border)",
-                transition: "background 0.1s",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg-secondary)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--bg)"; }}
+              <div key={p.id}
+                className="px-[18px] py-3 bg-bg border-b border-border transition-colors hover:bg-bg-secondary"
               >
-                <div style={{ marginBottom: 4 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.85rem", marginBottom: 4 }}>
+                <div className="mb-1">
+                  <div className="font-bold text-[0.85rem] mb-1">
                     {p.website
-                      ? <a href={p.website} target="_blank" rel="noopener noreferrer" style={{ color: "var(--green-mid)", textDecoration: "none", borderBottom: "1px solid rgba(30,107,10,0.2)" }}>{p.name} ↗</a>
-                      : <span style={{ color: "var(--text)" }}>{p.name}</span>}
+                      ? <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-green-mid no-underline border-b border-[rgba(30,107,10,0.2)]">{p.name} ↗</a>
+                      : <span className="text-text">{p.name}</span>}
                   </div>
-                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+                  <div className="flex gap-[5px] flex-wrap items-center">
                     <CategoryPill cat={p.category} />
-                    <span style={{ fontSize: "0.65rem", color: "var(--text-tertiary)" }}>
+                    <span className="text-[0.65rem] text-text-tertiary">
                       {(p.province || []).filter(x => x !== "National").join(", ") || (p.province?.includes("National") ? "National" : "—")}
                     </span>
                     {p.stage && p.stage.length > 0 && p.stage.map(st => (
-                      <span key={st} style={{
-                        fontSize: "0.58rem", fontWeight: 600, background: "var(--bg-tertiary)",
-                        padding: "1px 7px", borderRadius: 4, color: "var(--text-tertiary)",
-                      }}>{STAGE_LABELS[st] || st}</span>
+                      <span key={st} className="text-[0.58rem] font-semibold bg-bg-tertiary px-[7px] py-px rounded text-text-tertiary">
+                        {STAGE_LABELS[st] || st}
+                      </span>
                     ))}
                   </div>
                 </div>
                 {p.description && (
-                  <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                  <div className="text-[0.78rem] text-text-secondary leading-[1.5]">
                     {p.description}
                   </div>
                 )}
@@ -325,19 +271,11 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
           </div>
         )}
       </div>
+
       {/* Feedback prompt */}
       {onFeedback && (
-        <div style={{
-          padding: "8px 18px", borderTop: "1px solid var(--border)",
-          background: "linear-gradient(90deg, #f59e0b, #d97706)",
-          flexShrink: 0, textAlign: "center",
-          animation: "feedbackPulse 2s ease-in-out 5s 1, feedbackPulse 2s ease-in-out 30s 1",
-        }}>
-          <style>{`@keyframes feedbackPulse { 0%,100% { transform: translateY(0); box-shadow: none; } 30% { transform: translateY(-3px); box-shadow: 0 4px 16px rgba(245,158,11,0.4); } 60% { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(245,158,11,0.2); } }`}</style>
-          <button onClick={onFeedback} style={{
-            background: "none", border: "none", color: "#fff",
-            fontSize: "0.72rem", fontWeight: 600, padding: 0,
-          }}>
+        <div className="px-[18px] py-2 border-t border-border bg-gradient-to-r from-amber to-[#d97706] shrink-0 text-center">
+          <button onClick={onFeedback} className="bg-transparent border-none text-white text-[0.72rem] font-semibold p-0">
             💬 See something missing? Tell us →
           </button>
         </div>
@@ -364,7 +302,6 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
 
   async function submit() {
     if (!form.feedback.trim()) { alert("Please share some feedback."); return; }
-    // Save identity for next time
     try {
       if (form.email) sessionStorage.setItem("ag_fb_email", form.email);
       if (form.name) sessionStorage.setItem("ag_fb_name", form.name);
@@ -386,101 +323,69 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
   }
 
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 300,
-      background: "rgba(0,0,0,0.45)",
-      backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: 20, animation: "fadeIn 0.2s ease",
-    }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{
-        background: "var(--bg)", borderRadius: "var(--radius-lg)",
-        maxWidth: 440, width: "100%",
-        boxShadow: "0 24px 80px rgba(0,0,0,0.2)",
-        overflow: "hidden", animation: "slideUp 0.3s ease",
-      }}>
+    <div
+      className="fixed inset-0 z-[300] bg-[rgba(0,0,0,0.45)] backdrop-blur-[6px] flex items-center justify-center p-5 animate-fade-in"
+      onClick={onClose}
+    >
+      <div onClick={e => e.stopPropagation()} className="bg-bg rounded-lg max-w-[440px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-hidden animate-slide-up">
         {/* Amber header */}
-        <div style={{
-          background: "linear-gradient(135deg, #92400e, #b45309, #d97706)",
-          padding: "18px 24px",
-          display: "flex", alignItems: "center", gap: 10,
-        }}>
-          <span style={{ fontSize: "1.3rem" }}>⚠️</span>
+        <div className="bg-gradient-to-br from-[#92400e] via-[#b45309] to-[#d97706] px-6 py-[18px] flex items-center gap-2.5">
+          <span className="text-[1.3rem]">⚠️</span>
           <div>
-            <div style={{ fontWeight: 700, fontSize: "0.92rem", color: "#fff" }}>
+            <div className="font-bold text-[0.92rem] text-white">
               Beta Feedback
             </div>
-            <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.65)" }}>
+            <div className="text-[0.72rem] text-white/65">
               {pageContext ? `Feedback on: ${pageContext}` : "Help us build the tool you actually need"}
             </div>
           </div>
         </div>
 
-        <div style={{ padding: "20px 24px 24px" }}>
+        <div className="px-6 pt-5 pb-6">
           {done ? (
-            <div style={{ textAlign: "center", padding: "12px 0" }}>
-              <div style={{ fontSize: "1.4rem", marginBottom: 8 }}>✓</div>
-              <p style={{ fontWeight: 700, fontSize: "0.88rem", marginBottom: 4 }}>Thanks — that's genuinely helpful.</p>
-              <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: 16 }}>We'll reach out if we have questions.</p>
-              <button onClick={onClose} style={{ background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: "var(--radius-sm)", padding: "8px 20px", fontWeight: 600, fontSize: "0.82rem" }}>Close</button>
+            <div className="text-center py-3">
+              <div className="text-[1.4rem] mb-2">✓</div>
+              <p className="font-bold text-[0.88rem] mb-1">Thanks — that's genuinely helpful.</p>
+              <p className="text-[0.78rem] text-text-secondary mb-4">We'll reach out if we have questions.</p>
+              <button onClick={onClose} className="bg-green-mid text-white border-none rounded-sm px-5 py-2 font-semibold text-[0.82rem]">Close</button>
             </div>
           ) : (
             <>
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--text-secondary)" }}>
+              <div className="mb-3.5">
+                <label className="text-[0.72rem] font-semibold text-text-secondary">
                   What's working? What's wrong? What's missing? *
                 </label>
                 <textarea value={form.feedback} onChange={e => setForm(f => ({ ...f, feedback: e.target.value }))}
                   placeholder={isEco ? "e.g. My program isn't listed, the gap data is wrong for SK, I'd use this if it had…" : "e.g. The pathway was great but missed X, the loading took too long, I wish it showed…"}
                   rows={3}
-                  style={{
-                    width: "100%", padding: "10px 12px", borderRadius: "var(--radius-sm)",
-                    border: "1.5px solid var(--border)", fontSize: "0.82rem", marginTop: 4,
-                    outline: "none", background: "var(--bg-secondary)", resize: "none",
-                    fontFamily: "var(--font-text)",
-                  }}
-                  onFocus={e => (e.target.style.borderColor = "#d97706")}
-                  onBlur={e => (e.target.style.borderColor = "var(--border)")}
+                  className="w-full px-3 py-2.5 rounded-sm border-[1.5px] border-border text-[0.82rem] mt-1 outline-none bg-bg-secondary resize-none font-sans focus:border-[#d97706]"
                 />
               </div>
-              {/* Show identity fields only if we don't have them yet */}
               {!hasIdentity && (
-                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--text-tertiary)" }}>Your name</label>
+                <div className="flex gap-2.5 mb-4">
+                  <div className="flex-1">
+                    <label className="text-[0.68rem] font-semibold text-text-tertiary">Your name</label>
                     <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Optional"
-                      style={{
-                        width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
-                        border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 3,
-                        outline: "none", background: "var(--bg-secondary)", fontFamily: "var(--font-text)",
-                      }}
+                      className="w-full px-2.5 py-2 rounded-sm border border-border text-[0.8rem] mt-[3px] outline-none bg-bg-secondary font-sans"
                     />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "var(--text-tertiary)" }}>Email <span style={{ color: "#d97706" }}>(so we can follow up)</span></label>
+                  <div className="flex-1">
+                    <label className="text-[0.68rem] font-semibold text-text-tertiary">Email <span className="text-[#d97706]">(so we can follow up)</span></label>
                     <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@company.com"
                       type="email" autoComplete="email" autoCapitalize="off" autoCorrect="off" spellCheck={false}
-                      style={{
-                        width: "100%", padding: "8px 10px", borderRadius: "var(--radius-sm)",
-                        border: "1px solid var(--border)", fontSize: "0.8rem", marginTop: 3,
-                        outline: "none", background: "var(--bg-secondary)", fontFamily: "var(--font-text)",
-                      }}
+                      className="w-full px-2.5 py-2 rounded-sm border border-border text-[0.8rem] mt-[3px] outline-none bg-bg-secondary font-sans"
                     />
                   </div>
                 </div>
               )}
               {hasIdentity && (
-                <div style={{ fontSize: "0.68rem", color: "var(--text-tertiary)", marginBottom: 14 }}>
-                  Sending as <strong style={{ color: "var(--text-secondary)" }}>{form.name || form.email}</strong>
+                <div className="text-[0.68rem] text-text-tertiary mb-3.5">
+                  Sending as <strong className="text-text-secondary">{form.name || form.email}</strong>
                 </div>
               )}
-              <button onClick={submit} disabled={busy} style={{
-                width: "100%", padding: "11px",
-                background: "linear-gradient(135deg, #d97706, #b45309)",
-                color: "#fff", border: "none", borderRadius: "var(--radius-sm)",
-                fontWeight: 700, fontSize: "0.85rem",
-                boxShadow: "0 2px 8px rgba(217,119,6,0.3)",
-              }}>{busy ? "Sending…" : "Send Feedback"}</button>
+              <button onClick={submit} disabled={busy}
+                className="w-full py-[11px] bg-gradient-to-br from-[#d97706] to-[#b45309] text-white border-none rounded-sm font-bold text-[0.85rem] shadow-[0_2px_8px_rgba(217,119,6,0.3)]"
+              >{busy ? "Sending…" : "Send Feedback"}</button>
             </>
           )}
         </div>
@@ -507,25 +412,17 @@ function LoadingMessages() {
     return () => timers.forEach(clearTimeout);
   }, []);
   return (
-    <div style={{ padding: "0 16px 4px" }}>
-      <div style={{
-        display: "inline-flex", alignItems: "center", gap: 8,
-        background: "var(--bg)", border: "1px solid var(--border)",
-        borderRadius: "16px 16px 16px 4px",
-        padding: "10px 16px", boxShadow: "var(--shadow-sm)",
-      }}>
+    <div className="px-4 pb-1">
+      <div className="inline-flex items-center gap-2 bg-bg border border-border rounded-[16px_16px_16px_4px] px-4 py-2.5 shadow-sm">
         {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            width: 5, height: 5, borderRadius: "50%",
-            background: "var(--text-tertiary)",
-            animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
-          }} />
+          <div key={i}
+            className="w-[5px] h-[5px] rounded-full bg-text-tertiary animate-pulse-dot"
+            style={{ animationDelay: `${i * 0.2}s` }}
+          />
         ))}
-        <span style={{
-          fontSize: "0.75rem", color: "var(--text-secondary)",
-          fontFamily: "var(--font-text)", fontWeight: 500,
-          transition: "opacity 0.3s ease",
-        }}>{LOADING_MSGS[idx]}</span>
+        <span className="text-[0.75rem] text-text-secondary font-sans font-medium transition-opacity duration-300">
+          {LOADING_MSGS[idx]}
+        </span>
       </div>
     </div>
   );
@@ -545,16 +442,13 @@ export default function Navigator() {
   const [showPathway, setShowPathway] = useState(false);
   const [quickFeedbackSent, setQuickFeedbackSent] = useState(false);
   const [showQuickFeedback, setShowQuickFeedback] = useState(false);
-  // Partner engagement: show CTA after they've sent 2+ messages or been idle 20s
   const [ecoMsgCount, setEcoMsgCount] = useState(0);
   const [showEcoCta, setShowEcoCta] = useState(false);
-  // Feedback strip minimized state
   const [feedbackMinimized, setFeedbackMinimized] = useState(false);
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Check for shareable URL params on mount
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -571,7 +465,6 @@ export default function Navigator() {
     } catch {}
   }, []);
 
-  // Eco operator: show engagement CTA after 20s
   useEffect(() => {
     if (isEco) {
       const timer = setTimeout(() => setShowEcoCta(true), 20000);
@@ -579,22 +472,17 @@ export default function Navigator() {
     }
   }, [isEco]);
 
-  // Show eco CTA after 2 messages
   useEffect(() => {
     if (isEco && ecoMsgCount >= 2 && !showEcoCta) setShowEcoCta(true);
   }, [ecoMsgCount]);
 
-  // FIX: Auto-scroll — when loading starts, scroll to loading indicator (bottom);
-  // when response arrives, scroll to top of newest assistant message
   const lastMsgRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => {
         if (loading) {
-          // While loading, keep bottom in view
           bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         } else {
-          // Response arrived — scroll to top of last message
           lastMsgRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }, 100);
@@ -644,7 +532,6 @@ export default function Navigator() {
     setLoading(true);
     if (isEco) setEcoMsgCount(c => c + 1);
 
-    // Build context prefix from wizard data so AI always knows who the user is
     let contextPrefix = "";
     if (wizardSnapshot && !isEco) {
       const parts = [`Stage: ${wizardSnapshot.stage}`, `Province: ${wizardSnapshot.provinces.join(", ")}`, `Need: ${wizardSnapshot.need}`];
@@ -677,21 +564,12 @@ export default function Navigator() {
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
 
-      <div style={{ position: "fixed", inset: 0, background: "var(--bg)", display: "flex", flexDirection: "column", fontFamily: "var(--font-text)" }}>
+      <div className="fixed inset-0 bg-bg flex flex-col font-sans">
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
-        <div style={{
-          height: 48, padding: "0 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
-          background: "rgba(250,250,248,0.92)", backdropFilter: "saturate(180%) blur(20px)", WebkitBackdropFilter: "saturate(180%) blur(20px)",
-          borderBottom: "1px solid var(--border)", flexShrink: 0, zIndex: 10,
-        }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-            <div style={{
-              width: 32, height: 32,
-              background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-              borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 1px 4px rgba(30,107,10,0.15)",
-            }}>
+        <div className="h-12 px-4 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
+          <Link href="/" className="flex items-center gap-2 no-underline">
+            <div className="w-8 h-8 bg-gradient-to-br from-green-mid to-green-light rounded-[8px] flex items-center justify-center shadow-green">
               <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
                 <path d="M4 30 Q12 24 20 26 Q28 28 36 24" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/>
                 <path d="M4 34 Q12 28 20 30 Q28 32 36 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.25"/>
@@ -702,129 +580,102 @@ export default function Navigator() {
                 <circle cx="20" cy="35" r="2" fill="#3dcc1a"/>
               </svg>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontWeight: 800, fontSize: "0.85rem", color: "var(--text)", letterSpacing: "-0.03em" }}>
-                  Ag<span style={{ color: "var(--green-mid)" }}>Path</span>
+            <div className="flex flex-col leading-none">
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-[0.85rem] text-text tracking-[-0.03em]">
+                  Ag<span className="text-green-mid">Path</span>
                 </span>
-                <span style={{
-                  fontSize: "0.5rem", fontWeight: 700, padding: "1px 5px", borderRadius: 3,
-                  background: isEco ? "#dbeafe" : "var(--green-soft)",
-                  color: isEco ? "#1e40af" : "var(--green-mid)",
-                  letterSpacing: "0.04em", textTransform: "uppercase",
-                }}>{isEco ? "Partner" : "Founder"}</span>
+                <span className={cn(
+                  "text-[0.5rem] font-bold px-[5px] py-px rounded-[3px] tracking-[0.04em] uppercase",
+                  isEco ? "bg-[#dbeafe] text-[#1e40af]" : "bg-green-soft text-green-mid"
+                )}>{isEco ? "Partner" : "Founder"}</span>
               </div>
-              <span style={{ fontSize: "0.5rem", color: "var(--text-tertiary)", fontWeight: 500, marginTop: 1 }}>
+              <span className="text-[0.5rem] text-text-tertiary font-medium mt-px">
                 Navigate Canada's agtech ecosystem
               </span>
             </div>
           </Link>
-          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            <button onClick={() => setShowBrowse(true)} style={{
-              background: "none", border: "none", padding: "6px 10px",
-              fontSize: "0.72rem", fontWeight: 600, color: "var(--text-secondary)",
-            }}>{isEco ? "Programs" : "All Programs"}</button>
+          <div className="flex gap-1.5 items-center">
+            <button onClick={() => setShowBrowse(true)} className="bg-transparent border-none px-2.5 py-1.5 text-[0.72rem] font-semibold text-text-secondary">
+              {isEco ? "Programs" : "All Programs"}
+            </button>
             {isEco && (
-              <button onClick={() => setShowGapMap(true)} style={{
-                background: "none", border: "none", padding: "6px 10px",
-                fontSize: "0.72rem", fontWeight: 600, color: "var(--text-secondary)",
-              }}>Gap Map</button>
+              <button onClick={() => setShowGapMap(true)} className="bg-transparent border-none px-2.5 py-1.5 text-[0.72rem] font-semibold text-text-secondary">
+                Gap Map
+              </button>
             )}
           </div>
         </div>
 
         {/* ── Messages area ────────────────────────────────────────── */}
-        <div style={{ flex: 1, overflowY: "auto", paddingTop: 16, paddingBottom: 12 }}>
+        <div className="flex-1 overflow-y-auto pt-4 pb-3">
 
           {/* Eco operator welcome */}
           {isEco && messages.length === 0 && !loading && (
-            <div style={{ padding: "20px 16px", animation: "fadeInUp 0.4s ease", display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="px-4 py-5 animate-fade-in-up flex flex-col gap-3.5">
 
               {/* First-visit onboarding tip */}
               {(() => { try { return !sessionStorage.getItem("ag_eco_onboarded"); } catch { return true; } })() && (
-                <div style={{
-                  background: "linear-gradient(135deg, #eff6ff, #dbeafe)",
-                  border: "1px solid #bfdbfe",
-                  borderRadius: "var(--radius)", padding: "14px 16px",
-                  display: "flex", gap: 10, alignItems: "flex-start",
-                }}>
-                  <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>👋</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: "0.82rem", color: "#1e40af", marginBottom: 4 }}>
+                <div className="bg-gradient-to-br from-[#eff6ff] to-[#dbeafe] border border-[#bfdbfe] rounded px-4 py-3.5 flex gap-2.5 items-start">
+                  <span className="text-[1.1rem] shrink-0">👋</span>
+                  <div className="flex-1">
+                    <div className="font-bold text-[0.82rem] text-[#1e40af] mb-1">
                       Welcome — start by finding yourself
                     </div>
-                    <div style={{ fontSize: "0.75rem", color: "#3b82f6", lineHeight: 1.55, marginBottom: 10 }}>
+                    <div className="text-[0.75rem] text-[#3b82f6] leading-[1.55] mb-2.5">
                       Tap <strong>Programs</strong> above and search your organization's name. See how you appear to founders — then hit the feedback button to tell us what we got wrong. We built this from public data and we know we're missing things.
                     </div>
-                    <button onClick={() => { setShowBrowse(true); try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }} style={{
-                      background: "#1e40af", color: "#fff", border: "none",
-                      borderRadius: "var(--radius-sm)", padding: "7px 14px",
-                      fontSize: "0.75rem", fontWeight: 600,
-                    }}>Search programs →</button>
+                    <button onClick={() => { setShowBrowse(true); try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }}
+                      className="bg-[#1e40af] text-white border-none rounded-sm px-3.5 py-[7px] text-[0.75rem] font-semibold">
+                      Search programs →
+                    </button>
                   </div>
-                  <button onClick={() => { try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }} style={{
-                    background: "none", border: "none", fontSize: "0.72rem", color: "#3b82f6", padding: "0 4px",
-                    fontWeight: 600, flexShrink: 0,
-                  }}>✕</button>
+                  <button onClick={() => { try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }}
+                    className="bg-transparent border-none text-[0.72rem] text-[#3b82f6] px-1 font-semibold shrink-0">
+                    ✕
+                  </button>
                 </div>
               )}
 
               {/* Main welcome card */}
-              <div style={{
-                background: "var(--bg)", border: "1px solid var(--border)",
-                borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-md)",
-                overflow: "hidden",
-              }}>
+              <div className="bg-bg border border-border rounded-lg shadow-md overflow-hidden">
                 {/* Header */}
-                <div style={{
-                  background: "linear-gradient(145deg, #0c1829, #1a2940)",
-                  padding: "22px 24px 18px",
-                }}>
-                  <div style={{
-                    fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
-                    color: "rgba(96,165,250,0.5)", marginBottom: 8,
-                  }}>Ecosystem Intelligence</div>
-                  <h2 style={{
-                    fontFamily: "var(--font-display)", fontSize: "1.2rem", fontWeight: 400,
-                    color: "#fff", lineHeight: 1.2, marginBottom: 6,
-                  }}>What do you want to know?</h2>
-                  <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
+                <div className="bg-gradient-to-br from-[#0c1829] to-[#1a2940] px-6 pt-[22px] pb-[18px]">
+                  <div className="text-[0.55rem] font-bold tracking-[0.12em] uppercase text-[rgba(96,165,250,0.5)] mb-2">
+                    Ecosystem Intelligence
+                  </div>
+                  <h2 className="font-display text-[1.2rem] font-normal text-white leading-[1.2] mb-1.5">
+                    What do you want to know?
+                  </h2>
+                  <p className="text-[0.82rem] text-white/70 leading-[1.6]">
                     We've catalogued what we could find — ask a question, or poke holes in our data. Seriously, we need that.
                   </p>
 
                   {/* Stats strip */}
-                  <div style={{
-                    display: "flex", gap: 0, marginTop: 16,
-                    background: "rgba(255,255,255,0.06)", borderRadius: 8,
-                    overflow: "hidden",
-                  }}>
+                  <div className="flex mt-4 bg-white/[0.06] rounded-[8px] overflow-hidden">
                     {[
                       { num: "347", label: "Programs" },
                       { num: "127", label: "Insights" },
                       { num: "10", label: "Provinces" },
                       { num: "6", label: "Categories" },
                     ].map((s, i) => (
-                      <div key={i} style={{
-                        flex: 1, padding: "10px 0", textAlign: "center",
-                        borderRight: i < 3 ? "1px solid rgba(255,255,255,0.08)" : "none",
-                      }}>
-                        <div style={{ fontSize: "1rem", fontWeight: 800, color: "#60a5fa" }}>{s.num}</div>
-                        <div style={{ fontSize: "0.5rem", fontWeight: 600, color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{s.label}</div>
+                      <div key={i} className={cn(
+                        "flex-1 py-2.5 text-center",
+                        i < 3 && "border-r border-white/[0.08]"
+                      )}>
+                        <div className="text-base font-extrabold text-[#60a5fa]">{s.num}</div>
+                        <div className="text-[0.5rem] font-semibold text-white/35 tracking-[0.08em] uppercase">{s.label}</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Gap insight preview cards */}
-                <div style={{
-                  padding: "12px 16px", background: "var(--bg-secondary)",
-                  borderBottom: "1px solid var(--border)",
-                }}>
-                  <div style={{
-                    fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.06em",
-                    textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 8,
-                  }}>Live coverage gaps</div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div className="px-4 py-3 bg-bg-secondary border-b border-border">
+                  <div className="text-[0.6rem] font-bold tracking-[0.06em] uppercase text-text-tertiary mb-2">
+                    Live coverage gaps
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
                     {[
                       { prov: "NB", gap: "0 pilot sites, 0 events", severity: "high" },
                       { prov: "NL", gap: "0 pilot sites, 0 events, 0 orgs", severity: "high" },
@@ -832,52 +683,37 @@ export default function Navigator() {
                       { prov: "BC", gap: "1 training, 2 events", severity: "medium" },
                     ].map((g, i) => (
                       <div key={i} onClick={() => send(`Show me the full coverage analysis for ${g.prov} — what's missing and what would you recommend?`)}
-                        style={{
-                          flex: "1 1 calc(50% - 4px)", minWidth: 130,
-                          padding: "8px 10px", borderRadius: "var(--radius-sm)",
-                          background: "var(--bg)", border: "1px solid var(--border)",
-                          cursor: "pointer", transition: "all 0.12s",
-                        }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = g.severity === "high" ? "#ef4444" : "#f59e0b"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
+                        className={cn(
+                          "flex-[1_1_calc(50%-4px)] min-w-[130px] px-2.5 py-2 rounded-sm bg-bg border border-border cursor-pointer transition-all",
+                          g.severity === "high" ? "hover:border-[#ef4444]" : "hover:border-amber"
+                        )}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 3 }}>
-                          <span style={{
-                            width: 6, height: 6, borderRadius: "50%",
-                            background: g.severity === "high" ? "#ef4444" : "#f59e0b",
-                          }} />
-                          <span style={{ fontWeight: 700, fontSize: "0.75rem", color: "var(--text)" }}>{g.prov}</span>
+                        <div className="flex items-center gap-[5px] mb-[3px]">
+                          <span className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            g.severity === "high" ? "bg-[#ef4444]" : "bg-amber"
+                          )} />
+                          <span className="font-bold text-[0.75rem] text-text">{g.prov}</span>
                         </div>
-                        <div style={{ fontSize: "0.65rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>{g.gap}</div>
+                        <div className="text-[0.65rem] text-text-secondary leading-[1.4]">{g.gap}</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Quick-start grid */}
-                <div style={{ padding: "14px 16px", display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div className="p-4 flex gap-2 flex-wrap">
                   {ECO_SUGGESTIONS.slice(0, 4).map((s, i) => (
-                    <button key={i} onClick={() => send(s.q)} style={{
-                      flex: "1 1 calc(50% - 4px)", minWidth: 140,
-                      padding: "10px 14px", borderRadius: "var(--radius-sm)",
-                      border: "1px solid var(--border)", background: "var(--bg)",
-                      fontSize: "0.78rem", fontWeight: 600, color: "var(--text)",
-                      textAlign: "left", transition: "all 0.12s",
-                      boxShadow: "var(--shadow-sm)",
-                    }}
-                      onMouseEnter={e => { const t = e.currentTarget as HTMLElement; t.style.borderColor = "#60a5fa"; t.style.transform = "translateY(-1px)"; }}
-                      onMouseLeave={e => { const t = e.currentTarget as HTMLElement; t.style.borderColor = "var(--border)"; t.style.transform = "translateY(0)"; }}
+                    <button key={i} onClick={() => send(s.q)}
+                      className="flex-[1_1_calc(50%-4px)] min-w-[140px] px-3.5 py-2.5 rounded-sm border border-border bg-bg text-[0.78rem] font-semibold text-text text-left transition-all shadow-sm hover:border-[#60a5fa] hover:-translate-y-px"
                     >{s.label}</button>
                   ))}
                 </div>
+
                 {/* Tools pointer */}
-                <div style={{
-                  padding: "10px 20px 14px", borderTop: "1px solid var(--border)",
-                  fontSize: "0.72rem", color: "var(--text-tertiary)",
-                  display: "flex", gap: 12,
-                }}>
-                  <span onClick={() => setShowGapMap(true)} style={{ cursor: "pointer", color: "var(--green-mid)", fontWeight: 600 }}>📊 Gap Map</span>
-                  <span onClick={() => setShowBrowse(true)} style={{ cursor: "pointer", color: "var(--green-mid)", fontWeight: 600 }}>📋 Browse All Programs</span>
+                <div className="px-5 py-2.5 pb-3.5 border-t border-border text-[0.72rem] text-text-tertiary flex gap-3">
+                  <span onClick={() => setShowGapMap(true)} className="cursor-pointer text-green-mid font-semibold">📊 Gap Map</span>
+                  <span onClick={() => setShowBrowse(true)} className="cursor-pointer text-green-mid font-semibold">📋 Browse All Programs</span>
                 </div>
               </div>
             </div>
@@ -901,7 +737,7 @@ export default function Navigator() {
             />
           )}
 
-          {/* Chat messages — only show after eco welcome or wizard done */}
+          {/* Chat messages */}
           {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => (
             <div key={i} ref={i === messages.length - 1 ? lastMsgRef : undefined}><ChatBubble msg={m} /></div>
           ))}
@@ -911,86 +747,46 @@ export default function Navigator() {
 
         {/* ── Chat input ───────────────────────────────────────────── */}
         {(!showWizard || isEco) && (
-        <div style={{
-          background: "var(--bg)", borderTop: "1px solid var(--border-strong)",
-          padding: "12px 16px 16px", flexShrink: 0,
-          boxShadow: "0 -2px 12px rgba(0,0,0,0.04)",
-        }}>
-          {/* Eco suggestion chips above input when no messages yet */}
+        <div className="bg-bg border-t border-border-strong px-4 pt-3 pb-4 shrink-0 shadow-[0_-2px_12px_rgba(0,0,0,0.04)]">
+          {/* Eco suggestion chips above input when messages exist */}
           {isEco && messages.length > 0 && messages.length < 4 && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+            <div className="flex gap-1.5 flex-wrap mb-2.5">
               {ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q)).slice(0, 3).map((s, i) => (
-                <button key={i} onClick={() => send(s.q)} style={{
-                  padding: "5px 12px", borderRadius: 100,
-                  border: "1px solid var(--border)", background: "var(--bg-secondary)",
-                  fontSize: "0.7rem", fontWeight: 600, color: "var(--text-secondary)",
-                  transition: "all 0.1s",
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--green-mid)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
+                <button key={i} onClick={() => send(s.q)}
+                  className="px-3 py-[5px] rounded-full border border-border bg-bg-secondary text-[0.7rem] font-semibold text-text-secondary transition-all hover:border-green-mid"
                 >{s.label}</button>
               ))}
             </div>
           )}
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="flex gap-2">
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
               placeholder={isEco ? "e.g., What's missing for biologicals companies in Saskatchewan?" : "Ask about your pathway, programs, or next steps…"}
               rows={2}
-              style={{
-                flex: 1, resize: "none",
-                border: "1.5px solid var(--border)", borderRadius: "var(--radius)",
-                padding: "10px 14px", fontSize: "0.85rem", lineHeight: 1.5, outline: "none",
-                background: "var(--bg-secondary)",
-                transition: "border-color 0.15s, box-shadow 0.15s",
-                fontFamily: "var(--font-text)",
-              }}
-              onFocus={e => { e.target.style.borderColor = "var(--green-mid)"; e.target.style.boxShadow = "0 0 0 3px rgba(30,107,10,0.08)"; }}
-              onBlur={e => { e.target.style.borderColor = "var(--border)"; e.target.style.boxShadow = "none"; }}
+              className="flex-1 resize-none border-[1.5px] border-border rounded px-3.5 py-2.5 text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-green-mid focus:shadow-[0_0_0_3px_rgba(30,107,10,0.08)]"
             />
             <button
               onClick={() => send()}
               disabled={loading || !input.trim()}
-              style={{
-                background: loading || !input.trim() ? "var(--bg-tertiary)" : "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-                color: loading || !input.trim() ? "var(--text-tertiary)" : "#fff",
-                border: "none", borderRadius: "var(--radius)",
-                padding: "0 20px", fontWeight: 700, fontSize: "0.9rem",
-                transition: "all 0.15s", minWidth: 48,
-                boxShadow: loading || !input.trim() ? "none" : "0 2px 8px rgba(30,107,10,0.2)",
-              }}
+              className={cn(
+                "border-none rounded px-5 font-bold text-[0.9rem] transition-all min-w-[48px]",
+                loading || !input.trim()
+                  ? "bg-bg-tertiary text-text-tertiary"
+                  : "bg-gradient-to-br from-green-mid to-green-light text-white shadow-green"
+              )}
             >→</button>
           </div>
         </div>
         )}
-
-        <style>{`
-          @keyframes pulse {
-            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-            40% { opacity: 1; transform: scale(1); }
-          }
-        `}</style>
       </div>
 
       {/* ── Quick feedback (founder) — compact, auto-collapses ──────── */}
       {showQuickFeedback && !quickFeedbackSent && !isEco && (
-        <div style={{
-          position: "fixed", bottom: 80, left: 0, right: 0,
-          display: "flex", justifyContent: "center",
-          zIndex: 4, animation: "slideUp 0.4s ease",
-          padding: "0 16px",
-          pointerEvents: "none",
-        }}>
-          <div style={{
-            background: "var(--bg)", border: "1.5px solid #f59e0b",
-            borderRadius: 100, padding: "6px 8px",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
-            display: "inline-flex", alignItems: "center", gap: 6,
-            pointerEvents: "auto",
-          }}>
-            <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--text-secondary)", padding: "0 6px", whiteSpace: "nowrap" }}>Useful?</span>
+        <div className="fixed bottom-20 left-0 right-0 flex justify-center z-[4] animate-slide-up px-4 pointer-events-none">
+          <div className="bg-bg border-[1.5px] border-amber rounded-full px-2 py-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.12)] inline-flex items-center gap-1.5 pointer-events-auto">
+            <span className="text-[0.7rem] font-semibold text-text-secondary px-1.5 whitespace-nowrap">Useful?</span>
             {[
               { emoji: "🔥", value: "great" },
               { emoji: "👍", value: "ok" },
@@ -1009,20 +805,12 @@ export default function Navigator() {
                 setQuickFeedbackSent(true);
                 setShowQuickFeedback(false);
               }}
-                style={{
-                  width: 36, height: 36, borderRadius: "50%",
-                  background: "var(--bg-secondary)", border: "1px solid var(--border)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "1rem", transition: "transform 0.1s",
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1.15)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+                className="w-9 h-9 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-base transition-transform hover:scale-[1.15]"
               >{opt.emoji}</button>
             ))}
-            <button onClick={() => setShowQuickFeedback(false)} style={{
-              background: "none", border: "none", fontSize: "0.7rem",
-              color: "var(--text-tertiary)", padding: "0 4px",
-            }}>✕</button>
+            <button onClick={() => setShowQuickFeedback(false)} className="bg-transparent border-none text-[0.7rem] text-text-tertiary px-1">
+              ✕
+            </button>
           </div>
         </div>
       )}
@@ -1031,22 +819,12 @@ export default function Navigator() {
       {!showFeedback && !showQuickFeedback && !feedbackMinimized && (
         <button
           onClick={() => setShowFeedback(true)}
-          style={{
-            position: "fixed", bottom: 80, right: 16,
-            zIndex: 4,
-            background: "linear-gradient(135deg, #f59e0b, #d97706)",
-            color: "#fff", border: "none",
-            borderRadius: 100, padding: "8px 14px",
-            fontSize: "0.7rem", fontWeight: 700,
-            boxShadow: "0 2px 12px rgba(217,119,6,0.3)",
-            display: "flex", alignItems: "center", gap: 5,
-            animation: "fadeIn 0.3s ease",
-          }}
+          className="fixed bottom-20 right-4 z-[4] bg-gradient-to-br from-amber to-[#d97706] text-white border-none rounded-full px-3.5 py-2 text-[0.7rem] font-bold shadow-[0_2px_12px_rgba(217,119,6,0.3)] flex items-center gap-[5px] animate-fade-in"
         >
           <span>💬</span> Feedback
           <span
             onClick={(e) => { e.stopPropagation(); setFeedbackMinimized(true); }}
-            style={{ marginLeft: 4, opacity: 0.7, fontSize: "0.65rem" }}
+            className="ml-1 opacity-70 text-[0.65rem]"
           >✕</span>
         </button>
       )}

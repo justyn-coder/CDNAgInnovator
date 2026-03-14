@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { cn } from "../lib/cn";
 
 // ── Stage display labels ───────────────────────────────────────────────────
 const SL: Record<string, string> = {
@@ -53,26 +54,26 @@ interface Props {
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
-const CAT_STYLE: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  Fund:  { label: "Funding",      color: "#1a5fb4", bg: "#dbeafe", icon: "💰" },
-  Accel: { label: "Accelerator",  color: "#92400e", bg: "#fef3c7", icon: "🚀" },
-  Pilot: { label: "Pilot Site",   color: "#166534", bg: "#dcfce7", icon: "🌾" },
-  Event: { label: "Event",        color: "#9f1239", bg: "#ffe4e6", icon: "📅" },
-  Org:   { label: "Industry Org", color: "#6b21a8", bg: "#f3e8ff", icon: "🏛" },
-  Train: { label: "Training",     color: "#0e7490", bg: "#cffafe", icon: "📚" },
+const CAT_STYLE: Record<string, { label: string; colorClass: string; bgClass: string; icon: string }> = {
+  Fund:  { label: "Funding",      colorClass: "text-[#1a5fb4]", bgClass: "bg-[#dbeafe]", icon: "💰" },
+  Accel: { label: "Accelerator",  colorClass: "text-[#92400e]", bgClass: "bg-[#fef3c7]", icon: "🚀" },
+  Pilot: { label: "Pilot Site",   colorClass: "text-[#166534]", bgClass: "bg-[#dcfce7]", icon: "🌾" },
+  Event: { label: "Event",        colorClass: "text-[#9f1239]", bgClass: "bg-[#ffe4e6]", icon: "📅" },
+  Org:   { label: "Industry Org", colorClass: "text-[#6b21a8]", bgClass: "bg-[#f3e8ff]", icon: "🏛" },
+  Train: { label: "Training",     colorClass: "text-[#0e7490]", bgClass: "bg-[#cffafe]", icon: "📚" },
 };
 
-const TIMING_LABEL: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  now:          { label: "Do now",       color: "#166534", bg: "#dcfce7", icon: "⚡" },
-  next_month:   { label: "This month",   color: "#92400e", bg: "#fef3c7", icon: "📅" },
-  next_quarter: { label: "Next quarter", color: "#1a5fb4", bg: "#dbeafe", icon: "📅" },
-  horizon:      { label: "Future",       color: "#6b21a8", bg: "#f3e8ff", icon: "🔭" },
+const TIMING_LABEL: Record<string, { label: string; colorClass: string; bgClass: string; borderClass: string; icon: string }> = {
+  now:          { label: "Do now",       colorClass: "text-[#166534]", bgClass: "bg-[#dcfce7]", borderClass: "border-[#16653422]", icon: "⚡" },
+  next_month:   { label: "This month",   colorClass: "text-[#92400e]", bgClass: "bg-[#fef3c7]", borderClass: "border-[#92400e22]", icon: "📅" },
+  next_quarter: { label: "Next quarter", colorClass: "text-[#1a5fb4]", bgClass: "bg-[#dbeafe]", borderClass: "border-[#1a5fb422]", icon: "📅" },
+  horizon:      { label: "Future",       colorClass: "text-[#6b21a8]", bgClass: "bg-[#f3e8ff]", borderClass: "border-[#6b21a822]", icon: "🔭" },
 };
 
-const CONFIDENCE: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  high:        { label: "Strong fit",  color: "#166534", bg: "#dcfce7", icon: "✓" },
-  medium:      { label: "Likely fit",  color: "#92400e", bg: "#fef3c7", icon: "~" },
-  exploratory: { label: "Exploratory", color: "#6e6e73", bg: "#f0f0ec", icon: "?" },
+const CONFIDENCE: Record<string, { label: string; colorClass: string; bgClass: string; borderClass: string; icon: string }> = {
+  high:        { label: "Strong fit",  colorClass: "text-[#166534]", bgClass: "bg-[#dcfce7]", borderClass: "border-[#16653444]", icon: "✓" },
+  medium:      { label: "Likely fit",  colorClass: "text-[#92400e]", bgClass: "bg-[#fef3c7]", borderClass: "border-[#92400e44]", icon: "~" },
+  exploratory: { label: "Exploratory", colorClass: "text-[#6e6e73]", bgClass: "bg-[#f0f0ec]", borderClass: "border-[#6e6e7344]", icon: "?" },
 };
 
 // ── Loading messages ────────────────────────────────────────────────────────
@@ -86,84 +87,51 @@ const LOADING_MESSAGES = [
 // ── Stage Journey Bar ───────────────────────────────────────────────────────
 function StageJourney({ current, next }: { current: string; next: string }) {
   const currentIdx = STAGE_ORDER.indexOf(current);
-  const nextIdx = STAGE_ORDER.indexOf(next);
 
   return (
-    <div style={{
-      display: "flex", alignItems: "flex-start", gap: 0,
-      padding: "0 4px", marginTop: 16,
-    }}>
+    <div className="flex items-start px-1 mt-4">
       {STAGE_ORDER.map((s, i) => {
         const isCurrent = s === current;
         const isNext = s === next && s !== current;
         const isPast = i < currentIdx;
 
         return (
-          <div key={s} style={{ display: "flex", alignItems: "flex-start", flex: i < STAGE_ORDER.length - 1 ? 1 : "none" }}>
+          <div key={s} className={cn("flex items-start", i < STAGE_ORDER.length - 1 ? "flex-1" : "flex-none")}>
             {/* Stage dot */}
-            <div style={{
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-              paddingTop: isCurrent ? 0 : 5,
-            }}>
-              <div style={{
-                width: isCurrent ? 36 : 26,
-                height: isCurrent ? 36 : 26,
-                borderRadius: "50%",
-                background: isCurrent
-                  ? "var(--green-mid)"
-                  : isPast
-                    ? "rgba(255,255,255,0.35)"
-                    : isNext
-                      ? "transparent"
-                      : "rgba(255,255,255,0.1)",
-                border: isCurrent
-                  ? "2.5px solid var(--green-accent)"
-                  : isNext
-                    ? "2px dashed rgba(255,255,255,0.6)"
-                    : isPast
-                      ? "2px solid rgba(255,255,255,0.5)"
-                      : "2px solid rgba(255,255,255,0.3)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: isCurrent ? "0.85rem" : "0.6rem",
-                transition: "all 0.3s ease",
-                boxShadow: isCurrent ? "0 0 16px rgba(61,204,26,0.35)" : "none",
-                animation: isNext ? "stagePulse 2s ease-in-out infinite" : "none",
-                color: isPast ? "rgba(255,255,255,0.87)" : "rgba(255,255,255,0.7)",
-              }}>
+            <div className={cn(
+              "flex flex-col items-center gap-[3px]",
+              isCurrent ? "pt-0" : "pt-[5px]"
+            )}>
+              <div className={cn(
+                "rounded-full flex items-center justify-center transition-all duration-300",
+                isCurrent && "w-9 h-9 bg-green-mid border-[2.5px] border-green-accent text-[0.85rem] shadow-[0_0_16px_rgba(61,204,26,0.35)] text-white/70",
+                isPast && "w-[26px] h-[26px] bg-white/35 border-2 border-white/50 text-[0.6rem] text-white/[0.87]",
+                isNext && "w-[26px] h-[26px] bg-transparent border-2 border-dashed border-white/60 text-[0.6rem] text-white/70 animate-stage-pulse",
+                !isCurrent && !isPast && !isNext && "w-[26px] h-[26px] bg-white/10 border-2 border-white/30 text-[0.6rem] text-white/70",
+              )}>
                 {isCurrent ? STAGE_ICONS[s] : isPast ? "✓" : isNext ? STAGE_ICONS[s] : ""}
               </div>
-              <span style={{
-                fontSize: "0.65rem",
-                fontWeight: isCurrent ? 700 : isNext ? 600 : 400,
-                color: isCurrent
-                  ? "#fff"
-                  : isNext
-                    ? "rgba(255,255,255,0.9)"
-                    : isPast
-                      ? "rgba(255,255,255,0.82)"
-                      : "rgba(255,255,255,0.7)",
-                whiteSpace: "nowrap",
-              }}>{SL[s] || s}</span>
+              <span className={cn(
+                "whitespace-nowrap text-[0.65rem]",
+                isCurrent && "font-bold text-white",
+                isNext && "font-semibold text-white/90",
+                isPast && "font-normal text-white/[0.82]",
+                !isCurrent && !isNext && !isPast && "font-normal text-white/70",
+              )}>{SL[s] || s}</span>
               {isCurrent && (
-                <span style={{
-                  fontSize: "0.55rem", fontWeight: 700,
-                  color: "var(--green-accent)",
-                  letterSpacing: "0.1em", textTransform: "uppercase",
-                  marginTop: -2,
-                }}>YOU ARE HERE</span>
+                <span className="text-[0.55rem] font-bold text-green-accent tracking-[0.1em] uppercase -mt-0.5">
+                  YOU ARE HERE
+                </span>
               )}
             </div>
             {/* Connector line */}
             {i < STAGE_ORDER.length - 1 && (
-              <div style={{
-                flex: 1, height: 2, minWidth: 8,
-                background: i < currentIdx
-                  ? "rgba(255,255,255,0.5)"
-                  : i === currentIdx
-                    ? "linear-gradient(90deg, var(--green-accent), rgba(255,255,255,0.3))"
-                    : "rgba(255,255,255,0.2)",
-                marginTop: 17,
-              }} />
+              <div className={cn(
+                "flex-1 h-0.5 min-w-2 mt-[17px]",
+                i < currentIdx && "bg-white/50",
+                i === currentIdx && "bg-gradient-to-r from-green-accent to-white/30",
+                i > currentIdx && "bg-white/20",
+              )} />
             )}
           </div>
         );
@@ -182,101 +150,83 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp }: {
   const conf = step.fit_confidence ? CONFIDENCE[step.fit_confidence] : null;
 
   return (
-    <div style={{
-      padding: "16px 22px",
-      borderBottom: isLast ? "none" : "1px solid var(--border)",
-      display: "flex", gap: 14,
-      opacity: isHorizon ? 0.75 : 1,
-      background: isHorizon ? "var(--bg-secondary)" : "var(--bg)",
-      animation: `fadeInUp 0.4s ease ${animDelay}s both`,
-    }}>
-      <div style={{
-        display: "flex", flexDirection: "column", alignItems: "center",
-        minWidth: 32, paddingTop: 2,
-      }}>
-        <div style={{
-          width: 28, height: 28, borderRadius: "50%",
-          background: isHorizon ? "var(--bg-tertiary)" : cat.bg,
-          border: `2px solid ${isHorizon ? "var(--border)" : cat.color}`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "0.7rem", fontWeight: 800,
-          color: isHorizon ? "var(--text-tertiary)" : cat.color,
-        }}>
+    <div
+      className={cn(
+        "px-[22px] py-4 flex gap-3.5",
+        !isLast && "border-b border-border",
+        isHorizon ? "opacity-75 bg-bg-secondary" : "bg-bg",
+      )}
+      style={{ animation: `fadeInUp 0.4s ease ${animDelay}s both` }}
+    >
+      <div className="flex flex-col items-center min-w-8 pt-0.5">
+        <div className={cn(
+          "w-7 h-7 rounded-full border-2 flex items-center justify-center text-[0.7rem] font-extrabold",
+          isHorizon
+            ? "bg-bg-tertiary border-border text-text-tertiary"
+            : cn(cat.bgClass, cat.colorClass),
+        )}
+          style={!isHorizon ? { borderColor: "currentColor" } : undefined}
+        >
           {step.order}
         </div>
         {!isLast && (
-          <div style={{
-            width: 2, flex: 1, minHeight: 16, marginTop: 4,
-            background: isHorizon ? "var(--border)" : "var(--bg-tertiary)",
-          }} />
+          <div className={cn(
+            "w-0.5 flex-1 min-h-4 mt-1",
+            isHorizon ? "bg-border" : "bg-bg-tertiary",
+          )} />
         )}
       </div>
 
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ marginBottom: 3 }}>
-          <span style={{ fontWeight: 700, fontSize: "0.88rem" }}>
+      <div className="flex-1 min-w-0">
+        <div className="mb-[3px]">
+          <span className="font-bold text-[0.88rem]">
             {step.program_website ? (
               <a href={step.program_website} target="_blank" rel="noopener noreferrer"
-                style={{ color: "var(--green-mid)", textDecoration: "none", borderBottom: "1px solid rgba(30,107,10,0.2)" }}>
+                className="text-green-mid no-underline border-b border-[rgba(30,107,10,0.2)] hover:border-green-mid">
                 {step.program_name} ↗
               </a>
-            ) : <span style={{ color: "var(--text)" }}>{step.program_name}</span>}
+            ) : <span className="text-text">{step.program_name}</span>}
           </span>
         </div>
 
-        <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 8 }}>
-          <span style={{
-            fontSize: "0.6rem", fontWeight: 700, padding: "2px 8px", borderRadius: 100,
-            background: cat.bg, color: cat.color,
-          }}>{cat.icon} {cat.label}</span>
-          <span style={{
-            fontSize: "0.6rem", fontWeight: 700, padding: "2px 8px", borderRadius: 100,
-            background: timing.bg, color: timing.color,
-            border: `1px solid ${timing.color}22`,
-          }}>{timing.icon} {timing.label}</span>
+        <div className="flex gap-[5px] flex-wrap mb-2">
+          <span className={cn(
+            "text-[0.6rem] font-bold px-2 py-[2px] rounded-full",
+            cat.bgClass, cat.colorClass,
+          )}>{cat.icon} {cat.label}</span>
+          <span className={cn(
+            "text-[0.6rem] font-bold px-2 py-[2px] rounded-full border",
+            timing.bgClass, timing.colorClass, timing.borderClass,
+          )}>{timing.icon} {timing.label}</span>
           {conf && (
-            <span style={{
-              fontSize: "0.6rem", fontWeight: 600, padding: "2px 8px", borderRadius: 100,
-              background: conf.bg, color: conf.color,
-              border: `1px dashed ${conf.color}44`,
-            }}>{conf.icon} {conf.label}</span>
+            <span className={cn(
+              "text-[0.6rem] font-semibold px-2 py-[2px] rounded-full border border-dashed",
+              conf.bgClass, conf.colorClass, conf.borderClass,
+            )}>{conf.icon} {conf.label}</span>
           )}
         </div>
 
-        <div style={{
-          fontSize: "0.82rem", fontWeight: 600, color: "var(--text)",
-          lineHeight: 1.5, marginBottom: 4,
-        }}>{step.action}</div>
+        <div className="text-[0.82rem] font-semibold text-text leading-[1.5] mb-1">
+          {step.action}
+        </div>
 
-        <div style={{
-          fontSize: "0.78rem", color: "var(--text-secondary)",
-          lineHeight: 1.55,
-        }}>{step.why}</div>
+        <div className="text-[0.78rem] text-text-secondary leading-[1.55]">
+          {step.why}
+        </div>
 
         {step.prepare && (
-          <div style={{
-            fontSize: "0.72rem", color: "var(--text-tertiary)",
-            lineHeight: 1.45, marginTop: 6,
-            padding: "6px 10px",
-            background: isHorizon ? "var(--bg-tertiary)" : "var(--bg-secondary)",
-            borderRadius: "var(--radius-sm)",
-            borderLeft: `2px solid ${isHorizon ? "var(--border)" : "var(--bg-tertiary)"}`,
-          }}>
-            <strong style={{ fontWeight: 600, color: "var(--text-secondary)" }}>Prepare:</strong> {step.prepare}
+          <div className={cn(
+            "text-[0.72rem] text-text-tertiary leading-[1.45] mt-1.5 p-[6px_10px] rounded-sm border-l-2",
+            isHorizon ? "bg-bg-tertiary border-l-border" : "bg-bg-secondary border-l-bg-tertiary",
+          )}>
+            <strong className="font-semibold text-text-secondary">Prepare:</strong> {step.prepare}
           </div>
         )}
 
         {step.order === 1 && !isHorizon && (
           <button
             onClick={() => onFollowUp(`Tell me more about ${step.program_name}. What exactly should I prepare before reaching out, and who should I contact?`)}
-            style={{
-              marginTop: 8, padding: "5px 12px",
-              background: "none", border: "1px solid var(--green-mid)",
-              borderRadius: 100, fontSize: "0.68rem", fontWeight: 600,
-              color: "var(--green-mid)", transition: "all 0.15s",
-            }}
-            onMouseEnter={e => { const t = e.currentTarget as HTMLElement; t.style.background = "var(--green-mid)"; t.style.color = "#fff"; }}
-            onMouseLeave={e => { const t = e.currentTarget as HTMLElement; t.style.background = "none"; t.style.color = "var(--green-mid)"; }}
+            className="mt-2 px-3 py-[5px] bg-transparent border border-green-mid rounded-full text-[0.68rem] font-semibold text-green-mid transition-all duration-150 hover:bg-green-mid hover:text-white"
           >
             Tell me how to approach this →
           </button>
@@ -317,27 +267,32 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
   if (loading) {
     return (
-      <div style={{
-        margin: "16px", padding: "36px 24px",
-        background: "var(--bg)", border: "1px solid var(--border)",
-        borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-md)",
-      }}>
-        <div style={{ height: 3, background: "var(--bg-tertiary)", borderRadius: 2, overflow: "hidden", marginBottom: 24 }}>
-          <div style={{ height: "100%", background: "var(--green-mid)", borderRadius: 2, transition: "width 2s ease", width: `${Math.min(25 + loadingStep * 25, 95)}%` }} />
+      <div className="m-4 px-6 py-9 bg-bg border border-border rounded-lg shadow-md">
+        <div className="h-[3px] bg-bg-tertiary rounded-[2px] overflow-hidden mb-6">
+          <div
+            className="h-full bg-green-mid rounded-[2px] transition-[width] duration-2000 ease-in-out"
+            style={{ width: `${Math.min(25 + loadingStep * 25, 95)}%` }}
+          />
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="flex flex-col gap-2">
           {LOADING_MESSAGES.map((msg, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, opacity: i <= loadingStep ? 1 : 0.25, transition: "opacity 0.5s ease" }}>
-              <div style={{
-                width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
-                background: i < loadingStep ? "var(--green-mid)" : (i === loadingStep ? "var(--bg-tertiary)" : "var(--bg-secondary)"),
-                border: i === loadingStep ? "2px solid var(--green-mid)" : "none",
-                display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.3s",
-              }}>
+            <div key={i} className={cn(
+              "flex items-center gap-2.5 transition-opacity duration-500",
+              i <= loadingStep ? "opacity-100" : "opacity-25",
+            )}>
+              <div className={cn(
+                "w-5 h-5 rounded-full shrink-0 flex items-center justify-center transition-all duration-300",
+                i < loadingStep && "bg-green-mid",
+                i === loadingStep && "bg-bg-tertiary border-2 border-green-mid",
+                i > loadingStep && "bg-bg-secondary",
+              )}>
                 {i < loadingStep && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                {i === loadingStep && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--green-mid)", animation: "pulse 1.2s ease infinite" }} />}
+                {i === loadingStep && <div className="w-1.5 h-1.5 rounded-full bg-green-mid animate-pulse-dot" />}
               </div>
-              <span style={{ fontSize: "0.82rem", fontWeight: i <= loadingStep ? 600 : 400, color: i <= loadingStep ? "var(--text)" : "var(--text-tertiary)" }}>{msg}</span>
+              <span className={cn(
+                "text-[0.82rem]",
+                i <= loadingStep ? "font-semibold text-text" : "font-normal text-text-tertiary",
+              )}>{msg}</span>
             </div>
           ))}
         </div>
@@ -347,9 +302,16 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
   if (error || !data) {
     return (
-      <div style={{ margin: "16px", padding: "28px 24px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "var(--radius-lg)", textAlign: "center" }}>
-        <div style={{ fontSize: "0.88rem", color: "#991b1b", fontWeight: 600, marginBottom: 10 }}>{error || "Something went wrong."}</div>
-        <button onClick={() => { setError(""); setLoading(true); }} style={{ background: "var(--green-mid)", color: "#fff", border: "none", borderRadius: "var(--radius-sm)", padding: "10px 20px", fontWeight: 600, fontSize: "0.82rem" }}>Try Again</button>
+      <div className="m-4 px-6 py-7 bg-red-soft border border-[#fecaca] rounded-lg text-center">
+        <div className="text-[0.88rem] text-[#991b1b] font-semibold mb-2.5">
+          {error || "Something went wrong."}
+        </div>
+        <button
+          onClick={() => { setError(""); setLoading(true); }}
+          className="bg-green-mid text-white border-none rounded-sm px-5 py-2.5 font-semibold text-[0.82rem]"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -363,25 +325,30 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
   const futureSteps = pathway.steps.filter(s => s.horizon || s.timing === "horizon");
 
   return (
-    <div style={{ margin: "12px 16px 0", display: "flex", flexDirection: "column", gap: 0, animation: "fadeInUp 0.5s ease" }}>
+    <div className="mx-4 mt-3 flex flex-col animate-fade-in-up">
 
       {/* ── Header with Stage Journey ──────────────────────────────────── */}
-      <div style={{
-        background: "linear-gradient(145deg, #0a1f08 0%, #14330c 40%, #1e5510 100%)",
-        borderRadius: "var(--radius-lg) var(--radius-lg) 0 0",
-        padding: "24px 22px 16px", color: "#fff",
-        position: "relative", overflow: "hidden",
-      }}>
-        <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-        <div style={{ position: "relative" }}>
-          <div style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.82)", marginBottom: 6 }}>Your Innovation Pathway</div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.35rem", fontWeight: 400, letterSpacing: "-0.01em", color: "#fff", marginBottom: 10, lineHeight: 1.2 }}>{titleOverride}</h2>
-          <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.9)", lineHeight: 1.65, maxWidth: 520 }}>{pathway.summary}</p>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
+      <div className="bg-gradient-to-br from-[#0a1f08] via-[#14330c] to-[#1e5510] rounded-t-lg px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+        <div className="relative">
+          <div className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-white/[0.82] mb-1.5">
+            Your Innovation Pathway
+          </div>
+          <h2 className="font-display text-[1.35rem] font-normal tracking-tight text-white mb-2.5 leading-[1.2]">
+            {titleOverride}
+          </h2>
+          <p className="text-[0.85rem] text-white/90 leading-[1.65] max-w-[520px]">
+            {pathway.summary}
+          </p>
+          <div className="flex gap-1.5 flex-wrap mt-3">
             {provinces.map(p => (
-              <span key={p} style={{ fontSize: "0.62rem", fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.87)" }}>{p}</span>
+              <span key={p} className="text-[0.62rem] font-semibold px-2.5 py-[3px] rounded-full bg-white/15 text-white/[0.87]">
+                {p}
+              </span>
             ))}
-            <span style={{ fontSize: "0.62rem", fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.87)" }}>{meta.programsConsidered} programs analyzed</span>
+            <span className="text-[0.62rem] font-semibold px-2.5 py-[3px] rounded-full bg-white/15 text-white/[0.87]">
+              {meta.programsConsidered} programs analyzed
+            </span>
           </div>
           <StageJourney current={stage} next={meta.nextStage} />
         </div>
@@ -389,23 +356,18 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
       {/* ── Gap warning ───────────────────────────────────────────────── */}
       {pathway.gap_warning && (
-        <div style={{ padding: "12px 22px", background: "#fffbeb", borderLeft: "3px solid #f59e0b", fontSize: "0.78rem", color: "#78350f", lineHeight: 1.55 }}>
-          <strong style={{ fontWeight: 700 }}>⚠ Gap detected:</strong> {pathway.gap_warning}
+        <div className="px-[22px] py-3 bg-[#fffbeb] border-l-[3px] border-l-amber text-[0.78rem] text-[#78350f] leading-[1.55]">
+          <strong className="font-bold">⚠ Gap detected:</strong> {pathway.gap_warning}
         </div>
       )}
 
       {/* ── Current Stage Steps ───────────────────────────────────────── */}
       {currentSteps.length > 0 && (
-        <div style={{ background: "var(--bg)", border: "1px solid var(--border)", borderTop: "none" }}>
-          <div style={{
-            padding: "10px 22px",
-            background: "linear-gradient(90deg, var(--green-soft), var(--bg))",
-            borderBottom: "1px solid var(--border)",
-            display: "flex", alignItems: "center", gap: 8,
-          }}>
-            <span style={{ fontSize: "0.85rem" }}>🎯</span>
-            <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--green-mid)" }}>Your next moves</span>
-            <span style={{ fontSize: "0.6rem", color: "var(--text-tertiary)", fontWeight: 500 }}>— {stageLabel} stage</span>
+        <div className="bg-bg border border-border border-t-0">
+          <div className="px-[22px] py-2.5 bg-gradient-to-r from-green-soft to-bg border-b border-border flex items-center gap-2">
+            <span className="text-[0.85rem]">🎯</span>
+            <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-green-mid">Your next moves</span>
+            <span className="text-[0.6rem] text-text-tertiary font-medium">— {stageLabel} stage</span>
           </div>
           {currentSteps.map((step, i) => (
             <StepCard key={`c-${i}`} step={step} isLast={i === currentSteps.length - 1 && futureSteps.length === 0} isHorizon={false} animDelay={i * 0.08} onFollowUp={onChatFollowUp} />
@@ -415,16 +377,11 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
       {/* ── Future Stage Steps ────────────────────────────────────────── */}
       {futureSteps.length > 0 && (
-        <div style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderTop: currentSteps.length > 0 ? "none" : undefined }}>
-          <div style={{
-            padding: "10px 22px",
-            background: "linear-gradient(90deg, #f3e8ff, var(--bg-secondary))",
-            borderBottom: "1px solid var(--border)",
-            display: "flex", alignItems: "center", gap: 8,
-          }}>
-            <span style={{ fontSize: "0.85rem" }}>🔭</span>
-            <span style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#6b21a8" }}>Looking ahead</span>
-            <span style={{ fontSize: "0.6rem", color: "var(--text-tertiary)", fontWeight: 500 }}>— {nextStageLabel} stage</span>
+        <div className={cn("bg-bg-secondary border border-border", currentSteps.length > 0 && "border-t-0")}>
+          <div className="px-[22px] py-2.5 bg-gradient-to-r from-[#f3e8ff] to-bg-secondary border-b border-border flex items-center gap-2">
+            <span className="text-[0.85rem]">🔭</span>
+            <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-[#6b21a8]">Looking ahead</span>
+            <span className="text-[0.6rem] text-text-tertiary font-medium">— {nextStageLabel} stage</span>
           </div>
           {futureSteps.map((step, i) => (
             <StepCard key={`f-${i}`} step={step} isLast={i === futureSteps.length - 1} isHorizon={true} animDelay={(currentSteps.length + i) * 0.08} onFollowUp={onChatFollowUp} />
@@ -434,21 +391,18 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
       {/* ── Next stage note ───────────────────────────────────────────── */}
       {pathway.next_stage_note && (
-        <div style={{
-          padding: "12px 22px", background: "var(--bg-secondary)",
-          border: "1px solid var(--border)", borderTop: "none",
-          borderRadius: "0 0 var(--radius-lg) var(--radius-lg)",
-          fontSize: "0.78rem", color: "var(--text-secondary)", lineHeight: 1.55,
-        }}>
-          <strong style={{ fontWeight: 700, color: "var(--text)" }}>When you reach {nextStageLabel}:</strong>{" "}
+        <div className="px-[22px] py-3 bg-bg-secondary border border-border border-t-0 rounded-b-lg text-[0.78rem] text-text-secondary leading-[1.55]">
+          <strong className="font-bold text-text">When you reach {nextStageLabel}:</strong>{" "}
           {pathway.next_stage_note}
         </div>
       )}
 
       {/* ── Follow-up chips ───────────────────────────────────────────── */}
-      <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-        <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--text-tertiary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Continue the conversation</div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div className="mt-4 flex flex-col gap-2.5">
+        <div className="text-[0.68rem] font-bold text-text-tertiary tracking-[0.08em] uppercase">
+          Continue the conversation
+        </div>
+        <div className="flex gap-2 flex-wrap">
           {(() => {
             const chips: { label: string; q: string }[] = [];
             const firstStep = pathway.steps[0];
@@ -467,14 +421,10 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
             }
             chips.push({ label: "Write me an outreach email", q: `Write me a concise outreach email to ${firstStep?.program_name || "the first program"} introducing what I'm building and asking about next steps.` });
             return chips.slice(0, 4).map((chip, i) => (
-              <button key={i} onClick={() => onChatFollowUp(chip.q)} style={{
-                background: "var(--bg)", border: "1px solid var(--border)",
-                borderRadius: "var(--radius-sm)", padding: "8px 14px",
-                fontSize: "0.78rem", fontWeight: 500, color: "var(--text)",
-                transition: "all 0.15s", boxShadow: "var(--shadow-sm)",
-              }}
-                onMouseEnter={e => { const t = e.currentTarget as HTMLElement; t.style.borderColor = "var(--green-mid)"; t.style.boxShadow = "var(--shadow-md)"; t.style.transform = "translateY(-1px)"; }}
-                onMouseLeave={e => { const t = e.currentTarget as HTMLElement; t.style.borderColor = "var(--border)"; t.style.boxShadow = "var(--shadow-sm)"; t.style.transform = "translateY(0)"; }}
+              <button
+                key={i}
+                onClick={() => onChatFollowUp(chip.q)}
+                className="bg-bg border border-border rounded-sm px-3.5 py-2 text-[0.78rem] font-medium text-text transition-all duration-150 shadow-sm hover:border-green-mid hover:shadow-md hover:-translate-y-px"
               >{chip.label}</button>
             ));
           })()}
@@ -484,26 +434,14 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
           const url = new URL(window.location.origin + "/navigator");
           url.searchParams.set("stage", stage); url.searchParams.set("prov", provinces.join(",")); url.searchParams.set("need", need);
           navigator.clipboard.writeText(url.toString()).then(() => alert("Link copied! Share it with your advisor or team."), () => alert("Couldn't copy — try manually."));
-        }} style={{
-          alignSelf: "flex-start", padding: "7px 14px",
-          background: "none", color: "var(--text-tertiary)", border: "1px solid var(--border)",
-          borderRadius: "var(--radius-sm)", fontWeight: 500, fontSize: "0.72rem", transition: "color 0.15s",
         }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--text)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)"; }}
+          className="self-start px-3.5 py-[7px] bg-transparent text-text-tertiary border border-border rounded-sm font-medium text-[0.72rem] transition-colors duration-150 hover:text-text"
         >📋 Copy shareable link</button>
 
-        <div style={{ fontSize: "0.65rem", color: "var(--text-tertiary)", lineHeight: 1.5, marginTop: 4, fontStyle: "italic" }}>
+        <div className="text-[0.65rem] text-text-tertiary leading-[1.5] mt-1 italic">
           Built from public data — we're probably missing things. If a recommendation looks off, that's useful feedback too.
         </div>
       </div>
-
-      <style>{`
-        @keyframes stagePulse {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.1); }
-        }
-      `}</style>
     </div>
   );
 }

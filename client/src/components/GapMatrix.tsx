@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { cn } from "../lib/cn";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface CellProgram {
@@ -66,7 +67,15 @@ const PROV_LABELS: Record<string, string> = {
 };
 
 // ── Color scale ────────────────────────────────────────────────────────────
-function cellColor(count: number): { bg: string; text: string; border: string } {
+function cellColorClasses(count: number): { bg: string; text: string; border: string; outlineBorder: string } {
+  if (count === 0) return { bg: "bg-[#fde8e8]", text: "text-[#b91c1c]", border: "border-[#fca5a5]", outlineBorder: "#b91c1c" };
+  if (count === 1) return { bg: "bg-[#fef9c3]", text: "text-[#854d0e]", border: "border-[#fde047]", outlineBorder: "#854d0e" };
+  if (count === 2) return { bg: "bg-[#dcfce7]", text: "text-[#166534]", border: "border-[#86efac]", outlineBorder: "#166534" };
+  return              { bg: "bg-[#d1fae5]", text: "text-[#064e3b]", border: "border-[#34d399]", outlineBorder: "#064e3b" };
+}
+
+// For inline-style contexts (badge borders etc.) we still need raw hex values
+function cellColorRaw(count: number): { bg: string; text: string; border: string } {
   if (count === 0) return { bg: "#fde8e8", text: "#b91c1c", border: "#fca5a5" };
   if (count === 1) return { bg: "#fef9c3", text: "#854d0e", border: "#fde047" };
   if (count === 2) return { bg: "#dcfce7", text: "#166534", border: "#86efac" };
@@ -80,14 +89,14 @@ function gapLabel(count: number): string {
   return "Strong";
 }
 
-const GAP_TYPE_STYLE: Record<string, { bg: string; text: string; border: string }> = {
-  structural:     { bg: "#fef3c7", text: "#92400e", border: "#fcd34d" },
-  market_failure: { bg: "#fee2e2", text: "#991b1b", border: "#fca5a5" },
-  coverage_gap:   { bg: "#e0e7ff", text: "#3730a3", border: "#a5b4fc" },
-  stage_mismatch: { bg: "#fce7f3", text: "#9d174d", border: "#f9a8d4" },
-  data_gap:       { bg: "#f3e8ff", text: "#6b21a8", border: "#c4b5fd" },
-  weak:           { bg: "#fef9c3", text: "#854d0e", border: "#fde047" },
-  adequate:       { bg: "#d1fae5", text: "#064e3b", border: "#34d399" },
+const GAP_TYPE_CLASSES: Record<string, { bg: string; text: string; border: string }> = {
+  structural:     { bg: "bg-[#fef3c7]", text: "text-[#92400e]", border: "border-[#fcd34d]" },
+  market_failure: { bg: "bg-[#fee2e2]", text: "text-[#991b1b]", border: "border-[#fca5a5]" },
+  coverage_gap:   { bg: "bg-[#e0e7ff]", text: "text-[#3730a3]", border: "border-[#a5b4fc]" },
+  stage_mismatch: { bg: "bg-[#fce7f3]", text: "text-[#9d174d]", border: "border-[#f9a8d4]" },
+  data_gap:       { bg: "bg-[#f3e8ff]", text: "text-[#6b21a8]", border: "border-[#c4b5fd]" },
+  weak:           { bg: "bg-[#fef9c3]", text: "text-[#854d0e]", border: "border-[#fde047]" },
+  adequate:       { bg: "bg-[#d1fae5]", text: "text-[#064e3b]", border: "border-[#34d399]" },
 };
 
 // ── AI Explain card ────────────────────────────────────────────────────────
@@ -124,39 +133,22 @@ function ExplainCard({
       });
   }
 
-  const typeStyle = data ? (GAP_TYPE_STYLE[data.gapType] || GAP_TYPE_STYLE.adequate) : null;
+  const typeClasses = data ? (GAP_TYPE_CLASSES[data.gapType] || GAP_TYPE_CLASSES.adequate) : null;
 
   if (!data && !loading && !error) {
     return (
       <button
         onClick={fetchExplain}
-        style={{
-          width: "100%",
-          padding: "10px 14px",
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-          border: "1px solid #334155",
-          borderRadius: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          cursor: "pointer",
-          marginTop: 10,
-          transition: "all 0.15s",
-        }}
+        className="w-full px-3.5 py-2.5 bg-gradient-to-br from-[#0f172a] to-[#1e293b] border border-[#334155] rounded-[10px] flex items-center gap-2 cursor-pointer mt-2.5 transition-all duration-150"
       >
-        <div style={{
-          width: 22, height: 22, borderRadius: 6,
-          background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0,
-        }}>
+        <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0">
           <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
             <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
         </div>
-        <div style={{ textAlign: "left" }}>
-          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#e2e8f0" }}>🤖 Ask AI: why this gap?</div>
-          <div style={{ fontSize: "0.6rem", color: "#94a3b8", marginTop: 1 }}>Our best guess — we're still learning this landscape</div>
+        <div className="text-left">
+          <div className="text-[0.72rem] font-bold text-[#e2e8f0]">Ask AI: why this gap?</div>
+          <div className="text-[0.6rem] text-[#94a3b8] mt-px">Our best guess — we're still learning this landscape</div>
         </div>
       </button>
     );
@@ -164,26 +156,13 @@ function ExplainCard({
 
   if (loading) {
     return (
-      <div style={{
-        width: "100%", padding: "14px",
-        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-        border: "1px solid #334155", borderRadius: 10,
-        marginTop: 10, display: "flex", alignItems: "center", gap: 8,
-      }}>
-        <div style={{
-          width: 22, height: 22, borderRadius: 6,
-          background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-        }}>
-          <div style={{
-            width: 10, height: 10, border: "2px solid rgba(255,255,255,0.3)",
-            borderTop: "2px solid #fff", borderRadius: "50%",
-            animation: "spin 0.8s linear infinite",
-          }} />
+      <div className="w-full p-3.5 bg-gradient-to-br from-[#0f172a] to-[#1e293b] border border-[#334155] rounded-[10px] mt-2.5 flex items-center gap-2">
+        <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0">
+          <div className="w-2.5 h-2.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
         </div>
         <div>
-          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#e2e8f0" }}>Analyzing…</div>
-          <div style={{ fontSize: "0.6rem", color: "#94a3b8", marginTop: 1 }}>Reasoning about this ecosystem gap</div>
+          <div className="text-[0.72rem] font-bold text-[#e2e8f0]">Analyzing…</div>
+          <div className="text-[0.6rem] text-[#94a3b8] mt-px">Reasoning about this ecosystem gap</div>
         </div>
       </div>
     );
@@ -191,16 +170,12 @@ function ExplainCard({
 
   if (error) {
     return (
-      <div style={{
-        marginTop: 10, padding: "10px 14px",
-        background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10,
-        fontSize: "0.75rem", color: "#991b1b",
-      }}>
+      <div className="mt-2.5 px-3.5 py-2.5 bg-[#fef2f2] border border-[#fecaca] rounded-[10px] text-[0.75rem] text-[#991b1b]">
         {error}{" "}
-        <button onClick={() => { setError(""); setData(null); }} style={{
-          background: "none", border: "none", textDecoration: "underline", cursor: "pointer",
-          color: "#991b1b", fontSize: "0.75rem",
-        }}>Retry</button>
+        <button
+          onClick={() => { setError(""); setData(null); }}
+          className="bg-transparent border-none underline cursor-pointer text-[#991b1b] text-[0.75rem]"
+        >Retry</button>
       </div>
     );
   }
@@ -208,68 +183,45 @@ function ExplainCard({
   if (!data) return null;
 
   return (
-    <div style={{
-      marginTop: 10,
-      background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-      border: "1px solid #334155",
-      borderRadius: 10,
-      overflow: "hidden",
-    }}>
+    <div className="mt-2.5 bg-gradient-to-br from-[#0f172a] to-[#1e293b] border border-[#334155] rounded-[10px] overflow-hidden">
       {/* Header */}
-      <div style={{
-        padding: "10px 14px 8px",
-        display: "flex", alignItems: "center", gap: 8,
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-      }}>
-        <div style={{
-          width: 18, height: 18, borderRadius: 5,
-          background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-        }}>
+      <div className="px-3.5 pt-2.5 pb-2 flex items-center gap-2 border-b border-white/[0.06]">
+        <div className="w-[18px] h-[18px] rounded-[5px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0">
           <svg width="9" height="9" viewBox="0 0 16 16" fill="none">
             <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
         </div>
-        <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "#e2e8f0" }}>AI Analysis</span>
-        {typeStyle && (
-          <span style={{
-            fontSize: "0.58rem", fontWeight: 700, padding: "2px 7px",
-            borderRadius: 100, background: typeStyle.bg, color: typeStyle.text,
-            border: `1px solid ${typeStyle.border}`, marginLeft: "auto",
-          }}>{data.explanation.classification_label}</span>
+        <span className="text-[0.68rem] font-bold text-[#e2e8f0]">AI Analysis</span>
+        {typeClasses && (
+          <span className={cn(
+            "text-[0.58rem] font-bold px-[7px] py-[2px] rounded-full border ml-auto",
+            typeClasses.bg, typeClasses.text, typeClasses.border,
+          )}>{data.explanation.classification_label}</span>
         )}
       </div>
 
       {/* Why */}
-      <div style={{ padding: "10px 14px 6px" }}>
-        <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#6366f1", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>Why</div>
-        <div style={{ fontSize: "0.73rem", color: "#cbd5e1", lineHeight: 1.55 }}>{data.explanation.why}</div>
+      <div className="px-3.5 pt-2.5 pb-1.5">
+        <div className="text-[0.6rem] font-bold text-[#6366f1] tracking-[0.06em] uppercase mb-1">Why</div>
+        <div className="text-[0.73rem] text-[#cbd5e1] leading-[1.55]">{data.explanation.why}</div>
       </div>
 
       {/* Action */}
-      <div style={{ padding: "6px 14px 12px" }}>
-        <div style={{ fontSize: "0.6rem", fontWeight: 700, color: "#22c55e", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>
+      <div className="px-3.5 pt-1.5 pb-3">
+        <div className="text-[0.6rem] font-bold text-[#22c55e] tracking-[0.06em] uppercase mb-1">
           {mode === "ec" ? "Opportunity" : "What to do"}
         </div>
-        <div style={{ fontSize: "0.73rem", color: "#cbd5e1", lineHeight: 1.55 }}>{data.explanation.action}</div>
+        <div className="text-[0.73rem] text-[#cbd5e1] leading-[1.55]">{data.explanation.action}</div>
       </div>
 
       {/* Meta */}
-      <div style={{ padding: "0 14px 10px" }}>
+      <div className="px-3.5 pb-2.5">
         <button
           onClick={() => setShowMeta(!showMeta)}
-          style={{
-            background: "none", border: "none", padding: 0,
-            fontSize: "0.6rem", color: "#64748b", cursor: "pointer",
-            textDecoration: "underline", textDecorationColor: "#334155",
-          }}
+          className="bg-transparent border-none p-0 text-[0.6rem] text-[#64748b] cursor-pointer underline decoration-[#334155]"
         >{showMeta ? "Hide" : "Show"} context</button>
         {showMeta && (
-          <div style={{
-            marginTop: 6, padding: "6px 10px",
-            background: "rgba(255,255,255,0.04)", borderRadius: 6,
-            fontSize: "0.63rem", color: "#64748b", lineHeight: 1.6,
-          }}>
+          <div className="mt-1.5 px-2.5 py-1.5 bg-white/[0.04] rounded-[6px] text-[0.63rem] text-[#64748b] leading-[1.6]">
             {Object.keys(data.meta.neighborCounts).length > 0 && (
               <div>Neighbors: {Object.entries(data.meta.neighborCounts).map(([p, c]) => `${p} ${c}`).join(" · ")}</div>
             )}
@@ -288,89 +240,74 @@ function CellDetail({
 }: {
   prov: string; cat: string; cell: Cell; stage: string; mode: string; onClose: () => void;
 }) {
-  const colors = cellColor(cell.count);
+  const rawColors = cellColorRaw(cell.count);
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 300,
-      background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "flex-end",
-    }} onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[300] bg-black/45 flex items-end"
+      onClick={onClose}
+    >
       <div
         onClick={e => e.stopPropagation()}
-        style={{
-          width: "100%", maxHeight: "75vh", overflowY: "auto",
-          background: "var(--bg)", borderRadius: "16px 16px 0 0",
-          padding: "20px 18px 32px",
-        }}
+        className="w-full max-h-[75vh] overflow-y-auto bg-bg rounded-t-[16px] px-[18px] pt-5 pb-8"
       >
-        <div style={{ width: 36, height: 4, background: "var(--border)", borderRadius: 2, margin: "0 auto 16px" }} />
+        <div className="w-9 h-1 bg-border rounded-sm mx-auto mb-4" />
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+        <div className="flex justify-between items-start mb-3.5">
           <div>
-            <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
-              <span style={{
-                fontSize: "0.65rem", fontWeight: 700, padding: "2px 8px",
-                borderRadius: 100, background: colors.bg, color: colors.text,
-                border: `1px solid ${colors.border}`,
-              }}>{gapLabel(cell.count)}</span>
-              <span style={{ fontSize: "0.72rem", color: "var(--text-secondary)", fontWeight: 600 }}>
+            <div className="flex gap-1.5 items-center mb-1">
+              <span
+                className="text-[0.65rem] font-bold px-2 py-[2px] rounded-full border"
+                style={{ background: rawColors.bg, color: rawColors.text, borderColor: rawColors.border }}
+              >{gapLabel(cell.count)}</span>
+              <span className="text-[0.72rem] text-text-secondary font-semibold">
                 {cell.count} program{cell.count !== 1 ? "s" : ""}
               </span>
               {stage !== "All" && (
-                <span style={{
-                  fontSize: "0.6rem", padding: "2px 7px", borderRadius: 4,
-                  background: "var(--bg-tertiary)", color: "var(--text-secondary)", fontWeight: 600,
-                }}>{stage} stage</span>
+                <span className="text-[0.6rem] px-[7px] py-[2px] rounded-[4px] bg-bg-tertiary text-text-secondary font-semibold">
+                  {stage} stage
+                </span>
               )}
             </div>
-            <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--text)" }}>
+            <div className="font-bold text-[0.95rem] text-text">
               {prov === "National" ? "National" : prov} · {CAT_LABELS[cat]}
             </div>
           </div>
-          <button onClick={onClose} style={{
-            background: "var(--bg-secondary)", border: "1px solid var(--border)",
-            borderRadius: "var(--radius-sm)", padding: "4px 12px",
-            fontSize: "0.75rem", fontWeight: 600, color: "var(--text)",
-          }}>Close</button>
+          <button
+            onClick={onClose}
+            className="bg-bg-secondary border border-border rounded-sm px-3 py-1 text-[0.75rem] font-semibold text-text"
+          >Close</button>
         </div>
 
         {cell.count === 0 ? (
-          <div style={{
-            padding: "20px 16px", background: "var(--bg-secondary)",
-            borderRadius: "var(--radius)", textAlign: "center",
-            border: "1px dashed var(--border)",
-          }}>
-            <div style={{ fontSize: "1.2rem", marginBottom: 6 }}>🤔</div>
-            <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "var(--text)", marginBottom: 4 }}>We didn't find any programs here</div>
-            <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+          <div className="px-4 py-5 bg-bg-secondary rounded text-center border border-dashed border-border">
+            <div className="text-[1.2rem] mb-1.5">🤔</div>
+            <div className="font-semibold text-[0.85rem] text-text mb-1">We didn't find any programs here</div>
+            <div className="text-[0.75rem] text-text-secondary leading-[1.5]">
               This looks like a gap — but we might be missing something. If you know of a program that belongs here, we'd love to hear about it.
             </div>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="flex flex-col gap-2.5">
             {cell.programs.map((p, i) => (
-              <div key={i} style={{
-                padding: "11px 13px", background: "var(--bg-secondary)",
-                borderRadius: "var(--radius)", border: "1px solid var(--border)",
-              }}>
-                <div style={{ fontWeight: 600, fontSize: "0.82rem", marginBottom: 3 }}>
+              <div key={i} className="px-[13px] py-[11px] bg-bg-secondary rounded border border-border">
+                <div className="font-semibold text-[0.82rem] mb-[3px]">
                   {p.website
                     ? <a href={p.website} target="_blank" rel="noopener noreferrer"
-                        style={{ color: "var(--green-mid)", textDecoration: "none" }}>{p.name} ↗</a>
-                    : <span style={{ color: "var(--text)" }}>{p.name}</span>
+                        className="text-green-mid no-underline">{p.name} ↗</a>
+                    : <span className="text-text">{p.name}</span>
                   }
                 </div>
                 {p.description && (
-                  <div style={{ fontSize: "0.73rem", color: "var(--text-secondary)", lineHeight: 1.45, marginBottom: 5 }}>
+                  <div className="text-[0.73rem] text-text-secondary leading-[1.45] mb-[5px]">
                     {p.description}
                   </div>
                 )}
                 {p.stage.length > 0 && (
-                  <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+                  <div className="flex gap-[3px] flex-wrap">
                     {p.stage.map(st => (
-                      <span key={st} style={{
-                        fontSize: "0.6rem", padding: "1px 6px", borderRadius: 4,
-                        background: "var(--bg-tertiary)", color: "var(--text-secondary)",
-                      }}>{st}</span>
+                      <span key={st} className="text-[0.6rem] px-1.5 py-px rounded-[4px] bg-bg-tertiary text-text-secondary">
+                        {st}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -421,160 +358,138 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
     : null;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
+    <div className="fixed inset-0 z-[200] bg-bg flex flex-col">
 
       {/* ── Tutorial overlay — shows on first visit ──────────────── */}
       {showGuide && !loading && data && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 300,
-          background: "rgba(0,0,0,0.6)",
-          backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          padding: 20, animation: "fadeIn 0.3s ease",
-        }} onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: "var(--bg)", borderRadius: "var(--radius-lg)",
-            maxWidth: 400, width: "100%",
-            boxShadow: "0 24px 80px rgba(0,0,0,0.25)",
-            overflow: "hidden", animation: "slideUp 0.4s ease",
-          }}>
-            <div style={{ padding: "24px 24px 16px" }}>
-              <div style={{ fontSize: "1.8rem", marginBottom: 10 }}>🗺</div>
-              <h3 style={{
-                fontFamily: "var(--font-display)", fontSize: "1.15rem", fontWeight: 400,
-                color: "var(--text)", marginBottom: 8,
-              }}>How to read the Gap Map</h3>
-              <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: 1.65 }}>
-                <p style={{ marginBottom: 10 }}>
+        <div
+          className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-[4px] flex items-center justify-center p-5 animate-fade-in"
+          onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="bg-bg rounded-lg max-w-[400px] w-full shadow-lg overflow-hidden animate-slide-up"
+          >
+            <div className="px-6 pt-6 pb-4">
+              <div className="text-[1.8rem] mb-2.5">🗺</div>
+              <h3 className="font-display text-[1.15rem] font-normal text-text mb-2">
+                How to read the Gap Map
+              </h3>
+              <div className="text-[0.82rem] text-text-secondary leading-[1.65]">
+                <p className="mb-2.5">
                   Each cell shows how many programs we've found for that province and category.
                 </p>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+                <div className="flex gap-2 flex-wrap mb-3">
                   {[
-                    { label: "Gap (0)", bg: "#fde8e8", color: "#b91c1c" },
-                    { label: "Weak (1)", bg: "#fef9c3", color: "#854d0e" },
-                    { label: "Fair (2)", bg: "#dcfce7", color: "#166534" },
-                    { label: "Strong (3+)", bg: "#d1fae5", color: "#064e3b" },
+                    { label: "Gap (0)", bg: "bg-[#fde8e8]", color: "text-[#b91c1c]" },
+                    { label: "Weak (1)", bg: "bg-[#fef9c3]", color: "text-[#854d0e]" },
+                    { label: "Fair (2)", bg: "bg-[#dcfce7]", color: "text-[#166534]" },
+                    { label: "Strong (3+)", bg: "bg-[#d1fae5]", color: "text-[#064e3b]" },
                   ].map(l => (
-                    <span key={l.label} style={{
-                      fontSize: "0.7rem", fontWeight: 700, padding: "3px 10px",
-                      borderRadius: 6, background: l.bg, color: l.color,
-                    }}>{l.label}</span>
+                    <span key={l.label} className={cn(
+                      "text-[0.7rem] font-bold px-2.5 py-[3px] rounded-[6px]",
+                      l.bg, l.color,
+                    )}>{l.label}</span>
                   ))}
                 </div>
-                <p style={{ marginBottom: 10 }}>
-                  <strong style={{ color: "var(--text)" }}>Tap any cell</strong> to see the programs inside it — and get an AI perspective on why gaps exist.
+                <p className="mb-2.5">
+                  <strong className="text-text">Tap any cell</strong> to see the programs inside it — and get an AI perspective on why gaps exist.
                 </p>
-                <p style={{ fontSize: "0.75rem", color: "var(--text-tertiary)" }}>
-                  Scroll right → to see all categories. Use the stage filter to narrow by company maturity.
+                <p className="text-[0.75rem] text-text-tertiary">
+                  Scroll right to see all categories. Use the stage filter to narrow by company maturity.
                 </p>
               </div>
             </div>
-            <div style={{ padding: "0 24px 20px" }}>
-              <button onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }} style={{
-                width: "100%", padding: "12px",
-                background: "linear-gradient(135deg, var(--green-mid), var(--green-light))",
-                color: "#fff", border: "none", borderRadius: "var(--radius-sm)",
-                fontWeight: 700, fontSize: "0.85rem",
-                boxShadow: "0 2px 8px rgba(30,107,10,0.2)",
-              }}>Got it — show me the map</button>
+            <div className="px-6 pb-5">
+              <button
+                onClick={() => { setShowGuide(false); try { sessionStorage.setItem("ag_gap_guided", "1"); } catch {} }}
+                className="w-full py-3 bg-gradient-to-br from-green-mid to-green-light text-white border-none rounded-sm font-bold text-[0.85rem] shadow-green"
+              >Got it — show me the map</button>
             </div>
           </div>
         </div>
       )}
-      <div style={{
-        height: 56, padding: "0 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
-        borderBottom: "1px solid var(--border)", flexShrink: 0,
-        background: "rgba(250,250,248,0.92)",
-        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-      }}>
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1.05rem", color: "var(--text)" }}>Gap Map</span>
-        <button onClick={onClose} style={{
-          background: "var(--bg-secondary)", border: "1px solid var(--border)",
-          borderRadius: "var(--radius-sm)", padding: "6px 16px",
-          fontSize: "0.78rem", fontWeight: 600, color: "var(--text)",
-          transition: "all 0.12s",
-        }}>Done</button>
+
+      <div className="h-14 px-[18px] flex justify-between items-center border-b border-border shrink-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px]">
+        <span className="font-display font-normal text-[1.05rem] text-text">Gap Map</span>
+        <button
+          onClick={onClose}
+          className="bg-bg-secondary border border-border rounded-sm px-4 py-1.5 text-[0.78rem] font-semibold text-text transition-all duration-[120ms]"
+        >Done</button>
       </div>
 
       {/* Compact filter + legend bar */}
-      <div style={{
-        padding: "8px 16px", borderBottom: "1px solid var(--border)",
-        background: "var(--bg-secondary)", flexShrink: 0,
-        display: "flex", alignItems: "center", gap: 10,
-      }}>
-        <select value={stage} onChange={e => setStage(e.target.value)} style={{
-          padding: "5px 10px", borderRadius: "var(--radius-sm)", border: "1.5px solid var(--border)",
-          fontSize: "0.75rem", fontWeight: 600, background: "var(--bg)", color: "var(--text)",
-          fontFamily: "var(--font-text)",
-        }}>
+      <div className="px-4 py-2 border-b border-border bg-bg-secondary shrink-0 flex items-center gap-2.5">
+        <select
+          value={stage}
+          onChange={e => setStage(e.target.value)}
+          className="px-2.5 py-[5px] rounded-sm border-[1.5px] border-border text-[0.75rem] font-semibold bg-bg text-text font-sans"
+        >
           {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
         </select>
-        <div style={{ display: "flex", gap: 4, alignItems: "center", marginLeft: "auto" }}>
+        <div className="flex gap-1 items-center ml-auto">
           {[
-            { label: "Gap", bg: "#fde8e8", text: "#b91c1c" },
-            { label: "Weak", bg: "#fef9c3", text: "#854d0e" },
-            { label: "OK", bg: "#dcfce7", text: "#166534" },
-            { label: "Strong", bg: "#d1fae5", text: "#064e3b" },
+            { label: "Gap", bg: "bg-[#fde8e8]", text: "text-[#b91c1c]" },
+            { label: "Weak", bg: "bg-[#fef9c3]", text: "text-[#854d0e]" },
+            { label: "OK", bg: "bg-[#dcfce7]", text: "text-[#166534]" },
+            { label: "Strong", bg: "bg-[#d1fae5]", text: "text-[#064e3b]" },
           ].map(l => (
-            <span key={l.label} style={{
-              fontSize: "0.58rem", fontWeight: 700, padding: "2px 6px",
-              borderRadius: 4, background: l.bg, color: l.text,
-            }}>{l.label}</span>
+            <span key={l.label} className={cn(
+              "text-[0.58rem] font-bold px-1.5 py-[2px] rounded-[4px]",
+              l.bg, l.text,
+            )}>{l.label}</span>
           ))}
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", overflowX: "auto" }}>
+      <div className="flex-1 overflow-y-auto overflow-x-auto">
         {loading && (
-          <div style={{ padding: 48, textAlign: "center", color: "var(--text-tertiary)", fontSize: "0.85rem" }}>Loading gap data…</div>
+          <div className="p-12 text-center text-text-tertiary text-[0.85rem]">Loading gap data…</div>
         )}
         {error && (
-          <div style={{ padding: 48, textAlign: "center", color: "#b91c1c", fontSize: "0.85rem" }}>{error}</div>
+          <div className="p-12 text-center text-[#b91c1c] text-[0.85rem]">{error}</div>
         )}
         {data && !loading && (
-          <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 520 }}>
+          <table className="border-collapse w-full min-w-[520px]">
             <thead>
               <tr>
-                <th style={{
-                  padding: "8px 10px", textAlign: "left", fontWeight: 600,
-                  fontSize: "0.65rem", color: "var(--text-secondary)",
-                  borderBottom: "1px solid var(--border)",
-                  background: "var(--bg-secondary)", position: "sticky", top: 0, left: 0, zIndex: 2, minWidth: 48,
-                }}>Prov</th>
+                <th className="px-2.5 py-2 text-left font-semibold text-[0.65rem] text-text-secondary border-b border-border bg-bg-secondary sticky top-0 left-0 z-[2] min-w-[48px]">
+                  Prov
+                </th>
                 {data.categories.map(cat => (
-                  <th key={cat} style={{
-                    padding: "8px 6px", textAlign: "center", fontWeight: 600,
-                    fontSize: "0.62rem", color: "var(--text-secondary)",
-                    borderBottom: "1px solid var(--border)",
-                    background: "var(--bg-secondary)", position: "sticky", top: 0, zIndex: 1, letterSpacing: "0.02em",
-                  }}>{CAT_LABELS[cat]}</th>
+                  <th key={cat} className="px-1.5 py-2 text-center font-semibold text-[0.62rem] text-text-secondary border-b border-border bg-bg-secondary sticky top-0 z-[1] tracking-[0.02em]">
+                    {CAT_LABELS[cat]}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {data.provinces.map(prov => (
-                <tr key={prov} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{
-                    padding: "7px 10px", fontWeight: 700, fontSize: "0.72rem",
-                    color: "var(--text)", background: "var(--bg-secondary)",
-                    position: "sticky", left: 0, zIndex: 1, borderRight: "1px solid var(--border)",
-                  }}>{PROV_LABELS[prov] || prov}</td>
+                <tr key={prov} className="border-b border-border">
+                  <td className="px-2.5 py-[7px] font-bold text-[0.72rem] text-text bg-bg-secondary sticky left-0 z-[1] border-r border-border">
+                    {PROV_LABELS[prov] || prov}
+                  </td>
                   {data.categories.map(cat => {
                     const cell = data.matrix[prov][cat];
-                    const colors = cellColor(cell.count);
+                    const colors = cellColorClasses(cell.count);
                     const isSelected = selected?.prov === prov && selected?.cat === cat;
                     return (
-                      <td key={cat}
+                      <td
+                        key={cat}
                         onClick={() => setSelected({ prov, cat })}
-                        style={{
-                          padding: "6px 4px", textAlign: "center", cursor: "pointer",
-                          background: isSelected ? colors.border : colors.bg,
-                          transition: "background 0.1s",
-                          outline: isSelected ? `2px solid ${colors.text}` : "none",
+                        className={cn(
+                          "px-1 py-1.5 text-center cursor-pointer transition-colors duration-100",
+                          isSelected ? undefined : colors.bg,
+                        )}
+                        style={isSelected ? {
+                          background: cellColorRaw(cell.count).border,
+                          outline: `2px solid ${colors.outlineBorder}`,
                           outlineOffset: -2,
-                        }}
+                        } : undefined}
                       >
-                        <div style={{ fontSize: "0.82rem", fontWeight: 700, color: colors.text, lineHeight: 1 }}>{cell.count}</div>
+                        <div className={cn("text-[0.82rem] font-bold leading-none", colors.text)}>
+                          {cell.count}
+                        </div>
                       </td>
                     );
                   })}
@@ -595,8 +510,6 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
           onClose={() => setSelected(null)}
         />
       )}
-
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
