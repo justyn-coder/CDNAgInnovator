@@ -112,23 +112,23 @@ function StageJourney({ current, next }: { current: string; next: string }) {
                 background: isCurrent
                   ? "var(--green-mid)"
                   : isPast
-                    ? "rgba(255,255,255,0.25)"
+                    ? "rgba(255,255,255,0.35)"
                     : isNext
                       ? "transparent"
-                      : "rgba(255,255,255,0.06)",
+                      : "rgba(255,255,255,0.1)",
                 border: isCurrent
                   ? "2.5px solid var(--green-accent)"
                   : isNext
-                    ? "2px dashed rgba(255,255,255,0.4)"
+                    ? "2px dashed rgba(255,255,255,0.6)"
                     : isPast
-                      ? "2px solid rgba(255,255,255,0.25)"
-                      : "2px solid rgba(255,255,255,0.1)",
+                      ? "2px solid rgba(255,255,255,0.5)"
+                      : "2px solid rgba(255,255,255,0.3)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: isCurrent ? "0.85rem" : "0.6rem",
                 transition: "all 0.3s ease",
                 boxShadow: isCurrent ? "0 0 16px rgba(61,204,26,0.35)" : "none",
                 animation: isNext ? "stagePulse 2s ease-in-out infinite" : "none",
-                color: isPast ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.3)",
+                color: isPast ? "rgba(255,255,255,0.87)" : "rgba(255,255,255,0.7)",
               }}>
                 {isCurrent ? STAGE_ICONS[s] : isPast ? "✓" : isNext ? STAGE_ICONS[s] : ""}
               </div>
@@ -138,10 +138,10 @@ function StageJourney({ current, next }: { current: string; next: string }) {
                 color: isCurrent
                   ? "#fff"
                   : isNext
-                    ? "rgba(255,255,255,0.75)"
+                    ? "rgba(255,255,255,0.9)"
                     : isPast
-                      ? "rgba(255,255,255,0.45)"
-                      : "rgba(255,255,255,0.25)",
+                      ? "rgba(255,255,255,0.82)"
+                      : "rgba(255,255,255,0.7)",
                 whiteSpace: "nowrap",
               }}>{SL[s] || s}</span>
               {isCurrent && (
@@ -158,10 +158,10 @@ function StageJourney({ current, next }: { current: string; next: string }) {
               <div style={{
                 flex: 1, height: 2, minWidth: 8,
                 background: i < currentIdx
-                  ? "rgba(255,255,255,0.25)"
+                  ? "rgba(255,255,255,0.5)"
                   : i === currentIdx
-                    ? "linear-gradient(90deg, var(--green-accent), rgba(255,255,255,0.12))"
-                    : "rgba(255,255,255,0.06)",
+                    ? "linear-gradient(90deg, var(--green-accent), rgba(255,255,255,0.3))"
+                    : "rgba(255,255,255,0.2)",
                 marginTop: 17,
               }} />
             )}
@@ -374,14 +374,14 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       }}>
         <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         <div style={{ position: "relative" }}>
-          <div style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", marginBottom: 6 }}>Your Innovation Pathway</div>
+          <div style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.82)", marginBottom: 6 }}>Your Innovation Pathway</div>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.35rem", fontWeight: 400, letterSpacing: "-0.01em", color: "#fff", marginBottom: 10, lineHeight: 1.2 }}>{titleOverride}</h2>
-          <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.75)", lineHeight: 1.65, maxWidth: 520 }}>{pathway.summary}</p>
+          <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.9)", lineHeight: 1.65, maxWidth: 520 }}>{pathway.summary}</p>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
             {provinces.map(p => (
-              <span key={p} style={{ fontSize: "0.62rem", fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}>{p}</span>
+              <span key={p} style={{ fontSize: "0.62rem", fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.87)" }}>{p}</span>
             ))}
-            <span style={{ fontSize: "0.62rem", fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}>{meta.programsConsidered} programs analyzed</span>
+            <span style={{ fontSize: "0.62rem", fontWeight: 600, padding: "3px 10px", borderRadius: 100, background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.87)" }}>{meta.programsConsidered} programs analyzed</span>
           </div>
           <StageJourney current={stage} next={meta.nextStage} />
         </div>
