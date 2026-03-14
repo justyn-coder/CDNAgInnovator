@@ -1,53 +1,54 @@
-/** Inline SVG nav logo — renders text with page fonts (unlike <img> which can't access external fonts). */
+/** Inline SVG nav logo — icon + wordmark, no tagline. */
 export function TrellisLogo({ className = "h-8" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 200 50" className={className} aria-label="Trellis — Navigate Canada's AgTech Ecosystem" role="img">
+    <svg viewBox="0 0 140 36" className={className} aria-label="Trellis" role="img">
       {/* Trellis lattice icon */}
-      <g transform="translate(2, 3)">
+      <g transform="translate(2, 2)">
         {/* Vertical supports */}
-        <line x1="4" y1="40" x2="4" y2="8" stroke="#1B4332" strokeWidth="2" strokeLinecap="round"/>
-        <line x1="14" y1="40" x2="14" y2="8" stroke="#1B4332" strokeWidth="2" strokeLinecap="round"/>
-        <line x1="24" y1="40" x2="24" y2="8" stroke="#1B4332" strokeWidth="2" strokeLinecap="round"/>
+        <line x1="4" y1="30" x2="4" y2="6" stroke="#1B4332" strokeWidth="2" strokeLinecap="round"/>
+        <line x1="12" y1="30" x2="12" y2="6" stroke="#1B4332" strokeWidth="2" strokeLinecap="round"/>
+        <line x1="20" y1="30" x2="20" y2="6" stroke="#1B4332" strokeWidth="2" strokeLinecap="round"/>
         {/* Crossbars */}
-        <line x1="0" y1="32" x2="28" y2="32" stroke="#1B4332" strokeWidth="1" strokeLinecap="round"/>
-        <line x1="0" y1="20" x2="28" y2="20" stroke="#1B4332" strokeWidth="1" strokeLinecap="round"/>
+        <line x1="0" y1="24" x2="24" y2="24" stroke="#1B4332" strokeWidth="1" strokeLinecap="round"/>
+        <line x1="0" y1="15" x2="24" y2="15" stroke="#1B4332" strokeWidth="1" strokeLinecap="round"/>
         {/* Bottom — green */}
-        <circle cx="4" cy="32" r="2.5" fill="#48B87A"/>
-        <circle cx="14" cy="32" r="2.2" fill="#48B87A" opacity="0.9"/>
-        <circle cx="24" cy="32" r="1.8" fill="#48B87A" opacity="0.8"/>
+        <circle cx="4" cy="24" r="2.2" fill="#48B87A"/>
+        <circle cx="12" cy="24" r="1.9" fill="#48B87A" opacity="0.9"/>
+        <circle cx="20" cy="24" r="1.6" fill="#48B87A" opacity="0.8"/>
         {/* Middle — chartreuse */}
-        <circle cx="4" cy="20" r="2.8" fill="#8CC63F"/>
-        <circle cx="14" cy="20" r="2.5" fill="#8CC63F" opacity="0.9"/>
-        <circle cx="24" cy="20" r="2" fill="#8CC63F" opacity="0.7"/>
+        <circle cx="4" cy="15" r="2.4" fill="#8CC63F"/>
+        <circle cx="12" cy="15" r="2.1" fill="#8CC63F" opacity="0.9"/>
+        <circle cx="20" cy="15" r="1.7" fill="#8CC63F" opacity="0.7"/>
         {/* Top — gold */}
-        <circle cx="4" cy="8" r="2.5" fill="#D4A828" opacity="0.85"/>
-        <circle cx="14" cy="4" r="2" fill="#D4A828" opacity="0.65"/>
-        <circle cx="24" cy="0" r="1.5" fill="#D4A828" opacity="0.5"/>
+        <circle cx="4" cy="6" r="2.1" fill="#D4A828" opacity="0.85"/>
+        <circle cx="12" cy="3" r="1.7" fill="#D4A828" opacity="0.65"/>
+        <circle cx="20" cy="0" r="1.3" fill="#D4A828" opacity="0.5"/>
       </g>
       {/* Wordmark — uses page-loaded DM Serif Display */}
       <text
-        x="36"
-        y="27"
+        x="32"
+        y="24"
         fontFamily="'DM Serif Display', Georgia, serif"
-        fontSize="26"
+        fontSize="22"
         fontWeight="400"
         letterSpacing="0.01em"
         fill="#1a1a18"
       >
         Trellis
       </text>
-      {/* Tagline */}
-      <text
-        x="37"
-        y="42"
-        fontFamily="'DM Sans', system-ui, sans-serif"
-        fontSize="6"
-        fontWeight="400"
-        letterSpacing="0.05em"
-        fill="#6b6b6b"
-      >
-        NAVIGATE CANADA'S AGTECH ECOSYSTEM
-      </text>
+    </svg>
+  );
+}
+
+/** Small inline maple leaf SVG icon */
+export function MapleLeaf({ size = 16, className }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path
+        d="M12 2L9.5 7.5L4 6L6.5 11L2 13L7 14L5.5 19L10 16.5L12 22L14 16.5L18.5 19L17 14L22 13L17.5 11L20 6L14.5 7.5L12 2Z"
+        fill="#C41E3A"
+        opacity="0.85"
+      />
     </svg>
   );
 }

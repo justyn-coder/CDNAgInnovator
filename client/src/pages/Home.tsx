@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { TrellisLogo } from "../components/TrellisLogo";
+import { TrellisLogo, MapleLeaf } from "../components/TrellisLogo";
 
 /** Inline trellis icon (no wordmark) for popup header */
 function TrellisIcon({ size = 48 }: { size?: number }) {
@@ -257,10 +257,16 @@ export default function Home() {
       )}
 
       {/* ── Nav ─────────────────────────────────────────────── */}
-      <nav className="px-8 h-14 flex items-center justify-between border-b border-border sticky top-0 bg-[rgba(250,250,248,0.88)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
-        <div className="flex items-center gap-2.5">
-          <TrellisLogo className="h-8" />
-        </div>
+      <nav className="px-6 md:px-6 h-11 md:h-12 flex items-center justify-between border-b border-border sticky top-0 bg-[rgba(250,250,248,0.88)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
+        <TrellisLogo className="h-[22px] md:h-7" />
+        <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); } catch {} }}
+          className="flex items-center gap-1.5 no-underline text-text-secondary hover:text-text transition-colors">
+          <MapleLeaf size={14} className="md:w-4 md:h-4" />
+          <span className="text-[0.72rem] md:text-[0.78rem] font-semibold">
+            <span className="hidden md:inline">All Programs</span>
+            <span className="md:hidden">Programs</span>
+          </span>
+        </Link>
       </nav>
 
       {/* ── Hero ─────────────────────────────────────────────── */}

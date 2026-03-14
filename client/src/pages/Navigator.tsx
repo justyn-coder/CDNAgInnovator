@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { cn } from "../lib/cn";
-import { TrellisLogo } from "../components/TrellisLogo";
+import { TrellisLogo, MapleLeaf } from "../components/TrellisLogo";
 import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
 import PathwayCard from "../components/PathwayCard";
@@ -911,21 +911,29 @@ export default function Navigator() {
       <div className="fixed inset-0 bg-bg flex flex-col font-sans">
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
-        <div className="h-12 px-4 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
-          <Link href="/" className="flex items-center gap-2 no-underline">
-            <TrellisLogo className="h-7" />
-            <span className={cn(
-              "text-[0.5rem] font-bold px-[5px] py-px rounded-[3px] tracking-[0.04em] uppercase",
-              isEco ? "bg-eco-pill-bg text-eco-pill-text" : "bg-founder-pill-bg text-founder-pill-text"
-            )}>{isEco ? "Partner" : "Founder"}</span>
+        <div className="h-11 md:h-12 px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
+          <Link href="/" className="flex items-center no-underline">
+            <TrellisLogo className="h-[22px] md:h-7" />
           </Link>
           <div className="flex gap-1.5 items-center">
-            <button onClick={() => { setBrowseInitialSearch(""); setOrgParam(null); setShowBrowse(true); }} className="bg-transparent border-none px-2.5 py-1.5 text-[0.72rem] font-semibold text-text-secondary">
-              {isEco ? "Programs" : "All Programs"}
+            <button onClick={() => { setBrowseInitialSearch(""); setOrgParam(null); setShowBrowse(true); }}
+              className="bg-transparent border-none flex items-center gap-1.5 px-2.5 py-1.5 text-text-secondary hover:text-text transition-colors cursor-pointer">
+              <MapleLeaf size={14} className="md:w-4 md:h-4" />
+              <span className="text-[0.72rem] md:text-[0.78rem] font-semibold">
+                <span className="hidden md:inline">All Programs</span>
+                <span className="md:hidden">Programs</span>
+              </span>
             </button>
             {isEco && (
-              <button onClick={() => setShowGapMap(true)} className="bg-transparent border-none px-2.5 py-1.5 text-[0.72rem] font-semibold text-text-secondary">
-                Gap Map
+              <button onClick={() => setShowGapMap(true)}
+                className="bg-transparent border-none flex items-center gap-1.5 px-2.5 py-1.5 text-text-secondary hover:text-text transition-colors cursor-pointer">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <rect x="1" y="1" width="6" height="6" rx="1" fill="#D4A828"/>
+                  <rect x="9" y="1" width="6" height="6" rx="1" fill="#48B87A"/>
+                  <rect x="1" y="9" width="6" height="6" rx="1" fill="#48B87A"/>
+                  <rect x="9" y="9" width="6" height="6" rx="1" fill="#D4A828" opacity="0.5"/>
+                </svg>
+                <span className="text-[0.72rem] md:text-[0.78rem] font-semibold">Gap Map</span>
               </button>
             )}
           </div>
