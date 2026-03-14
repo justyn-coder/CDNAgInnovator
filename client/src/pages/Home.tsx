@@ -1,11 +1,42 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { cn } from "../lib/cn";
 import { TrellisLogo } from "../components/TrellisLogo";
+
+/** Inline trellis icon (no wordmark) for popup header */
+function TrellisIcon({ size = 48 }: { size?: number }) {
+  const s = size / 48; // scale factor
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">
+      <g transform={`translate(${10 * s}, ${2 * s}) scale(${s})`}>
+        {/* Vertical supports */}
+        <line x1="4" y1="40" x2="4" y2="8" stroke="#1B4332" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1="14" y1="40" x2="14" y2="8" stroke="#1B4332" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1="24" y1="40" x2="24" y2="8" stroke="#1B4332" strokeWidth="2.5" strokeLinecap="round" />
+        {/* Crossbars */}
+        <line x1="0" y1="32" x2="28" y2="32" stroke="#1B4332" strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="0" y1="20" x2="28" y2="20" stroke="#1B4332" strokeWidth="1.2" strokeLinecap="round" />
+        {/* Bottom dots — green */}
+        <circle cx="4" cy="32" r="3" fill="#48B87A" />
+        <circle cx="14" cy="32" r="2.6" fill="#48B87A" opacity="0.9" />
+        <circle cx="24" cy="32" r="2.2" fill="#48B87A" opacity="0.8" />
+        {/* Middle dots — chartreuse */}
+        <circle cx="4" cy="20" r="3.2" fill="#8CC63F" />
+        <circle cx="14" cy="20" r="2.8" fill="#8CC63F" opacity="0.9" />
+        <circle cx="24" cy="20" r="2.2" fill="#8CC63F" opacity="0.7" />
+        {/* Top dots — gold */}
+        <circle cx="4" cy="8" r="2.8" fill="#D4A828" opacity="0.85" />
+        <circle cx="14" cy="4" r="2.2" fill="#D4A828" opacity="0.65" />
+        <circle cx="24" cy="0" r="1.8" fill="#D4A828" opacity="0.5" />
+      </g>
+    </svg>
+  );
+}
 
 export default function Home() {
   const [count, setCount] = useState<number | null>(null);
-  const [showBetaModal, setShowBetaModal] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [urlMode, setUrlMode] = useState<"founder" | "operator">("founder");
+  const [orgParam, setOrgParam] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/programs")
@@ -13,93 +44,214 @@ export default function Home() {
       .then((d: any[]) => setCount(d.length))
       .catch(() => {});
 
-    // Show beta modal if ?beta=1 in URL or first visit
+    // Read URL params
     try {
       const params = new URLSearchParams(window.location.search);
-      const isBeta = params.get("beta") === "1";
-      const seen = sessionStorage.getItem("ag_home_seen");
-      if (isBeta || !seen) {
-        setShowBetaModal(true);
+      const mode = params.get("mode");
+      const org = params.get("org");
+      if (mode === "operator") setUrlMode("operator");
+      if (org) setOrgParam(org);
+
+      // Show popup if not already welcomed
+      const welcomed = localStorage.getItem("trellis_welcomed");
+      if (!welcomed) {
+        setShowPopup(true);
+      } else if (mode === "operator" && org) {
+        // Already welcomed but arriving via operator link — go straight to programs
+        localStorage.setItem("ag_nav_mode", "ec");
+        window.location.href = `/navigator?eco=true&org=${encodeURIComponent(org)}`;
+      } else if (mode === "operator") {
+        localStorage.setItem("ag_nav_mode", "ec");
+        window.location.href = "/navigator?eco=true";
       }
-    } catch { setShowBetaModal(true); }
+    } catch {
+      setShowPopup(true);
+    }
   }, []);
 
-  function dismissModal(mode: "e" | "ec") {
+  function dismissPopup(target: "pathway" | "browse" | "programs" | "founder-experience") {
     try {
-      sessionStorage.setItem("ag_home_seen", "1");
-      localStorage.setItem("ag_nav_mode", mode);
+      localStorage.setItem("trellis_welcomed", "true");
     } catch {}
-    setShowBetaModal(false);
-    window.location.href = "/navigator";
+    setShowPopup(false);
+
+    if (target === "pathway") {
+      localStorage.setItem("ag_nav_mode", "e");
+      window.location.href = "/navigator";
+    } else if (target === "browse") {
+      localStorage.setItem("ag_nav_mode", "e");
+      window.location.href = "/navigator?browse=true";
+    } else if (target === "programs") {
+      localStorage.setItem("ag_nav_mode", "ec");
+      const url = orgParam
+        ? `/navigator?eco=true&org=${encodeURIComponent(orgParam)}`
+        : "/navigator?eco=true";
+      window.location.href = url;
+    } else if (target === "founder-experience") {
+      localStorage.setItem("ag_nav_mode", "e");
+      window.location.href = "/navigator";
+    }
   }
+
+  const programCount = count || 350;
 
   return (
     <div className="min-h-screen bg-bg flex flex-col font-sans">
 
-      {/* ── Beta Welcome Modal ─────────────────────────────────── */}
-      {showBetaModal && (
-        <div className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-[8px] flex items-center justify-center p-5 animate-fade-in">
-          <div className="bg-bg rounded-lg max-w-[480px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-hidden animate-slide-up">
-            {/* Header — tight, scannable */}
-            <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] px-7 pt-7 pb-5.5 text-white">
-              <div className="text-[0.58rem] font-bold tracking-[0.12em] uppercase text-white/60 mb-2.5">
-                Early Access
-              </div>
-              <h2 className="font-display text-2xl font-normal leading-[1.15]">
-                Canada's ag ecosystem,<br />mapped for you.
-              </h2>
+      {/* ── First-Visit Popup ───────────────────────────────────── */}
+      {showPopup && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-5"
+          style={{ background: "rgba(245, 243, 237, 0.97)" }}
+        >
+          <div
+            className="bg-white w-full max-w-[460px] animate-slide-up"
+            style={{
+              borderRadius: 16,
+              padding: "40px 32px 28px",
+              border: "0.5px solid #E5E5E0",
+            }}
+          >
+            {/* Icon */}
+            <div className="flex justify-center mb-5">
+              <TrellisIcon size={48} />
             </div>
 
-            {/* Stats strip — scannable at a glance */}
-            <div className="flex border-b border-border">
-              {[
-                { num: count || 283, label: "Programs" },
-                { num: "10", label: "Provinces" },
-                { num: "AI", label: "Personalized" },
-              ].map((stat, i) => (
-                <div key={i} className={cn(
-                  "flex-1 py-3 text-center",
-                  i < 2 && "border-r border-border"
-                )}>
-                  <div className="text-[1.1rem] font-extrabold text-brand-green">{stat.num}</div>
-                  <div className="text-[0.62rem] font-semibold text-text-tertiary tracking-[0.04em] uppercase">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Body */}
-            <div className="px-7 pt-5 pb-6.5">
-              <p className="text-[0.8rem] text-text-secondary leading-[1.6] mb-4.5">
-                We built this because finding the right programs shouldn't require a spreadsheet and six phone calls.
-                We're keeping it current — and we're counting on ecosystem partners like you to help us get it right for the founders and farmers who need it most.
-              </p>
-
-              {/* Two paths */}
-              <div className="flex flex-col gap-2.5">
-                <button onClick={() => dismissModal("e")}
-                  className="bg-brand-gold text-brand-forest border-none rounded px-5 py-3.5 text-left shadow-gold transition-transform duration-[120ms] hover:-translate-y-px"
+            {urlMode === "founder" ? (
+              /* ── VARIANT A: Founder ──────────────────────── */
+              <>
+                <h2
+                  className="font-display font-normal text-center leading-[1.2] mb-4 popup-headline"
+                  style={{ fontSize: 28, color: "#1a1a18" }}
                 >
-                  <div className="font-bold text-[0.88rem] mb-0.5">I'm building an agtech company →</div>
-                  <div className="text-[0.75rem] opacity-80">Get a personalized pathway in 30 seconds</div>
-                </button>
+                  Find your path through<br />Canada's ag ecosystem.
+                </h2>
 
-                <button onClick={() => dismissModal("ec")}
-                  className="bg-bg-secondary text-text border border-border-strong rounded px-5 py-3.5 text-left transition-transform duration-[120ms] hover:-translate-y-px"
+                <p
+                  className="text-center leading-[1.6] mb-6"
+                  style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 15, color: "#6b6b6b" }}
                 >
-                  <div className="font-bold text-[0.88rem] mb-0.5">I run a program, accelerator, or funding body →</div>
-                  <div className="text-[0.75rem] text-text-secondary">Review ecosystem data, check your listing, find gaps</div>
-                </button>
-              </div>
+                  Answer 4 quick questions. Get a personalized pathway to the accelerators, funding, and pilot sites that match your stage and province.
+                </p>
 
-              <div className="mt-4 px-3 py-2 bg-green-soft rounded-sm text-[0.65rem] text-brand-green font-semibold text-center tracking-[0.01em]">
-                Your feedback shapes the product
-              </div>
-              <div className="mt-3.5 pt-3 border-t border-border text-center">
-                <div className="flex items-center justify-center gap-1.5 text-[0.6rem] text-text-tertiary tracking-[0.02em]">
-                  <span>Powered by AI · Free, no signup · Beta v1.1</span>
+                {/* CTA */}
+                <button
+                  onClick={() => dismissPopup("pathway")}
+                  className="w-full font-medium transition-colors"
+                  style={{
+                    background: "#D4A828",
+                    color: "#1B4332",
+                    fontSize: 15,
+                    fontWeight: 500,
+                    padding: 14,
+                    borderRadius: 12,
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#BF9624")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "#D4A828")}
+                >
+                  Build My Pathway →
+                </button>
+                <div className="text-center mt-1.5" style={{ fontSize: 12, color: "#999" }}>
+                  Takes about 30 seconds
                 </div>
-              </div>
-            </div>
+
+                {/* Footer stats */}
+                <div
+                  className="text-center mt-4"
+                  style={{ fontSize: 13, color: "#999", borderTop: "0.5px solid #E5E5E0", paddingTop: 12 }}
+                >
+                  {programCount} programs · 10 provinces · Updated weekly
+                </div>
+
+                {/* Secondary link */}
+                <div className="text-center mt-3">
+                  <button
+                    onClick={() => dismissPopup("browse")}
+                    className="bg-transparent border-none cursor-pointer hover:underline"
+                    style={{ fontSize: 13, color: "#2D7A4F" }}
+                  >
+                    Or: Browse all programs →
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* ── VARIANT B: Operator ─────────────────────── */
+              <>
+                <h2
+                  className="font-display font-normal text-center leading-[1.2] mb-4 popup-headline"
+                  style={{ fontSize: 28, color: "#1a1a18" }}
+                >
+                  Your programs are already<br />in Trellis.
+                </h2>
+
+                <p
+                  className="text-center leading-[1.6] mb-4"
+                  style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 15, color: "#6b6b6b" }}
+                >
+                  We've mapped {programCount} programs across 10 provinces — including yours. Before we share this with founders, we want to make sure we got it right.
+                </p>
+
+                {/* Highlight box */}
+                <div
+                  className="mb-5"
+                  style={{
+                    background: "#FFF8E7",
+                    borderLeft: "3px solid #D4A828",
+                    borderRadius: "0 8px 8px 0",
+                    padding: "10px 14px",
+                    fontSize: 13,
+                    color: "#6b6b6b",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  You can review your listing, flag corrections, and see where founders in your province have coverage gaps.
+                </div>
+
+                {/* CTA */}
+                <button
+                  onClick={() => dismissPopup("programs")}
+                  className="w-full font-medium transition-colors"
+                  style={{
+                    background: "#1B4332",
+                    color: "#FFFFFF",
+                    fontSize: 15,
+                    fontWeight: 500,
+                    padding: 14,
+                    borderRadius: 12,
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#2D7A4F")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "#1B4332")}
+                >
+                  Check Your Programs →
+                </button>
+                <div className="text-center mt-1.5" style={{ fontSize: 12, color: "#999" }}>
+                  No signup · Takes 2 minutes
+                </div>
+
+                {/* Footer credit */}
+                <div
+                  className="text-center mt-4"
+                  style={{ fontSize: 12, color: "#999", borderTop: "0.5px solid #E5E5E0", paddingTop: 12 }}
+                >
+                  Built by Justyn Szymczyk · BestInShow.ag
+                </div>
+
+                {/* Secondary link */}
+                <div className="text-center mt-3">
+                  <button
+                    onClick={() => dismissPopup("founder-experience")}
+                    className="bg-transparent border-none cursor-pointer hover:underline"
+                    style={{ fontSize: 13, color: "#2D7A4F" }}
+                  >
+                    Or: See the founder experience →
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

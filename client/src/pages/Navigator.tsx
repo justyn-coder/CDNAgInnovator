@@ -172,17 +172,237 @@ function CategoryPill({ cat }: { cat: string }) {
   );
 }
 
-function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?: () => void }) {
+// ── Inline Correction Form ──────────────────────────────────────────────────
+function CorrectionForm({ programName, onClose }: { programName: string; onClose: () => void }) {
+  const [text, setText] = useState("");
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+
+  async function submit() {
+    if (!text.trim()) return;
+    setSubmitting(true);
+    try {
+      await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          programName: `CORRECTION: ${programName}`,
+          bestFor: text.trim(),
+          submitterName: "operator",
+          submitterEmail: email.trim() || `correction-${Date.now()}@anon`,
+        }),
+      });
+      setDone(true);
+      setTimeout(onClose, 3000);
+    } catch {
+      alert("Something went wrong — try again");
+    }
+    setSubmitting(false);
+  }
+
+  if (done) {
+    return (
+      <div
+        className="mt-2.5 px-3 py-2.5 rounded-lg text-center"
+        style={{ background: "#FFF8E7", border: "0.5px solid rgba(212,168,40,0.27)", fontSize: 13, color: "#6b6b6b" }}
+      >
+        Thanks — we'll review this
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="mt-2.5 rounded-lg"
+      style={{ background: "#FFF8E7", border: "0.5px solid rgba(212,168,40,0.27)", padding: 12 }}
+    >
+      <div style={{ fontSize: 12, fontWeight: 500, color: "#8B6914", marginBottom: 8 }}>
+        Correction for {programName}
+      </div>
+      <textarea
+        value={text}
+        onChange={e => setText(e.target.value)}
+        placeholder='e.g., Description should mention X'
+        rows={2}
+        className="w-full outline-none resize-none font-sans"
+        style={{
+          border: "0.5px solid #D0D0CA",
+          borderRadius: 6,
+          background: "white",
+          fontSize: 13,
+          fontFamily: "'DM Sans', system-ui, sans-serif",
+          padding: "8px 10px",
+          marginBottom: 6,
+        }}
+      />
+      <input
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="Your email (optional — for follow-up)"
+        type="email"
+        className="w-full outline-none font-sans"
+        style={{
+          border: "0.5px solid #D0D0CA",
+          borderRadius: 6,
+          background: "white",
+          fontSize: 13,
+          fontFamily: "'DM Sans', system-ui, sans-serif",
+          padding: "8px 10px",
+          marginBottom: 4,
+        }}
+      />
+      <div style={{ fontSize: 11, color: "#999", marginBottom: 8 }}>
+        We'll only use this to confirm corrections with you.
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={submit}
+          disabled={submitting || !text.trim()}
+          style={{
+            background: "#D4A828",
+            color: "#1B4332",
+            fontSize: 12,
+            fontWeight: 500,
+            padding: "6px 16px",
+            borderRadius: 6,
+            border: "none",
+            cursor: submitting ? "wait" : "pointer",
+            opacity: !text.trim() ? 0.5 : 1,
+          }}
+        >
+          {submitting ? "Sending…" : "Submit correction"}
+        </button>
+        <button
+          onClick={onClose}
+          className="bg-transparent border-none cursor-pointer"
+          style={{ fontSize: 12, color: "#999" }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Program Card with inline correction ─────────────────────────────────────
+function ProgramCard({ p }: { p: Program }) {
+  const [showCorrection, setShowCorrection] = useState(false);
+  const provinces = (p.province || []).filter(x => x !== "National").join(", ") || (p.province?.includes("National") ? "National" : "—");
+
+  return (
+    <div className="px-[18px] py-3 bg-bg border-b border-border transition-colors hover:bg-bg-secondary">
+      <div className="mb-1">
+        <div className="font-bold text-[0.85rem] mb-1">
+          {p.website
+            ? <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-brand-green no-underline border-b border-[rgba(45,122,79,0.2)]">{p.name} ↗</a>
+            : <span className="text-text">{p.name}</span>}
+        </div>
+        <div className="flex gap-[5px] flex-wrap items-center">
+          <CategoryPill cat={p.category} />
+          <span className="text-[0.65rem] text-text-tertiary">{provinces}</span>
+          {p.stage && p.stage.length > 0 && p.stage.map(st => (
+            <span key={st} className="text-[0.58rem] font-semibold bg-bg-tertiary px-[7px] py-px rounded text-text-tertiary">
+              {STAGE_LABELS[st] || st}
+            </span>
+          ))}
+        </div>
+      </div>
+      {p.description && (
+        <div className="text-[0.78rem] text-text-secondary leading-[1.5]">
+          {p.description}
+        </div>
+      )}
+
+      {/* Actions row */}
+      <div
+        className="flex items-center gap-4 mt-2 pt-2"
+        style={{ borderTop: "0.5px solid #E5E5E0" }}
+      >
+        <button
+          onClick={() => setShowCorrection(!showCorrection)}
+          className="bg-transparent border-none cursor-pointer flex items-center gap-1 p-0"
+          style={{ fontSize: 12, color: "#2D7A4F" }}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M7 3v8M3 7h8" stroke="#2D7A4F" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          Suggest a correction
+        </button>
+        {p.website && (
+          <a
+            href={p.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="no-underline flex items-center gap-1"
+            style={{ fontSize: 12, color: "#2D7A4F" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M5 9l4-4M9 5v4h-4" stroke="#2D7A4F" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Visit program page
+          </a>
+        )}
+      </div>
+
+      {/* Inline correction form */}
+      {showCorrection && (
+        <CorrectionForm programName={p.name} onClose={() => setShowCorrection(false)} />
+      )}
+    </div>
+  );
+}
+
+// ── Browse Panel ────────────────────────────────────────────────────────────
+function BrowsePanel({
+  onClose,
+  onFeedback,
+  initialSearch,
+  orgLabel,
+  totalCount,
+}: {
+  onClose: () => void;
+  onFeedback?: () => void;
+  initialSearch?: string;
+  orgLabel?: string | null;
+  totalCount?: number;
+}) {
   const [data, setData] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch || "");
   const [catFilter, setCatFilter] = useState("All");
   const [stageFilter, setStageFilter] = useState("All");
   const [provFilter, setProvFilter] = useState("All");
+  const [programsLoadedAt] = useState(() => Date.now());
+
+  // Operator feedback nudge
+  const [showNudge, setShowNudge] = useState(false);
+  // Bridge banner
+  const [showBridge, setShowBridge] = useState(false);
+
+  const isOperatorView = !!orgLabel;
 
   useEffect(() => {
     fetch("/api/programs").then(r => r.json()).then((d: Program[]) => { setData(d); setLoading(false); }).catch(() => setLoading(false));
   }, []);
+
+  // Feedback nudge timer — 10s after programs load (operator only)
+  useEffect(() => {
+    if (!isOperatorView) return;
+    const nudged = localStorage.getItem("trellis_feedback_nudged");
+    if (nudged) return;
+    const timer = setTimeout(() => setShowNudge(true), 10000);
+    return () => clearTimeout(timer);
+  }, [isOperatorView]);
+
+  // Bridge banner timer — 45s after mount (operator only)
+  useEffect(() => {
+    if (!isOperatorView) return;
+    const dismissed = localStorage.getItem("trellis_bridge_dismissed");
+    if (dismissed) return;
+    const timer = setTimeout(() => setShowBridge(true), 45000);
+    return () => clearTimeout(timer);
+  }, [isOperatorView]);
 
   const filtered = data.filter(p => {
     const q = search.toLowerCase();
@@ -211,6 +431,66 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
           Done
         </button>
       </div>
+
+      {/* Operator org header bar */}
+      {orgLabel && (
+        <div className="px-[18px] py-2.5 flex justify-between items-center border-b border-border bg-bg-secondary shrink-0">
+          <div className="flex items-baseline gap-2">
+            <span className="font-display text-[1.1rem] text-text">
+              Your {orgLabel.toUpperCase()} programs
+            </span>
+            <span style={{ fontSize: 13, color: "#999" }}>
+              · {filtered.length} results
+            </span>
+          </div>
+          <button
+            onClick={() => setSearch("")}
+            className="bg-transparent border-none cursor-pointer"
+            style={{ fontSize: 13, color: "#2D7A4F" }}
+          >
+            View all {data.length} programs →
+          </button>
+        </div>
+      )}
+
+      {/* Bridge banner */}
+      {showBridge && (
+        <div
+          className="mx-[18px] mt-2.5 flex items-center justify-between"
+          style={{
+            background: "#1B4332",
+            borderRadius: 10,
+            padding: "12px 20px",
+            animation: "slideDown 0.3s ease both, fadeIn 0.3s ease both",
+          }}
+        >
+          <span style={{ fontSize: 13, color: "white" }}>
+            Curious how founders discover these programs?
+          </span>
+          <div className="flex items-center gap-3">
+            <a
+              href="/navigator"
+              onClick={() => {
+                try { localStorage.setItem("ag_nav_mode", "e"); } catch {}
+              }}
+              className="no-underline"
+              style={{ fontSize: 13, color: "#D4A828", fontWeight: 500 }}
+            >
+              Try the founder pathway →
+            </a>
+            <button
+              onClick={() => {
+                setShowBridge(false);
+                try { localStorage.setItem("trellis_bridge_dismissed", "true"); } catch {}
+              }}
+              className="bg-transparent border-none cursor-pointer"
+              style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="px-[18px] py-2.5 flex gap-2 flex-wrap bg-bg-secondary border-b border-border shrink-0">
@@ -243,44 +523,61 @@ function BrowsePanel({ onClose, onFeedback }: { onClose: () => void; onFeedback?
         ) : (
           <div className="flex flex-col gap-px">
             {filtered.map(p => (
-              <div key={p.id}
-                className="px-[18px] py-3 bg-bg border-b border-border transition-colors hover:bg-bg-secondary"
-              >
-                <div className="mb-1">
-                  <div className="font-bold text-[0.85rem] mb-1">
-                    {p.website
-                      ? <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-brand-green no-underline border-b border-[rgba(45,122,79,0.2)]">{p.name} ↗</a>
-                      : <span className="text-text">{p.name}</span>}
-                  </div>
-                  <div className="flex gap-[5px] flex-wrap items-center">
-                    <CategoryPill cat={p.category} />
-                    <span className="text-[0.65rem] text-text-tertiary">
-                      {(p.province || []).filter(x => x !== "National").join(", ") || (p.province?.includes("National") ? "National" : "—")}
-                    </span>
-                    {p.stage && p.stage.length > 0 && p.stage.map(st => (
-                      <span key={st} className="text-[0.58rem] font-semibold bg-bg-tertiary px-[7px] py-px rounded text-text-tertiary">
-                        {STAGE_LABELS[st] || st}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                {p.description && (
-                  <div className="text-[0.78rem] text-text-secondary leading-[1.5]">
-                    {p.description}
-                  </div>
-                )}
-              </div>
+              <ProgramCard key={p.id} p={p} />
             ))}
           </div>
         )}
       </div>
 
       {/* Feedback prompt */}
-      {onFeedback && (
+      {onFeedback && !orgLabel && (
         <div className="px-[18px] py-2 border-t border-border bg-brand-gold shrink-0 text-center">
           <button onClick={onFeedback} className="bg-transparent border-none text-white text-[0.72rem] font-semibold p-0">
             💬 See something missing? Tell us →
           </button>
+        </div>
+      )}
+
+      {/* Feedback nudge — operator only, 10s after programs load */}
+      {showNudge && (
+        <div
+          className="fixed z-[250]"
+          style={{
+            bottom: 20,
+            right: 20,
+            maxWidth: 280,
+            background: "white",
+            borderRadius: 12,
+            border: "0.5px solid #E5E5E0",
+            padding: "16px 18px",
+            animation: "slideUp 0.3s ease both, fadeIn 0.3s ease both",
+          }}
+        >
+          <div style={{ fontSize: 14, fontWeight: 500, color: "#1a1a18", marginBottom: 6 }}>
+            Quick thought?
+          </div>
+          <div style={{ fontSize: 13, color: "#6b6b6b", lineHeight: 1.5, marginBottom: 12 }}>
+            You're one of the first people testing Trellis. Use "Suggest a correction" on any program to tell us what we got wrong.
+          </div>
+          <div className="text-center">
+            <button
+              onClick={() => {
+                setShowNudge(false);
+                try { localStorage.setItem("trellis_feedback_nudged", "true"); } catch {}
+              }}
+              style={{
+                fontSize: 12,
+                padding: "6px 20px",
+                background: "#F5F3ED",
+                borderRadius: 8,
+                color: "#6b6b6b",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Got it
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -452,9 +749,31 @@ export default function Navigator() {
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // Operator params: ?eco=true&org=fcc or ?browse=true
+  const [orgParam, setOrgParam] = useState<string | null>(null);
+  const [browseInitialSearch, setBrowseInitialSearch] = useState<string>("");
+
+  // Read URL params on mount
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
+      const eco = params.get("eco");
+      const org = params.get("org");
+      const browse = params.get("browse");
+
+      // Operator arriving with org filter → open BrowsePanel immediately
+      if (eco === "true" && org) {
+        setOrgParam(org);
+        setBrowseInitialSearch(org);
+        setShowBrowse(true);
+      } else if (eco === "true") {
+        // Operator without org — show normal eco dashboard
+      } else if (browse === "true") {
+        // Founder chose "browse all programs"
+        setShowBrowse(true);
+      }
+
+      // Handle shared pathway links
       const urlStage = params.get("stage");
       const urlProv = params.get("prov");
       const urlNeed = params.get("need");
@@ -563,7 +882,14 @@ export default function Navigator() {
 
   return (
     <>
-      {showBrowse && <BrowsePanel onClose={() => setShowBrowse(false)} onFeedback={() => { setShowBrowse(false); setShowFeedback(true); }} />}
+      {showBrowse && (
+        <BrowsePanel
+          onClose={() => { setShowBrowse(false); setOrgParam(null); }}
+          onFeedback={() => { setShowBrowse(false); setShowFeedback(true); }}
+          initialSearch={browseInitialSearch}
+          orgLabel={orgParam}
+        />
+      )}
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
 
@@ -579,7 +905,7 @@ export default function Navigator() {
             )}>{isEco ? "Partner" : "Founder"}</span>
           </Link>
           <div className="flex gap-1.5 items-center">
-            <button onClick={() => setShowBrowse(true)} className="bg-transparent border-none px-2.5 py-1.5 text-[0.72rem] font-semibold text-text-secondary">
+            <button onClick={() => { setBrowseInitialSearch(""); setOrgParam(null); setShowBrowse(true); }} className="bg-transparent border-none px-2.5 py-1.5 text-[0.72rem] font-semibold text-text-secondary">
               {isEco ? "Programs" : "All Programs"}
             </button>
             {isEco && (
@@ -804,8 +1130,8 @@ export default function Navigator() {
         </div>
       )}
 
-      {/* ── Persistent feedback button — small, out of the way ──────── */}
-      {!showFeedback && !showQuickFeedback && !feedbackMinimized && (
+      {/* ── Persistent feedback button — founders only (operators use inline corrections) ──────── */}
+      {!isEco && !showFeedback && !showQuickFeedback && !feedbackMinimized && (
         <button
           onClick={() => setShowFeedback(true)}
           className="fixed bottom-20 right-4 z-[4] bg-brand-gold text-white border-none rounded-full px-3.5 py-2 text-[0.7rem] font-bold shadow-gold flex items-center gap-[5px] animate-fade-in"
