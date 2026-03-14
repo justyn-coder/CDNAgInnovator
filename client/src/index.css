@@ -8,10 +8,10 @@
   --color-bg-dark: #0d1a0a;
   --color-text: #1a1a18;
   --color-text-secondary: #5c5c56;
-  --color-text-tertiary: #9c9c94;
+  --color-text-tertiary: #656560;
   --color-green: #0d2b06;
   --color-green-mid: #1e6b0a;
-  --color-green-light: #2d8a14;
+  --color-green-light: #237210;
   --color-green-accent: #3dcc1a;
   --color-green-soft: #e8f5e0;
   --color-gold: #c4960a;
@@ -19,8 +19,8 @@
   --color-amber: #f59e0b;
   --color-red-soft: #fef2f2;
   --color-blue-soft: #eff6ff;
-  --color-border: rgba(0,0,0,0.07);
-  --color-border-strong: rgba(0,0,0,0.12);
+  --color-border: rgba(0,0,0,0.12);
+  --color-border-strong: rgba(0,0,0,0.20);
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);

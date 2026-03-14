@@ -1,5 +1,28 @@
 # Requirements & Backlog
 
+## North Star
+
+### Why This Exists
+
+CDNAgInnovator is a free public tool built to establish Justyn Szymczyk as a credible, trusted operator inside the Canadian AgTech ecosystem. The primary business goal is lead generation: founders and early-stage AgTech companies who find value in the tool are the exact profile that benefits from Best In Show (BIS) trade show consulting. The tool is the top of the funnel.
+
+### Rollout Approach
+
+1. Share V1 with a tight first ring: Calgary AgTech 2026 contacts, Marlise and ecosystem connectors, select accelerators and incubators
+2. Gather feedback on accuracy, gaps, and missing programs before wider distribution
+3. Use provider buy-in (gov bodies, investors, crop advisors, agrologists) to validate data and earn dissemination partners
+4. Iterate publicly and visibly — the build process itself signals credibility
+
+### The Bigger Goal
+
+The aspirational purpose is to connect every facet of the Canadian ag innovation ecosystem — founders, funders, accelerators, universities, agrologists, farmers, and crop advisors — so they can work together more efficiently to ideate, build, test, and adopt Canadian-built technologies. The end state: Canadian farmers are more profitable, more efficient, and tread lighter on the land, while producing food that keeps Canadians healthy. This is the mission that earns trust from ecosystem partners beyond just the startup audience.
+
+### Decision Filter
+
+When scoping features, prioritize anything that: moves a founder faster through the ecosystem, surfaces a connection they wouldn't have found otherwise, or gives an ecosystem partner a reason to share the tool. Deprioritize anything that adds complexity without serving those three outcomes.
+
+---
+
 ## Status Key
 - ✅ Done
 - 🔧 Known bug / needs fix

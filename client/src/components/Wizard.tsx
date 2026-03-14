@@ -245,7 +245,7 @@ export default function Wizard({ onComplete }: Props) {
             <span className="font-bold">{s.label}</span>
             <span className={cn(
               "text-[0.72rem] font-normal",
-              data.stage === s.key ? "text-white/70" : "text-text-tertiary"
+              data.stage === s.key ? "text-white/80" : "text-text-tertiary"
             )}>{s.sub}</span>
           </button>
         ))}
@@ -277,7 +277,7 @@ export default function Wizard({ onComplete }: Props) {
               <div className="font-bold">{p.key}</div>
               <div className={cn(
                 "text-[0.68rem] font-normal mt-px",
-                active ? "text-white/65" : "text-text-tertiary"
+                active ? "text-white/80" : "text-text-tertiary"
               )}>{p.label}</div>
             </button>
           );
@@ -308,7 +308,7 @@ export default function Wizard({ onComplete }: Props) {
                 {n.sub && (
                   <div className={cn(
                     "text-[0.72rem] font-normal mt-0.5",
-                    isActive ? "text-white/65" : "text-text-tertiary"
+                    isActive ? "text-white/80" : "text-text-tertiary"
                   )}>{n.sub}</div>
                 )}
               </div>

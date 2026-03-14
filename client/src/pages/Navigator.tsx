@@ -335,7 +335,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
             <div className="font-bold text-[0.92rem] text-white">
               Beta Feedback
             </div>
-            <div className="text-[0.72rem] text-white/65">
+            <div className="text-[0.72rem] text-white/90">
               {pageContext ? `Feedback on: ${pageContext}` : "Help us build the tool you actually need"}
             </div>
           </div>
@@ -622,7 +622,7 @@ export default function Navigator() {
                     <div className="font-bold text-[0.82rem] text-[#1e40af] mb-1">
                       Welcome — start by finding yourself
                     </div>
-                    <div className="text-[0.75rem] text-[#3b82f6] leading-[1.55] mb-2.5">
+                    <div className="text-[0.75rem] text-[#1d4ed8] leading-[1.55] mb-2.5">
                       Tap <strong>Programs</strong> above and search your organization's name. See how you appear to founders — then hit the feedback button to tell us what we got wrong. We built this from public data and we know we're missing things.
                     </div>
                     <button onClick={() => { setShowBrowse(true); try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {} }}
@@ -641,13 +641,13 @@ export default function Navigator() {
               <div className="bg-bg border border-border rounded-lg shadow-md overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-br from-[#0c1829] to-[#1a2940] px-6 pt-[22px] pb-[18px]">
-                  <div className="text-[0.55rem] font-bold tracking-[0.12em] uppercase text-[rgba(96,165,250,0.5)] mb-2">
+                  <div className="text-[0.55rem] font-bold tracking-[0.12em] uppercase text-[rgba(96,165,250,0.7)] mb-2">
                     Ecosystem Intelligence
                   </div>
                   <h2 className="font-display text-[1.2rem] font-normal text-white leading-[1.2] mb-1.5">
                     What do you want to know?
                   </h2>
-                  <p className="text-[0.82rem] text-white/70 leading-[1.6]">
+                  <p className="text-[0.82rem] text-white/80 leading-[1.6]">
                     We've catalogued what we could find — ask a question, or poke holes in our data. Seriously, we need that.
                   </p>
 
@@ -664,7 +664,7 @@ export default function Navigator() {
                         i < 3 && "border-r border-white/[0.08]"
                       )}>
                         <div className="text-base font-extrabold text-[#60a5fa]">{s.num}</div>
-                        <div className="text-[0.5rem] font-semibold text-white/35 tracking-[0.08em] uppercase">{s.label}</div>
+                        <div className="text-[0.5rem] font-semibold text-white/55 tracking-[0.08em] uppercase">{s.label}</div>
                       </div>
                     ))}
                   </div>

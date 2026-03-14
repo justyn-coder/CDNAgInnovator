@@ -148,7 +148,7 @@ function ExplainCard({
         </div>
         <div className="text-left">
           <div className="text-[0.72rem] font-bold text-[#e2e8f0]">Ask AI: why this gap?</div>
-          <div className="text-[0.6rem] text-[#94a3b8] mt-px">Our best guess — we're still learning this landscape</div>
+          <div className="text-[0.6rem] text-[#a8b5c4] mt-px">Our best guess — we're still learning this landscape</div>
         </div>
       </button>
     );
@@ -162,7 +162,7 @@ function ExplainCard({
         </div>
         <div>
           <div className="text-[0.72rem] font-bold text-[#e2e8f0]">Analyzing…</div>
-          <div className="text-[0.6rem] text-[#94a3b8] mt-px">Reasoning about this ecosystem gap</div>
+          <div className="text-[0.6rem] text-[#a8b5c4] mt-px">Reasoning about this ecosystem gap</div>
         </div>
       </div>
     );
@@ -218,10 +218,10 @@ function ExplainCard({
       <div className="px-3.5 pb-2.5">
         <button
           onClick={() => setShowMeta(!showMeta)}
-          className="bg-transparent border-none p-0 text-[0.6rem] text-[#64748b] cursor-pointer underline decoration-[#334155]"
+          className="bg-transparent border-none p-0 text-[0.6rem] text-[#8394a8] cursor-pointer underline decoration-[#334155]"
         >{showMeta ? "Hide" : "Show"} context</button>
         {showMeta && (
-          <div className="mt-1.5 px-2.5 py-1.5 bg-white/[0.04] rounded-[6px] text-[0.63rem] text-[#64748b] leading-[1.6]">
+          <div className="mt-1.5 px-2.5 py-1.5 bg-white/[0.04] rounded-[6px] text-[0.63rem] text-[#8394a8] leading-[1.6]">
             {Object.keys(data.meta.neighborCounts).length > 0 && (
               <div>Neighbors: {Object.entries(data.meta.neighborCounts).map(([p, c]) => `${p} ${c}`).join(" · ")}</div>
             )}

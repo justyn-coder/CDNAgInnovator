@@ -56,29 +56,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     // Detect province mention for filtering
-    const provMap: Record<string, string> = {
-      alberta: "AB", "ab ": "AB", ontario: "ON", "on ": "ON",
-      saskatchewan: "SK", " sk ": "SK", manitoba: "MB", " mb ": "MB",
-      "british columbia": "BC", " bc ": "BC", quebec: "QC", " qc ": "QC",
-      atlantic: "NB", "new brunswick": "NB", "nova scotia": "NS",
-      "prince edward": "PE", newfoundland: "NL", national: "National",
+    const provMap: Record<string, string[]> = {
+      alberta: ["AB"], "ab ": ["AB"], ontario: ["ON"], "on ": ["ON"],
+      saskatchewan: ["SK"], " sk ": ["SK"], manitoba: ["MB"], " mb ": ["MB"],
+      "british columbia": ["BC"], " bc ": ["BC"], quebec: ["QC"], " qc ": ["QC"],
+      atlantic: ["NB", "NS", "PE", "NL"], "new brunswick": ["NB"], "nova scotia": ["NS"],
+      "prince edward": ["PE"], newfoundland: ["NL"], national: ["National"],
     };
     const msgLower = message.toLowerCase();
     const detectedProvs: string[] = [];
     for (const [k, v] of Object.entries(provMap)) {
-      if (msgLower.includes(k) && !detectedProvs.includes(v)) {
-        detectedProvs.push(v);
+      if (msgLower.includes(k)) {
+        for (const prov of v) {
+          if (!detectedProvs.includes(prov)) detectedProvs.push(prov);
+        }
       }
     }
-    const provFilter = detectedProvs[0] || "";
 
     // Fetch relevant programs
-    const rows = await client.unsafe(
-      provFilter
-        ? `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE $1 = ANY(province) OR 'National' = ANY(province) ORDER BY name LIMIT 50`
-        : `SELECT name, category, description, use_case, province, stage, website FROM programs ORDER BY name LIMIT 50`,
-      provFilter ? [provFilter] : []
-    );
+    const rows = detectedProvs.length > 0
+      ? await client.unsafe(
+          `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE province && $1 OR 'National' = ANY(province) ORDER BY name LIMIT 50`,
+          [detectedProvs]
+        )
+      : await client.unsafe(
+          `SELECT name, category, description, use_case, province, stage, website FROM programs ORDER BY name LIMIT 50`
+        );
 
     // ── Smart knowledge retrieval ──────────────────────────────────────
     // Strategy: pull entries that match by province OR by tag overlap with message keywords

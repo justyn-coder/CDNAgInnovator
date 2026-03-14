@@ -41,7 +41,7 @@ export default function Home() {
           <div className="bg-bg rounded-lg max-w-[480px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-hidden animate-slide-up">
             {/* Header — tight, scannable */}
             <div className="bg-gradient-to-br from-[#0a1f08] via-[#14330c] to-[#1e5510] px-7 pt-7 pb-5.5 text-white">
-              <div className="text-[0.58rem] font-bold tracking-[0.12em] uppercase text-white/35 mb-2.5">
+              <div className="text-[0.58rem] font-bold tracking-[0.12em] uppercase text-white/60 mb-2.5">
                 Early Access
               </div>
               <h2 className="font-display text-2xl font-normal leading-[1.15]">
@@ -79,7 +79,7 @@ export default function Home() {
                   className="bg-gradient-to-br from-green-mid to-green-light text-white border-none rounded px-5 py-3.5 text-left shadow-[0_4px_16px_rgba(30,107,10,0.25)] transition-transform duration-[120ms] hover:-translate-y-px"
                 >
                   <div className="font-bold text-[0.88rem] mb-0.5">I'm building an agtech company →</div>
-                  <div className="text-[0.75rem] opacity-70">Get a personalized pathway in 30 seconds</div>
+                  <div className="text-[0.75rem] opacity-80">Get a personalized pathway in 30 seconds</div>
                 </button>
 
                 <button onClick={() => dismissModal("ec")}
@@ -164,9 +164,9 @@ export default function Home() {
           <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); } catch {} }}
             className="flex-[1_1_280px] bg-gradient-to-br from-green-mid to-green-light rounded px-5.5 py-6 no-underline text-left shadow-[0_4px_24px_rgba(30,107,10,0.25),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-150 text-white hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(30,107,10,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]"
           >
-            <div className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-white/45 mb-2.5">For AgTech Companies</div>
+            <div className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-white/60 mb-2.5">For AgTech Companies</div>
             <div className="text-[1.05rem] font-bold mb-1.5 tracking-[-0.02em] leading-[1.3]">I'm building an agtech product</div>
-            <div className="text-[0.8rem] text-white/60 leading-[1.55] mb-4.5">
+            <div className="text-[0.8rem] text-white/80 leading-[1.55] mb-4.5">
               Answer 4 questions. Get a personalized pathway to the accelerators, funding, and pilot sites that match your stage and province.
             </div>
             <div className="inline-flex items-center gap-[5px] bg-white/18 rounded-[7px] px-3.5 py-2 text-[0.78rem] font-bold text-white">

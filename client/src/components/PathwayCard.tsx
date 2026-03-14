@@ -73,7 +73,7 @@ const TIMING_LABEL: Record<string, { label: string; colorClass: string; bgClass:
 const CONFIDENCE: Record<string, { label: string; colorClass: string; bgClass: string; borderClass: string; icon: string }> = {
   high:        { label: "Strong fit",  colorClass: "text-[#166534]", bgClass: "bg-[#dcfce7]", borderClass: "border-[#16653444]", icon: "✓" },
   medium:      { label: "Likely fit",  colorClass: "text-[#92400e]", bgClass: "bg-[#fef3c7]", borderClass: "border-[#92400e44]", icon: "~" },
-  exploratory: { label: "Exploratory", colorClass: "text-[#6e6e73]", bgClass: "bg-[#f0f0ec]", borderClass: "border-[#6e6e7344]", icon: "?" },
+  exploratory: { label: "Exploratory", colorClass: "text-[#555560]", bgClass: "bg-[#f0f0ec]", borderClass: "border-[#55556044]", icon: "?" },
 };
 
 // ── Loading messages ────────────────────────────────────────────────────────
