@@ -896,9 +896,9 @@ export default function Navigator() {
       <div className="fixed inset-0 bg-bg flex flex-col font-sans">
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
-        <div className="h-11 md:h-12 px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
+        <div className="h-11 md:h-14 px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">
           <Link href="/" className="flex items-center no-underline">
-            <TrellisLogo className="h-[22px] md:h-7" />
+            <TrellisLogo className="h-6 md:h-8" showTagline />
           </Link>
           <div className="flex gap-1.5 items-center">
             <button onClick={() => { setBrowseInitialSearch(""); setOrgParam(null); setShowBrowse(true); }}

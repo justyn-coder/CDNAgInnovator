@@ -273,8 +273,8 @@ export default function Home() {
       )}
 
       {/* ── Nav ─────────────────────────────────────────────── */}
-      <nav className="px-6 md:px-6 h-11 md:h-12 flex items-center justify-between border-b border-border sticky top-0 bg-[rgba(250,250,248,0.88)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
-        <TrellisLogo className="h-[22px] md:h-7" />
+      <nav className="px-6 md:px-6 h-11 md:h-14 flex items-center justify-between border-b border-border sticky top-0 bg-[rgba(250,250,248,0.88)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
+        <TrellisLogo className="h-6 md:h-8" showTagline />
         <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); } catch {} }}
           className="flex items-center gap-1.5 no-underline text-text-secondary hover:text-text transition-colors">
           <MapleLeaf size={14} className="md:w-4 md:h-4" />
