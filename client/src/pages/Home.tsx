@@ -107,7 +107,7 @@ export default function Home() {
       {/* ── Nav ─────────────────────────────────────────────── */}
       <nav className="px-8 h-14 flex items-center justify-between border-b border-border sticky top-0 bg-[rgba(250,250,248,0.88)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
         <div className="flex items-center gap-2.5">
-          <TrellisLogo className="h-6" />
+          <TrellisLogo className="h-8" />
         </div>
       </nav>
 
