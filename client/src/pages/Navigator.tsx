@@ -974,7 +974,7 @@ export default function Navigator() {
             <div className="px-4 py-5 animate-fade-in-up flex flex-col gap-3.5">
 
               {/* First-visit onboarding tip */}
-              {(() => { try { return !sessionStorage.getItem("ag_eco_onboarded"); } catch { return true; } })() && (
+              {!orgParam && (() => { try { return !sessionStorage.getItem("ag_eco_onboarded"); } catch { return true; } })() && (
                 <div className="bg-gradient-to-br from-eco-accent-bg to-[#d8e5db] border border-[#b8ccbc] rounded px-4 py-3.5 flex gap-2.5 items-start">
                   <span className="text-[1.1rem] shrink-0">👋</span>
                   <div className="flex-1">
