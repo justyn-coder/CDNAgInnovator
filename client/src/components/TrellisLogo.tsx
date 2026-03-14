@@ -1,3 +1,5 @@
+import mapleLeafPng from "../assets/maple-leaf.png";
+
 /** Inline SVG nav logo — icon + wordmark. Use showTagline to add subtitle. */
 export function TrellisLogo({ className = "h-8", showTagline = false }: { className?: string; showTagline?: boolean }) {
   return (
@@ -54,7 +56,7 @@ export function TrellisLogo({ className = "h-8", showTagline = false }: { classN
 export function MapleLeaf({ size = 16, className }: { size?: number; className?: string }) {
   return (
     <img
-      src="/brand/maple-leaf.png"
+      src={mapleLeafPng}
       alt=""
       width={size}
       height={size}
