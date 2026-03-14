@@ -190,7 +190,7 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           programName: `CORRECTION: ${programName}`,
-          bestFor: text.trim(),
+          bestFor: text.trim() + ((() => { try { const r = localStorage.getItem("trellis_ref"); return r ? ` [ref:${r}]` : ""; } catch { return ""; } })()),
           submitterName: "operator",
           submitterEmail: email.trim() || `correction-${Date.now()}@anon`,
         }),
@@ -575,7 +575,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
       await fetch("/api/submissions", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          programName: `FEEDBACK: ${isEco ? "operator" : "founder"}${pageContext ? ` [${pageContext}]` : ""}`,
+          programName: `FEEDBACK: ${isEco ? "operator" : "founder"}${pageContext ? ` [${pageContext}]` : ""}${(() => { try { const r = localStorage.getItem("trellis_ref"); return r ? ` [ref:${r}]` : ""; } catch { return ""; } })()}`,
           bestFor: form.feedback,
           submitterName: form.name || "anonymous",
           submitterEmail: form.email || `anon-${Date.now()}@feedback`,
@@ -733,6 +733,12 @@ export default function Navigator() {
       const eco = params.get("eco");
       const org = params.get("org");
       const browse = params.get("browse");
+      const ref = params.get("ref");
+
+      // Store ref for attribution if present
+      if (ref) {
+        try { localStorage.setItem("trellis_ref", ref); } catch {}
+      }
 
       // Operator arriving with org filter → open BrowsePanel immediately
       if (eco === "true" && org) {
@@ -1177,7 +1183,7 @@ export default function Navigator() {
                 fetch("/api/submissions", {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    programName: `FEEDBACK: ${opt.value}`,
+                    programName: `FEEDBACK: ${opt.value}${(() => { try { const r = localStorage.getItem("trellis_ref"); return r ? ` [ref:${r}]` : ""; } catch { return ""; } })()}`,
                     bestFor: `Stage: ${wizardSnapshot?.stage}, Prov: ${wizardSnapshot?.provinces.join(",")}, Need: ${wizardSnapshot?.need}`,
                     submitterName: "anonymous",
                     submitterEmail: `feedback-${Date.now()}@anon`,

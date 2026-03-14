@@ -49,8 +49,24 @@ export default function Home() {
       const params = new URLSearchParams(window.location.search);
       const mode = params.get("mode");
       const org = params.get("org");
+      const ref = params.get("ref");
       if (mode === "operator") setUrlMode("operator");
       if (org) setOrgParam(org);
+
+      // Silent visitor tracking via ?ref= param
+      if (ref) {
+        try { localStorage.setItem("trellis_ref", ref); } catch {}
+        fetch("/api/submissions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            programName: "VISIT",
+            bestFor: `ref=${ref}, mode=${mode || "founder"}, org=${org || "none"}`,
+            submitterName: ref,
+            submitterEmail: `visit-${Date.now()}@track`,
+          }),
+        }).catch(() => {});
+      }
 
       // Show popup if not already welcomed
       const welcomed = localStorage.getItem("trellis_welcomed");
