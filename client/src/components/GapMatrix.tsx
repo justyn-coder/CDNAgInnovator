@@ -330,7 +330,11 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<{ prov: string; cat: string } | null>(null);
   const [showGuide, setShowGuide] = useState(() => {
-    try { return !sessionStorage.getItem("ag_gap_guided"); } catch { return true; }
+    try {
+      if (sessionStorage.getItem("ag_gap_guided")) return false;
+      if (localStorage.getItem("trellis_ref")) return false;
+      return true;
+    } catch { return true; }
   });
 
   useEffect(() => {

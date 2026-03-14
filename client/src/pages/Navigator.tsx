@@ -1238,9 +1238,9 @@ export default function Navigator() {
         </div>
       )}
 
-      {/* ── Persistent feedback button — founders only (operators use inline corrections) ──────── */}
-      {!isEco && !showFeedback && !showQuickFeedback && !feedbackMinimized && (
-        <div className="fixed bottom-20 left-4 md:left-auto md:right-4 z-[4] flex items-center gap-1 animate-fade-in">
+      {/* ── Persistent feedback button ──────── */}
+      {!showFeedback && !showQuickFeedback && !feedbackMinimized && (
+        <div className="fixed bottom-20 left-4 md:left-auto md:right-4 z-[250] flex items-center gap-1 animate-fade-in">
           <button
             onClick={() => setShowFeedback(true)}
             className="bg-brand-gold text-white border-none rounded-full px-3.5 py-2 text-[0.72rem] font-bold shadow-gold flex items-center gap-[5px]"
