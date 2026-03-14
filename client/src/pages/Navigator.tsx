@@ -21,6 +21,8 @@ interface WizardSnapshot {
   need: string;
   companyUrl?: string;
   productType?: string;
+  expansionProvinces?: string[];
+  completedPrograms?: string[];
 }
 
 const CAT_META: Record<string, { label: string; textCls: string; bgCls: string }> = {
@@ -860,7 +862,20 @@ export default function Navigator() {
       if (wizardDescription) parts.unshift(`Building: ${wizardDescription}`);
       if (wizardSnapshot.productType) parts.push(`Product type: ${wizardSnapshot.productType}`);
       if (wizardSnapshot.companyUrl) parts.push(`Website: ${wizardSnapshot.companyUrl}`);
-      contextPrefix = `[Founder context: ${parts.join(". ")}]\n\n`;
+      if (wizardSnapshot.expansionProvinces?.length) parts.push(`Expanding into: ${wizardSnapshot.expansionProvinces.join(", ")}`);
+      if (wizardSnapshot.completedPrograms?.length) parts.push(`Already completed: ${wizardSnapshot.completedPrograms.join(", ")}`);
+
+      // Stage-aware guidance
+      let stageGuidance = "";
+      if (wizardSnapshot.stage === "Idea" || wizardSnapshot.stage === "MVP") {
+        stageGuidance = ' The founder may be a farmer-entrepreneur. Use plain language: say "grants" not "non-dilutive funding," say "programs that help you get started" not "pre-seed accelerators." Don\'t assume they know what a pitch deck or term sheet is.';
+      } else if ((wizardSnapshot.stage === "Pilot" || wizardSnapshot.stage === "Comm") && wizardSnapshot.completedPrograms?.length) {
+        stageGuidance = ` This founder has already completed: ${wizardSnapshot.completedPrograms.join(", ")}. Don't recommend these. Focus on programs they likely haven't encountered: province-specific, newer programs, niche funding, and pilot site networks. Surface the second tier.`;
+      } else if (wizardSnapshot.stage === "Scale") {
+        stageGuidance = " The founder is at Scale stage. Focus on: programs in new provinces, later-stage and growth capital, international expansion pathways, strategic connections, and new market opportunities. Don't just list programs — provide strategic context.";
+      }
+
+      contextPrefix = `[Founder context: ${parts.join(". ")}${stageGuidance}]\n\n`;
     }
 
     try {
@@ -1043,6 +1058,8 @@ export default function Navigator() {
               provinces={wizardSnapshot.provinces}
               need={wizardSnapshot.need}
               onChatFollowUp={handlePathwayFollowUp}
+              expansionProvinces={wizardSnapshot.expansionProvinces}
+              completedPrograms={wizardSnapshot.completedPrograms}
             />
           )}
 

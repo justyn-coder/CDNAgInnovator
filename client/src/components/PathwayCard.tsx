@@ -51,6 +51,8 @@ interface Props {
   provinces: string[];
   need: string;
   onChatFollowUp: (question: string) => void;
+  expansionProvinces?: string[];
+  completedPrograms?: string[];
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -236,8 +238,143 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp }: {
   );
 }
 
+// ── Email Capture ───────────────────────────────────────────────────────────
+function EmailCapture({ stage, provinces, description, productType }: {
+  stage: string; provinces: string[]; description: string; productType?: string;
+}) {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    try { return !!localStorage.getItem("trellis_email_asked"); } catch { return false; }
+  });
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (dismissed || submitted) return;
+    const timer = setTimeout(() => setVisible(true), 20000);
+    return () => clearTimeout(timer);
+  }, [dismissed, submitted]);
+
+  if (!visible || dismissed || submitted) return null;
+
+  async function submit() {
+    if (!email.trim()) return;
+    try {
+      await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          programName: "EMAIL_SIGNUP",
+          bestFor: `Stage: ${stage}, Province: ${provinces.join(",")}, Product: ${productType || "unknown"}, Building: ${description}`,
+          submitterName: "email-signup",
+          submitterEmail: email.trim(),
+        }),
+      });
+      setSubmitted(true);
+      try { localStorage.setItem("trellis_email_asked", "true"); } catch {}
+    } catch {}
+  }
+
+  return (
+    <div
+      className="mx-4 mt-4 relative animate-fade-in-up"
+      style={{
+        background: "#FFF8E7",
+        border: "0.5px solid rgba(212,168,40,0.2)",
+        borderRadius: 10,
+        padding: "16px 20px",
+      }}
+    >
+      <button
+        onClick={() => { setDismissed(true); try { localStorage.setItem("trellis_email_asked", "true"); } catch {} }}
+        className="absolute top-3 right-3 bg-transparent border-none cursor-pointer"
+        style={{ fontSize: 12, color: "#999" }}
+      >✕</button>
+      <div style={{ fontSize: 14, fontWeight: 500, color: "#1a1a18", marginBottom: 8 }}>
+        Want updates when new programs match your profile?
+      </div>
+      <div className="flex gap-2 items-center">
+        <input
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="your@email.com"
+          type="email"
+          className="outline-none font-sans"
+          style={{
+            border: "0.5px solid #E5E5E0",
+            borderRadius: 6,
+            padding: "8px 12px",
+            fontSize: 13,
+            width: 200,
+            background: "white",
+          }}
+          onKeyDown={e => { if (e.key === "Enter") submit(); }}
+        />
+        <button
+          onClick={submit}
+          style={{
+            background: "#D4A828",
+            color: "#1B4332",
+            fontSize: 13,
+            borderRadius: 6,
+            border: "none",
+            padding: "8px 16px",
+            fontWeight: 500,
+            cursor: "pointer",
+          }}
+        >Notify me</button>
+      </div>
+      <div style={{ fontSize: 11, color: "#999", marginTop: 6 }}>
+        We check weekly. No spam. Unsubscribe anytime.
+      </div>
+    </div>
+  );
+}
+
+// ── Stage-aware follow-up chips ─────────────────────────────────────────────
+function getStageChips(stage: string, firstProgramName: string, provinces: string[], hasGap: boolean): { label: string; q: string }[] {
+  const chips: { label: string; q: string }[] = [];
+
+  if (stage === "Idea" || stage === "MVP") {
+    chips.push(
+      { label: "What grants are available for my province?", q: `What grants and non-dilutive funding are available for agtech companies at the ${stage} stage in ${provinces.join(", ")}?` },
+      { label: "How do I find farmers to test with?", q: "How do I find farmers or growers willing to test my product? Are there programs that help connect startups with test sites?" },
+      { label: "What's the first program I should apply to?", q: "Of all the programs in my pathway, which one should I apply to first and why?" },
+      { label: "Do I need to incorporate to apply?", q: "Do I need to be incorporated to apply to these programs? What's the minimum I need to have set up legally?" },
+    );
+    if (firstProgramName) {
+      chips.push({ label: `Help me write an intro email`, q: `Write me a concise intro email to ${firstProgramName} introducing what I'm building and asking about next steps.` });
+    }
+  } else if (stage === "Pilot") {
+    chips.push(
+      { label: "Where can I find pilot farmers?", q: "Where can I find farmers or farm operations willing to run a pilot or trial of my product? Are there specific organizations that facilitate this?" },
+    );
+    if (firstProgramName) {
+      chips.push({ label: `Help me write an intro email`, q: `Write me a concise intro email to ${firstProgramName} explaining what I've built and the pilot results I'm looking for.` });
+    }
+    chips.push(
+      { label: "What grants cover pilot costs?", q: "What grants or funding programs specifically cover the costs of running field trials or pilots in Canadian agriculture?" },
+      { label: "What am I missing?", q: `Beyond my pathway, what other resources or strategies should I be pursuing at the Pilot stage in ${provinces.join(", ")}?` },
+    );
+  } else {
+    // First Customers / Scale
+    chips.push(
+      { label: "What later-stage options exist?", q: `What later-stage programs, funding sources, and support exist for agtech companies past the pilot stage in Canada?` },
+      { label: "Show me pilot sites in other provinces", q: "What pilot sites and test facilities exist in provinces I'm not currently operating in? I'm considering expansion." },
+      { label: "Who's funding growth-stage agtech?", q: "Who is actively funding growth-stage agtech in Canada? Include VCs, strategic investors, and government programs for scaling companies." },
+      { label: "International expansion programs", q: "What programs help Canadian agtech companies expand internationally? Include trade missions, export programs, and international accelerators." },
+    );
+  }
+
+  if (hasGap) {
+    chips.push({ label: "How do I fill the gap?", q: "You flagged a gap in my pathway. What's the best workaround — are there national programs, neighboring provinces, or other approaches I should consider?" });
+  }
+
+  return chips.slice(0, 4);
+}
+
 // ── Main Component ──────────────────────────────────────────────────────────
-export default function PathwayCard({ description, stage, provinces, need, onChatFollowUp }: Props) {
+export default function PathwayCard({ description, stage, provinces, need, onChatFollowUp, expansionProvinces, completedPrograms }: Props) {
   const [data, setData] = useState<PathwayResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -408,39 +545,73 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
         >📋 Copy shareable link</button>
       </div>
 
-      {/* ── Follow-up chips ───────────────────────────────────────────── */}
+      {/* ── Thin-pathway note (Scale stage, <4 strong fits) ──────────── */}
+      {(() => {
+        const strongFits = pathway.steps.filter(s => s.fit_confidence === "high" && !s.horizon);
+        if (strongFits.length < 4 && (stage === "Scale" || stage === "Comm")) {
+          const thinChips = [
+            { label: "Pilot sites in other provinces", q: "What pilot sites and test facilities exist in provinces I'm not currently operating in?" },
+            { label: "Later-stage funding in Canada", q: "What later-stage funding options exist for growth-stage agtech companies in Canada?" },
+            { label: "International expansion programs", q: "What programs help Canadian agtech companies expand internationally?" },
+            { label: "Who's funding agtech hardware?", q: "Who is actively investing in agtech hardware companies in Canada and globally?" },
+          ];
+          return (
+            <div
+              className="mt-4 mx-0"
+              style={{ background: "#F5F3ED", border: "0.5px solid #E5E5E0", borderRadius: 12, padding: 20 }}
+            >
+              <div style={{ fontSize: 14, color: "#6b6b6b", marginBottom: 12 }}>
+                At your stage, structured programs thin out. But Trellis can still help — try asking:
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {thinChips.map((chip, i) => (
+                  <button
+                    key={i}
+                    onClick={() => onChatFollowUp(chip.q)}
+                    className="transition-all duration-150 cursor-pointer"
+                    style={{
+                      background: "white",
+                      border: "0.5px solid #E5E5E0",
+                      borderRadius: 20,
+                      padding: "8px 16px",
+                      fontSize: 13,
+                      color: "#1B4332",
+                      fontFamily: "'DM Sans', system-ui, sans-serif",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "#FFF8E7"; e.currentTarget.style.borderColor = "#D4A828"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "white"; e.currentTarget.style.borderColor = "#E5E5E0"; }}
+                  >{chip.label}</button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
+      {/* ── Follow-up chips (stage-aware) ────────────────────────────── */}
       <div className="mt-3 mb-4 flex flex-col gap-2.5">
         <div className="text-[0.68rem] font-bold text-text-tertiary tracking-[0.08em] uppercase">
           Continue the conversation
         </div>
         <div className="flex gap-2 flex-wrap">
-          {(() => {
-            const chips: { label: string; q: string }[] = [];
-            const firstStep = pathway.steps[0];
-            if (firstStep) {
-              chips.push({
-                label: `How do I approach ${firstStep.program_name.length > 28 ? firstStep.program_name.slice(0, 25) + "…" : firstStep.program_name}?`,
-                q: `Tell me more about ${firstStep.program_name}. What exactly should I prepare before reaching out, and who should I contact?`,
-              });
-            }
-            if (pathway.gap_warning) {
-              chips.push({ label: "How do I fill the gap?", q: "You flagged a gap in my pathway. What's the best workaround — are there national programs, neighboring provinces, or other approaches I should consider?" });
-            }
-            chips.push({ label: "What am I missing?", q: `Beyond the programs in my pathway, what other resources, connections, or strategies should I be pursuing at the ${stageLabel} stage in ${provinces.join(", ")}?` });
-            if (pathway.steps.length > 2) {
-              chips.push({ label: "Prioritize for me", q: "If I only have bandwidth for 2 things this month, which steps in my pathway should I prioritize and why?" });
-            }
-            chips.push({ label: "Write me an outreach email", q: `Write me a concise outreach email to ${firstStep?.program_name || "the first program"} introducing what I'm building and asking about next steps.` });
-            return chips.slice(0, 4).map((chip, i) => (
-              <button
-                key={i}
-                onClick={() => onChatFollowUp(chip.q)}
-                className="bg-bg border border-border rounded-sm px-3.5 py-2 text-[0.78rem] font-medium text-text transition-all duration-150 shadow-sm hover:border-brand-green hover:shadow-md hover:-translate-y-px"
-              >{chip.label}</button>
-            ));
-          })()}
+          {getStageChips(
+            stage,
+            pathway.steps[0]?.program_name || "",
+            provinces,
+            !!pathway.gap_warning,
+          ).map((chip, i) => (
+            <button
+              key={i}
+              onClick={() => onChatFollowUp(chip.q)}
+              className="bg-bg border border-border rounded-sm px-3.5 py-2 text-[0.78rem] font-medium text-text transition-all duration-150 shadow-sm hover:border-brand-green hover:shadow-md hover:-translate-y-px"
+            >{chip.label}</button>
+          ))}
         </div>
       </div>
+
+      {/* ── Email capture ────────────────────────────────────────────── */}
+      <EmailCapture stage={stage} provinces={provinces} description={description} />
     </div>
   );
 }
