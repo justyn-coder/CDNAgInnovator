@@ -110,11 +110,13 @@ function ChatBubble({ msg }: { msg: Message }) {
   const showCopy = msg.content.length > 200;
   return (
     <div className="flex justify-start mb-2.5 px-4">
-      <div className="relative max-w-[84%] bg-bg text-text rounded-[16px_16px_16px_4px] px-4 py-3 text-[0.82rem] leading-[1.6] border border-border shadow-sm">
-        {isPlain
-          ? <span className="whitespace-pre-wrap">{msg.content}</span>
-          : <div className="md-body" dangerouslySetInnerHTML={{ __html: `<p>${html}</p>` }} />
-        }
+      <div className="max-w-[84%] flex flex-col">
+        <div className="bg-bg text-text rounded-[16px_16px_16px_4px] px-4 py-3 text-[0.82rem] leading-[1.6] border border-border shadow-sm">
+          {isPlain
+            ? <span className="whitespace-pre-wrap">{msg.content}</span>
+            : <div className="md-body" dangerouslySetInnerHTML={{ __html: `<p>${html}</p>` }} />
+          }
+        </div>
         {showCopy && (
           <button
             onClick={() => {
@@ -124,7 +126,7 @@ function ChatBubble({ msg }: { msg: Message }) {
               }).catch(() => {});
             }}
             className={cn(
-              "absolute top-2 right-2 border border-border rounded-sm px-2 py-0.5 text-[0.6rem] font-semibold transition-all opacity-70 hover:opacity-100",
+              "self-start mt-1 border border-border rounded-sm px-2 py-0.5 text-[0.6rem] font-semibold transition-all opacity-70 hover:opacity-100",
               copied ? "bg-brand-green text-white" : "bg-bg-secondary text-text-tertiary"
             )}
           >{copied ? "✓ Copied" : "📋 Copy"}</button>

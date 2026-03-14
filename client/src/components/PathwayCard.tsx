@@ -409,7 +409,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       </div>
 
       {/* ── Follow-up chips ───────────────────────────────────────────── */}
-      <div className="mt-3 flex flex-col gap-2.5">
+      <div className="mt-3 mb-4 flex flex-col gap-2.5">
         <div className="text-[0.68rem] font-bold text-text-tertiary tracking-[0.08em] uppercase">
           Continue the conversation
         </div>
