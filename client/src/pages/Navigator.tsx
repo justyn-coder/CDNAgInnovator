@@ -659,13 +659,13 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
 }
 
 // ── Loading Messages ─────────────────────────────────────────────────────────
-const LOADING_MSGS = [
-  "Searching across 347 programs…",
-  "This usually takes 10–15 seconds — hang tight.",
-  "Cross-referencing with ecosystem insights…",
-  "Almost there…",
-];
-function LoadingMessages() {
+function LoadingMessages({ programCount }: { programCount?: number | null }) {
+  const LOADING_MSGS = [
+    `Searching across ${programCount ?? 350} programs…`,
+    "This usually takes 10–15 seconds — hang tight.",
+    "Cross-referencing with ecosystem insights…",
+    "Almost there…",
+  ];
   const [idx, setIdx] = useState(0);
   useEffect(() => {
     const timers = [
@@ -1125,7 +1125,7 @@ export default function Navigator() {
           {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => (
             <div key={i} ref={i === messages.length - 1 ? lastMsgRef : undefined}><ChatBubble msg={m} /></div>
           ))}
-          {loading && <LoadingMessages />}
+          {loading && <LoadingMessages programCount={programCount} />}
           <div ref={bottomRef} />
         </div>
 
