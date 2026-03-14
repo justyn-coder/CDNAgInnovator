@@ -1,4 +1,4 @@
-import { type JSX, useEffect, useState } from "react";
+import { type JSX, useEffect, useRef, useState } from "react";
 import { cn } from "../lib/cn";
 
 interface WizardResult {
@@ -101,6 +101,12 @@ export default function Wizard({ onComplete }: Props) {
   // For step 3c program search
   const [programList, setProgramList] = useState<string[]>([]);
   const [programSearch, setProgramSearch] = useState("");
+  const wizardRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top on step change
+  useEffect(() => {
+    wizardRef.current?.closest("[class*='overflow-y']")?.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [step]);
 
   // Rotate placeholder every 4 seconds
   useEffect(() => {
@@ -578,7 +584,7 @@ export default function Wizard({ onComplete }: Props) {
   };
 
   return (
-    <div className="m-4 p-6 bg-bg border border-border rounded-lg shadow-md">
+    <div ref={wizardRef} className="m-4 p-6 bg-bg border border-border rounded-lg shadow-md">
       {/* Progress — always 4 segments */}
       <div className="flex gap-1 mb-1.5">
         {[0, 1, 2, 3].map(i => (

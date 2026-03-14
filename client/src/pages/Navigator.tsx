@@ -454,6 +454,14 @@ function BrowsePanel({
     return matchText && matchCat && matchStage && matchProv;
   });
 
+  const sorted = [...filtered].sort((a, b) => {
+    const aFed = a.name.toLowerCase().includes("aafc") || a.name.toLowerCase().includes("agriculture and agri-food");
+    const bFed = b.name.toLowerCase().includes("aafc") || b.name.toLowerCase().includes("agriculture and agri-food");
+    if (aFed && !bFed) return 1;
+    if (!aFed && bFed) return -1;
+    return a.name.localeCompare(b.name);
+  });
+
   return (
     <div className="fixed inset-0 z-[200] bg-bg flex flex-col" role="dialog" aria-modal="true" aria-label="Program Database" onKeyDown={e => { if (e.key === "Escape") onClose(); }}>
       {/* Header */}
@@ -560,11 +568,11 @@ function BrowsePanel({
       <div className="flex-1 overflow-y-auto py-2">
         {loading ? (
           <div className="p-12 text-center text-text-tertiary">Loading programs…</div>
-        ) : filtered.length === 0 ? (
+        ) : sorted.length === 0 ? (
           <div className="p-12 text-center text-text-tertiary">No programs match your filters.</div>
         ) : (
           <div className="flex flex-col gap-px">
-            {filtered.map(p => (
+            {sorted.map(p => (
               <ProgramCard key={p.id} p={p} />
             ))}
           </div>
@@ -1252,17 +1260,20 @@ export default function Navigator() {
       )}
 
       {/* ── Persistent feedback button ──────── */}
-      {!showFeedback && !showQuickFeedback && !feedbackMinimized && (
-        <div className="fixed bottom-20 left-4 md:left-auto md:right-4 z-[250] flex items-center gap-1 animate-fade-in">
+      {!showFeedback && !feedbackMinimized && (
+        <div
+          className="fixed bottom-4 right-4 z-[250] flex items-center gap-1"
+          style={{ animation: messages.length <= 3 ? "fadeIn 0.4s ease 1s both" : "none" }}
+        >
           <button
             onClick={() => setShowFeedback(true)}
-            className="bg-brand-gold text-white border-none rounded-full px-3.5 py-2 text-[0.72rem] font-bold shadow-gold flex items-center gap-[5px]"
-          >
-            <span>💬</span> Feedback
-          </button>
+            className="bg-brand-gold/90 text-white border-none rounded-full w-10 h-10 flex items-center justify-center text-[1rem] shadow-gold"
+            aria-label="Send feedback"
+            title="Send feedback"
+          >💬</button>
           <button
             onClick={() => setFeedbackMinimized(true)}
-            className="bg-brand-gold/80 text-white border-none rounded-full w-7 h-7 flex items-center justify-center text-[0.72rem]"
+            className="bg-text-tertiary/30 text-text-tertiary border-none rounded-full w-5 h-5 flex items-center justify-center text-[0.6rem]"
             aria-label="Dismiss feedback button"
           >✕</button>
         </div>

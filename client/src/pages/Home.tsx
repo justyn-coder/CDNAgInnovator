@@ -122,9 +122,9 @@ export default function Home() {
           aria-modal="true"
           aria-label="Welcome to Trellis"
           style={{
-            background: "rgba(245, 243, 237, 0.75)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
+            background: "rgba(245, 243, 237, 0.6)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
           }}
         >
           <div
