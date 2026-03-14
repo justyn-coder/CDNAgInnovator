@@ -99,10 +99,11 @@ function StageJourney({ current, next }: { current: string; next: string }) {
         const isPast = i < currentIdx;
 
         return (
-          <div key={s} style={{ display: "flex", alignItems: "center", flex: i < STAGE_ORDER.length - 1 ? 1 : "none" }}>
+          <div key={s} style={{ display: "flex", alignItems: "flex-start", flex: i < STAGE_ORDER.length - 1 ? 1 : "none" }}>
             {/* Stage dot */}
             <div style={{
               display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+              paddingTop: isCurrent ? 0 : 5,
             }}>
               <div style={{
                 width: isCurrent ? 36 : 26,
@@ -161,7 +162,7 @@ function StageJourney({ current, next }: { current: string; next: string }) {
                   : i === currentIdx
                     ? "linear-gradient(90deg, var(--green-accent), rgba(255,255,255,0.12))"
                     : "rgba(255,255,255,0.06)",
-                marginBottom: 20,
+                marginTop: 17,
               }} />
             )}
           </div>

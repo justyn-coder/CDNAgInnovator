@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|@|client/|node_modules/).*)", "destination": "/index.html" }
   ]
 }
