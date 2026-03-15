@@ -1180,21 +1180,6 @@ export default function Navigator() {
         {/* ── Chat input ───────────────────────────────────────────── */}
         {(!showWizard || isEco) && (
         <div className="shrink-0 border-t border-border-strong shadow-[0_-2px_12px_rgba(0,0,0,0.04)] max-w-full overflow-hidden box-border">
-          {/* Label strip — desktop only, merged into placeholder on mobile */}
-          <div className="hidden md:flex px-4 md:px-6 py-[6px] bg-gradient-to-r from-[#E8F0EB] to-[#F5F3ED] items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="shrink-0">
-              <path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 13l-1.5-4.5L2 7l4.5-1.5L8 1z" fill="#2D7A4F" opacity="0.7"/>
-              <path d="M12.5 1l.75 2.25L15.5 4l-2.25.75L12.5 7l-.75-2.25L9.5 4l2.25-.75L12.5 1z" fill="#8CC63F" opacity="0.6"/>
-            </svg>
-            <span className="text-[0.68rem] font-semibold text-brand-green tracking-[0.01em]">
-              AI-powered
-            </span>
-            <span className="text-[0.68rem] text-text-tertiary">·</span>
-            <span className="text-[0.68rem] text-text-tertiary">
-              Ask follow-ups, drill into programs, or explore gaps
-            </span>
-          </div>
-
           {/* Eco suggestion chips */}
           {isEco && messages.length > 0 && messages.length < 4 && (
             <div className="flex gap-1.5 flex-wrap px-4 md:px-6 pt-2.5 pb-1">
@@ -1212,9 +1197,9 @@ export default function Navigator() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder={isEco ? "✦ AI-powered · e.g., Where are the gaps in Saskatchewan?" : "✦ AI-powered · e.g., Tell me more about the first program"}
+              placeholder="AI-powered chat..."
               rows={1}
-              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3.5 py-2.5 text-[16px] md:text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
+              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3.5 py-2.5 text-[16px] md:text-[0.85rem] leading-[1.5] outline-none bg-gradient-to-r from-[#E8F0EB] to-[#F5F3ED] transition-all font-sans focus:bg-white focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
             <button
               onClick={() => send()}
