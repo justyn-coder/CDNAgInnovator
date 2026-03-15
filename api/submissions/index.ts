@@ -22,7 +22,7 @@ async function sendNotification(data: { programName: string; bestFor: string; su
   const pageContext = data.programName.startsWith("FEEDBACK:") ? data.programName.replace("FEEDBACK:", "").trim() : "";
 
   await transporter.sendMail({
-    from: `AgPath Feedback <${user}>`,
+    from: `Trellis Feedback <${user}>`,
     to,
     subject: `New feedback from ${data.submitterName}${pageContext ? ` — ${pageContext}` : ""}`,
     text: [
@@ -31,7 +31,7 @@ async function sendNotification(data: { programName: string; bestFor: string; su
       `---`,
       data.bestFor,
       `---`,
-      `View all: https://cdn-ag-innovator.vercel.app/api/admin/feedback`,
+      `View all: https://trellisag.ca/api/admin/feedback`,
     ].filter(Boolean).join("\n"),
   });
 }

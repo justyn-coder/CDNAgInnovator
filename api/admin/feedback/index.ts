@@ -24,12 +24,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Return as simple HTML table for easy browser viewing
     const accept = req.headers.accept || "";
     if (accept.includes("text/html")) {
-      const html = `<!DOCTYPE html><html><head><title>AgPath Feedback</title>
+      const html = `<!DOCTYPE html><html><head><title>Trellis Feedback</title>
         <style>body{font-family:system-ui;padding:24px;max-width:960px;margin:0 auto}
         table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px 12px;text-align:left;font-size:14px}
         th{background:#f5f5f5;font-weight:600}tr:nth-child(even){background:#fafafa}
         .feedback{max-width:400px;white-space:pre-wrap}</style></head>
-        <body><h1>AgPath Feedback (${rows.length})</h1>
+        <body><h1>Trellis Feedback (${rows.length})</h1>
         <table><tr><th>Date</th><th>Name</th><th>Email</th><th>Context</th><th>Feedback</th></tr>
         ${rows.map(r => `<tr>
           <td>${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "—"}</td>
