@@ -1256,7 +1256,7 @@ export default function Navigator() {
             <div className="bg-gradient-to-br from-[#122b1f] to-[#1B4332] rounded-lg px-4 py-3 shadow-lg relative">
               <div className="flex items-start justify-between gap-3">
                 <div className="text-[0.78rem] text-white/90 leading-[1.55]">
-                  👋 You're one of the first testing Trellis — if anything looks off, that button is always there.
+                  You're testing Trellis early — if something's off, let us know below.
                 </div>
                 <button
                   onClick={() => {
