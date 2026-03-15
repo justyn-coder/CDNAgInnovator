@@ -1137,13 +1137,31 @@ export default function Navigator() {
                   </div>
                 </div>
 
-                {/* Quick-start grid */}
-                <div className="p-4 flex gap-2 flex-wrap">
-                  {ECO_SUGGESTIONS.slice(0, 4).map((s, i) => (
-                    <button key={i} onClick={() => send(s.q)}
-                      className="flex-[1_1_calc(50%-4px)] min-w-[140px] px-3.5 py-2.5 rounded-sm border border-border bg-bg text-[0.78rem] font-semibold text-text text-left transition-all shadow-sm hover:border-brand-green hover:-translate-y-px"
-                    >{s.label}</button>
-                  ))}
+                {/* Explore the ecosystem — chip queries */}
+                <div className="px-4 py-3">
+                  <div className="text-[0.72rem] font-semibold text-text mb-0.5">
+                    Explore the ecosystem
+                  </div>
+                  <div className="text-[0.65rem] text-text-tertiary mb-2">
+                    Tap a question to query our data with AI
+                  </div>
+                  <div className="flex flex-wrap gap-[7px]">
+                    {ECO_SUGGESTIONS.map((s, i) => (
+                      <button key={i} onClick={() => send(s.q)}
+                        className="cursor-pointer font-sans transition-all hover:border-brand-green active:bg-bg-tertiary"
+                        style={{
+                          padding: "7px 13px",
+                          borderRadius: 18,
+                          fontSize: "12.5px",
+                          fontWeight: 600,
+                          background: "#f0ede6",
+                          border: "1px solid #ddd9ce",
+                          color: "#3d5a45",
+                          minHeight: 44,
+                        }}
+                      >{s.label}</button>
+                    ))}
+                  </div>
                 </div>
 
               </div>
@@ -1183,10 +1201,20 @@ export default function Navigator() {
         <div className="shrink-0 border-t border-border-strong shadow-[0_-2px_12px_rgba(0,0,0,0.04)] max-w-full overflow-hidden box-border">
           {/* Eco suggestion chips */}
           {isEco && messages.length > 0 && messages.length < 4 && (
-            <div className="flex gap-1.5 flex-wrap px-4 md:px-6 pt-2.5 pb-1">
+            <div className="flex gap-[7px] flex-wrap px-4 md:px-6 pt-2.5 pb-1">
               {ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q)).slice(0, 3).map((s, i) => (
                 <button key={i} onClick={() => send(s.q)}
-                  className="px-3 py-1.5 rounded-full border border-border bg-bg-secondary text-[0.72rem] font-semibold text-text-secondary transition-all hover:border-brand-green active:bg-bg-tertiary"
+                  className="cursor-pointer font-sans transition-all hover:border-brand-green active:bg-bg-tertiary"
+                  style={{
+                    padding: "7px 13px",
+                    borderRadius: 18,
+                    fontSize: "12.5px",
+                    fontWeight: 600,
+                    background: "#f0ede6",
+                    border: "1px solid #ddd9ce",
+                    color: "#3d5a45",
+                    minHeight: 44,
+                  }}
                 >{s.label}</button>
               ))}
             </div>
