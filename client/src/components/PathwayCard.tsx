@@ -594,11 +594,11 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       })()}
 
       {/* ── Follow-up chips (stage-aware) ────────────────────────────── */}
-      <div className="mt-3 mb-4 flex flex-col gap-2.5 max-w-full overflow-hidden">
-        <div className="text-[0.68rem] font-bold text-text-tertiary tracking-[0.08em] uppercase">
-          Continue the conversation
+      <div className="mt-3 mb-4 max-w-full overflow-hidden">
+        <div className="text-[0.65rem] font-bold text-text-tertiary tracking-[0.08em] uppercase mb-1.5">
+          Keep exploring
         </div>
-        <div className="flex gap-2 flex-wrap max-w-full">
+        <div className="flex gap-1.5 flex-wrap max-w-full">
           {getStageChips(
             stage,
             pathway.steps[0]?.program_name || "",
@@ -608,7 +608,8 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
             <button
               key={i}
               onClick={() => onChatFollowUp(chip.q)}
-              className="bg-bg border border-border rounded-sm px-3.5 py-2 text-[0.78rem] font-medium text-text transition-all duration-150 shadow-sm hover:border-brand-green hover:shadow-md hover:-translate-y-px"
+              className="bg-bg-secondary border border-border text-text-secondary cursor-pointer font-sans transition-all duration-[120ms] hover:border-brand-green hover:text-text hover:bg-bg-tertiary"
+              style={{ padding: "6px 12px", borderRadius: 100, fontSize: "0.72rem", fontWeight: 500, whiteSpace: "nowrap" }}
             >{chip.label}</button>
           ))}
         </div>
