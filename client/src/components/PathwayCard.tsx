@@ -91,37 +91,46 @@ function StageJourney({ current, next }: { current: string; next: string }) {
   const currentIdx = STAGE_ORDER.indexOf(current);
 
   return (
-    <div className="mt-4 px-1 max-w-full overflow-hidden">
-      <div className="flex items-start">
+    <div className="mt-4 max-w-full overflow-hidden">
+      <div className="grid grid-cols-5">
         {STAGE_ORDER.map((s, i) => {
           const isCurrent = s === current;
           const isNext = s === next && s !== current;
           const isPast = i < currentIdx;
+          const isFirst = i === 0;
           const isLast = i === STAGE_ORDER.length - 1;
+
+          // Connector color for the segment leaving this cell (right half)
+          const rightColor = i < currentIdx ? "bg-white/50"
+            : i === currentIdx ? "bg-brand-chartreuse" : "bg-white/20";
+          // Connector color for the segment entering this cell (left half)
+          const leftColor = i <= currentIdx ? "bg-white/50"
+            : i === currentIdx + 1 ? "bg-white/30" : "bg-white/20";
+
           return (
-            <div key={s} className={cn("flex flex-col items-center min-w-0", isLast ? "shrink-0" : "flex-1")}>
-              {/* Circle + connector row */}
-              <div className="flex items-center w-full" style={{ height: 36 }}>
+            <div key={s} className="flex flex-col items-center min-w-0">
+              {/* Circle row with self-contained connector segments */}
+              <div className="relative flex items-center justify-center w-full" style={{ height: 36 }}>
+                {/* Left connector: from left edge to center */}
+                {!isFirst && (
+                  <div className={cn("absolute left-0 top-1/2 -translate-y-1/2 h-0.5 w-1/2", leftColor)} />
+                )}
+                {/* Right connector: from center to right edge */}
+                {!isLast && (
+                  <div className={cn("absolute right-0 top-1/2 -translate-y-1/2 h-0.5 w-1/2", rightColor)} />
+                )}
+                {/* Circle — on top of connectors */}
                 <div className={cn(
-                  "rounded-full flex items-center justify-center shrink-0 transition-all duration-300",
+                  "rounded-full flex items-center justify-center shrink-0 transition-all duration-300 relative z-10",
                   isCurrent && "w-9 h-9 bg-brand-green border-[2.5px] border-brand-chartreuse text-[0.85rem] shadow-[0_0_16px_rgba(140,198,63,0.35)] text-white/70",
                   isPast && "w-[26px] h-[26px] bg-white/35 border-2 border-white/50 text-[0.6rem] text-white/[0.87]",
-                  isNext && "w-[26px] h-[26px] bg-transparent border-2 border-dashed border-white/60 text-[0.6rem] text-white/70 animate-stage-pulse",
-                  !isCurrent && !isPast && !isNext && "w-[26px] h-[26px] bg-white/10 border-2 border-white/30 text-[0.6rem] text-white/70",
+                  isNext && "w-[26px] h-[26px] border-2 border-dashed border-white/60 text-[0.6rem] text-white/70 animate-stage-pulse bg-[#1B4332]",
+                  !isCurrent && !isPast && !isNext && "w-[26px] h-[26px] border-2 border-white/30 text-[0.6rem] text-white/70 bg-[#1B4332]",
                 )}>
                   {isCurrent ? STAGE_ICONS[s] : isPast ? "✓" : isNext ? STAGE_ICONS[s] : ""}
                 </div>
-                {/* Connector line fills remaining space in this step's slot */}
-                {!isLast && (
-                  <div className={cn(
-                    "flex-1 h-0.5 min-w-2",
-                    i < currentIdx && "bg-white/50",
-                    i === currentIdx && "bg-gradient-to-r from-brand-chartreuse to-white/30",
-                    i > currentIdx && "bg-white/20",
-                  )} />
-                )}
               </div>
-              {/* Label — naturally centered under circle */}
+              {/* Label — centered in same grid column as circle */}
               <span className={cn(
                 "text-[0.6rem] sm:text-[0.65rem] text-center leading-tight mt-1",
                 isCurrent && "font-bold text-white",
