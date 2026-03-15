@@ -1137,32 +1137,6 @@ export default function Navigator() {
                   </div>
                 </div>
 
-                {/* Explore the ecosystem — chip queries */}
-                <div className="px-4 py-3">
-                  <div className="text-[0.72rem] font-semibold text-text mb-0.5">
-                    Explore the ecosystem
-                  </div>
-                  <div className="text-[0.65rem] text-text-tertiary mb-2">
-                    Tap a question to query our data with AI
-                  </div>
-                  <div className="flex flex-wrap gap-[7px]">
-                    {ECO_SUGGESTIONS.map((s, i) => (
-                      <button key={i} onClick={() => send(s.q)}
-                        className="cursor-pointer font-sans transition-all hover:border-brand-green active:bg-bg-tertiary"
-                        style={{
-                          padding: "7px 13px",
-                          borderRadius: 18,
-                          fontSize: "12.5px",
-                          fontWeight: 600,
-                          background: "#f0ede6",
-                          border: "1px solid #ddd9ce",
-                          color: "#3d5a45",
-                          minHeight: 44,
-                        }}
-                      >{s.label}</button>
-                    ))}
-                  </div>
-                </div>
 
               </div>
             </div>
@@ -1199,26 +1173,30 @@ export default function Navigator() {
         {/* ── Chat input ───────────────────────────────────────────── */}
         {(!showWizard || isEco) && (
         <div className="shrink-0 border-t border-border-strong shadow-[0_-2px_12px_rgba(0,0,0,0.04)] max-w-full overflow-hidden box-border">
-          {/* Eco suggestion chips */}
-          {isEco && messages.length > 0 && messages.length < 4 && (
-            <div className="flex gap-[7px] flex-wrap px-4 md:px-6 pt-2.5 pb-1">
-              {ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q)).slice(0, 3).map((s, i) => (
-                <button key={i} onClick={() => send(s.q)}
-                  className="cursor-pointer font-sans transition-all hover:border-brand-green active:bg-bg-tertiary"
-                  style={{
-                    padding: "7px 13px",
-                    borderRadius: 18,
-                    fontSize: "12.5px",
-                    fontWeight: 600,
-                    background: "#f0ede6",
-                    border: "1px solid #ddd9ce",
-                    color: "#3d5a45",
-                    minHeight: 44,
-                  }}
-                >{s.label}</button>
-              ))}
-            </div>
-          )}
+          {/* Eco suggestion chips — above input */}
+          {isEco && messages.length < 4 && (() => {
+            const chips = ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q));
+            if (chips.length === 0) return null;
+            return (
+              <div
+                className="flex gap-1.5 px-4 md:px-6 pt-2 pb-1 overflow-x-auto md:flex-wrap [&::-webkit-scrollbar]:hidden"
+                style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
+              >
+                {chips.slice(0, messages.length === 0 ? 5 : 3).map((s, i) => (
+                  <button key={i} onClick={() => send(s.q)}
+                    className="shrink-0 cursor-pointer font-sans transition-all bg-bg-secondary border border-border text-text-secondary hover:border-brand-green hover:text-text hover:bg-bg-tertiary"
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: 100,
+                      fontSize: "0.72rem",
+                      fontWeight: 500,
+                      whiteSpace: "nowrap",
+                    }}
+                  >{s.label}</button>
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Input row */}
           <div className="px-4 md:px-6 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
