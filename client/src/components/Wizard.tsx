@@ -10,6 +10,7 @@ interface WizardResult {
   need: string;
   expansionProvinces: string[];
   completedPrograms: string[];
+  otherPrograms: string;
 }
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
     productType?: string;
     expansionProvinces?: string[];
     completedPrograms?: string[];
+    otherPrograms?: string;
   }) => void;
 }
 
@@ -95,7 +97,7 @@ export default function Wizard({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<WizardResult & { needs: string[] }>({
     description: "", companyUrl: "", productTypes: [], stage: "", provinces: [], need: "", needs: [],
-    expansionProvinces: [], completedPrograms: [],
+    expansionProvinces: [], completedPrograms: [], otherPrograms: "",
   });
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   // For step 3c program search
@@ -222,12 +224,16 @@ export default function Wizard({ onComplete }: Props) {
       completedStr = ` I've already been through: ${data.completedPrograms.join(", ")}. Focus on programs I haven't done.`;
     }
 
+    const otherProgsStr = data.otherPrograms.trim()
+      ? ` I've previously been through these programs: ${data.otherPrograms.trim()}.`
+      : "";
+
     let expansionStr = "";
     if (data.expansionProvinces.length > 0) {
       expansionStr = ` I'm also looking to expand into ${data.expansionProvinces.join(", ")}.`;
     }
 
-    const prompt = `I'm building ${data.description}.${productTypeStr} I'm at the ${stageLabel} stage, based in ${provinceStr}.${expansionStr}${completedStr} ${needStr}. What are the best programs for my situation?`;
+    const prompt = `I'm building ${data.description}.${productTypeStr} I'm at the ${stageLabel} stage, based in ${provinceStr}.${expansionStr}${completedStr}${otherProgsStr} ${needStr}. What are the best programs for my situation?`;
     onComplete(prompt, {
       stage: data.stage,
       provinces: data.provinces,
@@ -236,6 +242,7 @@ export default function Wizard({ onComplete }: Props) {
       productType: data.productTypes.length > 0 ? data.productTypes.join(", ") : undefined,
       expansionProvinces: data.expansionProvinces.length > 0 ? data.expansionProvinces : undefined,
       completedPrograms: data.completedPrograms.length > 0 ? data.completedPrograms : undefined,
+      otherPrograms: data.otherPrograms.trim() || undefined,
     });
   }
 
@@ -514,6 +521,20 @@ export default function Wizard({ onComplete }: Props) {
         <p className="text-[0.72rem] text-text-tertiary italic">
           Optional — skip this if you haven't been through any programs yet.
         </p>
+
+        {/* Freetext for programs not in our database */}
+        <div style={{ marginTop: 16 }}>
+          <p style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)", marginBottom: 6, fontWeight: 500 }}>
+            Been through a program we don't have listed? (e.g., TechStars, Y Combinator, Reservoir)
+          </p>
+          <input
+            value={data.otherPrograms}
+            onChange={e => setData(d => ({ ...d, otherPrograms: e.target.value }))}
+            placeholder="Type program names, separated by commas..."
+            className="w-full px-3.5 py-2.5 rounded-sm text-[0.82rem] outline-none bg-white font-sans focus:border-brand-gold"
+            style={{ border: "0.5px solid #E5E5E0", boxSizing: "border-box" }}
+          />
+        </div>
       </div>
     ),
 

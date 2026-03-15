@@ -23,6 +23,7 @@ interface WizardSnapshot {
   productType?: string;
   expansionProvinces?: string[];
   completedPrograms?: string[];
+  otherPrograms?: string;
 }
 
 const CAT_META: Record<string, { label: string; textCls: string; bgCls: string }> = {
