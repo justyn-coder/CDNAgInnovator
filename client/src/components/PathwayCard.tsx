@@ -138,11 +138,6 @@ function StageJourney({ current, next }: { current: string; next: string }) {
                 isPast && "font-normal text-white/[0.82]",
                 !isCurrent && !isNext && !isPast && "font-normal text-white/70",
               )}>{SL[s] || s}</span>
-              {isCurrent && (
-                <span className="text-[0.5rem] font-bold text-brand-chartreuse tracking-[0.08em] uppercase mt-px">
-                  YOU ARE HERE
-                </span>
-              )}
             </div>
           );
         })}
