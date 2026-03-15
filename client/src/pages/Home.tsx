@@ -335,7 +335,7 @@ export default function Home() {
           className="text-[1.1rem] text-text-secondary max-w-[480px] leading-[1.65] mb-11 text-center font-normal"
           style={{ animation: "fadeInUp 0.6s ease 0.2s both" }}
         >
-          Guiding your path to farm.
+          We mapped it for you.
         </p>
 
         {/* ── Two clear CTA cards ─────────────────────────────── */}
@@ -364,7 +364,7 @@ export default function Home() {
             <div className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-text-tertiary mb-2.5">For Programs & Ecosystem</div>
             <div className="text-[1.05rem] font-bold text-text mb-1.5 tracking-[-0.02em] leading-[1.3]">I run a program, fund, or accelerator</div>
             <div className="text-[0.8rem] text-text-secondary leading-[1.55] mb-4.5">
-              Review your listing, explore coverage gaps, check how you appear in founder pathways, and submit updates.
+              See where your programs appear in founder pathways — and where the gaps are.
             </div>
             <div className="inline-flex items-center gap-[5px] bg-brand-forest rounded-[7px] px-3.5 py-2 text-[0.78rem] font-bold text-white">
               Explore Ecosystem →
@@ -378,7 +378,7 @@ export default function Home() {
           style={{ animation: "fadeInUp 0.6s ease 0.4s both" }}
         >
           {[
-            { icon: "🎯", title: "Matched to you", desc: "Programs filtered by your stage, province, product type, and actual needs" },
+            { icon: "📊", title: "Verified data", desc: `${programCount} programs cross-referenced against CFIN, CAPI, and provincial source reports` },
             { icon: "🗺", title: "Ordered pathway", desc: "Not a list — a sequence of what to do first, next, and later" },
             { icon: "⚠️", title: "Gap warnings", desc: "We flag when your province is missing critical support" },
           ].map((item, i) => (
@@ -401,6 +401,9 @@ export default function Home() {
 
         <p className="text-[0.72rem] text-text-tertiary mt-3">
           Powered by AI · Free during beta
+        </p>
+        <p className="text-[0.7rem] text-text-tertiary" style={{ marginTop: 8 }}>
+          Event performance consulting → <span style={{ fontWeight: 500 }}>BestInShow</span>
         </p>
       </main>
     </div>

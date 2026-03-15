@@ -142,19 +142,19 @@ function ChatBubble({ msg }: { msg: Message }) {
 function WizardSummary({ snapshot, onReset }: { snapshot: WizardSnapshot; onReset: () => void }) {
   const needMeta = snapshot.need ? NEED_META[snapshot.need] : null;
   return (
-    <div className="mx-4 mb-3.5 px-3 py-2 bg-bg-secondary border border-border rounded flex items-center gap-1.5 flex-wrap text-[0.72rem]">
+    <div className="mx-4 mb-3.5 px-3 py-1.5 bg-transparent border border-border rounded flex items-center gap-1.5 flex-wrap text-[0.65rem]">
       {snapshot.stage && (
-        <span className="bg-brand-green text-white px-2 py-0.5 rounded-full font-bold text-[0.65rem]">
+        <span className="bg-transparent text-text-secondary px-2 py-0.5 rounded-full font-semibold text-[0.65rem] border border-border">
           {STAGE_LABELS[snapshot.stage] || snapshot.stage}
         </span>
       )}
       {snapshot.provinces.map(p => (
-        <span key={p} className="bg-bg-tertiary text-text-secondary px-[7px] py-0.5 rounded-full text-[0.65rem] font-semibold border border-border">
+        <span key={p} className="bg-transparent text-text-secondary px-2 py-0.5 rounded-full text-[0.65rem] font-semibold border border-border">
           {p}
         </span>
       ))}
       {needMeta && (
-        <span className={cn("px-2 py-0.5 rounded-full text-[0.65rem] font-bold", needMeta.bgCls, needMeta.textCls)}>
+        <span className="bg-transparent text-text-secondary px-2 py-0.5 rounded-full text-[0.65rem] font-semibold border border-border">
           {needMeta.label}
         </span>
       )}
@@ -995,22 +995,36 @@ export default function Navigator() {
               Canada's AgTech Ecosystem
             </span>
           </Link>
-          <button
-            onClick={() => {
-              localStorage.setItem("ag_nav_mode", isEco ? "e" : "ec");
-              window.location.reload();
-            }}
-            className={cn(
-              "rounded-full px-3.5 py-1 text-[0.72rem] font-semibold tracking-[0.02em] cursor-pointer transition-all hover:brightness-95 active:brightness-90 border-none",
-              isEco
-                ? "bg-eco-pill-bg text-eco-pill-text"
-                : "bg-founder-pill-bg text-founder-pill-text"
+          <div className="flex items-center gap-2.5">
+            {isEco && messages.length > 0 && (
+              <button
+                onClick={() => setMessages([])}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  fontSize: "0.78rem", color: "#2D7A4F", fontWeight: 600,
+                  display: "flex", alignItems: "center", gap: 4,
+                }}
+              >
+                ← Back to start
+              </button>
             )}
-            title={isEco ? "Switch to founder view" : "Switch to partner view"}
-          >
-            {isEco ? "Partners" : "Founders"}
-            <span className="ml-1 opacity-60">▾</span>
-          </button>
+            <button
+              onClick={() => {
+                localStorage.setItem("ag_nav_mode", isEco ? "e" : "ec");
+                window.location.reload();
+              }}
+              className={cn(
+                "rounded-full px-3.5 py-1 text-[0.72rem] font-semibold tracking-[0.02em] cursor-pointer transition-all hover:brightness-95 active:brightness-90 border-none",
+                isEco
+                  ? "bg-eco-pill-bg text-eco-pill-text"
+                  : "bg-founder-pill-bg text-founder-pill-text"
+              )}
+              title={isEco ? "Switch to founder view" : "Switch to partner view"}
+            >
+              {isEco ? "Partners" : "Founders"}
+              <span className="ml-1 opacity-60">▾</span>
+            </button>
+          </div>
         </div>
 
 
@@ -1228,7 +1242,7 @@ export default function Navigator() {
           {/* Disclaimer */}
           {!isEco && showPathway && (
             <div className="hidden md:block text-[0.6rem] text-text-tertiary leading-[1.5] px-4 md:px-6 pb-2 italic text-center max-w-full">
-              Built from public data · Beta — your feedback shapes what we build next
+              Built from public data · {programCount ?? 355} programs tracked
             </div>
           )}
         </div>
