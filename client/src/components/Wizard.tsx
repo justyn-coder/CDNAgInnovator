@@ -459,10 +459,10 @@ export default function Wizard({ onComplete }: Props) {
     completed: (
       <div key="completed" className="animate-fade-in-up">
         <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
-          Been through any programs already?
+          Been through any Canadian programs already?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">
-          Helps us focus on what's new for you, not what you've already done.
+          Search our database of 349+ Canadian programs. Helps us skip what you've already done.
         </p>
 
         {/* Search input */}
@@ -523,14 +523,17 @@ export default function Wizard({ onComplete }: Props) {
         </p>
 
         {/* Freetext for programs not in our database */}
-        <div style={{ marginTop: 16 }}>
-          <p style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)", marginBottom: 6, fontWeight: 500 }}>
-            Been through a program we don't have listed? (e.g., TechStars, Y Combinator, Reservoir)
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--color-border)" }}>
+          <p style={{ fontSize: "0.78rem", color: "var(--color-text)", marginBottom: 6, fontWeight: 600 }}>
+            Been through a non-Canadian program?
+          </p>
+          <p style={{ fontSize: "0.72rem", color: "var(--color-text-tertiary)", marginBottom: 8 }}>
+            e.g., TechStars, Y Combinator, Reservoir, IndieBio
           </p>
           <input
             value={data.otherPrograms}
             onChange={e => setData(d => ({ ...d, otherPrograms: e.target.value }))}
-            placeholder="Type program names, separated by commas..."
+            placeholder="Program names, separated by commas"
             className="w-full px-3.5 py-2.5 rounded-sm text-[0.82rem] outline-none bg-white font-sans focus:border-brand-gold"
             style={{ border: "0.5px solid #E5E5E0", boxSizing: "border-box" }}
           />
@@ -643,7 +646,7 @@ export default function Wizard({ onComplete }: Props) {
             {(currentStepName === "expansion" || currentStepName === "completed")
               ? (currentStepName === "expansion" && data.expansionProvinces.length === 0
                 ? "Skip this"
-                : currentStepName === "completed" && data.completedPrograms.length === 0
+                : currentStepName === "completed" && data.completedPrograms.length === 0 && !data.otherPrograms.trim()
                   ? "Skip this"
                   : "Next →")
               : "Next →"
