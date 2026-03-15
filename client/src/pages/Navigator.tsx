@@ -5,6 +5,7 @@ import { cn } from "../lib/cn";
 import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
 import PathwayCard from "../components/PathwayCard";
+import CorrectionHintTooltip from "../components/CorrectionHintTooltip";
 
 interface Program {
   id: number; name: string; category: string;
@@ -184,7 +185,9 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
   const [name, setName] = useState(() => {
     try { return sessionStorage.getItem("ag_fb_name") || ""; } catch { return ""; }
   });
-  const hasIdentity = !!(email || name);
+  const [hasIdentity] = useState(() => {
+    try { return !!(sessionStorage.getItem("ag_fb_email") || sessionStorage.getItem("ag_fb_name")); } catch { return false; }
+  });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -366,6 +369,7 @@ function ProgramCard({ p }: { p: Program }) {
         style={{ borderTop: "1px solid #E5E5E0" }}
       >
         <button
+          data-correction-link
           onClick={() => setShowCorrection(!showCorrection)}
           className="bg-transparent border-none cursor-pointer flex items-center gap-1 py-1.5 px-1"
           style={{ fontSize: 12, color: "#2D7A4F" }}
@@ -427,6 +431,7 @@ function BrowsePanel({
   const [stageFilter, setStageFilter] = useState("All");
   const [provFilter, setProvFilter] = useState("All");
   const [programsLoadedAt] = useState(() => Date.now());
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Bridge banner
   const [showBridge, setShowBridge] = useState(false);
@@ -566,7 +571,7 @@ function BrowsePanel({
       </div>
 
       {/* Program list */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden py-2">
+      <div ref={listRef} className="flex-1 overflow-y-auto overflow-x-hidden py-2 relative">
         {loading ? (
           <div className="p-12 text-center text-text-tertiary">Loading programs…</div>
         ) : sorted.length === 0 ? (
@@ -577,6 +582,9 @@ function BrowsePanel({
               <ProgramCard key={p.id} p={p} />
             ))}
           </div>
+        )}
+        {isOperatorView && !loading && sorted.length > 0 && (
+          <CorrectionHintTooltip containerRef={listRef} />
         )}
       </div>
 
@@ -710,7 +718,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
 // ── Loading Messages ─────────────────────────────────────────────────────────
 function LoadingMessages({ programCount }: { programCount?: number | null }) {
   const LOADING_MSGS = [
-    `Searching across ${programCount ?? 350} programs…`,
+    `Searching across ${programCount ?? 400} programs…`,
     "This usually takes 10–15 seconds — hang tight.",
     "Cross-referencing with ecosystem insights…",
     "Almost there…",
@@ -841,13 +849,6 @@ export default function Navigator() {
     }, 15000);
     return () => clearTimeout(auto);
   }, [showNudgeBanner]);
-
-  useEffect(() => {
-    if (isEco) {
-      const timer = setTimeout(() => setShowEcoCta(true), 20000);
-      return () => clearTimeout(timer);
-    }
-  }, [isEco]);
 
   useEffect(() => {
     // eco CTA tracking (reserved for future use)

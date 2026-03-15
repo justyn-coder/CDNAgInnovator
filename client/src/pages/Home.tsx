@@ -109,7 +109,7 @@ export default function Home() {
     }
   }
 
-  const programCount = count ?? 350;
+  const programCount = count ?? 400;
 
   return (
     <div className="min-h-screen bg-bg flex flex-col font-sans">
