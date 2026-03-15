@@ -837,7 +837,7 @@ export default function Navigator() {
     const auto = setTimeout(() => {
       setShowNudgeBanner(false);
       try { localStorage.setItem("trellis_feedback_nudged", "true"); } catch {}
-    }, 8000);
+    }, 15000);
     return () => clearTimeout(auto);
   }, [showNudgeBanner]);
 
@@ -1180,8 +1180,8 @@ export default function Navigator() {
         {/* ── Chat input ───────────────────────────────────────────── */}
         {(!showWizard || isEco) && (
         <div className="shrink-0 border-t border-border-strong shadow-[0_-2px_12px_rgba(0,0,0,0.04)] max-w-full overflow-hidden box-border">
-          {/* Label strip */}
-          <div className="px-4 md:px-6 py-[6px] bg-gradient-to-r from-[#E8F0EB] to-[#F5F3ED] flex items-center gap-1.5">
+          {/* Label strip — desktop only, merged into placeholder on mobile */}
+          <div className="hidden md:flex px-4 md:px-6 py-[6px] bg-gradient-to-r from-[#E8F0EB] to-[#F5F3ED] items-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="shrink-0">
               <path d="M8 1l1.5 4.5L14 7l-4.5 1.5L8 13l-1.5-4.5L2 7l4.5-1.5L8 1z" fill="#2D7A4F" opacity="0.7"/>
               <path d="M12.5 1l.75 2.25L15.5 4l-2.25.75L12.5 7l-.75-2.25L9.5 4l2.25-.75L12.5 1z" fill="#8CC63F" opacity="0.6"/>
@@ -1212,9 +1212,9 @@ export default function Navigator() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder={isEco ? "e.g., Where are the gaps in Saskatchewan?" : "e.g., Tell me more about the first program"}
+              placeholder={isEco ? "✦ AI-powered · e.g., Where are the gaps in Saskatchewan?" : "✦ AI-powered · e.g., Tell me more about the first program"}
               rows={1}
-              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3.5 py-2.5 text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
+              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3.5 py-2.5 text-[16px] md:text-[0.85rem] leading-[1.5] outline-none bg-bg-secondary transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
             <button
               onClick={() => send()}
@@ -1235,7 +1235,7 @@ export default function Navigator() {
 
           {/* Disclaimer */}
           {!isEco && showPathway && (
-            <div className="text-[0.6rem] text-text-tertiary leading-[1.5] px-4 md:px-6 pb-2 italic text-center max-w-full">
+            <div className="hidden md:block text-[0.6rem] text-text-tertiary leading-[1.5] px-4 md:px-6 pb-2 italic text-center max-w-full">
               Built from public data · Beta — your feedback shapes what we build next
             </div>
           )}
@@ -1277,10 +1277,10 @@ export default function Navigator() {
               try { localStorage.setItem("trellis_feedback_nudged", "true"); } catch {}
             }
           }}
-          className="shrink-0 w-full flex items-center justify-center gap-2 bg-bg-secondary cursor-pointer hover:bg-bg-tertiary transition-colors"
-          style={{ height: 38, border: "none", borderTop: "1px solid var(--color-border, #E5E5E0)" }}
+          className="shrink-0 w-full flex items-center justify-center gap-2 bg-bg-secondary cursor-pointer hover:bg-bg-tertiary transition-colors h-7 md:h-[38px]"
+          style={{ border: "none", borderTop: "1px solid var(--color-border, #E5E5E0)" }}
         >
-          <span style={{ fontSize: 12, color: "#2D7A4F", fontWeight: 600 }}>
+          <span className="text-[0.68rem] md:text-xs" style={{ color: "#2D7A4F", fontWeight: 600 }}>
             💬 Something wrong or missing? Tell us →
           </span>
         </button>

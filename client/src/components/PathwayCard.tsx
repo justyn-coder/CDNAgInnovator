@@ -4,7 +4,7 @@ import { cn } from "../lib/cn";
 // ── Stage display labels ───────────────────────────────────────────────────
 const SL: Record<string, string> = {
   Idea: "Idea", MVP: "MVP", Pilot: "Pilot",
-  Comm: "First Customers", Scale: "Scale",
+  Comm: "Customers", Scale: "Scale",
 };
 const STAGE_ORDER = ["Idea", "MVP", "Pilot", "Comm", "Scale"];
 const STAGE_ICONS: Record<string, string> = {
@@ -102,8 +102,6 @@ function StageJourney({ current, next }: { current: string; next: string }) {
             <div key={s} className={cn("flex flex-col items-center min-w-0", isLast ? "shrink-0" : "flex-1")}>
               {/* Circle + connector row */}
               <div className="flex items-center w-full" style={{ height: 36 }}>
-                {/* Spacer to center circle in slot */}
-                {!isLast && <div className="flex-1" />}
                 <div className={cn(
                   "rounded-full flex items-center justify-center shrink-0 transition-all duration-300",
                   isCurrent && "w-9 h-9 bg-brand-green border-[2.5px] border-brand-chartreuse text-[0.85rem] shadow-[0_0_16px_rgba(140,198,63,0.35)] text-white/70",
