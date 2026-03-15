@@ -204,7 +204,7 @@ export default function Home() {
                   className="font-display font-normal text-center leading-[1.2] mb-4 popup-headline"
                   style={{ fontSize: 28, color: "#1a1a18" }}
                 >
-                  Your programs are already<br />in Trellis.
+                  Your programs are already in Trellis.
                 </h2>
 
                 <p
@@ -366,9 +366,9 @@ export default function Home() {
           style={{ animation: "fadeInUp 0.6s ease 0.4s both" }}
         >
           {[
-            { icon: "📊", title: "Verified data", desc: `${programCount} programs cross-referenced against CFIN, CAPI, and provincial source reports` },
-            { icon: "🗺", title: "Ordered pathway", desc: "Not a list — a sequence of what to do first, next, and later" },
-            { icon: "⚠️", title: "Gap warnings", desc: "We'll tell you if your province lacks key programs — and where to look instead." },
+            { icon: "📊", title: "Verified data", desc: `${programCount} programs verified against federal and provincial databases` },
+            { icon: "🗺", title: "Ordered pathway", desc: "Not a list — a clear sequence: what to do now, next, and later" },
+            { icon: "⚠️", title: "Gap warnings", desc: "We flag gaps in your province — and point you to the next best option." },
           ].map((item, i) => (
             <div key={i} className="bg-bg-secondary border border-border border-t-[3px] border-t-brand-green rounded px-4 py-4.5">
               <div className="text-[1.2rem] mb-2">{item.icon}</div>

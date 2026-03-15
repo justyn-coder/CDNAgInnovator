@@ -178,7 +178,7 @@ export default function CorrectionHintTooltip({
           ✕
         </button>
 
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>See something off?</div>
+        <div style={{ fontWeight: 600, marginBottom: 4 }}>👀 See something off?</div>
         <div>
           Every program has a "Suggest a correction" link.
           Help us get your data right before founders see it.

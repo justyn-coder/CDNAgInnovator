@@ -12,8 +12,10 @@ export default function App() {
         <Route path="/navigator" component={Navigator} />
         <Route>
           <div className="p-10 text-center font-sans">
-            <h2>Page not found</h2>
-            <a href="/">← Go home</a>
+            <div className="text-4xl mb-4">🚜</div>
+            <h2 className="text-xl font-bold mb-2">Wrong field!</h2>
+            <p className="text-gray-500 mb-4">This page doesn't exist — let's get you back on track.</p>
+            <a href="/" className="text-[#1B4332] font-medium hover:underline">← Back to Trellis</a>
           </div>
         </Route>
       </Switch>

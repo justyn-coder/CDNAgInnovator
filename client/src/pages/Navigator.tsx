@@ -223,7 +223,7 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
         className="mt-2.5 px-3 py-2.5 rounded-lg text-center"
         style={{ background: "#FFF8E7", border: "1px solid rgba(212,168,40,0.27)", fontSize: 13, color: "#6b6b6b" }}
       >
-        Thanks — we'll review this
+        🙏 Thanks — we'll review this shortly
       </div>
     );
   }
@@ -520,7 +520,7 @@ function BrowsePanel({
           }}
         >
           <span style={{ fontSize: 13, color: "white" }}>
-            Curious how founders discover these programs?
+            🌱 Curious how founders discover these programs?
           </span>
           <div className="flex items-center gap-3 shrink-0">
             <a
@@ -573,9 +573,9 @@ function BrowsePanel({
       {/* Program list */}
       <div ref={listRef} className="flex-1 overflow-y-auto overflow-x-hidden py-2 relative">
         {loading ? (
-          <div className="p-12 text-center text-text-tertiary">Loading programs…</div>
+          <div className="p-12 text-center text-text-tertiary">🌾 Loading programs…</div>
         ) : sorted.length === 0 ? (
-          <div className="p-12 text-center text-text-tertiary">No programs match your filters.</div>
+          <div className="p-12 text-center text-text-tertiary">🔍 No programs match those filters — try broadening your search.</div>
         ) : (
           <div className="flex flex-col gap-px">
             {sorted.map(p => (
@@ -1220,7 +1220,7 @@ export default function Navigator() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder="AI-powered chat..."
+              placeholder="Ask me anything about Canada's ag ecosystem…"
               rows={1}
               className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3 py-2 md:px-3.5 md:py-2.5 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-gradient-to-r from-[#E8F0EB] to-[#F5F3ED] transition-all font-sans focus:bg-white focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
