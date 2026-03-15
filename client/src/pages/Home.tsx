@@ -314,14 +314,6 @@ export default function Home() {
 
       {/* ── Hero ─────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col items-center px-6 pt-14 pb-12">
-        {/* Status pill */}
-        <div className="inline-flex items-center gap-[7px] bg-green-soft border border-[rgba(45,122,79,0.12)] rounded-full px-4 py-[5px] mb-7 animate-fade-in-up">
-          <div className="w-[7px] h-[7px] rounded-full bg-brand-chartreuse shadow-[0_0_8px_rgba(140,198,63,0.4)]" />
-          <span className="text-[0.72rem] font-semibold text-brand-green tracking-[0.01em]">
-            {count !== null ? `${count} programs tracked across Canada` : "Loading…"}
-          </span>
-        </div>
-
         {/* Headline */}
         <h1
           className="font-display text-[clamp(1.8rem,4.5vw,3rem)] font-normal tracking-[-0.02em] leading-[1.15] text-text max-w-[640px] mb-4.5 text-center"
@@ -332,7 +324,7 @@ export default function Home() {
         </h1>
 
         <p
-          className="font-display text-[1.4rem] text-brand-green max-w-[480px] leading-[1.3] mb-11 text-center font-normal"
+          className="font-display text-[1.4rem] text-brand-gold max-w-[480px] leading-[1.3] mb-11 text-center font-normal"
           style={{ animation: "fadeInUp 0.6s ease 0.2s both" }}
         >
           We mapped it for you.
@@ -340,7 +332,7 @@ export default function Home() {
 
         {/* ── Two clear CTA cards ─────────────────────────────── */}
         <div
-          className="flex gap-3.5 flex-wrap justify-center max-w-[640px] w-full mb-14"
+          className="flex gap-3.5 flex-wrap justify-center max-w-[640px] w-full mb-8"
           style={{ animation: "fadeInUp 0.6s ease 0.3s both" }}
         >
           {/* Founder card */}
@@ -380,9 +372,9 @@ export default function Home() {
           {[
             { icon: "📊", title: "Verified data", desc: `${programCount} programs cross-referenced against CFIN, CAPI, and provincial source reports` },
             { icon: "🗺", title: "Ordered pathway", desc: "Not a list — a sequence of what to do first, next, and later" },
-            { icon: "⚠️", title: "Gap warnings", desc: "We flag when your province is missing critical support" },
+            { icon: "⚠️", title: "Gap warnings", desc: "We'll tell you if your province lacks key programs — and where to look instead." },
           ].map((item, i) => (
-            <div key={i} className="bg-bg-secondary border border-border rounded px-4 py-4.5">
+            <div key={i} className="bg-bg-secondary border border-border border-t-[3px] border-t-brand-green rounded px-4 py-4.5">
               <div className="text-[1.2rem] mb-2">{item.icon}</div>
               <div className="font-bold text-[0.82rem] text-text mb-1">{item.title}</div>
               <div className="text-[0.75rem] text-text-secondary leading-[1.5]">{item.desc}</div>
@@ -392,6 +384,9 @@ export default function Home() {
 
         <p className="text-[0.72rem] text-text-tertiary mt-3">
           Powered by AI · Free during beta
+        </p>
+        <p className="text-[0.68rem] text-text-tertiary mt-1.5">
+          Event performance consulting → <a href="https://bestinshow.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-text-secondary">BestInShow</a>
         </p>
       </main>
     </div>
