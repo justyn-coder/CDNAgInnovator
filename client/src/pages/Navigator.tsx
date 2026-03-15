@@ -959,7 +959,7 @@ export default function Navigator() {
           orgLabel={orgParam}
         />
       )}
-      {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} mode={mode === "ec" ? "ec" : "founder"} />}
+      {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} onFeedback={() => { setShowGapMap(false); setShowFeedback(true); }} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
 
       <div className="fixed inset-0 bg-bg flex flex-col font-sans" style={{ paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>

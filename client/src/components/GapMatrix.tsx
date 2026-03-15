@@ -109,6 +109,21 @@ function ExplainCard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showMeta, setShowMeta] = useState(false);
+  const [gapFeedback, setGapFeedback] = useState("");
+
+  function submitGapFeedback(rating: string) {
+    setGapFeedback(rating);
+    fetch("/api/submissions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        programName: `FEEDBACK:GAP:${prov}:${cat}`,
+        bestFor: `${rating} — AI analysis for ${prov} ${cat} (stage: ${stage})`,
+        submitterName: "Gap Map user",
+        submitterEmail: "gap-feedback@trellisag.ca",
+      }),
+    }).catch(() => {});
+  }
 
   function fetchExplain() {
     if (data || loading) return;
@@ -230,6 +245,24 @@ function ExplainCard({
           </div>
         )}
       </div>
+
+      {/* Feedback */}
+      <div className="px-3.5 pb-3 flex items-center gap-2.5 border-t border-white/[0.08] pt-2.5">
+        {gapFeedback ? (
+          <span className="text-[0.68rem] text-[#A098A8]">Thanks — noted for {prov} · {cat}</span>
+        ) : (
+          <>
+            <button
+              onClick={() => submitGapFeedback("accurate")}
+              className="bg-transparent border border-white/20 rounded-full px-2.5 py-1 text-[0.68rem] text-white/60 cursor-pointer hover:border-white/40 hover:text-white/80 transition-colors font-sans"
+            >👍 Looks right</button>
+            <button
+              onClick={() => submitGapFeedback("inaccurate")}
+              className="bg-transparent border border-white/20 rounded-full px-2.5 py-1 text-[0.68rem] text-white/60 cursor-pointer hover:border-white/40 hover:text-white/80 transition-colors font-sans"
+            >👎 Not quite</button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -323,7 +356,7 @@ function CellDetail({
 }
 
 // ── Main component ─────────────────────────────────────────────────────────
-export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () => void; mode?: string }) {
+export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { onClose: () => void; onFeedback?: () => void; mode?: string }) {
   const [stage, setStage] = useState("All");
   const [data, setData] = useState<GapData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -416,6 +449,12 @@ export default function GapMatrix({ onClose, mode = "founder" }: { onClose: () =
 
       <div className="h-14 px-[18px] flex justify-between items-center border-b border-border shrink-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px]">
         <span className="font-display font-normal text-[1.05rem] text-text">Gap Map</span>
+        {onFeedback && (
+          <button
+            onClick={onFeedback}
+            className="bg-transparent border-none text-[0.72rem] text-text-tertiary cursor-pointer flex items-center gap-1 hover:text-text-secondary transition-colors font-sans"
+          >💬 Something wrong or missing?</button>
+        )}
         <button
           onClick={onClose}
           className="bg-bg-secondary border border-border rounded-sm px-4 py-1.5 text-[0.78rem] font-semibold text-text transition-all duration-[120ms]"

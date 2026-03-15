@@ -110,7 +110,7 @@ Response format:
 {
   "classification_label": "Human-readable gap type (e.g., 'Likely Gap', 'Possible Structural Gap', 'Stage Mismatch', 'Data Blind Spot')",
   "why": "2-3 sentences explaining WHY this pattern shows up for this province+category+stage combination. Be specific to the province's economy and ecosystem. Reference Bioenterprise findings where relevant. Acknowledge uncertainty where appropriate.",
-  "action": "1-2 sentences with a concrete next step. For founders: where to look instead. For operators: what opportunity this represents. End with a nudge: 'Know something we don't? Hit the feedback button.'"
+  "action": "1-2 sentences with a concrete next step. For founders: where to look instead. For operators: what opportunity this represents. End with a nudge: 'Know something we don't? Use the buttons below to let us know.'"
 }
 
 RULES:
