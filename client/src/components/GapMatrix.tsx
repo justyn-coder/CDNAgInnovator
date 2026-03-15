@@ -449,12 +449,6 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
 
       <div className="h-14 px-[18px] flex justify-between items-center border-b border-border shrink-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px]">
         <span className="font-display font-normal text-[1.05rem] text-text">Gap Map</span>
-        {onFeedback && (
-          <button
-            onClick={onFeedback}
-            className="bg-transparent border-none text-[0.72rem] text-text-tertiary cursor-pointer flex items-center gap-1 hover:text-text-secondary transition-colors font-sans"
-          >💬 Something wrong or missing?</button>
-        )}
         <button
           onClick={onClose}
           className="bg-bg-secondary border border-border rounded-sm px-4 py-1.5 text-[0.78rem] font-semibold text-text transition-all duration-[120ms]"
@@ -542,6 +536,14 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
           </table>
         )}
       </div>
+
+      {onFeedback && (
+        <div className="px-[18px] py-2 border-t border-border bg-brand-gold shrink-0 text-center">
+          <button onClick={onFeedback} className="bg-transparent border-none text-white text-[0.72rem] font-semibold p-0">
+            💬 Something wrong or missing? Tell us →
+          </button>
+        </div>
+      )}
 
       {selectedCell && (
         <CellDetail
