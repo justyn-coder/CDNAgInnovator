@@ -159,8 +159,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
        AND ($2 = ANY(stage) OR $3 = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)
        ORDER BY
          CASE WHEN category = ANY($4::text[]) THEN 0 ELSE 1 END,
+         CASE WHEN province && $1::text[] THEN 0 ELSE 1 END,
          name
-       LIMIT 50`,
+       LIMIT 75`,
       [
         `{${provArray.join(",")}}`,
         stage,
