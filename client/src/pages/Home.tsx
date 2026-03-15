@@ -332,7 +332,7 @@ export default function Home() {
         </h1>
 
         <p
-          className="text-[1.1rem] text-text-secondary max-w-[480px] leading-[1.65] mb-11 text-center font-normal"
+          className="font-display text-[1.4rem] text-brand-green max-w-[480px] leading-[1.3] mb-11 text-center font-normal"
           style={{ animation: "fadeInUp 0.6s ease 0.2s both" }}
         >
           We mapped it for you.
@@ -347,12 +347,12 @@ export default function Home() {
           <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); } catch {} }}
             className="flex-[1_1_280px] bg-brand-gold text-brand-forest rounded px-5.5 py-6 no-underline text-left shadow-[0_4px_24px_rgba(212,168,40,0.25),inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(212,168,40,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]"
           >
-            <div className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-white/60 mb-2.5">For AgTech Companies</div>
+            <div className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-brand-forest/70 mb-2.5">For AgTech Companies</div>
             <div className="text-[1.05rem] font-bold mb-1.5 tracking-[-0.02em] leading-[1.3]">I'm building an agtech product</div>
-            <div className="text-[0.8rem] text-white/80 leading-[1.55] mb-4.5">
+            <div className="text-[0.8rem] text-brand-forest/80 leading-[1.55] mb-4.5">
               Answer 4 questions. Get a personalized pathway to the accelerators, funding, and pilot sites that match your stage and province.
             </div>
-            <div className="inline-flex items-center gap-[5px] bg-white/18 rounded-[7px] px-3.5 py-2 text-[0.78rem] font-bold text-white">
+            <div className="inline-flex items-center gap-[5px] bg-brand-forest rounded-[7px] px-3.5 py-2 text-[0.78rem] font-bold text-white">
               Build My Pathway →
             </div>
           </Link>
@@ -390,20 +390,8 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Category tags */}
-        <div className="flex gap-2 flex-wrap justify-center mb-6">
-          {["Accelerators", "Funding", "Pilot Sites", "Events", "Industry Orgs", "Training"].map(cat => (
-            <span key={cat} className="text-[0.7rem] text-text-tertiary font-medium bg-bg-secondary border border-border rounded-full px-3 py-1">
-              {cat}
-            </span>
-          ))}
-        </div>
-
         <p className="text-[0.72rem] text-text-tertiary mt-3">
           Powered by AI · Free during beta
-        </p>
-        <p className="text-[0.7rem] text-text-tertiary" style={{ marginTop: 8 }}>
-          Event performance consulting → <span style={{ fontWeight: 500 }}>BestInShow</span>
         </p>
       </main>
     </div>
