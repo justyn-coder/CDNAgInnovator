@@ -160,7 +160,7 @@ export default function Home() {
                 {/* CTA */}
                 <button
                   onClick={() => dismissPopup("pathway")}
-                  className="w-full font-medium transition-colors"
+                  className="w-full font-medium transition-colors hover:!bg-[#BF9624]"
                   style={{
                     background: "#D4A828",
                     color: "#1B4332",
@@ -171,8 +171,6 @@ export default function Home() {
                     border: "none",
                     cursor: "pointer",
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "#BF9624")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "#D4A828")}
                 >
                   Build My Pathway →
                 </button>
@@ -235,7 +233,7 @@ export default function Home() {
                 {/* CTA */}
                 <button
                   onClick={() => dismissPopup("programs")}
-                  className="w-full font-medium transition-colors"
+                  className="w-full font-medium transition-colors hover:!bg-[#2D7A4F]"
                   style={{
                     background: "#1B4332",
                     color: "#FFFFFF",
@@ -246,8 +244,6 @@ export default function Home() {
                     border: "none",
                     cursor: "pointer",
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "#2D7A4F")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "#1B4332")}
                 >
                   Check Your Programs →
                 </button>

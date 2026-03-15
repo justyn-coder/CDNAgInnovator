@@ -76,11 +76,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Fetch relevant programs
     const rows = detectedProvs.length > 0
       ? await client.unsafe(
-          `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE province && $1 OR 'National' = ANY(province) ORDER BY name LIMIT 50`,
+          `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE province && $1 OR 'National' = ANY(province) ORDER BY name LIMIT 15`,
           [detectedProvs]
         )
       : await client.unsafe(
-          `SELECT name, category, description, use_case, province, stage, website FROM programs ORDER BY name LIMIT 50`
+          `SELECT name, category, description, use_case, province, stage, website FROM programs ORDER BY name LIMIT 15`
         );
 
     // ── Smart knowledge retrieval ──────────────────────────────────────
@@ -109,7 +109,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           + CASE WHEN ${provArray.length > 0 ? `province && $2::text[] OR 'National' = ANY(province)` : "FALSE"} THEN 2 ELSE 0 END
           DESC,
           confidence DESC
-        LIMIT 12`,
+        LIMIT 8`,
         provArray.length > 0
           ? [tagPattern, `{${provArray.join(",")}}`]
           : [tagPattern]

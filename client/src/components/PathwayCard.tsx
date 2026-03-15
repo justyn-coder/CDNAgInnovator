@@ -1,6 +1,30 @@
 import { useEffect, useState } from "react";
 import { cn } from "../lib/cn";
 
+// ── Copy link button with inline toast ─────────────────────────────────────
+function CopyLinkButton({ stage, provinces, need }: { stage: string; provinces: string[]; need: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="mt-4 relative">
+      <button onClick={() => {
+        const url = new URL(window.location.origin + "/navigator");
+        url.searchParams.set("stage", stage); url.searchParams.set("prov", provinces.join(",")); url.searchParams.set("need", need);
+        navigator.clipboard.writeText(url.toString()).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2500);
+        }, () => {});
+      }}
+        className="self-start px-3.5 py-[7px] bg-transparent text-text-tertiary border border-border rounded-sm font-medium text-[0.72rem] transition-colors duration-150 hover:text-text"
+      >{copied ? "✓ Link copied!" : "📋 Copy shareable link"}</button>
+      {copied && (
+        <span className="ml-2.5 text-[0.72rem] text-brand-green font-medium animate-fade-in-up">
+          Share it with your advisor or team
+        </span>
+      )}
+    </div>
+  );
+}
+
 // ── Stage display labels ───────────────────────────────────────────────────
 const SL: Record<string, string> = {
   Idea: "Idea", MVP: "MVP", Pilot: "Pilot",
@@ -539,15 +563,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       )}
 
       {/* ── Shareable link ─────────────────────────────────────────────── */}
-      <div className="mt-4">
-        <button onClick={() => {
-          const url = new URL(window.location.origin + "/navigator");
-          url.searchParams.set("stage", stage); url.searchParams.set("prov", provinces.join(",")); url.searchParams.set("need", need);
-          navigator.clipboard.writeText(url.toString()).then(() => alert("Link copied! Share it with your advisor or team."), () => alert("Couldn't copy — try manually."));
-        }}
-          className="self-start px-3.5 py-[7px] bg-transparent text-text-tertiary border border-border rounded-sm font-medium text-[0.72rem] transition-colors duration-150 hover:text-text"
-        >📋 Copy shareable link</button>
-      </div>
+      <CopyLinkButton stage={stage} provinces={provinces} need={need} />
 
       {/* ── Thin-pathway note (Scale stage, <4 strong fits) ──────────── */}
       {(() => {

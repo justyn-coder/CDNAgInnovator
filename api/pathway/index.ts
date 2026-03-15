@@ -161,7 +161,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
          CASE WHEN category = ANY($4::text[]) THEN 0 ELSE 1 END,
          CASE WHEN province && $1::text[] THEN 0 ELSE 1 END,
          name
-       LIMIT 75`,
+       LIMIT 30`,
       [
         `{${provArray.join(",")}}`,
         stage,
