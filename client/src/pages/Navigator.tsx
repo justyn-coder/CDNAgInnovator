@@ -811,6 +811,7 @@ export default function Navigator() {
         setOrgParam(org);
         setBrowseInitialSearch(org);
         setShowBrowse(true);
+        try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {}
       } else if (eco === "true") {
         // Operator without org — show normal eco dashboard
       } else if (browse === "true") {
@@ -1012,7 +1013,7 @@ export default function Navigator() {
             <button
               onClick={() => {
                 localStorage.setItem("ag_nav_mode", isEco ? "e" : "ec");
-                window.location.reload();
+                window.location.href = "/navigator";
               }}
               className={cn(
                 "rounded-full px-3.5 py-1 text-[0.72rem] font-semibold tracking-[0.02em] cursor-pointer transition-all hover:brightness-95 active:brightness-90 border-none",
