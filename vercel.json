@@ -1,5 +1,23 @@
 {
   "rewrites": [
     { "source": "/((?!api/|@|client/|node_modules/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/robots.txt",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    },
+    {
+      "source": "/llms.txt",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    },
+    {
+      "source": "/og-image.png",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+    }
   ]
 }

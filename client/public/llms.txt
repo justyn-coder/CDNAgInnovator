@@ -1,0 +1,25 @@
+# Trellis
+
+> Trellis is an AI-powered navigator for Canada's agricultural technology ecosystem. It maps 400+ programs — accelerators, funding, pilot sites, events, and industry organizations — across all 10 provinces, and builds personalized pathways for agtech founders based on their stage and location.
+
+## Key Pages
+
+- [Home](https://trellisag.ca/): Landing page with program stats and entry points for founders and ecosystem operators
+- [Navigator](https://trellisag.ca/navigator): Interactive wizard that builds AI-powered pathways, plus chat, program browser, and gap analysis
+
+## What Trellis Does
+
+- Matches agtech founders to relevant programs by stage (Idea → Scale) and province
+- Sequences programs into step-by-step pathways using AI
+- Shows ecosystem operators where coverage gaps exist (which stages/provinces lack support)
+- Tracks 400+ verified programs including accelerators, grants, pilot sites, events, and industry organizations
+- Covers all 10 Canadian provinces with national programs included
+
+## Who It's For
+
+- **Agtech founders** looking for accelerators, funding, pilot sites, and events matched to their stage and province
+- **Ecosystem operators** (accelerator managers, program officers, investors) analyzing coverage gaps and reviewing their program listings
+
+## Built By
+
+- Justyn Szymczyk — agtech go-to-market, event performance, BestInShow.ag
