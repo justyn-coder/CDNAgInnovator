@@ -349,7 +349,7 @@ export default function Wizard({ onComplete }: Props) {
           What stage are you at?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">
-          Be honest — this determines which programs are actually open to you.
+          This determines which programs are actually open to you.
         </p>
         <div className="flex flex-col gap-2 max-w-[480px]">
           {STAGES.map(s => {
