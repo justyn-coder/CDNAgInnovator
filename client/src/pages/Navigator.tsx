@@ -145,7 +145,7 @@ function ChatBubble({ msg }: { msg: Message }) {
 function CategoryPill({ cat }: { cat: string }) {
   const m = CAT_META[cat] || { label: cat, textCls: "text-[#555]", bgCls: "bg-[#eee]" };
   return (
-    <span className={cn("text-[0.65rem] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap", m.bgCls, m.textCls)}>
+    <span className={cn("text-[0.65rem] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]", m.bgCls, m.textCls)}>
       {m.label}
     </span>
   );

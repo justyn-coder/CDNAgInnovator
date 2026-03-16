@@ -469,7 +469,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
           <h2 className="font-display text-[1.35rem] font-normal tracking-tight text-white mb-2.5 leading-[1.2]">
             {titleOverride}
           </h2>
-          <p className="text-[0.85rem] text-white/90 leading-[1.65] max-w-[520px]">
+          <p className="text-[0.85rem] text-white/90 leading-[1.65] max-w-full md:max-w-[520px]">
             {pathway.summary}
           </p>
           <div className="flex gap-1.5 flex-wrap mt-3">

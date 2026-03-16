@@ -82,7 +82,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Match "Province: ON" or "Province: AB, SK" patterns from wizard context
     const provContextMatch = msgLower.match(/province:\s*([a-z,\s]+?)(?:\.|]|\n)/);
     if (provContextMatch) {
-      for (const code of provContextMatch[1].split(",").map(s => s.trim())) {
+      for (const code of provContextMatch[1].split(",").map((s: string) => s.trim())) {
         const mapped = provCodeMap[code];
         if (mapped && !detectedProvs.includes(mapped)) detectedProvs.push(mapped);
       }
@@ -95,7 +95,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // ── Name-match lookup: check if user is asking about a specific program ──
     const nameMatches = await client.unsafe(
       `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE name ILIKE $1 OR name ILIKE $2 LIMIT 5`,
-      [`%${msgLower.replace(/[^a-z0-9 ]/g, "").trim()}%`, `%${msgLower.split(" ").filter(w => w.length > 3).join("%")}%`]
+      [`%${msgLower.replace(/[^a-z0-9 ]/g, "").trim()}%`, `%${msgLower.split(" ").filter((w: string) => w.length > 3).join("%")}%`]
     );
 
     // Fetch relevant programs (broader context) — filter by province AND stage when available
