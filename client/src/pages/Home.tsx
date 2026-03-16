@@ -385,11 +385,17 @@ export default function Home() {
           <p className="text-[0.82rem] text-text-secondary leading-[1.65] mb-3">
             {programCount} programs. 10 provinces. AI-powered pathways built from public data — and one very stubborn spreadsheet.
           </p>
-          <p className="text-[0.82rem] text-text-secondary leading-[1.65] mb-6">
-            Trellis maps Canada's ag innovation ecosystem so founders stop Googling and start moving. If a program exists, we want it here. If it's missing,{" "}
+          <p className="text-[0.82rem] text-text-secondary leading-[1.65] mb-3">
+            Verified. Sequenced by stage. Mapped by province. That's what makes this different from a search result. And it gets better every time someone flags what we're missing —{" "}
             <Link href="/navigator" className="text-brand-green font-medium underline">
               tell us
             </Link>.
+          </p>
+          <p className="text-[0.82rem] text-text-secondary leading-[1.65] mb-6">
+            Want to help build a better tool for Canadian agtech?{" "}
+            <a href="mailto:justyn@trellisag.ca" className="text-brand-green font-medium underline">
+              Let's talk
+            </a>.
           </p>
           <p className="text-[0.76rem] text-text-secondary mb-1">
             Built by{" "}
