@@ -158,7 +158,7 @@ function StageJourney({ current, next }: { current: string; next: string }) {
               </div>
               {/* Label — centered in same grid column as circle */}
               <span className={cn(
-                "text-[0.6rem] sm:text-[0.65rem] text-center leading-tight mt-1",
+                "text-[0.65rem] sm:text-[0.7rem] text-center leading-tight mt-1",
                 isCurrent && "font-bold text-white",
                 isNext && "font-semibold text-white/90",
                 isPast && "font-normal text-white/[0.82]",

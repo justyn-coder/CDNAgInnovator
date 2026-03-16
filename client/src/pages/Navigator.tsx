@@ -103,7 +103,7 @@ function ChatBubble({ msg }: { msg: Message }) {
   if (isUser) {
     return (
       <div className="flex justify-end mb-2.5 px-4">
-        <div className="max-w-[72%] bg-green-mid text-white rounded-[16px_16px_4px_16px] px-3.5 py-2.5 text-[0.82rem] leading-[1.55]">
+        <div className="max-w-[85%] md:max-w-[72%] bg-green-mid text-white rounded-[16px_16px_4px_16px] px-3.5 py-2.5 text-[0.82rem] leading-[1.55]">
           {msg.content}
         </div>
       </div>
@@ -114,7 +114,7 @@ function ChatBubble({ msg }: { msg: Message }) {
   const showCopy = msg.content.length > 200;
   return (
     <div className="flex justify-start mb-2.5 px-4">
-      <div className="max-w-[84%] flex flex-col">
+      <div className="max-w-[92%] md:max-w-[84%] flex flex-col">
         <div className="bg-bg text-text rounded-[16px_16px_16px_4px] px-4 py-3 text-[0.82rem] leading-[1.6] border border-border shadow-sm overflow-hidden" style={{ overflowWrap: "break-word", wordBreak: "break-word" }}>
           {isPlain
             ? <span className="whitespace-pre-wrap">{msg.content}</span>
@@ -1196,7 +1196,7 @@ export default function Navigator() {
                   <div className="text-[0.82rem] md:text-[0.85rem] text-text-tertiary leading-tight">
                     <span className="font-semibold">AI Chat:</span> Ask me anything.
                   </div>
-                  <div className="text-[0.58rem] text-text-tertiary/60 mt-0.5">
+                  <div className="text-[0.65rem] text-text-tertiary/60 mt-0.5">
                     Built from public data · Still learning
                   </div>
                 </div>

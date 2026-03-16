@@ -13,7 +13,7 @@ export default function CorrectionHintTooltip({
   const [pos, setPos] = useState<{ top: number; left: number; arrowLeft: number; above: boolean } | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLButtonElement | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const dismiss = useCallback(() => {
     setDismissed(true);
