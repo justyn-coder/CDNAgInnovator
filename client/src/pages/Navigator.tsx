@@ -940,7 +940,7 @@ export default function Navigator() {
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} onFeedback={() => { setShowGapMap(false); setShowFeedback(true); }} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
 
-      <div className="fixed inset-0 bg-bg flex flex-col font-sans" style={{ paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+      <div className="fixed inset-0 bg-bg flex flex-col font-sans overflow-hidden" style={{ paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
 
         {/* ── Top bar ──────────────────────────────────────────────── */}
         <div className="h-16 md:h-[72px] px-4 md:px-6 flex justify-between items-center bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-border shrink-0 z-10">

@@ -392,7 +392,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
 
   if (loading) {
     return (
-      <div className="m-4 px-4 md:px-6 py-9 bg-bg border border-border rounded-lg shadow-md overflow-hidden box-border" style={{ maxWidth: "calc(100% - 2rem)" }}>
+      <div className="m-4 px-4 md:px-6 py-9 bg-bg border border-border rounded-lg shadow-md overflow-hidden box-border max-w-full" style={{ maxWidth: "calc(100% - 2rem)", overflowWrap: "break-word" }}>
         <div className="h-[3px] bg-bg-tertiary rounded-[2px] overflow-hidden mb-6">
           <div
             className="h-full bg-brand-green rounded-[2px] transition-[width] duration-2000 ease-in-out"
@@ -450,7 +450,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
   const futureSteps = pathway.steps.filter(s => s.horizon || s.timing === "horizon");
 
   return (
-    <div className="mx-4 mt-3 flex flex-col animate-fade-in-up overflow-hidden" style={{ maxWidth: "calc(100% - 2rem)" }}>
+    <div className="mx-4 mt-3 flex flex-col animate-fade-in-up overflow-hidden max-w-full" style={{ maxWidth: "calc(100% - 2rem)", overflowWrap: "break-word", wordBreak: "break-word" }}>
 
       {/* ── Header with Stage Journey ──────────────────────────────────── */}
       <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] rounded-t-lg px-4 md:px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
