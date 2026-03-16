@@ -180,7 +180,7 @@ export default function Home() {
                   Build My Pathway →
                 </button>
                 <div className="text-center mt-1.5" style={{ fontSize: 12, color: "#999" }}>
-                  Takes about 30 seconds
+                  Takes 30 seconds. Tell us what's wrong.
                 </div>
 
                 {/* Footer stats */}
