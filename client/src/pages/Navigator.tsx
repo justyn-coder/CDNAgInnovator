@@ -1189,27 +1189,29 @@ export default function Navigator() {
           })()}
 
           {/* Input row */}
-          <div className="px-4 md:px-6 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2 relative">
-            {!input && !chatFocused && (
-              <div className="absolute left-[calc(1rem+13px)] md:left-[calc(1.5rem+15px)] top-[calc(0.625rem+11px)] md:top-[calc(0.625rem+13px)] pointer-events-none">
-                <div className="text-[0.82rem] md:text-[0.85rem] text-text-tertiary leading-tight">
-                  <span className="font-semibold">AI Chat:</span> Ask me anything.
+          <div className="px-4 md:px-6 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
+            <div className="flex-1 min-w-0 relative">
+              {!input && !chatFocused && (
+                <div className="absolute left-3 md:left-3.5 top-2 md:top-2.5 pointer-events-none">
+                  <div className="text-[0.82rem] md:text-[0.85rem] text-text-tertiary leading-tight">
+                    <span className="font-semibold">AI Chat:</span> Ask me anything.
+                  </div>
+                  <div className="text-[0.58rem] text-text-tertiary/60 mt-0.5">
+                    Built from public data · Still learning
+                  </div>
                 </div>
-                <div className="text-[0.58rem] text-text-tertiary/60 mt-0.5">
-                  Built from public data · Still learning
-                </div>
-              </div>
-            )}
-            <textarea
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              onFocus={() => setChatFocused(true)}
-              onBlur={() => setChatFocused(false)}
-              placeholder=""
-              rows={1}
-              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3 py-2.5 md:px-3.5 md:py-3 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-white transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
-            />
+              )}
+              <textarea
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+                onFocus={() => setChatFocused(true)}
+                onBlur={() => setChatFocused(false)}
+                placeholder=""
+                rows={2}
+                className="w-full resize-none border-[1.5px] border-border rounded-lg px-3 py-2 md:px-3.5 md:py-2.5 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-white transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
+              />
+            </div>
             <button
               onClick={() => send()}
               disabled={loading || !input.trim()}
@@ -1227,12 +1229,6 @@ export default function Navigator() {
             </button>
           </div>
 
-          {/* Disclaimer */}
-          {!isEco && showPathway && (
-            <div className="hidden md:block text-[0.6rem] text-text-tertiary leading-[1.5] px-4 md:px-6 pb-2 italic text-center max-w-full">
-              Built from public data · {programCount ?? 355} programs tracked
-            </div>
-          )}
         </div>
         )}
 

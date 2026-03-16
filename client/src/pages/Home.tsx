@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
+import { MapleLeaf } from "../components/TrellisLogo";
 
 
 /** Inline trellis icon (no wordmark) for popup header */
@@ -378,12 +379,32 @@ export default function Home() {
           ))}
         </div>
 
-        <p className="text-[0.72rem] text-text-tertiary mt-3">
-          Powered by AI · Free during beta
-        </p>
-        <p className="text-[0.68rem] text-text-tertiary mt-1.5">
-          Event performance consulting → <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer" className="underline hover:text-text-secondary">BestInShow.ag</a>
-        </p>
+        {/* Footer */}
+        <div className="w-10 h-px bg-brand-gold mx-auto mt-10 mb-6" />
+        <div className="text-center max-w-[480px] mx-auto px-4">
+          <p className="text-[0.82rem] text-text-secondary leading-[1.65] mb-3">
+            {programCount} programs. 10 provinces. AI-powered pathways built from public data — and one very stubborn spreadsheet.
+          </p>
+          <p className="text-[0.82rem] text-text-secondary leading-[1.65] mb-6">
+            Trellis maps Canada's ag innovation ecosystem so founders stop Googling and start moving. If a program exists, we want it here. If it's missing,{" "}
+            <Link href="/navigator" className="text-brand-green font-medium underline">
+              tell us
+            </Link>.
+          </p>
+          <p className="text-[0.76rem] text-text-secondary mb-1">
+            Built by{" "}
+            <a href="https://www.linkedin.com/in/justynszymczyk/" target="_blank" rel="noopener noreferrer" className="font-medium text-text hover:underline">
+              Justyn Szymczyk
+            </a>
+            {" "}<MapleLeaf size={14} className="inline-block align-[-2px]" />
+          </p>
+          <p className="text-[0.7rem] text-text-tertiary">
+            AgTech go-to-market · event performance ·{" "}
+            <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer" className="font-medium hover:underline" style={{ color: "#D4A843" }}>
+              BestInShow.ag
+            </a>
+          </p>
+        </div>
       </main>
     </div>
   );
