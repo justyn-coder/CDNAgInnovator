@@ -729,7 +729,6 @@ export default function Navigator() {
   const [mode] = useState<"e" | "ec">(() => { try { return (localStorage.getItem("ag_nav_mode") as "e" | "ec") || "e"; } catch { return "e"; } });
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [chatFocused, setChatFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showBrowse, setShowBrowse] = useState(false);
   const [showGapMap, setShowGapMap] = useState(false);
@@ -1168,50 +1167,33 @@ export default function Navigator() {
             const chips = ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q));
             if (chips.length === 0) return null;
             return (
-              <>
-                <div className="text-[0.6rem] text-text-tertiary font-medium px-4 md:px-6 pt-2 pb-0">
-                  Try asking
-                </div>
-                <div
-                  className="flex gap-1.5 px-4 md:px-6 pt-1 pb-1 overflow-x-auto md:flex-wrap [&::-webkit-scrollbar]:hidden"
-                  style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
-                >
-                  {chips.slice(0, messages.length === 0 ? 5 : 3).map((s, i) => (
-                    <button key={i} onClick={() => send(s.q)}
-                      className="shrink-0 cursor-pointer font-sans transition-all bg-bg-secondary border border-border text-text-secondary hover:border-brand-green hover:text-text hover:bg-bg-tertiary"
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: 100,
-                        fontSize: "0.68rem",
-                        fontWeight: 500,
-                        whiteSpace: "nowrap",
-                      }}
-                    >{s.label}</button>
-                  ))}
-                </div>
-              </>
+              <div
+                className="flex gap-1.5 px-4 md:px-6 pt-2 pb-1 overflow-x-auto md:flex-wrap [&::-webkit-scrollbar]:hidden"
+                style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
+              >
+                {chips.slice(0, messages.length === 0 ? 5 : 3).map((s, i) => (
+                  <button key={i} onClick={() => send(s.q)}
+                    className="shrink-0 cursor-pointer font-sans transition-all bg-bg-secondary border border-border text-text-secondary hover:border-brand-green hover:text-text hover:bg-bg-tertiary"
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: 100,
+                      fontSize: "0.68rem",
+                      fontWeight: 500,
+                      whiteSpace: "nowrap",
+                    }}
+                  >{s.label}</button>
+                ))}
+              </div>
             );
           })()}
 
           {/* Input row */}
-          <div className="px-4 md:px-6 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2 relative">
-            {!input && !chatFocused && (
-              <div className="absolute left-[calc(1rem+12px)] md:left-[calc(1.5rem+14px)] top-[calc(0.625rem+8px)] md:top-[calc(0.625rem+10px)] pointer-events-none">
-                <div className="text-[0.78rem] md:text-[0.82rem] font-semibold text-text-tertiary leading-tight">
-                  AI Chat: Ask about programs, gaps, or next steps…
-                </div>
-                <div className="text-[0.58rem] text-text-tertiary/70 mt-0.5">
-                  Built from public data · Still learning
-                </div>
-              </div>
-            )}
+          <div className="px-4 md:px-6 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              onFocus={() => setChatFocused(true)}
-              onBlur={() => setChatFocused(false)}
-              placeholder=""
+              placeholder="Ask about programs, gaps, or next steps…"
               rows={1}
               className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3 py-2 md:px-3.5 md:py-2.5 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-gradient-to-r from-[#E8F0EB] to-[#F5F3ED] transition-all font-sans focus:bg-white focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
