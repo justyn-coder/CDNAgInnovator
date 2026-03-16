@@ -256,7 +256,7 @@ export default function Home() {
                   className="text-center mt-4"
                   style={{ fontSize: 12, color: "#999", borderTop: "0.5px solid #E5E5E0", paddingTop: 12 }}
                 >
-                  Built by Justyn Szymczyk · BestInShow.ag
+                  Built by Justyn Szymczyk · <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer" style={{ color: "#D4A828", fontWeight: 500 }}>BestInShow.ag</a>
                 </div>
 
                 {/* Secondary link */}
@@ -382,7 +382,7 @@ export default function Home() {
           Powered by AI · Free during beta
         </p>
         <p className="text-[0.68rem] text-text-tertiary mt-1.5">
-          Event performance consulting → <a href="https://bestinshow.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-text-secondary">BestInShow</a>
+          Event performance consulting → <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer" className="underline hover:text-text-secondary">BestInShow.ag</a>
         </p>
       </main>
     </div>

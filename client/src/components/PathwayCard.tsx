@@ -75,6 +75,8 @@ interface Props {
   provinces: string[];
   need: string;
   onChatFollowUp: (question: string) => void;
+  onReset?: () => void;
+  needLabel?: string;
   expansionProvinces?: string[];
   completedPrograms?: string[];
 }
@@ -359,50 +361,8 @@ function EmailCapture({ stage, provinces, description, productType }: {
   );
 }
 
-// ── Stage-aware follow-up chips ─────────────────────────────────────────────
-function getStageChips(stage: string, firstProgramName: string, provinces: string[], hasGap: boolean): { label: string; q: string }[] {
-  const chips: { label: string; q: string }[] = [];
-
-  if (stage === "Idea" || stage === "MVP") {
-    chips.push(
-      { label: "What grants are available for my province?", q: `What grants and non-dilutive funding are available for agtech companies at the ${stage} stage in ${provinces.join(", ")}?` },
-      { label: "How do I find farmers to test with?", q: "How do I find farmers or growers willing to test my product? Are there programs that help connect startups with test sites?" },
-      { label: "What's the first program I should apply to?", q: "Of all the programs in my pathway, which one should I apply to first and why?" },
-      { label: "Do I need to incorporate to apply?", q: "Do I need to be incorporated to apply to these programs? What's the minimum I need to have set up legally?" },
-    );
-    if (firstProgramName) {
-      chips.push({ label: `Help me write an intro email`, q: `Write me a concise intro email to ${firstProgramName} introducing what I'm building and asking about next steps.` });
-    }
-  } else if (stage === "Pilot") {
-    chips.push(
-      { label: "Where can I find pilot farmers?", q: "Where can I find farmers or farm operations willing to run a pilot or trial of my product? Are there specific organizations that facilitate this?" },
-    );
-    if (firstProgramName) {
-      chips.push({ label: `Help me write an intro email`, q: `Write me a concise intro email to ${firstProgramName} explaining what I've built and the pilot results I'm looking for.` });
-    }
-    chips.push(
-      { label: "What grants cover pilot costs?", q: "What grants or funding programs specifically cover the costs of running field trials or pilots in Canadian agriculture?" },
-      { label: "What am I missing?", q: `Beyond my pathway, what other resources or strategies should I be pursuing at the Pilot stage in ${provinces.join(", ")}?` },
-    );
-  } else {
-    // First Customers / Scale
-    chips.push(
-      { label: "What later-stage options exist?", q: `What later-stage programs, funding sources, and support exist for agtech companies past the pilot stage in Canada?` },
-      { label: "Show me pilot sites in other provinces", q: "What pilot sites and test facilities exist in provinces I'm not currently operating in? I'm considering expansion." },
-      { label: "Who's funding growth-stage agtech?", q: "Who is actively funding growth-stage agtech in Canada? Include VCs, strategic investors, and government programs for scaling companies." },
-      { label: "International expansion programs", q: "What programs help Canadian agtech companies expand internationally? Include trade missions, export programs, and international accelerators." },
-    );
-  }
-
-  if (hasGap) {
-    chips.push({ label: "How do I fill the gap?", q: "You flagged a gap in my pathway. What's the best workaround — are there national programs, neighboring provinces, or other approaches I should consider?" });
-  }
-
-  return chips.slice(0, 4);
-}
-
 // ── Main Component ──────────────────────────────────────────────────────────
-export default function PathwayCard({ description, stage, provinces, need, onChatFollowUp, expansionProvinces, completedPrograms }: Props) {
+export default function PathwayCard({ description, stage, provinces, need, onChatFollowUp, onReset, needLabel, expansionProvinces, completedPrograms }: Props) {
   const [data, setData] = useState<PathwayResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -496,8 +456,15 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] rounded-t-lg px-4 md:px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         <div className="relative">
-          <div className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-white/[0.82] mb-1.5">
-            Your Innovation Pathway
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-white/[0.82]">
+              Your Innovation Pathway
+            </div>
+            {onReset && (
+              <button onClick={onReset} className="bg-transparent border-none text-[0.68rem] text-white/50 underline cursor-pointer p-0">
+                Start over
+              </button>
+            )}
           </div>
           <h2 className="font-display text-[1.35rem] font-normal tracking-tight text-white mb-2.5 leading-[1.2]">
             {titleOverride}
@@ -506,11 +473,9 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
             {pathway.summary}
           </p>
           <div className="flex gap-1.5 flex-wrap mt-3">
-            {provinces.map(p => (
-              <span key={p} className="text-[0.62rem] font-semibold px-2.5 py-[3px] rounded-full bg-white/15 text-white/[0.87]">
-                {p}
-              </span>
-            ))}
+            <span className="text-[0.62rem] font-semibold px-2.5 py-[3px] rounded-full bg-white/15 text-white/[0.87]">
+              {provinces.join(", ")} · {SL[stage] || stage}{needLabel ? ` · ${needLabel}` : ""}
+            </span>
             <span className="text-[0.62rem] font-semibold px-2.5 py-[3px] rounded-full bg-white/15 text-white/[0.87]">
               {meta.programsConsidered} programs analyzed
             </span>
@@ -532,7 +497,6 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
           <div className="px-4 md:px-[22px] py-2.5 bg-gradient-to-r from-green-soft to-bg border-b border-border flex items-center gap-2">
             <span className="text-[0.85rem]">🎯</span>
             <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-brand-green">Your next moves</span>
-            <span className="text-[0.6rem] text-text-tertiary font-medium">— {stageLabel} stage</span>
           </div>
           {currentSteps.map((step, i) => (
             <StepCard key={`c-${i}`} step={step} isLast={i === currentSteps.length - 1 && futureSteps.length === 0} isHorizon={false} animDelay={i * 0.08} onFollowUp={onChatFollowUp} />
@@ -546,7 +510,6 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
           <div className="px-4 md:px-[22px] py-2.5 bg-gradient-to-r from-[#f3e8ff] to-bg-secondary border-b border-border flex items-center gap-2">
             <span className="text-[0.85rem]">🔭</span>
             <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-[#6b21a8]">Looking ahead</span>
-            <span className="text-[0.6rem] text-text-tertiary font-medium">— {nextStageLabel} stage</span>
           </div>
           {futureSteps.map((step, i) => (
             <StepCard key={`f-${i}`} step={step} isLast={i === futureSteps.length - 1} isHorizon={true} animDelay={(currentSteps.length + i) * 0.08} onFollowUp={onChatFollowUp} />
@@ -608,28 +571,6 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
         }
         return null;
       })()}
-
-      {/* ── Follow-up chips (stage-aware) ────────────────────────────── */}
-      <div className="mt-3 mb-4 max-w-full overflow-hidden">
-        <div className="text-[0.65rem] font-bold text-text-tertiary tracking-[0.08em] uppercase mb-1.5">
-          Keep exploring
-        </div>
-        <div className="flex gap-1.5 flex-wrap max-w-full">
-          {getStageChips(
-            stage,
-            pathway.steps[0]?.program_name || "",
-            provinces,
-            !!pathway.gap_warning,
-          ).map((chip, i) => (
-            <button
-              key={i}
-              onClick={() => onChatFollowUp(chip.q)}
-              className="bg-bg-secondary border border-border text-text-secondary cursor-pointer font-sans transition-all duration-[120ms] hover:border-brand-green hover:text-text hover:bg-bg-tertiary"
-              style={{ padding: "6px 12px", borderRadius: 100, fontSize: "0.72rem", fontWeight: 500, whiteSpace: "nowrap" }}
-            >{chip.label}</button>
-          ))}
-        </div>
-      </div>
 
       {/* ── Email capture ────────────────────────────────────────────── */}
       <EmailCapture stage={stage} provinces={provinces} description={description} />

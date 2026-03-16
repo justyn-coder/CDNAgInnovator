@@ -140,32 +140,7 @@ function ChatBubble({ msg }: { msg: Message }) {
   );
 }
 
-function WizardSummary({ snapshot, onReset }: { snapshot: WizardSnapshot; onReset: () => void }) {
-  const needMeta = snapshot.need ? NEED_META[snapshot.need] : null;
-  return (
-    <div className="mx-4 mb-3.5 px-3 py-1.5 bg-transparent border border-border rounded flex items-center gap-1.5 flex-wrap text-[0.65rem]">
-      {snapshot.stage && (
-        <span className="bg-transparent text-text-secondary px-2 py-0.5 rounded-full font-semibold text-[0.65rem] border border-border">
-          {STAGE_LABELS[snapshot.stage] || snapshot.stage}
-        </span>
-      )}
-      {snapshot.provinces.map(p => (
-        <span key={p} className="bg-transparent text-text-secondary px-2 py-0.5 rounded-full text-[0.65rem] font-semibold border border-border">
-          {p}
-        </span>
-      ))}
-      {needMeta && (
-        <span className="bg-transparent text-text-secondary px-2 py-0.5 rounded-full text-[0.65rem] font-semibold border border-border">
-          {needMeta.label}
-        </span>
-      )}
-      <span className="flex-1" />
-      <button onClick={onReset} className="bg-transparent border-none px-2 py-1 text-[0.72rem] text-text-tertiary cursor-pointer underline">
-        Start over
-      </button>
-    </div>
-  );
-}
+
 
 function CategoryPill({ cat }: { cat: string }) {
   const m = CAT_META[cat] || { label: cat, textCls: "text-[#555]", bgCls: "bg-[#eee]" };
@@ -589,7 +564,7 @@ function BrowsePanel({
       </div>
 
       {/* Feedback prompt */}
-      {onFeedback && !orgLabel && (
+      {onFeedback && (
         <div className="px-[18px] py-2 border-t border-border bg-brand-gold shrink-0 text-center">
           <button onClick={onFeedback} className="bg-transparent border-none text-white text-[0.72rem] font-semibold p-0">
             💬 See something missing? Tell us →
@@ -1162,10 +1137,6 @@ export default function Navigator() {
             <Wizard onComplete={handleWizardComplete} />
           )}
 
-          {!isEco && !showWizard && wizardSnapshot && (
-            <WizardSummary snapshot={wizardSnapshot} onReset={handleReset} />
-          )}
-
           {!isEco && showPathway && wizardSnapshot && (
             <PathwayCard
               description={wizardDescription}
@@ -1173,6 +1144,8 @@ export default function Navigator() {
               provinces={wizardSnapshot.provinces}
               need={wizardSnapshot.need}
               onChatFollowUp={handlePathwayFollowUp}
+              onReset={handleReset}
+              needLabel={wizardSnapshot.need ? (NEED_META[wizardSnapshot.need]?.label || wizardSnapshot.need) : undefined}
               expansionProvinces={wizardSnapshot.expansionProvinces}
               completedPrograms={wizardSnapshot.completedPrograms}
             />
@@ -1220,7 +1193,7 @@ export default function Navigator() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder="Ask me anything about Canada's ag ecosystem…"
+              placeholder="AI Chat: Ask me anything about Canada's ag ecosystem…"
               rows={1}
               className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3 py-2 md:px-3.5 md:py-2.5 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-gradient-to-r from-[#E8F0EB] to-[#F5F3ED] transition-all font-sans focus:bg-white focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
