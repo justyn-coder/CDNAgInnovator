@@ -216,7 +216,7 @@ export default function Home() {
                   className="text-center leading-[1.6] mb-4"
                   style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 15, color: "#6b6b6b" }}
                 >
-                  We've mapped {programCount} programs across 10 provinces — including yours. Before we share this with founders, we want to make sure we got it right.
+                  We've mapped {programCount} programs across 10 provinces and built AI-powered pathways that sequence them for founders by stage and province. Yours are in there — but before we send founders through, we need your eyes on it.
                 </p>
 
                 {/* Highlight box */}
@@ -232,7 +232,7 @@ export default function Home() {
                     lineHeight: 1.5,
                   }}
                 >
-                  You can review your listing, flag corrections, and see where founders in your province have coverage gaps.
+                  Review how your programs appear. Flag anything we got wrong. See where founders in your region have coverage gaps.
                 </div>
 
                 {/* CTA */}
@@ -261,7 +261,10 @@ export default function Home() {
                   className="text-center mt-4"
                   style={{ fontSize: 12, color: "#999", borderTop: "0.5px solid #E5E5E0", paddingTop: 12 }}
                 >
-                  Built by Justyn Szymczyk · <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer" style={{ color: "#D4A828", fontWeight: 500 }}>BestInShow.ag</a>
+                  Built by{" "}
+                  <a href="https://www.linkedin.com/in/justynszymczyk/" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, color: "inherit" }}>Justyn Szymczyk</a>
+                  {" "}<MapleLeaf size={14} className="inline-block align-[-2px]" />{" "}
+                  · <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer" style={{ color: "#D4A843", fontWeight: 500 }}>BestInShow.ag</a>
                 </div>
 
                 {/* Secondary link */}
@@ -397,7 +400,7 @@ export default function Home() {
           </p>
           <p className="text-[0.82rem] text-text-secondary leading-[1.65] mb-6">
             Want to help build a better tool for Canadian agtech?{" "}
-            <a href="mailto:justyn@trellisag.ca" className="text-brand-green font-medium underline">
+            <a href="mailto:justyn@bestinshow.ag" className="text-brand-green font-medium underline">
               Let's talk
             </a>.
           </p>

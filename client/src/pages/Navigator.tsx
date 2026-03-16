@@ -1192,7 +1192,7 @@ export default function Navigator() {
           <div className="px-4 md:px-6 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
             <div className="flex-1 min-w-0 relative">
               {!input && !chatFocused && (
-                <div className="absolute left-3 md:left-3.5 top-2 md:top-2.5 pointer-events-none">
+                <div className="absolute inset-0 flex flex-col justify-center pointer-events-none pl-3 md:pl-3.5">
                   <div className="text-[0.82rem] md:text-[0.85rem] text-text-tertiary leading-tight">
                     <span className="font-semibold">AI Chat:</span> Ask me anything.
                   </div>
@@ -1208,7 +1208,8 @@ export default function Navigator() {
                 onFocus={() => setChatFocused(true)}
                 onBlur={() => setChatFocused(false)}
                 placeholder=""
-                rows={2}
+                rows={1}
+                style={{ minHeight: "44px" }}
                 className="w-full resize-none border-[1.5px] border-border rounded-lg px-3 py-2 md:px-3.5 md:py-2.5 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-white transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
               />
             </div>
