@@ -59,11 +59,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Detect province mention for filtering
     const provMap: Record<string, string[]> = {
-      alberta: ["AB"], "ab ": ["AB"], ontario: ["ON"], "on ": ["ON"],
-      saskatchewan: ["SK"], " sk ": ["SK"], manitoba: ["MB"], " mb ": ["MB"],
-      "british columbia": ["BC"], " bc ": ["BC"], quebec: ["QC"], " qc ": ["QC"],
+      alberta: ["AB"], ontario: ["ON"],
+      saskatchewan: ["SK"], manitoba: ["MB"],
+      "british columbia": ["BC"], quebec: ["QC"],
       atlantic: ["NB", "NS", "PE", "NL"], "new brunswick": ["NB"], "nova scotia": ["NS"],
       "prince edward": ["PE"], newfoundland: ["NL"], national: ["National"],
+    };
+    // Also match province codes from wizard context prefix (e.g. "Province: ON")
+    const provCodeMap: Record<string, string> = {
+      "ab": "AB", "on": "ON", "sk": "SK", "mb": "MB", "bc": "BC",
+      "qc": "QC", "nb": "NB", "ns": "NS", "pe": "PE", "nl": "NL",
     };
     const msgLower = message.toLowerCase();
     const detectedProvs: string[] = [];
@@ -74,6 +79,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
     }
+    // Match "Province: ON" or "Province: AB, SK" patterns from wizard context
+    const provContextMatch = msgLower.match(/province:\s*([a-z,\s]+?)(?:\.|]|\n)/);
+    if (provContextMatch) {
+      for (const code of provContextMatch[1].split(",").map(s => s.trim())) {
+        const mapped = provCodeMap[code];
+        if (mapped && !detectedProvs.includes(mapped)) detectedProvs.push(mapped);
+      }
+    }
+
+    // Detect stage from wizard context prefix (e.g. "Stage: MVP")
+    const stageMatch = msgLower.match(/stage:\s*(idea|mvp|pilot|comm|scale)/);
+    const detectedStage = stageMatch ? stageMatch[1].charAt(0).toUpperCase() + stageMatch[1].slice(1) : "";
 
     // ── Name-match lookup: check if user is asking about a specific program ──
     const nameMatches = await client.unsafe(
@@ -81,15 +98,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       [`%${msgLower.replace(/[^a-z0-9 ]/g, "").trim()}%`, `%${msgLower.split(" ").filter(w => w.length > 3).join("%")}%`]
     );
 
-    // Fetch relevant programs (broader context)
-    const contextRows = detectedProvs.length > 0
-      ? await client.unsafe(
-          `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE province && $1 OR 'National' = ANY(province) ORDER BY name LIMIT 15`,
-          [detectedProvs]
-        )
-      : await client.unsafe(
-          `SELECT name, category, description, use_case, province, stage, website FROM programs ORDER BY name LIMIT 15`
-        );
+    // Fetch relevant programs (broader context) — filter by province AND stage when available
+    let contextRows: any[];
+    if (detectedProvs.length > 0 && detectedStage) {
+      contextRows = await client.unsafe(
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE (province && $1 OR 'National' = ANY(province)) AND $2 = ANY(stage) ORDER BY name LIMIT 20`,
+        [detectedProvs, detectedStage]
+      );
+    } else if (detectedProvs.length > 0) {
+      contextRows = await client.unsafe(
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE province && $1 OR 'National' = ANY(province) ORDER BY name LIMIT 20`,
+        [detectedProvs]
+      );
+    } else if (detectedStage) {
+      contextRows = await client.unsafe(
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE $1 = ANY(stage) ORDER BY name LIMIT 20`,
+        [detectedStage]
+      );
+    } else {
+      contextRows = await client.unsafe(
+        `SELECT name, category, description, use_case, province, stage, website FROM programs ORDER BY name LIMIT 20`
+      );
+    }
 
     // Merge: name matches first, then context rows (deduplicated)
     const seenNames = new Set(nameMatches.map((r: any) => r.name));
@@ -152,7 +182,7 @@ ${finalKnowledge.length ? `ECOSYSTEM INTELLIGENCE:\n${finalKnowledge.map((k: any
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 1024,
+        max_tokens: 2048,
         system: (mode === "ec" ? SYSTEM_EC : SYSTEM_E) + "\n\n" + context,
         messages: [
           ...history.slice(-6),
