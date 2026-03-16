@@ -54,19 +54,23 @@ export default function Home() {
       if (mode === "operator") setUrlMode("operator");
       if (org) setOrgParam(org);
 
-      // Silent visitor tracking via ?ref= param
+      // Silent visitor tracking via ?ref= param (once per session)
       if (ref) {
         try { localStorage.setItem("trellis_ref", ref); } catch {}
-        fetch("/api/submissions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            programName: "VISIT",
-            bestFor: `ref=${ref}, mode=${mode || "founder"}, org=${org || "none"}`,
-            submitterName: ref,
-            submitterEmail: `visit-${Date.now()}@track`,
-          }),
-        }).catch(() => {});
+        const refKey = `trellis_visit_logged_${ref}`;
+        if (!sessionStorage.getItem(refKey)) {
+          try { sessionStorage.setItem(refKey, "true"); } catch {}
+          fetch("/api/submissions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              programName: "VISIT",
+              bestFor: `ref=${ref}, mode=${mode || "founder"}, org=${org || "none"}`,
+              submitterName: ref,
+              submitterEmail: `visit-${Date.now()}@track`,
+            }),
+          }).catch(() => {});
+        }
       }
 
       // Show popup if not already welcomed
