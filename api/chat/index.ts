@@ -14,6 +14,8 @@ Be direct and specific. Always recommend 3-5 concrete programs with a reason for
 
 End with a gap or watch-out relevant to their stage.
 
+IMPORTANT: You have access to a curated database of 400+ Canadian agtech programs. If the user asks about a specific program and it appears in the ECOSYSTEM DATA below, use that data. If it does NOT appear, say "Let me check — I may not have loaded that program in this context. Try asking again or browse the full database." NEVER say a program doesn't exist or isn't in the database — it may simply not have been included in this query's results.
+
 ADVISOR CHANNEL INSIGHT: For any founder at Pilot stage or beyond whose product will be used by farmers/growers, flag if they haven't mentioned engaging the agronomist/CCA advisor channel. In Canadian agriculture, going direct-to-farmer without trusted advisor endorsement is the #1 adoption mistake. Key programs for advisor access: AgSphere (AB), Farming Smarter Field-Tested (AB), CCA networks (Prairies), provincial agrologist institutes. Frame this constructively: "The fastest path to farmer adoption runs through their trusted crop advisor."`;
 
 const SYSTEM_EC = `You are a Canadian agtech ecosystem analyst. Today's date is ${new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}. You help ecosystem operators (accelerator managers, government program officers, investors) understand gaps, coverage, and strategic opportunities in the Canadian agtech support landscape.
@@ -73,8 +75,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // Fetch relevant programs
-    const rows = detectedProvs.length > 0
+    // ── Name-match lookup: check if user is asking about a specific program ──
+    const nameMatches = await client.unsafe(
+      `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE name ILIKE $1 OR name ILIKE $2 LIMIT 5`,
+      [`%${msgLower.replace(/[^a-z0-9 ]/g, "").trim()}%`, `%${msgLower.split(" ").filter(w => w.length > 3).join("%")}%`]
+    );
+
+    // Fetch relevant programs (broader context)
+    const contextRows = detectedProvs.length > 0
       ? await client.unsafe(
           `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE province && $1 OR 'National' = ANY(province) ORDER BY name LIMIT 15`,
           [detectedProvs]
@@ -82,6 +90,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       : await client.unsafe(
           `SELECT name, category, description, use_case, province, stage, website FROM programs ORDER BY name LIMIT 15`
         );
+
+    // Merge: name matches first, then context rows (deduplicated)
+    const seenNames = new Set(nameMatches.map((r: any) => r.name));
+    const rows = [...nameMatches, ...contextRows.filter((r: any) => !seenNames.has(r.name))];
 
     // ── Smart knowledge retrieval ──────────────────────────────────────
     // Strategy: pull entries that match by province OR by tag overlap with message keywords
