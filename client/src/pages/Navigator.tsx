@@ -1193,9 +1193,9 @@ export default function Navigator() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-              placeholder="Ask about programs, gaps, or next steps…"
+              placeholder="Ask about programs, gaps, next steps…"
               rows={1}
-              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3 py-2 md:px-3.5 md:py-2.5 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-gradient-to-r from-[#E8F0EB] to-[#F5F3ED] transition-all font-sans focus:bg-white focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
+              className="flex-1 min-w-0 resize-none border-[1.5px] border-border rounded-lg px-3 py-2.5 md:px-3.5 md:py-3 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-white transition-all font-sans placeholder:text-text-tertiary placeholder:font-normal focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
             />
             <button
               onClick={() => send()}
