@@ -387,7 +387,7 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <div className="w-10 h-px bg-brand-gold mx-auto mt-4 md:mt-10 mb-4 md:mb-6" />
+        <div className="w-10 h-px bg-brand-gold mx-auto mt-4 md:mt-6 mb-4 md:mb-5" />
         <div className="text-center max-w-[480px] mx-auto px-4">
           <p className="text-[0.82rem] text-text-secondary leading-[1.65] mb-3">
             {programCount} programs. 10 provinces. AI-powered pathways built from public data — and one very stubborn spreadsheet.
