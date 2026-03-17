@@ -285,7 +285,23 @@ function EmailCapture({ stage, provinces, description, productType }: {
     return () => clearTimeout(timer);
   }, [dismissed, submitted]);
 
-  if (!visible || dismissed || submitted) return null;
+  if (!visible || dismissed) return null;
+
+  if (submitted) return (
+    <div
+      className="mt-4 animate-fade-in-up"
+      style={{
+        background: "#E8F5E9",
+        border: "0.5px solid rgba(76,175,80,0.3)",
+        borderRadius: 10,
+        padding: "16px 16px",
+      }}
+    >
+      <div style={{ fontSize: 14, fontWeight: 500, color: "#2E7D32" }}>
+        ✓ You're signed up! We'll notify you when new programs match your profile.
+      </div>
+    </div>
+  );
 
   async function submit() {
     if (!email.trim()) return;
