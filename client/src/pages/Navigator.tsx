@@ -693,7 +693,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
 // ── Loading Messages ─────────────────────────────────────────────────────────
 function LoadingMessages({ programCount }: { programCount?: number | null }) {
   const LOADING_MSGS = [
-    `Searching across ${programCount ?? 400} programs…`,
+    `Searching across ${programCount ?? 410} programs…`,
     "This usually takes 10–15 seconds — hang tight.",
     "Cross-referencing with ecosystem insights…",
     "Almost there…",
