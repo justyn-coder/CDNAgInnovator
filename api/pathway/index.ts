@@ -244,6 +244,7 @@ Generate the pathway now. Remember: prioritize programs whose description closel
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 2000,
+        temperature: 0,
         system: SYSTEM_PROMPT,
         messages: [{ role: "user", content: userMessage }],
       }),
