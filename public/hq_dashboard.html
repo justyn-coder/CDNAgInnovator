@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f1117;--card:#1a1d27;--text:#e0e0e0;--muted:#888;--border:#2a2d37;
+  --green:#2d6a4f;--blue:#1565c0;--amber:#f9a825;--gray:#616161;--purple:#7b1fa2;
+  --trellis:#26a69a;--bis:#ff7043;--winery:#ad1457;--kulture:#ec407a;--general:#78909c;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.5;min-height:100vh}
+.container{max-width:800px;margin:0 auto;padding:16px}
+a{color:var(--amber);text-decoration:none}
+a:hover{text-decoration:underline}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:8px}
+.header-left h1{font-size:24px;font-weight:700;letter-spacing:-0.5px}
+.header-right{text-align:right;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.header-counts{margin-top:2px;font-size:11px}
+.header-counts span{color:var(--text)}
+.header-updated{font-size:10px;margin-top:2px;opacity:0.6}
+.header-actions{display:flex;gap:8px;align-items:center;margin-top:4px}
+.btn-add{background:transparent;border:1px solid var(--border);color:var(--text);padding:4px 12px;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:11px}
+.btn-add:hover{border-color:var(--text)}
+.section{margin-bottom:24px}
+.section-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:default;user-select:none}
+.section-header.collapsible{cursor:pointer}
+.section-title{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.section-count{font-family:var(--mono);font-size:10px;background:var(--border);color:var(--text);padding:1px 6px;border-radius:3px}
+.section-body.collapsed{display:none}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;border-left:3px solid var(--gray);transition:opacity 0.2s}
+.card.fading{opacity:0}
+.card-action{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.3}
+.card-title{font-size:13px;color:var(--muted);margin-bottom:8px}
+.card-pills{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.card-summary{font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.5}
+.card-deliverable{margin-bottom:10px}
+.card-deliverable a{font-size:12px}
+.card-why{font-size:11px;color:var(--muted);cursor:pointer;margin-bottom:8px;font-family:var(--mono);display:inline-block}
+.card-why:hover{color:var(--text)}
+.card-notes{font-size:12px;color:var(--muted);padding:8px 12px;border-left:2px solid var(--border);margin-bottom:10px;white-space:pre-wrap;line-height:1.5;display:none;background:rgba(0,0,0,0.2);border-radius:0 6px 6px 0}
+.card-notes.visible{display:block}
+.card-buttons{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-question{font-size:13px;padding:8px 12px;background:rgba(255,255,255,0.03);border-left:2px solid var(--amber);margin-bottom:10px;line-height:1.5}
+.reply-row{display:flex;gap:6px;margin-top:8px}
+.reply-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;min-height:44px}
+.reply-input:focus{border-color:var(--muted)}
+.compact-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:4px;font-size:13px}
+.compact-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compact-meta{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+.pill{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:3px 8px;border-radius:4px;display:inline-block;line-height:1.2}
+.pill-goal{color:#e8f5e9}
+.pill-goal[data-goal="revenue"]{background:var(--green)}
+.pill-goal[data-goal="data_quality"]{background:var(--blue);color:#e3f2fd}
+.pill-goal[data-goal="pmf_signal"]{background:var(--amber);color:#1a1d27}
+.pill-goal[data-goal="infrastructure"]{background:var(--gray)}
+.pill-goal[data-goal="relationship"]{background:var(--purple);color:#f3e5f5}
+.pill-track{background:transparent;border:1px solid}
+.pill-track[data-track="trellis"]{border-color:var(--trellis);color:var(--trellis)}
+.pill-track[data-track="bis"]{border-color:var(--bis);color:var(--bis)}
+.pill-track[data-track="winery"]{border-color:var(--winery);color:var(--winery)}
+.pill-track[data-track="kulture"]{border-color:var(--kulture);color:var(--kulture)}
+.pill-track[data-track="general"]{border-color:var(--general);color:var(--general)}
+.pill-complexity{background:transparent;border:1px solid}
+.pill-complexity[data-cx="quick"]{border-color:var(--green);color:#4caf50}
+.pill-complexity[data-cx="deep"]{border-color:var(--amber);color:var(--amber)}
+.pill-ai{background:transparent;border:1px solid var(--muted);color:var(--muted)}
+.pill-effort{background:var(--border);color:var(--text)}
+.btn{font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer;border:1px solid;background:transparent;min-height:44px;display:inline-flex;align-items:center;transition:opacity 0.15s}
+.btn:hover{opacity:0.8}
+.btn-approve{border-color:var(--green);color:#4caf50}
+.btn-reject{border-color:#c62828;color:#ef5350}
+.btn-chat{border-color:var(--amber);color:var(--amber)}
+.btn-reply{border-color:var(--trellis);color:var(--trellis);min-height:44px}
+.btn-kill{background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:10px;cursor:pointer;margin-left:auto;padding:4px 8px}
+.btn-kill:hover{color:#ef5350}
+.btn-save{border-color:var(--green);color:#4caf50}
+.btn-cancel{border-color:var(--muted);color:var(--muted)}
+.kill-confirm{padding:16px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.kill-confirm button{margin:0 4px}
+.reject-row{display:flex;gap:6px;margin-top:8px;width:100%}
+.toast{position:fixed;top:16px;right:16px;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:8px 16px;border-radius:6px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:1000}
+.toast.show{opacity:1}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:500px;margin:16px}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:16px}
+.modal label{display:block;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px;margin-top:12px}
+.modal input,.modal select,.modal textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--font);font-size:13px;outline:none}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:var(--muted)}
+.modal select{appearance:auto}
+.modal textarea{resize:vertical}
+.modal-buttons{display:flex;gap:8px;margin-top:16px}
+@media(max-width:600px){.modal{max-width:100%;margin:0;border-radius:0;min-height:100vh}}
+.loading{text-align:center;padding:60px 20px;font-family:var(--mono);font-size:14px;color:var(--muted);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:0.4}50%{opacity:1}}
+.empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+.done-row{display:flex;align-items:center;gap:8px;padding:6px 12px;font-size:12px;color:var(--muted)}
+.done-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.done-time{font-family:var(--mono);font-size:10px;white-space:nowrap}
+.error-msg{text-align:center;padding:40px 20px;color:#ef5350;font-family:var(--mono);font-size:13px}
+.error-msg .retry{color:var(--amber);cursor:pointer;display:inline-block;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="container" id="app"><div class="loading">Loading HQ...</div></div>
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2>Add Task</h2>
+    <label>ID</label><input type="text" id="m-id" placeholder="e.g. t28 or b5">
+    <label>Title</label><input type="text" id="m-title" placeholder="What needs to happen">
+    <label>Track</label>
+    <select id="m-track"><option value="general" selected>General</option><option value="trellis">Trellis</option><option value="bis">BIS</option><option value="winery">Winery</option><option value="kulture">Kulture</option></select>
+    <label>Goal</label>
+    <select id="m-goal"><option value="infrastructure">Infrastructure</option><option value="revenue">Revenue</option><option value="data_quality">Data Quality</option><option value="pmf_signal">PMF Signal</option><option value="relationship">Relationship</option></select>
+    <label>Context</label><textarea id="m-context" rows="3" placeholder="Background info"></textarea>
+    <div class="modal-buttons"><button class="btn btn-save" onclick="saveTask()">Save</button><button class="btn btn-cancel" onclick="closeModal()">Cancel</button></div>
+  </div>
+</div>
+<script>
+const SB='https://slttpknnuthbttjuzrnz.supabase.co',KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsdHRwa25udXRoYnR0anV6cm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzMyODIsImV4cCI6MjA4ODY0OTI4Mn0.K9uHjZflXEH-InjGeUYnJivCKyls3lVE655pHy10mzE',CL='https://claude.ai/project/019cb441-6687-720b-b2aa-38b38bd69d31';
+const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+const GC={revenue:'#2d6a4f',data_quality:'#1565c0',pmf_signal:'#f9a825',infrastructure:'#616161',relationship:'#7b1fa2'};
+let tasks=[],lastF=null,col={progress:true,next:true,blocked:true,done:true,killed:true};
+
+function e(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function gc(g){return GC[g]||'#616161'}
+function rt(d){if(!d)return'';const s=Math.floor((Date.now()-new Date(d))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
+function bs(s){return tasks.filter(t=>Array.isArray(s)?s.includes(t.status):t.status===s)}
+function pg(g){return g?'<span class="pill pill-goal" data-goal="'+e(g)+'">'+e(g).replace(/_/g,' ')+'</span>':''}
+function pt(t){return t?'<span class="pill pill-track" data-track="'+e(t)+'">'+e(t)+'</span>':''}
+function pc(c){return c?'<span class="pill pill-complexity" data-cx="'+e(c)+'">'+e(c)+'</span>':''}
+function pa(a){return a?'<span class="pill pill-ai">AI</span>':''}
+function pe(f){return f?'<span class="pill pill-effort">'+e(f)+'</span>':''}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+
+async function load(){
+  try{
+    const r=await fetch(SB+'/rest/v1/hq_tasks?select=*&order=priority.asc,created_at.asc',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    tasks=await r.json();lastF=new Date();render();
+  }catch(err){document.getElementById('app').innerHTML='<div class="error-msg">Failed to load: '+e(err.message)+'<br><span class="retry" onclick="load()">Retry</span></div>'}
+}
+
+async function patch(id,data){
+  data.updated_at=new Date().toISOString();
+  try{await fetch(SB+'/rest/v1/hq_tasks?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(data)});await load()}catch(err){toast('Error: '+err.message)}
+}
+
+function render(){
+  const rv=bs('review'),ik=bs('intake'),ip=bs(['preparing','in_progress']),nx=bs('next'),bl=bs('blocked');
+  const dn=bs('done').sort((a,b)=>new Date(b.completed_at||b.updated_at)-new Date(a.completed_at||a.updated_at)).slice(0,10);
+  const kl=bs('killed');const df=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  let h='<div class="header"><div class="header-left"><h1>HQ</h1></div><div class="header-right"><div>'+df+'</div><div class="header-counts"><span>'+rv.length+'</span> review · <span>'+ik.length+'</span> intake · <span>'+nx.length+'</span> next</div><div class="header-updated">Updated '+rt(lastF)+'</div><div class="header-actions"><a href="'+CL+'" target="_blank" style="font-family:var(--mono);font-size:11px">Open Claude</a> <button class="btn-add" onclick="openModal()">+ Add task</button></div></div></div>';
+
+  h+='<div class="section"><div class="section-header"><span class="section-title">REVIEW</span><span class="section-count">'+rv.length+'</span></div>';
+  if(!rv.length)h+='<div class="empty">✓ Nothing to review. All clear.</div>';
+  else rv.forEach(t=>{const q=t.review_complexity==='quick';h+='<div class="card" id="c-'+e(t.id)+'" style="border-left-color:'+gc(t.goal)+'"><div class="card-action">'+e(t.action_required||'No action specified')+'</div><div class="card-title">'+e(t.id)+' · '+e(t.title)+'</div><div class="card-pills">'+pg(t.goal)+pt(t.track)+pc(t.review_complexity)+pa(t.auto_generated)+'</div>'+(t.deliverable_summary?'<div class="card-summary">'+e(t.deliverable_summary)+'</div>':'')+(t.deliverable_url?'<div class="card-deliverable"><a href="'+e(t.deliverable_url)+'" target="_blank">Open deliverable →</a></div>':'')+(t.review_notes?'<div class="card-why" onclick="document.getElementById(\'n-'+e(t.id)+'\').classList.toggle(\'visible\')">Why?</div><div class="card-notes" id="n-'+e(t.id)+'">'+e(t.review_notes)+'</div>':'')+'<div class="card-buttons" id="b-'+e(t.id)+'">'+(q?'<button class="btn btn-approve" onclick="doApprove(\''+e(t.id)+'\')">✓ Approve</button><button class="btn btn-reject" onclick="showReject(\''+e(t.id)+'\')">✗ Reject</button>':'<button class="btn btn-chat" onclick="copyChat(\''+e(t.id)+'\')">Open in Chat</button>')+'<span class="btn-kill" onclick="showKill(\''+e(t.id)+'\')">Kill</span></div></div>'});
+  h+='</div>';
+
+  if(ik.length){h+='<div class="section"><div class="section-header"><span class="section-title">INTAKE</span><span class="section-count">'+ik.length+'</span></div>';ik.forEach(t=>{h+='<div class="card" style="border-left-color:'+gc(t.goal)+'"><div style="font-size:14px;font-weight:700;margin-bottom:4px">'+e(t.title)+'</div><div class="card-question">'+e(t.action_required||'No question')+'</div><div class="card-pills">'+pg(t.goal)+pt(t.track)+'</div><div class="reply-row"><input class="reply-input" id="r-'+e(t.id)+'" placeholder="Your reply..."><button class="btn btn-reply" onclick="sendReply(\''+e(t.id)+'\')">Reply</button></div></div>'});h+='</div>'}
+
+  if(ip.length){h+='<div class="section"><div class="section-header collapsible" onclick="tog(\'progress\')"><span class="section-title">'+(col.progress?'▸':'▾')+' IN PROGRESS</span><span class="section-count">'+ip.length+'</span></div><div class="section-body'+(col.progress?' collapsed':'')+'">';ip.forEach(t=>{h+='<div class="compact-row"><span class="compact-title">'+e(t.title)+'</span>'+pg(t.goal)+pt(t.track)+'<span class="compact-meta">'+e(t.tools||'')+'</span>'+pe(t.effort)+'</div>'});h+='</div></div>'}
+
+  if(nx.length){h+='<div class="section"><div class="section-header collapsible" onclick="tog(\'next\')"><span class="section-title">'+(col.next?'▸':'▾')+' UP NEXT</span><span class="section-count">'+nx.length+'</span></div><div class="section-body'+(col.next?' collapsed':'')+'">';nx.forEach(t=>{h+='<div class="compact-row"><span class="compact-title">'+e(t.title)+'</span>'+pg(t.goal)+pt(t.track)+'<span class="compact-meta">'+e(t.tools||'')+'</span>'+pe(t.effort)+'</div>'});h+='</div></div>'}
+
+  if(bl.length){h+='<div class="section"><div class="section-header collapsible" onclick="tog(\'blocked\')"><span class="section-title">'+(col.blocked?'▸':'▾')+' BLOCKED</span><span class="section-count">'+bl.length+'</span></div><div class="section-body'+(col.blocked?' collapsed':'')+'">';bl.forEach(t=>{h+='<div class="compact-row"><span class="compact-title">'+e(t.title)+'</span>'+(t.depends_on?'<span class="compact-meta">← '+e(t.depends_on)+'</span>':'')+'</div>'});h+='</div></div>'}
+
+  if(dn.length){h+='<div class="section"><div class="section-header collapsible" onclick="tog(\'done\')"><span class="section-title">'+(col.done?'▸':'▾')+' DONE</span><span class="section-count">'+dn.length+'</span></div><div class="section-body'+(col.done?' collapsed':'')+'">';dn.forEach(t=>{h+='<div class="done-row"><span class="done-title">'+e(t.title)+'</span>'+pt(t.track)+'<span class="done-time">'+rt(t.completed_at||t.updated_at)+'</span></div>'});h+='</div></div>'}
+
+  if(kl.length){h+='<div class="section"><div class="section-header collapsible" onclick="tog(\'killed\')"><span class="section-title">'+(col.killed?'▸':'▾')+' KILLED</span><span class="section-count">'+kl.length+'</span></div><div class="section-body'+(col.killed?' collapsed':'')+'">';kl.forEach(t=>{h+='<div class="done-row" style="opacity:0.5"><span class="done-title">'+e(t.title)+'</span><span class="done-time">'+rt(t.updated_at)+'</span></div>'});h+='</div></div>'}
+
+  document.getElementById('app').innerHTML=h;
+}
+
+function tog(id){col[id]=!col[id];render()}
+async function doApprove(id){const c=document.getElementById('c-'+id);if(c)c.classList.add('fading');setTimeout(()=>patch(id,{status:'approved'}),200)}
+function showReject(id){const b=document.getElementById('b-'+id);if(!b||b.querySelector('.reject-row'))return;const d=document.createElement('div');d.className='reject-row';d.innerHTML='<input class="reply-input" id="ri-'+id+'" placeholder="What should change?"><button class="btn btn-reject" onclick="doReject(\''+id+'\')">Send</button>';b.appendChild(d);document.getElementById('ri-'+id).focus()}
+async function doReject(id){const v=document.getElementById('ri-'+id)?.value?.trim();if(!v)return;const t=tasks.find(x=>x.id===id);await patch(id,{status:'intake',review_notes:'[REJECTED] '+v+'\n'+(t?.review_notes||'')})}
+function showKill(id){const c=document.getElementById('c-'+id);if(!c)return;c.dataset.bk=c.innerHTML;c.innerHTML='<div class="kill-confirm">Kill this task? <button class="btn btn-reject" onclick="patch(\''+id+'\',{status:\'killed\'})">Yes</button> <button class="btn btn-cancel" onclick="unkill(\''+id+'\')">No</button></div>'}
+function unkill(id){const c=document.getElementById('c-'+id);if(c&&c.dataset.bk)c.innerHTML=c.dataset.bk}
+async function sendReply(id){const v=document.getElementById('r-'+id)?.value?.trim();if(!v)return;const t=tasks.find(x=>x.id===id);await patch(id,{status:'preparing',context:'[REPLY] '+v+'\n'+(t?.context||'')})}
+function copyChat(id){const t=tasks.find(x=>x.id===id);if(!t)return;const txt='Working on task '+t.id+': '+t.title+'\n\nContext: '+(t.context||'None')+'\n\nAction required: '+(t.action_required||'None');if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast('Copied!')).catch(()=>fallbackCopy(txt))}else{fallbackCopy(txt)}}
+function fallbackCopy(txt){const a=document.createElement('textarea');a.value=txt;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.focus();a.select();try{document.execCommand('copy');toast('Copied!')}catch(x){toast('Copy failed')}document.body.removeChild(a)}
+function openModal(){document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open');['m-id','m-title','m-context'].forEach(i=>{const x=document.getElementById(i);if(x)x.value=''})}
+async function saveTask(){const id=document.getElementById('m-id').value.trim(),title=document.getElementById('m-title').value.trim();if(!id||!title){toast('ID and Title required');return}try{const r=await fetch(SB+'/rest/v1/hq_tasks',{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({id,title,track:document.getElementById('m-track').value,goal:document.getElementById('m-goal').value,context:document.getElementById('m-context').value.trim()||null,status:'intake',priority:50,auto_generated:false,source:'manual',created_at:new Date().toISOString()})});if(!r.ok)throw new Error('HTTP '+r.status);closeModal();await load();toast('Task added')}catch(x){toast('Error: '+x.message)}}
+load();setInterval(load,30000);
+</script>
+</body>
+</html>
