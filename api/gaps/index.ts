@@ -18,11 +18,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? await client.unsafe(
           `SELECT name, category, province, stage, website, description
            FROM programs
-           WHERE $1 = ANY(stage)`,
+           WHERE status NOT IN ('closed', 'dissolved', 'inactive')
+             AND $1 = ANY(stage)`,
           [stage]
         )
       : await client.unsafe(
-          `SELECT name, category, province, stage, website, description FROM programs`
+          `SELECT name, category, province, stage, website, description FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive')`
         );
 
     // Build cell map: "PROVINCE|CATEGORY" -> program list

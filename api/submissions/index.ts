@@ -47,6 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     sendNotification({ programName, bestFor, submitterName, submitterEmail }).catch(() => {});
     return res.status(201).json({ ok: true });
   } catch (e) {
-    return res.status(500).json({ error: String(e) });
+    console.error("Submission error:", e);
+    return res.status(500).json({ error: "Failed to save submission. Please try again." });
   }
 }

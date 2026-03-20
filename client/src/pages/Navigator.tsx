@@ -79,8 +79,13 @@ const ECO_SUGGESTIONS = [
 ];
 
 // ── Markdown renderer ───────────────────────────────────────────────────────
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function renderMarkdown(text: string): string {
-  let html = text
+  // Escape HTML first to prevent XSS, then apply markdown formatting
+  let html = escapeHtml(text)
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
@@ -1135,7 +1140,7 @@ export default function Navigator() {
           )}
 
           {!isEco && showWizard && (
-            <Wizard onComplete={handleWizardComplete} />
+            <Wizard onComplete={handleWizardComplete} programCount={programCount} />
           )}
 
           {!isEco && showPathway && wizardSnapshot && (

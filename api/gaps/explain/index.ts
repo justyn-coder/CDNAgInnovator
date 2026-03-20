@@ -140,25 +140,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const cellPrograms = stage && stage !== "All"
       ? await client.unsafe(
           `SELECT name, description, stage FROM programs
-           WHERE category = $1 AND $2 = ANY(province) AND $3 = ANY(stage)`,
+           WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND category = $1 AND $2 = ANY(province) AND $3 = ANY(stage)`,
           [category, province, stage]
         )
       : await client.unsafe(
           `SELECT name, description, stage FROM programs
-           WHERE category = $1 AND $2 = ANY(province)`,
+           WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND category = $1 AND $2 = ANY(province)`,
           [category, province]
         );
 
     // 2. Get unfiltered count (to detect stage mismatch)
     const unfilteredRows = await client.unsafe(
-      `SELECT COUNT(*) as cnt FROM programs WHERE category = $1 AND $2 = ANY(province)`,
+      `SELECT COUNT(*) as cnt FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND category = $1 AND $2 = ANY(province)`,
       [category, province]
     );
     const unfilteredCount = parseInt((unfilteredRows as any[])[0]?.cnt || "0", 10);
 
     // 3. Get national count for this category
     const nationalRows = await client.unsafe(
-      `SELECT COUNT(*) as cnt FROM programs WHERE category = $1 AND 'National' = ANY(province)`,
+      `SELECT COUNT(*) as cnt FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND category = $1 AND 'National' = ANY(province)`,
       [category]
     );
     const nationalCount = parseInt((nationalRows as any[])[0]?.cnt || "0", 10);
@@ -169,11 +169,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     for (const n of neighbors) {
       const nRows = stage && stage !== "All"
         ? await client.unsafe(
-            `SELECT COUNT(*) as cnt FROM programs WHERE category = $1 AND $2 = ANY(province) AND $3 = ANY(stage)`,
+            `SELECT COUNT(*) as cnt FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND category = $1 AND $2 = ANY(province) AND $3 = ANY(stage)`,
             [category, n, stage]
           )
         : await client.unsafe(
-            `SELECT COUNT(*) as cnt FROM programs WHERE category = $1 AND $2 = ANY(province)`,
+            `SELECT COUNT(*) as cnt FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND category = $1 AND $2 = ANY(province)`,
             [category, n]
           );
       neighborCounts[n] = parseInt((nRows as any[])[0]?.cnt || "0", 10);

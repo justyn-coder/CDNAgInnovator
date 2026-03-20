@@ -96,7 +96,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ── Name-match lookup: check if user is asking about a specific program ──
     const nameMatches = await client.unsafe(
-      `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE name ILIKE $1 OR name ILIKE $2 LIMIT 5`,
+      `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND (name ILIKE $1 OR name ILIKE $2) LIMIT 5`,
       [`%${msgLower.replace(/[^a-z0-9 ]/g, "").trim()}%`, `%${msgLower.split(" ").filter((w: string) => w.length > 3).join("%")}%`]
     );
 
@@ -104,22 +104,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let contextRows: any[];
     if (detectedProvs.length > 0 && detectedStage) {
       contextRows = await client.unsafe(
-        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE (province && $1 OR 'National' = ANY(province)) AND $2 = ANY(stage) ORDER BY name LIMIT 20`,
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND (province && $1 OR 'National' = ANY(province)) AND $2 = ANY(stage) ORDER BY name LIMIT 20`,
         [detectedProvs, detectedStage]
       );
     } else if (detectedProvs.length > 0) {
       contextRows = await client.unsafe(
-        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE province && $1 OR 'National' = ANY(province) ORDER BY name LIMIT 20`,
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND (province && $1 OR 'National' = ANY(province)) ORDER BY name LIMIT 20`,
         [detectedProvs]
       );
     } else if (detectedStage) {
       contextRows = await client.unsafe(
-        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE $1 = ANY(stage) ORDER BY name LIMIT 20`,
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND $1 = ANY(stage) ORDER BY name LIMIT 20`,
         [detectedStage]
       );
     } else {
       contextRows = await client.unsafe(
-        `SELECT name, category, description, use_case, province, stage, website FROM programs ORDER BY name LIMIT 20`
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') ORDER BY name LIMIT 20`
       );
     }
 
@@ -138,7 +138,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (searchTerms.length > 0 || provArray.length > 0) {
       // Build a relevance-scored query
       // Score = (number of matching tags) + (province match bonus)
-      const tagPattern = searchTerms.length > 0 ? searchTerms.join("|") : "NOMATCH";
+      // Escape any regex metacharacters and limit pattern length to prevent ReDoS
+      const safeTerms = searchTerms
+        .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+        .slice(0, 10);
+      const tagPattern = safeTerms.length > 0 ? safeTerms.join("|") : "NOMATCH";
       const provClause = provArray.length > 0
         ? `OR province && $2::text[] OR 'National' = ANY(province)`
         : "";
@@ -197,6 +201,7 @@ ${finalKnowledge.length ? `ECOSYSTEM INTELLIGENCE:\n${finalKnowledge.map((k: any
     const reply = data.content?.[0]?.text || "Something went wrong.";
     return res.status(200).json({ reply });
   } catch (e) {
-    return res.status(500).json({ error: String(e) });
+    console.error("Chat error:", e);
+    return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 }

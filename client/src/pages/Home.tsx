@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link } from "wouter";
 import { MapleLeaf } from "../components/TrellisLogo";
+const ResourceCenter = lazy(() => import("../components/ResourceCenter"));
 
 
 /** Inline trellis icon (no wordmark) for popup header */
@@ -36,6 +37,7 @@ function TrellisIcon({ size = 48 }: { size?: number }) {
 export default function Home() {
   const [count, setCount] = useState<number | null>(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [urlMode, setUrlMode] = useState<"founder" | "operator">("founder");
   const [orgParam, setOrgParam] = useState<string | null>(null);
 
@@ -284,7 +286,8 @@ export default function Home() {
       )}
 
       {/* ── Nav ─────────────────────────────────────────────── */}
-      <nav className="px-6 h-20 md:h-24 flex items-center justify-center border-b border-border sticky top-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
+      <nav className="px-6 h-20 md:h-24 flex items-center justify-between border-b border-border sticky top-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[20px] backdrop-saturate-[180%] z-[100]">
+        <div className="w-8" /> {/* Spacer for centering */}
         <div className="grid items-center" style={{ gridTemplateColumns: "auto 1fr", gridTemplateRows: "auto auto", columnGap: 8 }}>
           {/* Icon — spans both rows */}
           <svg viewBox="0 0 28 34" className="h-10 md:h-12 row-span-2" aria-hidden="true">
@@ -314,6 +317,14 @@ export default function Home() {
             Canada's AgTech Ecosystem
           </span>
         </div>
+        <button
+          onClick={() => setShowHelp(true)}
+          className="w-8 h-8 rounded-full border border-border bg-bg-secondary flex items-center justify-center text-text-secondary hover:text-brand-green hover:border-brand-green transition-colors"
+          aria-label="Resource Center"
+          title="Resource Center"
+        >
+          <span style={{ fontSize: 14, fontWeight: 600 }}>?</span>
+        </button>
       </nav>
 
       {/* ── Hero ─────────────────────────────────────────────── */}
@@ -419,6 +430,12 @@ export default function Home() {
           </p>
         </div>
       </main>
+
+      {showHelp && (
+        <Suspense fallback={null}>
+          <ResourceCenter onClose={() => setShowHelp(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }

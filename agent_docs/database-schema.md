@@ -4,7 +4,7 @@ Supabase Postgres — project `slttpknnuthbttjuzrnz` (ca-central-1).
 
 ## Tables
 
-### programs (347 rows as of March 13, 2026)
+### programs (410 rows as of March 18, 2026)
 
 Core directory of Canadian agtech support programs.
 
@@ -30,6 +30,7 @@ Core directory of Canadian agtech support programs.
 | mandate_stage | text[] | Stages the program is mandated to serve |
 | mentorship | boolean | Whether program includes mentorship |
 | capacity_notes | text | Notes on program capacity or waitlist |
+| deadline_notes | text | Intake deadlines, application windows, or timing notes |
 | status | text | Default "unverified". Values: unverified, verified, closed |
 | verified_at | date | When last verified |
 | verified_by | text | Who verified |
@@ -85,6 +86,58 @@ Stores both user feedback and program submissions.
 | created_at | timestamp | Auto-set |
 
 **Feedback vs submissions:** Differentiated by `program_name LIKE 'FEEDBACK%'`. Page context is auto-tagged in brackets, e.g. `"FEEDBACK: [pathway results]"`, `"FEEDBACK: [ecosystem chat]"`.
+
+---
+
+### contacts (60 rows as of March 19, 2026)
+
+Mini CRM for Justyn's professional network. Used to personalize communications and spot relationship patterns.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | serial PK | Auto-increment |
+| name | text NOT NULL | Contact name |
+| organization | text | Company / org |
+| role_title | text | Their title |
+| track | text[] | Which business tracks: `Trellis`, `BIS`, `Winery`, `Kulture`, `General` |
+| relationship_depth | text | `Hot`, `Warm`, `Lukewarm`, `Cold` |
+| email | text | Email address |
+| phone | text | Phone number |
+| linkedin | text | LinkedIn URL |
+| location | text | City/province |
+| professional_background | text | Who they are, what they do |
+| communication_style | text | How they prefer to communicate |
+| how_we_met | text | Context of first meeting |
+| priority | text | `A`, `B`, `C` |
+| status | text | `active`, `parked`, `nurture`, `closed` |
+| jtbd | text | Jobs To Be Done — what they're trying to accomplish |
+| what_they_offer | text | Intros, funding, validation, expertise they can provide |
+| what_they_need | text | What value Justyn can provide to them |
+| mutual_value | text | The win-win thesis |
+| intro_path | text | Who can make the intro |
+| follow_up_cadence | text | `weekly`, `biweekly`, `monthly`, `quarterly`, `as-needed` |
+| next_action | text | What to do next |
+| next_action_date | date | When follow-up is due |
+| tags | text[] | Flexible tags |
+| notes | text | Free-form notes |
+| created_at | timestamptz | Auto-set |
+| updated_at | timestamptz | Auto-set (trigger) |
+
+---
+
+### interactions (0 rows as of March 19, 2026)
+
+Touch log for contacts. Each meaningful interaction gets a row.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | serial PK | Auto-increment |
+| contact_id | integer FK → contacts | |
+| interaction_type | text NOT NULL | `email_sent`, `email_received`, `call`, `meeting`, `linkedin_dm`, `text`, `conference`, `intro_made` |
+| summary | text | What happened |
+| date | date NOT NULL | When |
+| next_step | text | What should follow |
+| created_at | timestamptz | Auto-set |
 
 ---
 

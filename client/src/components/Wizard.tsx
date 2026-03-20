@@ -24,6 +24,7 @@ interface Props {
     completedPrograms?: string[];
     otherPrograms?: string;
   }) => void;
+  programCount?: number | null;
 }
 
 const STAGES = [
@@ -93,7 +94,7 @@ const PLACEHOLDERS = [
 /** Back button classes */
 const backBtnCls = "bg-transparent border border-border rounded-sm px-4 py-2 text-[0.82rem] font-semibold text-text-secondary font-sans transition-all duration-100 hover:border-border-strong";
 
-export default function Wizard({ onComplete }: Props) {
+export default function Wizard({ onComplete, programCount }: Props) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<WizardResult & { needs: string[] }>({
     description: "", companyUrl: "", productTypes: [], stage: "", provinces: [], need: "", needs: [],
@@ -462,7 +463,7 @@ export default function Wizard({ onComplete }: Props) {
           Been through any Canadian programs already?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">
-          Search our database of 349+ Canadian programs. Helps us skip what you've already done.
+          Search our database of {programCount ?? 410}+ Canadian programs. Helps us skip what you've already done.
         </p>
 
         {/* Search input */}

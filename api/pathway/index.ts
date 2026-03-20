@@ -151,7 +151,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const rows = await client.unsafe(
       `SELECT name, category, description, use_case, province, stage, website, funding_type, funding_max_cad
        FROM programs
-       WHERE (
+       WHERE status NOT IN ('closed', 'dissolved', 'inactive')
+       AND (
          province && $1::text[]
          OR 'National' = ANY(province)
          ${provArray.length === 0 ? "OR TRUE" : ""}
@@ -175,7 +176,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     for (const cat of allCategories) {
       const countRows = await client.unsafe(
         `SELECT COUNT(*) as cnt FROM programs
-         WHERE category = $1
+         WHERE status NOT IN ('closed', 'dissolved', 'inactive')
+           AND category = $1
            AND (province && $2::text[] OR 'National' = ANY(province) ${provArray.length === 0 ? "OR TRUE" : ""})
            AND ($3 = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)`,
         [cat, `{${provArray.join(",")}}`, stage]
@@ -281,6 +283,6 @@ Generate the pathway now. Remember: prioritize programs whose description closel
     });
   } catch (e) {
     console.error("Pathway generation error:", e);
-    return res.status(500).json({ error: String(e) });
+    return res.status(500).json({ error: "Failed to generate pathway. Please try again." });
   }
 }
