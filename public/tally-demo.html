@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tally — Your Personal OS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0F0F0F;
+    --bg-card: #1A1A1A;
+    --bg-elevated: #242424;
+    --amber: #D4A828;
+    --amber-glow: rgba(212,168,40,0.25);
+    --gold-light: #F5E6B8;
+    --green: #48B87A;
+    --blue: #5B9FE4;
+    --text: #F5F3ED;
+    --text-sec: #9A9A90;
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .demo {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── Scene management ───────────────────────────────── */
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease;
+    will-change: transform, opacity;
+  }
+  .scene.active { opacity: 1; visibility: visible; }
+  .scene.leaving { opacity: 0; }
+
+  /* ── Ambient glow ───────────────────────────────────── */
+  .scene::after {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--amber-glow) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .scene > * { position: relative; z-index: 1; }
+
+  /* ── Scene 1: Title ─────────────────────────────────── */
+  .title-card { text-align: center; }
+  .logo {
+    font-family: var(--font-display);
+    font-size: 5rem;
+    color: var(--amber);
+    text-shadow: 0 0 60px var(--amber-glow);
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  .logo.on { animation: scaleIn 0.6s ease-out forwards; }
+  .tagline {
+    font-size: 1.4rem;
+    color: var(--gold-light);
+    margin-top: 12px;
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  .tagline.on { animation: fadeUp 0.5s ease-out 0.35s forwards; }
+
+  /* ── Scene 2: iPhone voice intake ───────────────────── */
+  .iphone {
+    width: 200px; height: 400px;
+    border-radius: 36px;
+    border: 3px solid #333;
+    background: var(--bg-card);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(212,168,40,0.08);
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  .iphone.on { animation: fadeUp 0.5s ease-out forwards; }
+  .iphone-notch {
+    width: 90px; height: 24px;
+    background: var(--bg);
+    border-radius: 0 0 16px 16px;
+    margin: 0 auto;
+  }
+  .iphone-content {
+    padding: 32px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .iphone-label {
+    font-size: 0.7rem;
+    color: var(--text-sec);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .waveform {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    height: 40px;
+    opacity: 0;
+  }
+  .waveform.on { opacity: 1; }
+  .waveform span {
+    display: block;
+    width: 4px;
+    border-radius: 2px;
+    background: var(--amber);
+  }
+  .waveform.on span { animation: wave 0.6s ease-in-out infinite alternate; }
+  .waveform span:nth-child(1) { height: 12px; animation-delay: 0s; }
+  .waveform span:nth-child(2) { height: 24px; animation-delay: 0.1s; }
+  .waveform span:nth-child(3) { height: 36px; animation-delay: 0.2s; }
+  .waveform span:nth-child(4) { height: 24px; animation-delay: 0.3s; }
+  .waveform span:nth-child(5) { height: 12px; animation-delay: 0.4s; }
+  .voice-text {
+    font-size: 0.85rem;
+    color: var(--text);
+    text-align: center;
+    min-height: 2.4em;
+    line-height: 1.4;
+  }
+  .voice-text .cursor {
+    display: inline-block;
+    width: 2px; height: 1em;
+    background: var(--amber);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 0.6s step-end infinite;
+  }
+  .route-badge {
+    display: inline-block;
+    background: rgba(212,168,40,0.15);
+    color: var(--amber);
+    border: 1px solid rgba(212,168,40,0.3);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  .route-badge.on { animation: popIn 0.3s ease-out forwards; }
+
+  /* ── Scene 3: Chrome Extension ──────────────────────── */
+  .browser {
+    width: 520px; max-width: 90vw;
+    border-radius: 12px;
+    border: 2px solid #333;
+    background: var(--bg-card);
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(212,168,40,0.08);
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  .browser.on { animation: fadeUp 0.4s ease-out forwards; }
+  .browser-toolbar {
+    height: 38px;
+    background: var(--bg-elevated);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+  }
+  .browser-dots { display: flex; gap: 6px; }
+  .browser-dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .browser-dots span:nth-child(1) { background: #FF5F57; }
+  .browser-dots span:nth-child(2) { background: #FEBC2E; }
+  .browser-dots span:nth-child(3) { background: #28C840; }
+  .url-bar {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    color: var(--text-sec);
+  }
+  .ext-icon {
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    background: var(--amber);
+    color: var(--bg);
+    font-weight: 700;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .browser-body {
+    padding: 16px;
+    min-height: 180px;
+    position: relative;
+  }
+  .li-profile {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    opacity: 0.5;
+  }
+  .li-avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0077B5, #00A0DC);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .li-info { font-size: 0.8rem; }
+  .li-name { font-weight: 600; color: var(--text); }
+  .li-role { color: var(--text-sec); font-size: 0.72rem; margin-top: 2px; }
+  .ext-popup {
+    position: absolute;
+    right: 16px; top: 10px;
+    width: 240px;
+    background: var(--bg-elevated);
+    border: 1px solid rgba(212,168,40,0.3);
+    border-radius: 10px;
+    padding: 14px;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .ext-popup.on { animation: popDown 0.35s ease-out forwards; }
+  .ext-popup-label {
+    font-size: 0.65rem;
+    color: var(--text-sec);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .ext-popup-task {
+    font-size: 0.8rem;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+  .ext-popup-btn {
+    background: var(--amber);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    width: 100%;
+    text-align: center;
+  }
+
+  /* ── Scene 4: Health Timeout ────────────────────────── */
+  .notif {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg-elevated);
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 18px 28px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  .notif.on { animation: slideDown 0.4s ease-out forwards; }
+  .notif-emoji { font-size: 2.2rem; }
+  .notif-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--gold-light);
+  }
+  .notif-sub { font-size: 0.85rem; color: var(--text-sec); margin-top: 4px; }
+  .notif-timer {
+    font-size: 0.7rem;
+    color: var(--amber);
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* ── Scene 5: Overnight ─────────────────────────────── */
+  .night { text-align: center; width: 100%; height: 100%; position: relative; }
+  .star {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 2s ease-in-out infinite;
+  }
+  .moon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: 12px -4px 0 0 var(--gold-light);
+    margin: 0 auto 20px;
+    opacity: 0;
+  }
+  .moon.on { animation: fadeIn 0.6s ease-out forwards; }
+  .overnight-text {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--gold-light);
+    opacity: 0;
+  }
+  .overnight-text.on { animation: fadeIn 0.5s ease-out 0.3s forwards; }
+  .overnight-sub {
+    font-size: 0.85rem;
+    color: var(--text-sec);
+    margin-top: 10px;
+    opacity: 0;
+  }
+  .overnight-sub.on { animation: fadeIn 0.5s ease-out 0.6s forwards; }
+  .spinner-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 16px;
+    opacity: 0;
+  }
+  .spinner-dots.on { opacity: 1; }
+  .spinner-dots span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+    animation: dotPulse 1s ease-in-out infinite;
+  }
+  .spinner-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .spinner-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  /* ── Scene 6: Morning Briefing ──────────────────────── */
+  .dashboard {
+    width: 400px; max-width: 90vw;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .dashboard.on { animation: fadeUp 0.4s ease-out forwards; }
+  .dash-header {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--gold-light);
+    margin-bottom: 18px;
+  }
+  .task-row {
+    background: var(--bg-card);
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .task-row.on { animation: fadeUp 0.35s ease-out forwards; }
+  .badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .badge-p1 { background: rgba(239,68,68,0.15); color: #F87171; }
+  .badge-p2 { background: rgba(212,168,40,0.15); color: var(--amber); }
+  .badge-p3 { background: rgba(91,159,228,0.15); color: var(--blue); }
+  .task-track {
+    font-size: 0.65rem;
+    color: var(--text-sec);
+    margin-right: auto;
+    margin-left: 8px;
+  }
+
+  /* ── Scene 7: Task Drill-down ───────────────────────── */
+  .detail-card {
+    width: 420px; max-width: 90vw;
+    background: var(--bg-card);
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  .detail-card.on { animation: scaleIn 0.4s ease-out forwards; }
+  .detail-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .detail-meta {
+    font-size: 0.72rem;
+    color: var(--text-sec);
+    margin-bottom: 16px;
+  }
+  .plan-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--amber);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.82rem;
+    color: var(--text-sec);
+    border-bottom: 1px solid #222;
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  .step:last-child { border-bottom: none; }
+  .step.on { animation: fadeRight 0.3s ease-out forwards; }
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    color: var(--text-sec);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* ── Scene 8: Execution ─────────────────────────────── */
+  .exec-card {
+    width: 420px; max-width: 90vw;
+    background: var(--bg-card);
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  }
+  .exec-card .detail-title { margin-bottom: 16px; }
+  .exec-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.82rem;
+    color: var(--text-sec);
+  }
+  .check-circle {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    transition: all 0.3s ease;
+  }
+  .check-circle.done {
+    border-color: var(--green);
+    background: var(--green);
+    color: white;
+    animation: checkPop 0.35s ease-out;
+  }
+  .exec-step.done-step { color: var(--text); }
+
+  /* ── Scene 9: Completion ────────────────────────────── */
+  .completion { text-align: center; }
+  .big-check {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--green);
+    color: white;
+    font-size: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    opacity: 0;
+    transform: scale(0);
+  }
+  .big-check.on { animation: checkPop 0.5s ease-out forwards; }
+  .complete-text {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--gold-light);
+    opacity: 0;
+  }
+  .complete-text.on { animation: fadeIn 0.4s ease-out 0.3s forwards; }
+  .confetti-particle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ── Replay button ──────────────────────────────────── */
+  .replay-btn {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--amber);
+    color: var(--bg);
+    border: none;
+    border-radius: 999px;
+    padding: 12px 28px;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, transform 0.2s ease;
+    z-index: 200;
+  }
+  .replay-btn.show { opacity: 1; visibility: visible; }
+  .replay-btn:hover { transform: translateX(-50%) scale(1.05); }
+
+  /* ── Keyframes ──────────────────────────────────────── */
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeRight {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes popDown {
+    from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes wave {
+    0%   { transform: scaleY(0.4); }
+    100% { transform: scaleY(1.5); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50%      { opacity: 1; }
+  }
+  @keyframes dotPulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50%      { opacity: 1; transform: scale(1.2); }
+  }
+  @keyframes checkPop {
+    0%   { opacity: 0; transform: scale(0); }
+    70%  { opacity: 1; transform: scale(1.25); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes confettiUp {
+    0%   { opacity: 1; transform: translate(var(--tx), 0) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--tx2), var(--ty)) rotate(var(--rot)); }
+  }
+</style>
+</head>
+<body>
+<div class="demo">
+
+  <!-- Scene 1: Title -->
+  <div class="scene" id="s1">
+    <div class="title-card">
+      <div class="logo" id="logo">Tally</div>
+      <div class="tagline" id="tagline">Your Personal OS</div>
+    </div>
+  </div>
+
+  <!-- Scene 2: Voice Intake -->
+  <div class="scene" id="s2">
+    <div class="iphone" id="iphone">
+      <div class="iphone-notch"></div>
+      <div class="iphone-content">
+        <div class="iphone-label">Voice Capture</div>
+        <div class="waveform" id="waveform">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="voice-text" id="voiceText"></div>
+        <div class="route-badge" id="routeBadge">→ Trellis</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 3: Chrome Extension -->
+  <div class="scene" id="s3">
+    <div class="browser" id="browser">
+      <div class="browser-toolbar">
+        <div class="browser-dots"><span></span><span></span><span></span></div>
+        <div class="url-bar">linkedin.com/in/sarah-chen</div>
+        <div class="ext-icon">T</div>
+      </div>
+      <div class="browser-body">
+        <div class="li-profile">
+          <div class="li-avatar">SC</div>
+          <div class="li-info">
+            <div class="li-name">Sarah Chen</div>
+            <div class="li-role">Partner @ Ag Venture Fund</div>
+          </div>
+        </div>
+        <div class="ext-popup" id="extPopup">
+          <div class="ext-popup-label">Tally captured</div>
+          <div class="ext-popup-task">"Follow up with Sarah re: Series A timing"</div>
+          <div class="ext-popup-btn">Added to Tally ✓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 4: Health Timeout -->
+  <div class="scene" id="s4">
+    <div class="notif" id="notif">
+      <div class="notif-emoji">🧘</div>
+      <div>
+        <div class="notif-title">Time to stretch!</div>
+        <div class="notif-sub">You've been focused for 90 minutes</div>
+        <div class="notif-timer">Next break in 5 min</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 5: Overnight Processing -->
+  <div class="scene" id="s5">
+    <div class="night" id="night">
+      <div class="moon" id="moon"></div>
+      <div class="overnight-text" id="overnightText">Claude is working while you sleep</div>
+      <div class="overnight-sub" id="overnightSub">Prioritizing tasks · Grooming intake · Preparing briefs</div>
+      <div class="spinner-dots" id="spinnerDots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- Scene 6: Morning Briefing -->
+  <div class="scene" id="s6">
+    <div class="dashboard" id="dashboard">
+      <div class="dash-header">☀️ Good morning, Justyn</div>
+      <div id="taskRows">
+        <div class="task-row" id="tr1">
+          <span>Review investor deck</span>
+          <span class="task-track">Trellis</span>
+          <span class="badge badge-p1">P1</span>
+        </div>
+        <div class="task-row" id="tr2">
+          <span>Follow up with Sarah</span>
+          <span class="task-track">BIS</span>
+          <span class="badge badge-p2">P2</span>
+        </div>
+        <div class="task-row" id="tr3">
+          <span>Ship onboarding flow</span>
+          <span class="task-track">Trellis</span>
+          <span class="badge badge-p3">P3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 7: Task Drill-down -->
+  <div class="scene" id="s7">
+    <div class="detail-card" id="detailCard">
+      <div class="detail-title">Ship Trellis onboarding flow</div>
+      <div class="detail-meta">Claude's plan · 4 steps</div>
+      <div class="plan-label">Approach</div>
+      <div class="step" id="st1"><span class="step-num">1</span> Design welcome screen wireframe</div>
+      <div class="step" id="st2"><span class="step-num">2</span> Build progress tracker component</div>
+      <div class="step" id="st3"><span class="step-num">3</span> Write onboarding copy</div>
+      <div class="step" id="st4"><span class="step-num">4</span> Add analytics events</div>
+    </div>
+  </div>
+
+  <!-- Scene 8: Rapid Execution -->
+  <div class="scene" id="s8">
+    <div class="exec-card">
+      <div class="detail-title">Ship Trellis onboarding flow</div>
+      <div class="exec-step" id="ex1"><span class="check-circle" id="ch1"></span> Design welcome screen</div>
+      <div class="exec-step" id="ex2"><span class="check-circle" id="ch2"></span> Build progress tracker</div>
+      <div class="exec-step" id="ex3"><span class="check-circle" id="ch3"></span> Write onboarding copy</div>
+      <div class="exec-step" id="ex4"><span class="check-circle" id="ch4"></span> Add analytics events</div>
+    </div>
+  </div>
+
+  <!-- Scene 9: Completion -->
+  <div class="scene" id="s9">
+    <div class="completion">
+      <div class="big-check" id="bigCheck">✓</div>
+      <div class="complete-text" id="completeText">Done.</div>
+    </div>
+  </div>
+
+  <button class="replay-btn" id="replayBtn" onclick="playDemo()">↻ Replay</button>
+</div>
+
+<script>
+const SCENES = [
+  { id: 's1', dur: 1800, enter: enterTitle },
+  { id: 's2', dur: 2000, enter: enterVoice },
+  { id: 's3', dur: 1800, enter: enterExtension },
+  { id: 's4', dur: 1500, enter: enterNotif },
+  { id: 's5', dur: 2000, enter: enterNight },
+  { id: 's6', dur: 1600, enter: enterDashboard },
+  { id: 's7', dur: 1600, enter: enterDrilldown },
+  { id: 's8', dur: 1800, enter: enterExecution },
+  { id: 's9', dur: 2000, enter: enterCompletion },
+];
+
+let timers = [];
+let currentScene = null;
+
+function resetAll() {
+  timers.forEach(t => clearTimeout(t));
+  timers = [];
+  document.querySelectorAll('.scene').forEach(s => {
+    s.classList.remove('active', 'leaving');
+  });
+  // Reset animation classes
+  ['logo','tagline','iphone','waveform','routeBadge',
+   'browser','extPopup','notif','moon','overnightText','overnightSub','spinnerDots',
+   'dashboard','detailCard','bigCheck','completeText'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('on');
+  });
+  ['tr1','tr2','tr3','st1','st2','st3','st4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('on');
+  });
+  ['ch1','ch2','ch3','ch4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('done'); el.textContent = ''; }
+  });
+  ['ex1','ex2','ex3','ex4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('done-step');
+  });
+  document.getElementById('voiceText').textContent = '';
+  document.querySelectorAll('.confetti-particle').forEach(p => p.remove());
+  document.getElementById('replayBtn').classList.remove('show');
+  // Reset stars
+  document.querySelectorAll('.star').forEach(s => s.remove());
+}
+
+function showScene(id) {
+  if (currentScene) {
+    const prev = document.getElementById(currentScene);
+    prev.classList.add('leaving');
+    const p = currentScene;
+    timers.push(setTimeout(() => {
+      document.getElementById(p).classList.remove('active', 'leaving');
+    }, 400));
+  }
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  currentScene = id;
+}
+
+function delay(ms) {
+  return new Promise(r => { timers.push(setTimeout(r, ms)); });
+}
+
+async function playDemo() {
+  resetAll();
+  await delay(300);
+
+  let offset = 0;
+  for (let i = 0; i < SCENES.length; i++) {
+    const s = SCENES[i];
+    await delay(i === 0 ? 0 : 400);
+    showScene(s.id);
+    s.enter();
+    await delay(s.dur);
+  }
+
+  await delay(800);
+  document.getElementById('replayBtn').classList.add('show');
+}
+
+// ── Scene enter callbacks ────────────────────────────
+
+function enterTitle() {
+  document.getElementById('logo').classList.add('on');
+  timers.push(setTimeout(() => document.getElementById('tagline').classList.add('on'), 200));
+}
+
+function enterVoice() {
+  const phone = document.getElementById('iphone');
+  const wf = document.getElementById('waveform');
+  const vt = document.getElementById('voiceText');
+  const rb = document.getElementById('routeBadge');
+  phone.classList.add('on');
+  timers.push(setTimeout(() => wf.classList.add('on'), 300));
+
+  const text = '"Add investor deck review to Trellis"';
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < text.length) {
+      vt.textContent = text.slice(0, i + 1);
+      i++;
+    } else {
+      clearInterval(interval);
+      timers.push(setTimeout(() => rb.classList.add('on'), 200));
+    }
+  }, 40);
+  timers.push(setTimeout(() => clearInterval(interval), 2500));
+}
+
+function enterExtension() {
+  document.getElementById('browser').classList.add('on');
+  timers.push(setTimeout(() => document.getElementById('extPopup').classList.add('on'), 500));
+}
+
+function enterNotif() {
+  document.getElementById('notif').classList.add('on');
+}
+
+function enterNight() {
+  // Generate stars
+  const night = document.getElementById('night');
+  for (let i = 0; i < 25; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 60 + '%';
+    star.style.animationDelay = (Math.random() * 2) + 's';
+    star.style.width = star.style.height = (1 + Math.random() * 3) + 'px';
+    night.appendChild(star);
+  }
+  document.getElementById('moon').classList.add('on');
+  document.getElementById('overnightText').classList.add('on');
+  document.getElementById('overnightSub').classList.add('on');
+  document.getElementById('spinnerDots').classList.add('on');
+}
+
+function enterDashboard() {
+  document.getElementById('dashboard').classList.add('on');
+  ['tr1','tr2','tr3'].forEach((id, i) => {
+    timers.push(setTimeout(() => document.getElementById(id).classList.add('on'), 200 + i * 200));
+  });
+}
+
+function enterDrilldown() {
+  document.getElementById('detailCard').classList.add('on');
+  ['st1','st2','st3','st4'].forEach((id, i) => {
+    timers.push(setTimeout(() => document.getElementById(id).classList.add('on'), 300 + i * 220));
+  });
+}
+
+function enterExecution() {
+  ['ch1','ch2','ch3','ch4'].forEach((id, i) => {
+    timers.push(setTimeout(() => {
+      const el = document.getElementById(id);
+      el.classList.add('done');
+      el.textContent = '✓';
+      document.getElementById('ex' + (i+1)).classList.add('done-step');
+    }, 200 + i * 350));
+  });
+}
+
+function enterCompletion() {
+  document.getElementById('bigCheck').classList.add('on');
+  document.getElementById('completeText').classList.add('on');
+  timers.push(setTimeout(spawnConfetti, 400));
+}
+
+function spawnConfetti() {
+  const colors = ['#D4A828','#F5E6B8','#48B87A','#8CC63F','#fff','#5B9FE4'];
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2 - 40;
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-particle';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    p.style.width = (4 + Math.random() * 5) + 'px';
+    p.style.height = (4 + Math.random() * 5) + 'px';
+    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '1px';
+    const tx = (Math.random() - 0.5) * 40 + 'px';
+    const tx2 = (Math.random() - 0.5) * 300 + 'px';
+    const ty = -(100 + Math.random() * 250) + 'px';
+    const rot = (Math.random() * 720 - 360) + 'deg';
+    p.style.setProperty('--tx', tx);
+    p.style.setProperty('--tx2', tx2);
+    p.style.setProperty('--ty', ty);
+    p.style.setProperty('--rot', rot);
+    p.style.animation = `confettiUp ${0.8 + Math.random() * 0.7}s ease-out forwards`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 2000);
+  }
+}
+
+// Auto-start
+window.addEventListener('DOMContentLoaded', () => setTimeout(playDemo, 600));
+</script>
+</body>
+</html>
