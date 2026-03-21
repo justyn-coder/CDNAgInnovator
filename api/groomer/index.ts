@@ -123,8 +123,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Mode: "groom" (default, nightly cron) or "redteam" (re-run existing tasks through red team only)
-  const url = new URL(req.url || "/", `https://${req.headers.host || "localhost"}`);
-  const mode = url.searchParams.get("mode") || "groom";
+  let mode = "groom";
+  try {
+    const url = new URL(req.url || "/", `https://${req.headers.host || "localhost"}`);
+    mode = url.searchParams.get("mode") || "groom";
+  } catch {
+    // URL parsing failed, default to groom
+  }
 
   if (mode !== "groom" && mode !== "redteam") {
     return res.status(400).json({ error: "Invalid mode. Use 'groom' or 'redteam'." });
@@ -402,7 +407,9 @@ ${JSON.stringify(batch, null, 2)}`;
       results,
     });
   } catch (e) {
-    console.error("Groomer error:", e);
-    return res.status(500).json({ error: "Groomer failed" });
+    const errMsg = e instanceof Error ? e.message : String(e);
+    const errStack = e instanceof Error ? e.stack : "";
+    console.error("Groomer error:", errMsg, errStack);
+    return res.status(500).json({ error: "Groomer failed", detail: errMsg });
   }
 }
