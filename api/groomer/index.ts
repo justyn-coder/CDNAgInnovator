@@ -122,13 +122,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  // Mode: "groom" (default, nightly cron) or "redteam" (re-run existing tasks through red team only)
+  // Parse query params: mode and limit
   let mode = "groom";
+  let taskLimit = 0; // 0 = no limit
   try {
     const url = new URL(req.url || "/", `https://${req.headers.host || "localhost"}`);
     mode = url.searchParams.get("mode") || "groom";
+    const limitParam = url.searchParams.get("limit");
+    if (limitParam) taskLimit = Math.max(1, parseInt(limitParam, 10) || 0);
   } catch {
-    // URL parsing failed, default to groom
+    // URL parsing failed, defaults apply
   }
 
   if (mode !== "groom" && mode !== "redteam") {
@@ -155,28 +158,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 2. Query tasks based on mode
+    const limitClause = taskLimit > 0 ? `LIMIT ${taskLimit}` : "";
     let tasks: any[];
     if (mode === "groom") {
-      tasks = await sql`
-        SELECT id, title, track, context, approach, tools, action_required,
-               priority, review_notes, source, effort
-        FROM hq_tasks
-        WHERE status = 'intake'
-          AND (approach IS NULL OR approach = '' OR approach = 'TBD')
-        ORDER BY priority ASC NULLS LAST
-      `;
+      tasks = await sql.unsafe(
+        `SELECT id, title, track, context, approach, tools, action_required,
+                priority, review_notes, source, effort
+         FROM hq_tasks
+         WHERE status = 'intake'
+           AND (approach IS NULL OR approach = '' OR approach = 'TBD')
+         ORDER BY priority ASC NULLS LAST ${limitClause}`
+      );
     } else {
-      // redteam mode: all non-done/killed tasks that HAVE an approach
-      tasks = await sql`
-        SELECT id, title, track, context, approach, tools, action_required,
-               priority, review_notes, source, effort, status
-        FROM hq_tasks
-        WHERE status NOT IN ('done', 'killed')
-          AND approach IS NOT NULL
-          AND approach != ''
-          AND approach != 'TBD'
-        ORDER BY priority ASC NULLS LAST
-      `;
+      tasks = await sql.unsafe(
+        `SELECT id, title, track, context, approach, tools, action_required,
+                priority, review_notes, source, effort, status
+         FROM hq_tasks
+         WHERE status NOT IN ('done', 'killed')
+           AND id != 'SYSTEM'
+           AND approach IS NOT NULL
+           AND approach != ''
+           AND approach != 'TBD'
+         ORDER BY priority ASC NULLS LAST ${limitClause}`
+      );
     }
 
     if (tasks.length === 0) {
