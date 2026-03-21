@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/groomer",
+      "schedule": "0 0 * * *"
+    }
+  ],
   "rewrites": [
     { "source": "/((?!api/|@|client/|node_modules/).*)", "destination": "/index.html" }
   ],
