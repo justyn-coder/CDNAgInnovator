@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import postgres from "postgres";
-import { checkRateLimit } from "../_lib/rate-limit";
+import { checkRateLimit, setCors } from "../_lib/rate-limit";
 
 const conn = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 const client = postgres(conn, { ssl: "require", max: 1 });
@@ -54,6 +54,7 @@ function extractSearchTerms(message: string): string[] {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!setCors(req, res)) return;
   if (req.method !== "POST") return res.status(405).end();
 
   // Rate limit: 10 requests per minute per IP

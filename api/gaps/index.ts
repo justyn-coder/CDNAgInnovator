@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import postgres from "postgres";
+import { setCors } from "../_lib/rate-limit";
 
 const conn = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 const client = postgres(conn, { ssl: "require", max: 1 });
@@ -8,6 +9,7 @@ const PROVINCES = ["BC", "AB", "SK", "MB", "ON", "QC", "NB", "NS", "PE", "NL", "
 const CATEGORIES = ["Fund", "Accel", "Pilot", "Event", "Org", "Train"];
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!setCors(req, res)) return;
   if (req.method !== "GET") return res.status(405).end();
 
   const stage = req.query.stage as string | undefined;
