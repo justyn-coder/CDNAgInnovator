@@ -388,10 +388,14 @@ ${JSON.stringify(batch, null, 2)}`;
         results.push({ id: g.id, action: mode === "redteam" ? "red_teamed" : (g.auto_approve ? "auto_approved" : "groomed"), red_team_notes: rtNotes || null });
       } catch (taskErr) {
         console.error(`Failed to update task ${g.id}:`, taskErr);
-        await sql`
-          INSERT INTO task_log (task_id, event, notes, timestamp)
-          VALUES (${g.id}, 'groomer_task_error', ${`Update failed: ${String(taskErr).slice(0, 200)}`}, NOW())
-        `;
+        try {
+          await sql`
+            INSERT INTO task_log (task_id, event, notes, timestamp)
+            VALUES (${g.id}, 'groomer_task_error', ${`Update failed: ${String(taskErr).slice(0, 200)}`}, NOW())
+          `;
+        } catch (logErr) {
+          console.error(`Failed to log error for task ${g.id}:`, logErr);
+        }
         results.push({ id: g.id, action: "error", error: String(taskErr).slice(0, 100) });
       }
     }
