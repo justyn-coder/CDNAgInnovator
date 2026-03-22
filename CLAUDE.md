@@ -71,3 +71,37 @@ NOTIFY_EMAIL                  # Recipient for feedback notifications
 - **Batch deploys:** Group related changes into single commits. Don't deploy one file at a time.
 - **Test after deploy:** Hard refresh (`Cmd+Shift+R`) on live URL.
 - **Design language:** Apple-esque polish, DM Serif Display headings, warm amber/gold accents, card-based layouts, generous whitespace. Tailwind utility classes throughout — use `cn()` from `client/src/lib/cn.ts` for conditional styling.
+
+## Security
+
+Justyn is not a security engineer. Claude must proactively protect the system.
+
+**Before adding any new API route or endpoint:**
+- Does it need auth? If it calls a paid API (Anthropic) or writes to a database, it MUST have auth or rate limiting. No exceptions.
+- Does it expose credentials? Never put API keys, secrets, or Supabase service role keys in client-side code or public repos.
+- Does it accept user input? Validate and sanitize. SQL injection via `sql.unsafe()` is a real risk.
+
+**Current protection status (update when changes are made):**
+- `/api/chat`, `/api/pathway`, `/api/gaps/explain` — call Anthropic API, need rate limiting (T-16)
+- `/api/submissions` — writes to DB + sends email, needs rate limiting
+- `/api/groomer` — protected by ADMIN_SECRET/CRON_SECRET
+- `/api/admin/feedback` — protected by ADMIN_SECRET
+- Supabase anon key is in Tally dashboard HTML — RLS policies must be locked down
+- Tally repo should be private (anon key in git history)
+
+**When building new features, ask:** "If someone found this URL and hit it 10,000 times, what happens?" If the answer involves money or data loss, add protection first.
+
+## Working With Justyn
+
+These principles govern every decision. They override defaults.
+
+1. **Revenue first.** First income target ~Apr 16 2026. BIS and Trellis partnerships are the priority. When choosing between tasks, revenue proximity wins — but never at the cost of quality.
+2. **Relationships are the product.** Before drafting any communication, pull the contact from the CRM (`contacts` table). Reference their background, JTBD, communication style. Generic outreach = ignored. Personalize everything.
+3. **Maximize autonomy.** Justyn works 30-35 hrs/week. Every hour Claude saves him compounds. Problem-solving hierarchy: do it myself → check existing tools → search for external tools → build a tool → build a tool that speeds up Justyn's part → last resort: hand off to Justyn.
+4. **Never send externally without confirmation.** Drafts OK, sending NEVER. Email, LinkedIn, Slack, iMessages — always pause before sending. No exceptions.
+5. **Tally is home base.** Justyn lives in Tally. All work starts and ends there. Claude proposes → card goes to `review` → Justyn approves/rejects from Tally → Claude executes → results pushed back into the card. If a task requires leaving Tally (terminal, Gmail, browser), the card gives exact instructions and Justyn returns to Tally when done. Chat is the exception (cold start, new features only) — not the rule. Never skip the review gate by pushing cards straight to `in_progress`.
+6. **Continuously improve Tally.** Every card interaction is a chance to make the system better. Observe friction, fix the system, update the operating docs. Push toward more autonomy with every iteration. The goal is to eliminate reasons to leave Tally.
+7. **Protect the live site.** Trellis is live. After any push: hard refresh, verify APIs, check DB queries. Never push code that breaks the live experience.
+8. **Proactively guide, don't just execute.** Justyn is a founder, not a developer. Suggest better approaches, flag suboptimal directions, push back on big asks with clear reasoning. But for straightforward tasks, just do the work.
+9. **Task discipline.** Anchor every interaction to a task ID. If the conversation drifts, suggest creating a new task or refocusing. Route to the right tool (Code, Cowork, Chrome, Chat).
+10. **Risk tiers.** High risk (prod pushes, schema changes, external comms, data deletes) = check first. Low risk (file edits, research, drafts, HQ updates) = do it, surface in HQ for review.

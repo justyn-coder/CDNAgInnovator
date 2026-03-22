@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { submissions } from "../schema.js";
 import nodemailer from "nodemailer";
+import { checkRateLimit } from "../_lib/rate-limit";
 
 const conn = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 const client = postgres(conn, { ssl: "require", max: 1 });
@@ -38,6 +39,11 @@ async function sendNotification(data: { programName: string; bestFor: string; su
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).end();
+
+  // Rate limit: 3 submissions per minute per IP
+  const allowed = await checkRateLimit(req, res, { maxRequests: 3, windowSeconds: 60, endpoint: "submissions" });
+  if (!allowed) return;
+
   try {
     const { programName, bestFor, submitterName, submitterEmail } = req.body;
     if (!programName || !bestFor || !submitterName || !submitterEmail)

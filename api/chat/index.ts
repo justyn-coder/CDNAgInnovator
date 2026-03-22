@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import postgres from "postgres";
+import { checkRateLimit } from "../_lib/rate-limit";
 
 const conn = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 const client = postgres(conn, { ssl: "require", max: 1 });
@@ -54,6 +55,10 @@ function extractSearchTerms(message: string): string[] {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).end();
+
+  // Rate limit: 10 requests per minute per IP
+  const allowed = await checkRateLimit(req, res, { maxRequests: 10, windowSeconds: 60, endpoint: "chat" });
+  if (!allowed) return;
 
   const { message, mode, history = [] } = req.body;
   if (!message) return res.status(400).json({ error: "No message" });
