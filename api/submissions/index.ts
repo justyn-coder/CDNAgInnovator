@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { submissions } from "../schema.js";
 import nodemailer from "nodemailer";
-import { checkRateLimit, setCors } from "../_lib/rate-limit";
+import { checkRateLimit, setCors } from "../_lib/rate-limit.js";
 
 const conn = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 const client = postgres(conn, { ssl: "require", max: 1 });

@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { programs } from "../schema.js";
-import { setCors } from "../_lib/rate-limit";
+import { setCors } from "../_lib/rate-limit.js";
 
 const conn = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 const client = postgres(conn, { ssl: "require", max: 1 });

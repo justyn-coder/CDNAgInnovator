@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import postgres from "postgres";
-import { checkRateLimit, setCors } from "../_lib/rate-limit";
+import { checkRateLimit, setCors } from "../_lib/rate-limit.js";
 
 const conn = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 const client = postgres(conn, { ssl: "require", max: 1 });
