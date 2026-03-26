@@ -1,7 +1,6 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { MapleLeaf } from "../components/TrellisLogo";
-const ResourceCenter = lazy(() => import("../components/ResourceCenter"));
 
 
 /** Inline trellis icon (no wordmark) for popup header */
@@ -37,7 +36,6 @@ function TrellisIcon({ size = 48 }: { size?: number }) {
 export default function Home() {
   const [count, setCount] = useState<number | null>(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [urlMode, setUrlMode] = useState<"founder" | "operator">("founder");
   const [orgParam, setOrgParam] = useState<string | null>(null);
 
@@ -317,14 +315,7 @@ export default function Home() {
             Canada's AgTech Ecosystem
           </span>
         </div>
-        <button
-          onClick={() => setShowHelp(true)}
-          className="w-8 h-8 rounded-full border border-border bg-bg-secondary flex items-center justify-center text-text-secondary hover:text-brand-green hover:border-brand-green transition-colors"
-          aria-label="Resource Center"
-          title="Resource Center"
-        >
-          <span style={{ fontSize: 14, fontWeight: 600 }}>?</span>
-        </button>
+        <div className="w-8" /> {/* Spacer for centering */}
       </nav>
 
       {/* ── Hero ─────────────────────────────────────────────── */}
@@ -431,11 +422,6 @@ export default function Home() {
         </div>
       </main>
 
-      {showHelp && (
-        <Suspense fallback={null}>
-          <ResourceCenter onClose={() => setShowHelp(false)} />
-        </Suspense>
-      )}
     </div>
   );
 }
