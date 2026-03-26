@@ -175,7 +175,7 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
     if (!text.trim()) return;
     setSubmitting(true);
     try {
-      await fetch("/api/submissions", {
+      const resp = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -185,6 +185,7 @@ function CorrectionForm({ programName, onClose }: { programName: string; onClose
           submitterEmail: email.trim() || `correction-${Date.now()}@anon`,
         }),
       });
+      if (!resp.ok) throw new Error();
       try {
         if (email.trim()) sessionStorage.setItem("ag_fb_email", email.trim());
         if (name.trim()) sessionStorage.setItem("ag_fb_name", name.trim());
@@ -605,7 +606,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
     } catch {}
     setBusy(true);
     try {
-      await fetch("/api/submissions", {
+      const resp = await fetch("/api/submissions", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           programName: `FEEDBACK: ${isEco ? "operator" : "founder"}${pageContext ? ` [${pageContext}]` : ""}${(() => { try { const r = localStorage.getItem("trellis_ref"); return r ? ` [ref:${r}]` : ""; } catch { return ""; } })()}`,
@@ -614,6 +615,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
           submitterEmail: form.email || `anon-${Date.now()}@feedback`,
         }),
       });
+      if (!resp.ok) throw new Error();
       setDone(true);
     } catch { alert("Something went wrong."); }
     setBusy(false);

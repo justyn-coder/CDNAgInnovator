@@ -306,7 +306,7 @@ function EmailCapture({ stage, provinces, description, productType }: {
   async function submit() {
     if (!email.trim()) return;
     try {
-      await fetch("/api/submissions", {
+      const resp = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -316,9 +316,10 @@ function EmailCapture({ stage, provinces, description, productType }: {
           submitterEmail: email.trim(),
         }),
       });
+      if (!resp.ok) throw new Error();
       setSubmitted(true);
       try { localStorage.setItem("trellis_email_asked", "true"); } catch {}
-    } catch {}
+    } catch { alert("Something went wrong — please try again."); }
   }
 
   return (
