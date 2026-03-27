@@ -1343,14 +1343,15 @@ export default function Navigator() {
                       </div>
 
                       {/* Stage funnel sparkline */}
-                      <div className="flex items-end gap-1.5 mt-3 mb-1" style={{ height: 48 }}>
+                      <div className="flex items-end gap-1 mt-3 mb-1" style={{ height: 64 }}>
                         {[
                           { label: "Idea", count: 154 },
                           { label: "MVP", count: 280 },
                           { label: "Pilot", count: 235 },
+                          { label: "Comm", count: 240 },
                           { label: "Scale", count: 117 },
                         ].map((s) => {
-                          const barH = Math.round((s.count / 280) * 36);
+                          const barH = Math.round((s.count / 280) * 48);
                           const isScale = s.label === "Scale";
                           return (
                             <div key={s.label} className="flex flex-col items-center justify-end flex-1" style={{ height: "100%" }}>
@@ -1359,11 +1360,11 @@ export default function Navigator() {
                                 style={{
                                   height: barH,
                                   backgroundColor: isScale ? "#B45309" : "#2D5A3D",
-                                  opacity: isScale ? 1 : s.label === "Idea" ? 0.35 : s.label === "MVP" ? 0.6 : 0.45,
+                                  opacity: isScale ? 1 : s.label === "Idea" ? 0.3 : s.label === "MVP" ? 0.6 : 0.45,
                                 }}
                               />
                               <span className={cn(
-                                "text-[0.58rem] mt-0.5",
+                                "text-[0.55rem] mt-0.5",
                                 isScale ? "text-[#B45309] font-semibold" : "text-text-tertiary"
                               )}>
                                 {s.label}
@@ -1374,7 +1375,7 @@ export default function Navigator() {
                       </div>
 
                       <div className="text-[0.72rem] text-text-secondary leading-[1.5] mb-3 max-w-[380px]">
-                        280 programs help at MVP stage. By the time a founder needs to scale, 117 remain. The sharpest drop in the pipeline.
+                        240 programs help at commercialization. By the time a founder needs to scale, 117 remain. A 51% drop.
                       </div>
                       <button
                         onClick={() => send("Where does support disappear between pilot and scale stage?")}
@@ -1444,6 +1445,17 @@ export default function Navigator() {
                       </div>
 
                     </div>
+                  </div>
+
+                  {/* Correction escape valve */}
+                  <div className="text-right mt-2">
+                    <button
+                      onClick={() => setShowFeedback(true)}
+                      className="bg-transparent border-none cursor-pointer text-[0.68rem] text-text-tertiary hover:text-brand-green transition-colors"
+                      style={{ textDecoration: "underline", textUnderlineOffset: "2px" }}
+                    >
+                      See something off? Help us get it right
+                    </button>
                   </div>
                 </div>
 
