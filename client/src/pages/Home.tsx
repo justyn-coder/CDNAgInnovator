@@ -99,6 +99,19 @@ export default function Home() {
     }
   }, []);
 
+  // Escape key dismisses popup
+  useEffect(() => {
+    if (!showPopup) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closePopup(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [showPopup]);
+
+  function closePopup() {
+    try { localStorage.setItem("trellis_welcomed", "true"); } catch {}
+    setShowPopup(false);
+  }
+
   function dismissPopup(target: "pathway" | "browse" | "programs" | "founder-experience") {
     try {
       localStorage.setItem("trellis_welcomed", "true");
@@ -135,6 +148,7 @@ export default function Home() {
           role="dialog"
           aria-modal="true"
           aria-label="Welcome to Trellis"
+          onClick={closePopup}
           style={{
             background: "rgba(245, 243, 237, 0.45)",
             backdropFilter: "blur(6px)",
@@ -143,6 +157,7 @@ export default function Home() {
         >
           <div
             className="bg-white w-full max-w-[460px] animate-slide-up"
+            onClick={e => e.stopPropagation()}
             style={{
               borderRadius: 16,
               padding: "32px 24px 24px",

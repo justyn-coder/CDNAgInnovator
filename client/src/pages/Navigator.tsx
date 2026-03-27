@@ -587,7 +587,7 @@ function BrowsePanel({
             </button>
           )}
           <button onClick={onClose} className="bg-bg-secondary border border-border rounded-sm px-4 py-1.5 text-[0.78rem] font-semibold text-text">
-            Done
+            ← Back
           </button>
         </div>
       </div>
@@ -715,6 +715,30 @@ function BrowsePanel({
               ✕
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Founder pathway bridge — visible immediately for non-operator users */}
+      {!isOperatorView && (
+        <div
+          className="mx-3 md:mx-[18px] mt-2.5 flex items-center justify-between gap-2 flex-wrap"
+          style={{
+            background: "#1B4332",
+            borderRadius: 10,
+            padding: "10px 14px",
+          }}
+        >
+          <span style={{ fontSize: 13, color: "white" }}>
+            🌱 Want a personalized pathway? Answer 4 quick questions and we'll match you to programs for your stage.
+          </span>
+          <a
+            href="/navigator"
+            onClick={onClose}
+            className="no-underline shrink-0"
+            style={{ fontSize: 13, color: "#D4A828", fontWeight: 500 }}
+          >
+            Build my pathway →
+          </a>
         </div>
       )}
 
@@ -1564,7 +1588,7 @@ export default function Navigator() {
                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
                 onFocus={() => setChatFocused(true)}
                 onBlur={() => setChatFocused(false)}
-                placeholder=""
+                placeholder="e.g., Tell me more about a program..."
                 rows={1}
                 style={{ minHeight: "44px" }}
                 className="w-full resize-none border-[1.5px] border-border rounded-lg px-3 py-2 md:px-3.5 md:py-2.5 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-white transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"

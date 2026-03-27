@@ -241,39 +241,51 @@ PRIORITY CATEGORIES for ${stage} stage: ${stagePriorities.join(", ")}
 
 Generate the pathway now. Remember: prioritize programs whose description closely matches what this specific founder is building. Generic programs should come after industry-specific ones.`;
 
-    // 5. Call Anthropic API
-    const apiRes = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY || "",
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 2000,
-        temperature: 0,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userMessage }],
-      }),
+    // 5. Call Anthropic API (retry once on parse failure)
+    const apiBody = JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 2000,
+      temperature: 0,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userMessage }],
     });
 
-    const data = await apiRes.json() as any;
-    const raw = data.content?.[0]?.text || "";
+    let pathway: any = null;
 
-    // 6. Parse JSON response
-    let pathway: any;
-    try {
-      const cleaned = raw.replace(/```json|```/g, "").trim();
-      pathway = JSON.parse(cleaned);
-    } catch {
-      pathway = {
-        pathway_title: `Your ${stage} Pathway`,
-        summary: "Unable to generate a structured pathway. Please try the chat for personalized recommendations.",
-        steps: [],
-        gap_warning: null,
-        next_stage_note: null,
-      };
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const apiRes = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.ANTHROPIC_API_KEY || "",
+            "anthropic-version": "2023-06-01",
+          },
+          body: apiBody,
+        });
+
+        const data = await apiRes.json() as any;
+        const raw = data.content?.[0]?.text || "";
+        const cleaned = raw.replace(/```json|```/g, "").trim();
+        const parsed = JSON.parse(cleaned);
+
+        // Validate: must have non-empty steps array
+        if (Array.isArray(parsed.steps) && parsed.steps.length > 0) {
+          pathway = parsed;
+          break;
+        }
+
+        // Valid JSON but empty steps — retry
+        console.warn(`Pathway attempt ${attempt + 1}: parsed OK but steps empty`);
+      } catch (parseErr) {
+        console.warn(`Pathway attempt ${attempt + 1} parse failed:`, parseErr);
+      }
+    }
+
+    if (!pathway) {
+      return res.status(502).json({
+        error: "Pathway generation is temporarily unavailable. Your answers are saved — please try again in a moment.",
+      });
     }
 
     return res.status(200).json({
@@ -292,3 +304,5 @@ Generate the pathway now. Remember: prioritize programs whose description closel
     return res.status(500).json({ error: "Failed to generate pathway. Please try again." });
   }
 }
+
+export const config = { maxDuration: 30 };

@@ -402,7 +402,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
     })
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then((d: PathwayResponse) => { timers.forEach(clearTimeout); setData(d); setLoading(false); })
-      .catch(() => { timers.forEach(clearTimeout); setError("Failed to generate pathway. Try refreshing."); setLoading(false); });
+      .catch(() => { timers.forEach(clearTimeout); setError("We hit a temporary issue generating your pathway. Your answers are saved — click below to try again."); setLoading(false); });
 
     return () => timers.forEach(clearTimeout);
   }, [description, stage, provinces.join(","), need]);
@@ -589,8 +589,8 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
         return null;
       })()}
 
-      {/* ── Email capture ────────────────────────────────────────────── */}
-      <EmailCapture stage={stage} provinces={provinces} description={description} />
+      {/* ── Email capture (only after successful pathway with steps) ── */}
+      {pathway.steps.length > 0 && <EmailCapture stage={stage} provinces={provinces} description={description} />}
     </div>
   );
 }
