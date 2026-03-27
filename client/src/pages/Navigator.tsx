@@ -442,7 +442,7 @@ function BrowsePanel({
     if (!isOperatorView) return;
     const dismissed = localStorage.getItem("trellis_founder_bridge_dismissed");
     if (dismissed) return;
-    const timer = setTimeout(() => setShowFounderBridge(true), 60000);
+    const timer = setTimeout(() => setShowFounderBridge(true), 25000);
     return () => clearTimeout(timer);
   }, [isOperatorView]);
 
