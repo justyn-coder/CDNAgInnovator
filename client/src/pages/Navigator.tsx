@@ -733,7 +733,11 @@ function BrowsePanel({
           </span>
           <a
             href="/navigator"
-            onClick={onClose}
+            onClick={(e) => {
+              e.preventDefault();
+              try { localStorage.setItem("ag_nav_mode", "e"); } catch {}
+              window.location.href = "/navigator";
+            }}
             className="no-underline shrink-0"
             style={{ fontSize: 13, color: "#D4A828", fontWeight: 500 }}
           >
@@ -1588,7 +1592,7 @@ export default function Navigator() {
                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
                 onFocus={() => setChatFocused(true)}
                 onBlur={() => setChatFocused(false)}
-                placeholder="e.g., Tell me more about a program..."
+                placeholder=""
                 rows={1}
                 style={{ minHeight: "44px" }}
                 className="w-full resize-none border-[1.5px] border-border rounded-lg px-3 py-2 md:px-3.5 md:py-2.5 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-white transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
