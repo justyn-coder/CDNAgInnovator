@@ -398,12 +398,16 @@ function BrowsePanel({
   initialSearch,
   orgLabel,
   totalCount,
+  onOpenGapMap,
+  onOpenChat,
 }: {
   onClose: () => void;
   onFeedback?: () => void;
   initialSearch?: string;
   orgLabel?: string | null;
   totalCount?: number;
+  onOpenGapMap?: () => void;
+  onOpenChat?: (question?: string) => void;
 }) {
   const [data, setData] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
@@ -414,8 +418,9 @@ function BrowsePanel({
   const [programsLoadedAt] = useState(() => Date.now());
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Bridge banner
-  const [showBridge, setShowBridge] = useState(false);
+  // Feature-discovery banner (15s) + founder-pathway bridge (60s)
+  const [showFeatureBanner, setShowFeatureBanner] = useState(false);
+  const [showFounderBridge, setShowFounderBridge] = useState(false);
 
   const isOperatorView = !!orgLabel;
 
@@ -423,12 +428,21 @@ function BrowsePanel({
     fetch("/api/programs").then(r => r.json()).then((d: Program[]) => { setData(d); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
-  // Bridge banner timer — 45s after mount (operator only)
+  // Feature-discovery banner — 15s after mount (operator only)
   useEffect(() => {
     if (!isOperatorView) return;
     const dismissed = localStorage.getItem("trellis_bridge_dismissed");
     if (dismissed) return;
-    const timer = setTimeout(() => setShowBridge(true), 45000);
+    const timer = setTimeout(() => setShowFeatureBanner(true), 15000);
+    return () => clearTimeout(timer);
+  }, [isOperatorView]);
+
+  // Founder pathway bridge — 60s after mount (operator only)
+  useEffect(() => {
+    if (!isOperatorView) return;
+    const dismissed = localStorage.getItem("trellis_founder_bridge_dismissed");
+    if (dismissed) return;
+    const timer = setTimeout(() => setShowFounderBridge(true), 60000);
     return () => clearTimeout(timer);
   }, [isOperatorView]);
 
@@ -463,9 +477,41 @@ function BrowsePanel({
             </span>
           )}
         </div>
-        <button onClick={onClose} className="bg-bg-secondary border border-border rounded-sm px-4 py-1.5 text-[0.78rem] font-semibold text-text">
-          Done
-        </button>
+        <div className="flex items-center gap-1.5">
+          {isOperatorView && onOpenGapMap && (
+            <button
+              onClick={onOpenGapMap}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-[0.72rem] font-semibold text-brand-green bg-transparent border border-transparent hover:border-border hover:bg-bg-secondary transition-all"
+              title="Coverage Gap Map"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <rect x="1" y="1" width="6" height="6" rx="1" fill="#D4A828"/>
+                <rect x="9" y="1" width="6" height="6" rx="1" fill="#48B87A"/>
+                <rect x="1" y="9" width="6" height="6" rx="1" fill="#48B87A"/>
+                <rect x="9" y="9" width="6" height="6" rx="1" fill="#D4A828" opacity="0.5"/>
+              </svg>
+              <span className="hidden sm:inline">Gap Map</span>
+            </button>
+          )}
+          {isOperatorView && onOpenChat && (
+            <button
+              onClick={() => onOpenChat?.()}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-[0.72rem] font-semibold text-brand-green bg-transparent border border-transparent hover:border-border hover:bg-bg-secondary transition-all"
+              title="Ask AI about the ecosystem"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H6l-3 2.5V11H3a1 1 0 01-1-1V3z" stroke="#2D7A4F" strokeWidth="1.3" fill="none"/>
+                <circle cx="5.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                <circle cx="8" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                <circle cx="10.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+              </svg>
+              <span className="hidden sm:inline">Ask AI</span>
+            </button>
+          )}
+          <button onClick={onClose} className="bg-bg-secondary border border-border rounded-sm px-4 py-1.5 text-[0.78rem] font-semibold text-text">
+            Done
+          </button>
+        </div>
       </div>
 
       {/* Operator org header bar */}
@@ -489,8 +535,73 @@ function BrowsePanel({
         </div>
       )}
 
-      {/* Bridge banner */}
-      {showBridge && (
+      {/* Feature-discovery banner — 15s */}
+      {showFeatureBanner && (
+        <div
+          className="mx-3 md:mx-[18px] mt-2.5"
+          style={{
+            background: "linear-gradient(135deg, #122b1f, #1B4332)",
+            borderRadius: 10,
+            padding: "12px 14px",
+            animation: "slideDown 0.3s ease both, fadeIn 0.3s ease both",
+          }}
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span style={{ fontSize: 13, color: "white", fontWeight: 600 }}>
+              ✦ See the bigger picture
+            </span>
+            <button
+              onClick={() => {
+                setShowFeatureBanner(false);
+                try { localStorage.setItem("trellis_bridge_dismissed", "true"); } catch {}
+              }}
+              className="bg-transparent border-none cursor-pointer px-2 py-1"
+              style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="flex gap-2">
+            {onOpenGapMap && (
+              <button
+                onClick={onOpenGapMap}
+                className="flex-1 flex items-center justify-center gap-2 bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.12] rounded-sm px-3 py-2 transition-all cursor-pointer"
+                style={{ fontSize: 12, color: "white", fontWeight: 500 }}
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <rect x="1" y="1" width="6" height="6" rx="1" fill="#D4A828"/>
+                  <rect x="9" y="1" width="6" height="6" rx="1" fill="#48B87A"/>
+                  <rect x="1" y="9" width="6" height="6" rx="1" fill="#48B87A"/>
+                  <rect x="9" y="9" width="6" height="6" rx="1" fill="#D4A828" opacity="0.5"/>
+                </svg>
+                Coverage Gaps
+              </button>
+            )}
+            {onOpenChat && (
+              <button
+                onClick={() => onOpenChat?.()}
+                className="flex-1 flex items-center justify-center gap-2 bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.12] rounded-sm px-3 py-2 transition-all cursor-pointer"
+                style={{ fontSize: 12, color: "white", fontWeight: 500 }}
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H6l-3 2.5V11H3a1 1 0 01-1-1V3z" stroke="white" strokeWidth="1.3" fill="none"/>
+                  <circle cx="5.5" cy="6.5" r="0.8" fill="white"/>
+                  <circle cx="8" cy="6.5" r="0.8" fill="white"/>
+                  <circle cx="10.5" cy="6.5" r="0.8" fill="white"/>
+                </svg>
+                Ask AI
+              </button>
+            )}
+          </div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 6 }}>
+            Where is coverage thin? What are founders struggling with? Get answers.
+          </div>
+        </div>
+      )}
+
+      {/* Founder pathway bridge — 60s */}
+      {showFounderBridge && (
         <div
           className="mx-3 md:mx-[18px] mt-2.5 flex items-center justify-between gap-2 flex-wrap"
           style={{
@@ -516,8 +627,8 @@ function BrowsePanel({
             </a>
             <button
               onClick={() => {
-                setShowBridge(false);
-                try { localStorage.setItem("trellis_bridge_dismissed", "true"); } catch {}
+                setShowFounderBridge(false);
+                try { localStorage.setItem("trellis_founder_bridge_dismissed", "true"); } catch {}
               }}
               className="bg-transparent border-none cursor-pointer px-2 py-1.5"
               style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}
@@ -562,6 +673,58 @@ function BrowsePanel({
             {sorted.map(p => (
               <ProgramCard key={p.id} p={p} />
             ))}
+          </div>
+        )}
+        {/* Explore More — discovery card at bottom of list (operator only) */}
+        {isOperatorView && !loading && sorted.length > 0 && (
+          <div
+            className="mx-3 md:mx-[18px] my-4 rounded-lg overflow-hidden border border-border"
+            style={{ animation: "fadeIn 0.3s ease both" }}
+          >
+            <div className="bg-gradient-to-br from-[#122b1f] to-[#1B4332] px-4 py-3">
+              <div className="text-[0.65rem] font-bold tracking-[0.1em] uppercase text-brand-gold/60 mb-1">
+                Beyond the list
+              </div>
+              <div className="text-[0.92rem] font-display text-white leading-[1.3]">
+                You've seen the programs. Now see the gaps.
+              </div>
+            </div>
+            <div className="bg-bg p-3 flex gap-2">
+              {onOpenGapMap && (
+                <button
+                  onClick={onOpenGapMap}
+                  className="flex-1 flex flex-col items-center gap-1.5 px-3 py-3 bg-bg-secondary border border-border rounded-sm transition-all hover:border-brand-green hover:-translate-y-px cursor-pointer"
+                >
+                  <svg width="20" height="20" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <rect x="1" y="1" width="6" height="6" rx="1" fill="#D4A828"/>
+                    <rect x="9" y="1" width="6" height="6" rx="1" fill="#48B87A"/>
+                    <rect x="1" y="9" width="6" height="6" rx="1" fill="#48B87A"/>
+                    <rect x="9" y="9" width="6" height="6" rx="1" fill="#D4A828" opacity="0.5"/>
+                  </svg>
+                  <span className="text-[0.75rem] font-semibold text-text">Gap Map</span>
+                  <span className="text-[0.65rem] text-text-tertiary leading-[1.4] text-center">
+                    Province × category coverage
+                  </span>
+                </button>
+              )}
+              {onOpenChat && (
+                <button
+                  onClick={() => onOpenChat?.()}
+                  className="flex-1 flex flex-col items-center gap-1.5 px-3 py-3 bg-bg-secondary border border-border rounded-sm transition-all hover:border-brand-green hover:-translate-y-px cursor-pointer"
+                >
+                  <svg width="20" height="20" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H6l-3 2.5V11H3a1 1 0 01-1-1V3z" stroke="#2D7A4F" strokeWidth="1.3" fill="none"/>
+                    <circle cx="5.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                    <circle cx="8" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                    <circle cx="10.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                  </svg>
+                  <span className="text-[0.75rem] font-semibold text-text">Ask AI</span>
+                  <span className="text-[0.65rem] text-text-tertiary leading-[1.4] text-center">
+                    Ecosystem intelligence queries
+                  </span>
+                </button>
+              )}
+            </div>
           </div>
         )}
         {isOperatorView && !loading && sorted.length > 0 && (
@@ -942,6 +1105,8 @@ export default function Navigator() {
           onFeedback={() => { setShowBrowse(false); setShowFeedback(true); }}
           initialSearch={browseInitialSearch}
           orgLabel={orgParam}
+          onOpenGapMap={() => { setShowBrowse(false); setOrgParam(null); setShowGapMap(true); }}
+          onOpenChat={(question) => { setShowBrowse(false); setOrgParam(null); if (question) send(question); }}
         />
       )}
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} onFeedback={() => { setShowGapMap(false); setShowFeedback(true); }} mode={mode === "ec" ? "ec" : "founder"} />}
