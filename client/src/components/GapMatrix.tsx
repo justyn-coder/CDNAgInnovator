@@ -537,6 +537,42 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
         )}
       </div>
 
+      {/* Where we're light */}
+      {!loading && data && (
+        <div className="px-[18px] py-3 border-t border-border bg-bg-secondary shrink-0">
+          <div className="text-[0.72rem] font-semibold text-text mb-0.5">
+            Where we're light
+          </div>
+          <div className="text-[0.65rem] text-text-tertiary mb-2">
+            Know a program we're missing? Flag it and we'll investigate.
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { prov: "NB", gap: "0 pilot sites, 0 events", severity: "high" },
+              { prov: "NL", gap: "0 pilot sites, 0 events, 0 orgs", severity: "high" },
+              { prov: "QC", gap: "0 events, 1 industry org", severity: "medium" },
+              { prov: "BC", gap: "1 training, 2 events", severity: "medium" },
+            ].map((g, i) => (
+              <div
+                key={i}
+                onClick={onFeedback}
+                className={`flex-[1_1_calc(50%-4px)] min-w-[130px] px-2.5 py-2 rounded-sm bg-bg border border-border cursor-pointer transition-all ${
+                  g.severity === "high" ? "hover:border-[#ef4444]" : "hover:border-[#D4A828]"
+                }`}
+              >
+                <div className="flex items-center gap-[5px] mb-[3px]">
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    g.severity === "high" ? "bg-[#ef4444]" : "bg-[#D4A828]"
+                  }`} />
+                  <span className="font-bold text-[0.75rem] text-text">{g.prov}</span>
+                </div>
+                <div className="text-[0.65rem] text-text-secondary leading-[1.4]">{g.gap}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {onFeedback && (
         <div className="px-[18px] py-2 border-t border-border bg-brand-gold shrink-0 text-center">
           <button onClick={onFeedback} className="bg-transparent border-none text-white text-[0.72rem] font-semibold p-0">

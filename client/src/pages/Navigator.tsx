@@ -1321,37 +1321,129 @@ export default function Navigator() {
                   </button>
                 </div>
 
-                {/* Coverage gap cards */}
-                <div className="px-4 py-3 bg-bg-secondary border-b border-border">
-                  <div className="text-[0.72rem] font-semibold text-text mb-0.5">
-                    Where coverage looks thin
+                {/* Ecosystem Signals */}
+                <div className="px-4 py-4 bg-bg-secondary border-b border-border">
+                  <div className="text-[0.6rem] font-bold tracking-[0.12em] uppercase text-text-tertiary mb-1">
+                    What the data shows
                   </div>
-                  <div className="text-[0.65rem] text-text-tertiary mb-2">
-                    Based on our data — help us fill the gaps
+                  <div className="text-[0.65rem] text-text-tertiary mb-3">
+                    Pre-computed from {programCount !== null ? programCount : "…"} programs across 10 provinces
                   </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {[
-                      { prov: "NB", gap: "0 pilot sites, 0 events", severity: "high" },
-                      { prov: "NL", gap: "0 pilot sites, 0 events, 0 orgs", severity: "high" },
-                      { prov: "QC", gap: "0 events, 1 industry org", severity: "medium" },
-                      { prov: "BC", gap: "1 training, 2 events", severity: "medium" },
-                    ].map((g, i) => (
-                      <div key={i} onClick={() => send(`Show me the full coverage analysis for ${g.prov} — what's missing and what would you recommend?`)}
-                        className={cn(
-                          "flex-[1_1_calc(50%-4px)] min-w-[130px] px-2.5 py-2 rounded-sm bg-bg border border-border cursor-pointer transition-all",
-                          g.severity === "high" ? "hover:border-[#ef4444]" : "hover:border-amber"
-                        )}
-                      >
-                        <div className="flex items-center gap-[5px] mb-[3px]">
-                          <span className={cn(
-                            "w-1.5 h-1.5 rounded-full",
-                            g.severity === "high" ? "bg-[#ef4444]" : "bg-amber"
-                          )} />
-                          <span className="font-bold text-[0.75rem] text-text">{g.prov}</span>
-                        </div>
-                        <div className="text-[0.65rem] text-text-secondary leading-[1.4]">{g.gap}</div>
+
+                  {/* Asymmetric grid: featured left, stacked right */}
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+
+                    {/* Featured: Scale Cliff */}
+                    <div className="md:col-span-3 bg-[#F0EDE6] rounded-sm px-4 py-4">
+                      <div className="text-[0.6rem] font-bold tracking-[0.12em] uppercase text-[#B45309] mb-2">
+                        The Scale Cliff
                       </div>
-                    ))}
+                      <div className="font-display text-[1.1rem] md:text-[1.25rem] text-text leading-[1.2] mb-1">
+                        The ecosystem builds founders up, then drops them.
+                      </div>
+
+                      {/* Stage funnel sparkline */}
+                      <div className="flex items-end gap-1.5 h-10 mt-3 mb-1">
+                        {[
+                          { label: "Idea", count: 154 },
+                          { label: "MVP", count: 280 },
+                          { label: "Pilot", count: 235 },
+                          { label: "Scale", count: 117 },
+                        ].map((s) => {
+                          const height = (s.count / 280) * 100;
+                          const isScale = s.label === "Scale";
+                          return (
+                            <div key={s.label} className="flex flex-col items-center gap-0.5 flex-1">
+                              <div
+                                className="w-full rounded-sm"
+                                style={{
+                                  height: `${height}%`,
+                                  backgroundColor: isScale ? "#B45309" : "#2D5A3D",
+                                  opacity: isScale ? 1 : s.label === "Idea" ? 0.3 : s.label === "MVP" ? 0.5 : 0.4,
+                                }}
+                              />
+                              <span className={cn(
+                                "text-[0.58rem]",
+                                isScale ? "text-[#B45309] font-semibold" : "text-text-tertiary"
+                              )}>
+                                {s.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="text-[0.72rem] text-text-secondary leading-[1.5] mb-3 max-w-[380px]">
+                        280 programs help at MVP stage. By the time a founder needs to scale, 117 remain. The sharpest drop in the pipeline.
+                      </div>
+                      <button
+                        onClick={() => send("Where does support disappear between pilot and scale stage?")}
+                        className="group bg-transparent border-none p-0 cursor-pointer flex items-center gap-1.5 text-[0.72rem] text-brand-green hover:underline"
+                        style={{ textUnderlineOffset: "3px" }}
+                      >
+                        <span>Where does support disappear at scale?</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+                          className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+                        >
+                          <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Right column: stacked */}
+                    <div className="md:col-span-2 flex flex-col">
+
+                      {/* Alberta's Paradox */}
+                      <div className="pb-3 mb-3 border-b border-border">
+                        <div className="text-[0.6rem] font-bold tracking-[0.12em] uppercase text-text-tertiary mb-1.5">
+                          Alberta's Paradox
+                        </div>
+                        <div className="font-display text-[1rem] md:text-[1.1rem] text-text leading-[1.2] mb-1.5">
+                          76 programs. 1 for scale-stage ag.
+                        </div>
+                        <div className="text-[0.72rem] text-text-secondary leading-[1.5] mb-2.5">
+                          Alberta has more programs than any province. But only 12% are ag-food specific. For a scale-stage agtech company, there's exactly one dedicated option.
+                        </div>
+                        <button
+                          onClick={() => send("What's actually available for a scale-stage agtech company in Alberta?")}
+                          className="group bg-transparent border-none p-0 cursor-pointer flex items-center gap-1.5 text-[0.72rem] text-brand-green hover:underline"
+                          style={{ textUnderlineOffset: "3px" }}
+                        >
+                          <span>What's available for scale-stage ag in Alberta?</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                            className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+                          >
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Funding Valley */}
+                      <div>
+                        <div className="text-[0.6rem] font-bold tracking-[0.12em] uppercase text-text-tertiary mb-1.5">
+                          The Funding Valley
+                        </div>
+                        <div className="font-display text-[1rem] md:text-[1.1rem] text-text leading-[1.2] mb-1.5">
+                          6 programs in the $500K-$1M band.
+                        </div>
+                        <div className="text-[0.72rem] text-text-secondary leading-[1.5] mb-2.5">
+                          23 programs fund under $150K. 20 fund over $1M. Founders who've outgrown grants but aren't ready for venture have almost nowhere to go.
+                        </div>
+                        <button
+                          onClick={() => send("What funding options exist between $500K and $1M for agtech companies with revenue?")}
+                          className="group bg-transparent border-none p-0 cursor-pointer flex items-center gap-1.5 text-[0.72rem] text-brand-green hover:underline"
+                          style={{ textUnderlineOffset: "3px" }}
+                        >
+                          <span>What's in the $500K-$1M funding gap?</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                            className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+                          >
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+
+                    </div>
                   </div>
                 </div>
 
