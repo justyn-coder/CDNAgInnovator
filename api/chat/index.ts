@@ -17,13 +17,19 @@ Be direct and specific. Always recommend 3-5 concrete programs with a reason for
 
 End with a gap or watch-out relevant to their stage.
 
-IMPORTANT: You have access to a curated database of 400+ Canadian agtech programs. If the user asks about a specific program and it appears in the ECOSYSTEM DATA below, use that data. If it does NOT appear, say "Let me check — I may not have loaded that program in this context. Try asking again or browse the full database." NEVER say a program doesn't exist or isn't in the database — it may simply not have been included in this query's results.
+IMPORTANT: You have access to a curated database of Canadian agtech programs. If the user asks about a specific program and it appears in the ECOSYSTEM DATA below, use that data. If it does NOT appear, say "I don't have that program loaded in this context. Try browsing the full database or ask me again." Do not supplement with programs from outside the provided data.
+
+PROGRAM NAME ACCURACY: When referencing programs, use the EXACT name from the ECOSYSTEM DATA provided below. Do not abbreviate, paraphrase, or use parent organization names in place of specific program names (e.g., say "BDC Capital" not "BDC", say "FCC Capital" not "FCC"). If a program is not listed in the ECOSYSTEM DATA below, do not recommend it by name. Instead say "Based on the programs loaded for this query..." to signal incomplete coverage. If ECOSYSTEM INTELLIGENCE mentions a program not present in ECOSYSTEM DATA, it may not have been loaded for this query or may be dissolved. Do not recommend it as current without noting this uncertainty.
 
 ADVISOR CHANNEL INSIGHT: For any founder at Pilot stage or beyond whose product will be used by farmers/growers, flag if they haven't mentioned engaging the agronomist/CCA advisor channel. In Canadian agriculture, going direct-to-farmer without trusted advisor endorsement is the #1 adoption mistake. Key programs for advisor access: AgSphere (AB), Farming Smarter Field-Tested (AB), CCA networks (Prairies), provincial agrologist institutes. Frame this constructively: "The fastest path to farmer adoption runs through their trusted crop advisor."`;
 
 const SYSTEM_EC = `You are a Canadian agtech ecosystem analyst. Today's date is ${new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}. You help ecosystem operators (accelerator managers, government program officers, investors) understand gaps, coverage, and strategic opportunities in the Canadian agtech support landscape.
 
-Be analytical. Surface gaps, overlaps, and strategic insights. Use data when available. Format findings clearly with headers.`;
+Be analytical and confident in your analysis. Surface gaps, overlaps, and strategic insights. Use data when available. Format findings clearly with headers.
+
+PROGRAM NAME ACCURACY: When referencing programs, use the EXACT name from the ECOSYSTEM DATA provided below. Do not abbreviate, paraphrase, or use parent organization names in place of specific program names. If a program is not listed in the ECOSYSTEM DATA below, do not recommend it by name. Instead frame your analysis around the programs loaded for this query to signal scope. If ECOSYSTEM INTELLIGENCE references a program not in ECOSYSTEM DATA, it may not have been loaded for this query or may be dissolved. Do not recommend it as current without noting this uncertainty.
+
+CRITICAL: Do not fabricate specific contact names, email addresses, phone numbers, or specific dollar amounts unless they appear in the provided data. When citing funding amounts, use "approximately" or "up to" if not certain.`;
 
 // ── Extract search terms from message for knowledge matching ──────────────
 function extractSearchTerms(message: string): string[] {
@@ -115,19 +121,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       );
     } else if (detectedProvs.length > 0) {
       contextRows = await client.unsafe(
-        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND (province && $1 OR 'National' = ANY(province)) ORDER BY name LIMIT 20`,
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND (province && $1 OR 'National' = ANY(province)) ORDER BY name LIMIT 60`,
         [detectedProvs]
       );
     } else if (detectedStage) {
       contextRows = await client.unsafe(
-        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND $1 = ANY(stage) ORDER BY name LIMIT 20`,
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') AND $1 = ANY(stage) ORDER BY name LIMIT 40`,
         [detectedStage]
       );
     } else {
       contextRows = await client.unsafe(
-        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') ORDER BY name LIMIT 20`
+        `SELECT name, category, description, use_case, province, stage, website FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive') ORDER BY name LIMIT 40`
       );
     }
+
+    // Total active program count (for context transparency)
+    const [{ count: totalCount }] = await client.unsafe(
+      `SELECT COUNT(*)::int AS count FROM programs WHERE status NOT IN ('closed', 'dissolved', 'inactive')`
+    ) as any[];
 
     // Merge: name matches first, then context rows (deduplicated)
     const seenNames = new Set(nameMatches.map((r: any) => r.name));
@@ -180,7 +191,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const relevant = scored.filter((k: any) => (k.tag_score || 0) + (k.prov_score || 0) > 0);
     const finalKnowledge = relevant.length >= 4 ? relevant : scored.slice(0, 10);
 
-    const context = `ECOSYSTEM DATA (${rows.length} programs${detectedProvs.length ? ` in ${detectedProvs.join(", ")}` : ""}):
+    const context = `ECOSYSTEM DATA (${rows.length} of ${totalCount} active programs loaded${detectedProvs.length ? `, filtered to ${detectedProvs.join(", ")}` : ""}):
 ${rows.map((p: any) => `- ${p.name} [${p.category}] | Stages: ${(p.stage || []).join(",")} | Province: ${(p.province || []).join(",")} | ${p.description?.slice(0, 120) || ""}`).join("\n")}
 
 ${finalKnowledge.length ? `ECOSYSTEM INTELLIGENCE:\n${finalKnowledge.map((k: any) => `[${k.title}]: ${k.body}`).join("\n\n")}` : ""}`;
