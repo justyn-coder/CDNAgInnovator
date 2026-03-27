@@ -1343,27 +1343,27 @@ export default function Navigator() {
                       </div>
 
                       {/* Stage funnel sparkline */}
-                      <div className="flex items-end gap-1.5 h-10 mt-3 mb-1">
+                      <div className="flex items-end gap-1.5 mt-3 mb-1" style={{ height: 48 }}>
                         {[
                           { label: "Idea", count: 154 },
                           { label: "MVP", count: 280 },
                           { label: "Pilot", count: 235 },
                           { label: "Scale", count: 117 },
                         ].map((s) => {
-                          const height = (s.count / 280) * 100;
+                          const barH = Math.round((s.count / 280) * 36);
                           const isScale = s.label === "Scale";
                           return (
-                            <div key={s.label} className="flex flex-col items-center gap-0.5 flex-1">
+                            <div key={s.label} className="flex flex-col items-center justify-end flex-1" style={{ height: "100%" }}>
                               <div
                                 className="w-full rounded-sm"
                                 style={{
-                                  height: `${height}%`,
+                                  height: barH,
                                   backgroundColor: isScale ? "#B45309" : "#2D5A3D",
-                                  opacity: isScale ? 1 : s.label === "Idea" ? 0.3 : s.label === "MVP" ? 0.5 : 0.4,
+                                  opacity: isScale ? 1 : s.label === "Idea" ? 0.35 : s.label === "MVP" ? 0.6 : 0.45,
                                 }}
                               />
                               <span className={cn(
-                                "text-[0.58rem]",
+                                "text-[0.58rem] mt-0.5",
                                 isScale ? "text-[#B45309] font-semibold" : "text-text-tertiary"
                               )}>
                                 {s.label}
