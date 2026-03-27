@@ -222,37 +222,42 @@ CATEGORY CONTEXT: ${CATEGORY_CONTEXT[category] || "No specific context available
 
 Generate the JSON explanation now.`;
 
-    // 7. Call Anthropic API
-    const apiRes = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY || "",
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 512,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userMessage }],
-      }),
+    // 7. Call Anthropic API (retry once on failure)
+    let explanation: { classification_label: string; why: string; action: string } | null = null;
+    const apiBody = JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 512,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userMessage }],
     });
 
-    const data = await apiRes.json() as any;
-    const raw = data.content?.[0]?.text || "";
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const apiRes = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.ANTHROPIC_API_KEY || "",
+            "anthropic-version": "2023-06-01",
+          },
+          body: apiBody,
+        });
 
-    // 8. Parse JSON response
-    let explanation: { classification_label: string; why: string; action: string };
-    try {
-      const cleaned = raw.replace(/```json|```/g, "").trim();
-      explanation = JSON.parse(cleaned);
-    } catch {
-      // Fallback if JSON parsing fails
-      explanation = {
-        classification_label: gapType.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase()),
-        why: raw.slice(0, 200),
-        action: "Unable to generate structured explanation. Try refreshing.",
-      };
+        const data = await apiRes.json() as any;
+        const raw = data.content?.[0]?.text || "";
+        const cleaned = raw.replace(/```json|```/g, "").trim();
+        explanation = JSON.parse(cleaned);
+        break; // success, stop retrying
+      } catch {
+        if (attempt === 1) {
+          // Both attempts failed — use fallback
+          explanation = {
+            classification_label: gapType.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase()),
+            why: "Our AI analysis is temporarily unavailable for this cell.",
+            action: "Try refreshing in a moment. The data above is still accurate.",
+          };
+        }
+      }
     }
 
     return res.status(200).json({
