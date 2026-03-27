@@ -19,6 +19,7 @@ export const programs = pgTable("programs", {
   deadlineNotes: text("deadline_notes"),
   productionSystems: text("production_systems").array(),
   techDomains: text("tech_domains").array(),
+  featured: boolean("featured").default(false),
 });
 
 export const submissions = pgTable("submissions", {

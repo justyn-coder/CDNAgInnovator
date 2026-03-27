@@ -16,6 +16,7 @@ interface Program {
   mentorship: boolean | null; cohortBased: boolean | null;
   intakeFrequency: string | null; deadlineNotes: string | null;
   productionSystems: string[] | null; techDomains: string[] | null;
+  featured: boolean | null;
 }
 
 interface Message { role: "user" | "assistant"; content: string; }
@@ -324,13 +325,21 @@ function ProgramCard({ p }: { p: Program }) {
   const [showCorrection, setShowCorrection] = useState(false);
   const provinces = (p.province || []).filter(x => x !== "National").join(", ") || (p.province?.includes("National") ? "National" : "—");
 
+  const isInactive = ["closed", "dissolved", "inactive", "announced"].includes(p.status || "");
+  const statusLabel = p.status === "dissolved" ? "Dissolved" : p.status === "announced" ? "Announced" : p.status === "inactive" ? "Archived" : "Closed";
+
   return (
-    <div className="px-[18px] py-3 bg-bg border-b border-border transition-colors hover:bg-bg-secondary">
+    <div className={cn("px-[18px] py-3 border-b border-border transition-colors hover:bg-bg-secondary", isInactive ? "bg-bg opacity-60" : "bg-bg")}>
       <div className="mb-1">
-        <div className="font-medium text-[0.94rem] md:text-[1rem] mb-1">
+        <div className="font-medium text-[0.94rem] md:text-[1rem] mb-1 flex items-center gap-2">
           {p.website
             ? <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-brand-green no-underline border-b border-[rgba(45,122,79,0.2)]">{p.name} ↗</a>
             : <span className="text-text">{p.name}</span>}
+          {isInactive && (
+            <span className="text-[0.6rem] font-semibold uppercase tracking-wide bg-[rgba(180,50,50,0.08)] text-[#9a3030] px-1.5 py-px rounded shrink-0">
+              {statusLabel}
+            </span>
+          )}
         </div>
         <div className="flex gap-[5px] flex-wrap items-center">
           <CategoryPill cat={p.category} />
@@ -500,9 +509,19 @@ function BrowsePanel({
     return () => clearTimeout(timer);
   }, [isOperatorView]);
 
+  const HIDDEN_STATUSES = ["closed", "dissolved", "inactive", "announced"];
+  const isSearching = search.trim().length > 0;
+
+  // Active programs (for count display and default browse)
+  const activeData = data.filter(p => !HIDDEN_STATUSES.includes(p.status || ""));
+
   const filtered = data.filter(p => {
+    // In default browse mode, hide closed/dissolved/inactive/announced
+    // When searching, show everything so users can find known programs
+    if (!isSearching && HIDDEN_STATUSES.includes(p.status || "")) return false;
     const q = search.toLowerCase();
-    const matchText = !q || [p.name, p.description || "", (p.province || []).join(" ")].some(f => f.toLowerCase().includes(q));
+    const qRe = q ? new RegExp(`\\b${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i') : null;
+    const matchText = !qRe || [p.name, p.description || "", (p.province || []).join(" ")].some(f => qRe.test(f));
     const matchCat = catFilter === "All" || p.category === catFilter;
     const matchStage = stageFilter === "All" || (p.stage || []).includes(stageFilter);
     const matchProv = provFilter === "All" || (p.province || []).includes(provFilter) || (p.province || []).includes("National");
@@ -510,6 +529,11 @@ function BrowsePanel({
   });
 
   const sorted = [...filtered].sort((a, b) => {
+    // Featured first
+    const aFeat = a.featured ? 1 : 0;
+    const bFeat = b.featured ? 1 : 0;
+    if (aFeat !== bFeat) return bFeat - aFeat;
+    // AAFC demotion
     const aFed = a.name.toLowerCase().includes("aafc") || a.name.toLowerCase().includes("agriculture and agri-food");
     const bFed = b.name.toLowerCase().includes("aafc") || b.name.toLowerCase().includes("agriculture and agri-food");
     if (aFed && !bFed) return 1;
@@ -527,7 +551,7 @@ function BrowsePanel({
           </span>
           {!loading && (
             <span className="text-[0.72rem] text-text-tertiary ml-2.5">
-              {filtered.length} of {data.length}
+              {filtered.length} of {activeData.length}
             </span>
           )}
         </div>
@@ -584,7 +608,7 @@ function BrowsePanel({
             className="bg-transparent border-none cursor-pointer shrink-0"
             style={{ fontSize: 13, color: "#2D7A4F" }}
           >
-            View all {data.length} →
+            View all {activeData.length} →
           </button>
         </div>
       )}
@@ -989,7 +1013,10 @@ export default function Navigator() {
 
   // Fetch dynamic counts for operator dashboard
   useEffect(() => {
-    fetch("/api/programs").then(r => r.json()).then((d: any[]) => setProgramCount(d.length)).catch(() => {});
+    fetch("/api/programs").then(r => r.json()).then((d: any[]) => {
+      const hidden = new Set(["closed", "dissolved", "inactive", "announced"]);
+      setProgramCount(d.filter((p: any) => !hidden.has(p.status || "")).length);
+    }).catch(() => {});
   }, []);
 
   // Read URL params on mount
