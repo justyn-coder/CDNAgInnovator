@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { cn } from "../lib/cn";
+import { SIGNAL_RESPONSES } from "../lib/signal-responses";
 
 import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
@@ -1165,6 +1166,17 @@ export default function Navigator() {
     setMessages(newMessages);
     setLoading(true);
     if (isEco) setEcoMsgCount(c => c + 1);
+
+    // Check for pre-baked signal card responses (instant, no API call)
+    const normalized = text.toLowerCase().replace(/[?.!]+$/, "");
+    const cachedKey = Object.keys(SIGNAL_RESPONSES).find(
+      k => k.toLowerCase().replace(/[?.!]+$/, "") === normalized
+    );
+    if (cachedKey) {
+      setMessages(m => [...m, { role: "assistant", content: SIGNAL_RESPONSES[cachedKey] }]);
+      setLoading(false);
+      return;
+    }
 
     let contextPrefix = "";
     if (wizardSnapshot && !isEco) {
