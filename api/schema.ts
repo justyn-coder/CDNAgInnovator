@@ -13,6 +13,12 @@ export const programs = pgTable("programs", {
   fundingType: text("funding_type"),
   fundingMaxCad: integer("funding_max_cad"),
   status: text("status").default("unverified"),
+  mentorship: boolean("mentorship"),
+  cohortBased: boolean("cohort_based"),
+  intakeFrequency: text("intake_frequency"),
+  deadlineNotes: text("deadline_notes"),
+  productionSystems: text("production_systems").array(),
+  techDomains: text("tech_domains").array(),
 });
 
 export const submissions = pgTable("submissions", {

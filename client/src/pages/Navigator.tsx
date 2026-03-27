@@ -12,6 +12,10 @@ interface Program {
   description: string | null; use_case: string[] | null;
   province: string[] | null; website: string | null;
   stage: string[] | null; status: string | null;
+  fundingType: string | null; fundingMaxCad: number | null;
+  mentorship: boolean | null; cohortBased: boolean | null;
+  intakeFrequency: string | null; deadlineNotes: string | null;
+  productionSystems: string[] | null; techDomains: string[] | null;
 }
 
 interface Message { role: "user" | "assistant"; content: string; }
@@ -343,6 +347,56 @@ function ProgramCard({ p }: { p: Program }) {
           {p.description}
         </div>
       )}
+
+      {/* Metadata pills */}
+      {(() => {
+        const pills: { label: string; icon?: string }[] = [];
+        if (p.fundingType) {
+          let label = p.fundingType.charAt(0).toUpperCase() + p.fundingType.slice(1);
+          if (p.fundingMaxCad && p.fundingMaxCad > 0) {
+            const amt = p.fundingMaxCad >= 1_000_000
+              ? `$${(p.fundingMaxCad / 1_000_000).toFixed(p.fundingMaxCad % 1_000_000 === 0 ? 0 : 1)}M`
+              : `$${(p.fundingMaxCad / 1_000).toFixed(0)}K`;
+            label += ` up to ${amt}`;
+          }
+          pills.push({ label, icon: "💰" });
+        }
+        if (p.mentorship) pills.push({ label: "Mentorship", icon: "🤝" });
+        if (p.cohortBased) pills.push({ label: "Cohort-based", icon: "👥" });
+        if (p.intakeFrequency) {
+          const freq = p.intakeFrequency.charAt(0).toUpperCase() + p.intakeFrequency.slice(1);
+          pills.push({ label: `${freq} intake`, icon: "📅" });
+        }
+        const domains = (p.techDomains || []).filter(d => d !== "agnostic");
+        if (domains.length > 0) {
+          const labels: Record<string, string> = {
+            precision_ag: "Precision Ag", ai_ml: "AI/ML", robotics: "Robotics",
+            biologicals: "Biologicals", carbon: "Carbon", water: "Water",
+            food_processing: "Food Processing", supply_chain: "Supply Chain",
+            genetics: "Genetics", soil: "Soil", energy: "Energy",
+          };
+          pills.push({ label: domains.map(d => labels[d] || d).join(", "), icon: "🔬" });
+        }
+        const systems = (p.productionSystems || []).filter(s => s !== "agnostic");
+        if (systems.length > 0) {
+          const labels: Record<string, string> = {
+            crop: "Crop", livestock: "Livestock", greenhouse: "Greenhouse",
+            aquaculture: "Aquaculture", apiculture: "Apiculture", vertical: "Vertical Farming",
+          };
+          pills.push({ label: systems.map(s => labels[s] || s).join(", "), icon: "🌾" });
+        }
+        if (pills.length === 0) return null;
+        return (
+          <div className="flex gap-x-3 gap-y-1 flex-wrap mt-1.5">
+            {pills.map((pill, i) => (
+              <span key={i} className="text-[0.7rem] text-text-tertiary">
+                {pill.icon && <span className="mr-0.5">{pill.icon}</span>}
+                {pill.label}
+              </span>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Actions row */}
       <div
