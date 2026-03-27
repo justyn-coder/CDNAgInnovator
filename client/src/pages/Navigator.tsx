@@ -729,7 +729,7 @@ function BrowsePanel({
           }}
         >
           <span style={{ fontSize: 13, color: "white" }}>
-            🌱 <strong>See what founders experience.</strong> Answer 4 quick questions and we'll match you to programs for your stage.
+            🌱 <strong>See what founders experience.</strong> 4 quick questions and we match them to programs for their stage.
           </span>
           <a
             href="/navigator"
