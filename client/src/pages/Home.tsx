@@ -48,9 +48,18 @@ export default function Home() {
     // Read URL params
     try {
       const params = new URLSearchParams(window.location.search);
-      const mode = params.get("mode");
+      const rawMode = params.get("mode");
       const org = params.get("org");
       const ref = params.get("ref");
+
+      // Auto-route ref tags to correct mode when ?mode= is missing
+      const OPERATOR_REFS = [
+        'chris', 'dave', 'frank', 'janice', 'leana', 'lewis', 'lisa',
+        'marian', 'maris', 'marlise', 'matt', 'melissa', 'tom', 'virginia',
+      ];
+      const mode = rawMode
+        || (ref && OPERATOR_REFS.includes(ref.toLowerCase()) ? "operator" : null);
+
       if (mode === "operator") setUrlMode("operator");
       if (org) setOrgParam(org);
 
