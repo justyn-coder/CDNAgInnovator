@@ -42,7 +42,10 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/programs")
       .then(r => r.json())
-      .then((d: any[]) => setCount(d.length))
+      .then((d: any[]) => {
+        const hidden = new Set(["closed", "dissolved", "inactive", "announced"]);
+        setCount(d.filter((p: any) => !hidden.has(p.status || "")).length);
+      })
       .catch(() => {});
 
     // Read URL params

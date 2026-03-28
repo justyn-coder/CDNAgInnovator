@@ -552,23 +552,35 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
               { prov: "NL", gap: "0 pilot sites, 0 events, 0 orgs", severity: "high" },
               { prov: "QC", gap: "0 events, 1 industry org", severity: "medium" },
               { prov: "BC", gap: "1 training, 2 events", severity: "medium" },
-            ].map((g, i) => (
-              <div
-                key={i}
-                onClick={onFeedback}
-                className={`flex-[1_1_calc(50%-4px)] min-w-[130px] px-2.5 py-2 rounded-sm bg-bg border border-border cursor-pointer transition-all ${
-                  g.severity === "high" ? "hover:border-[#ef4444]" : "hover:border-[#D4A828]"
-                }`}
-              >
-                <div className="flex items-center gap-[5px] mb-[3px]">
-                  <span className={`w-1.5 h-1.5 rounded-full ${
-                    g.severity === "high" ? "bg-[#ef4444]" : "bg-[#D4A828]"
-                  }`} />
-                  <span className="font-bold text-[0.75rem] text-text">{g.prov}</span>
+            ].map((g, i) => {
+              // Find the weakest category for this province from live data
+              const provRow = data?.matrix[g.prov];
+              let weakestCat: string | null = null;
+              if (provRow) {
+                let minCount = Infinity;
+                for (const cat of data!.categories) {
+                  const c = provRow[cat]?.count ?? 0;
+                  if (c < minCount) { minCount = c; weakestCat = cat; }
+                }
+              }
+              return (
+                <div
+                  key={i}
+                  onClick={() => weakestCat ? setSelected({ prov: g.prov, cat: weakestCat }) : undefined}
+                  className={`flex-[1_1_calc(50%-4px)] min-w-[130px] px-2.5 py-2 rounded-sm bg-bg border border-border cursor-pointer transition-all ${
+                    g.severity === "high" ? "hover:border-[#ef4444]" : "hover:border-[#D4A828]"
+                  }`}
+                >
+                  <div className="flex items-center gap-[5px] mb-[3px]">
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      g.severity === "high" ? "bg-[#ef4444]" : "bg-[#D4A828]"
+                    }`} />
+                    <span className="font-bold text-[0.75rem] text-text">{g.prov}</span>
+                  </div>
+                  <div className="text-[0.65rem] text-text-secondary leading-[1.4]">{g.gap}</div>
                 </div>
-                <div className="text-[0.65rem] text-text-secondary leading-[1.4]">{g.gap}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

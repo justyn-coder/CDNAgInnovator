@@ -26,7 +26,7 @@ const SECTIONS = [
     title: "Data & Intelligence",
     icon: "🗄️",
     items: [
-      { label: `410+ programs`, desc: "Accelerators, funds, pilot sites, events, orgs, and training — verified against federal and provincial databases." },
+      { label: "480+ programs", desc: "Accelerators, funds, pilot sites, events, orgs, and training — verified against federal and provincial databases." },
       { label: "143 knowledge entries", desc: "Conference insights, ecosystem analysis, and sector intelligence from real events and research." },
       { label: "AI-powered pathways", desc: "Claude Sonnet 4 sequences programs by stage and province, with gap detection and next-step logic." },
       { label: "Community corrections", desc: "Every correction and suggestion feeds back into the database. The data gets better with use." },
