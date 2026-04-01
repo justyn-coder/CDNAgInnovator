@@ -6,7 +6,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/((?!api/|@|client/|node_modules/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|@|client/|node_modules/|tour/|brand/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
