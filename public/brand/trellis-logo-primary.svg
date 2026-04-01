@@ -1,0 +1,32 @@
+<svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Trellis Icon -->
+  <g transform="translate(10, 5)">
+    <!-- Vertical supports — stop short of top -->
+    <line x1="10" y1="85" x2="10" y2="20" stroke="#1B4332" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="34" y1="85" x2="34" y2="20" stroke="#1B4332" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="58" y1="85" x2="58" y2="20" stroke="#1B4332" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Crossbars -->
+    <line x1="4" y1="70" x2="64" y2="70" stroke="#1B4332" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="4" y1="48" x2="64" y2="48" stroke="#1B4332" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="4" y1="26" x2="64" y2="26" stroke="#1B4332" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Bottom row — green -->
+    <circle cx="10" cy="70" r="4" fill="#48B87A"/>
+    <circle cx="34" cy="70" r="3.5" fill="#48B87A" opacity="0.9"/>
+    <circle cx="58" cy="70" r="3" fill="#48B87A" opacity="0.8"/>
+    <!-- Middle row — chartreuse -->
+    <circle cx="10" cy="48" r="4.5" fill="#8CC63F"/>
+    <circle cx="34" cy="48" r="4" fill="#8CC63F" opacity="0.9"/>
+    <circle cx="58" cy="48" r="3.5" fill="#8CC63F" opacity="0.7"/>
+    <!-- Top crossbar row — gold -->
+    <circle cx="10" cy="26" r="5" fill="#D4A828"/>
+    <circle cx="34" cy="26" r="4.5" fill="#D4A828" opacity="0.85"/>
+    <!-- Free-floating dots — past the trellis -->
+    <circle cx="58" cy="12" r="3" fill="#D4A828" opacity="0.6"/>
+    <circle cx="10" cy="4" r="4" fill="#D4A828" opacity="0.7"/>
+    <circle cx="34" cy="0" r="3.5" fill="#D4A828" opacity="0.5"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="88" y="57" font-family="'DM Serif Display', Georgia, serif" font-size="42" font-weight="400" letter-spacing="0.02em" fill="#1a1a18">Trellis</text>
+  <!-- Tagline -->
+  <text x="90" y="77" font-family="'DM Sans', system-ui, sans-serif" font-size="12" font-weight="400" letter-spacing="0.05em" fill="#6b6b6b" text-transform="uppercase">NAVIGATE CANADA'S AGTECH ECOSYSTEM</text>
+</svg>

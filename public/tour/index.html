@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trellis — Navigate Canada's AgTech Ecosystem</title>
+<meta name="description" content="The navigation layer for Canada's agtech ecosystem. Free for founders and operators.">
+<meta property="og:title" content="Trellis — Navigate Canada's AgTech Ecosystem">
+<meta property="og:description" content="Navigate Canada's agtech ecosystem. Free for founders and operators.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trellisag.ca/tour/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Base ────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  color: #1A1A1A;
+  background: #FAFAF7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  font-size: 16px;
+  overflow-x: hidden;
+}
+
+/* ── Scroll Progress Bar ─────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 0;
+  height: 3px;
+  background: #C4A052;
+  z-index: 9999;
+  transition: width 0.05s linear;
+}
+
+/* ── Typography ──────────────────────────────── */
+.font-display { font-family: 'DM Serif Display', Georgia, serif; }
+.section-label {
+  font-family: 'DM Sans', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 13px;
+  color: #C4A052;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.headline {
+  font-family: 'DM Serif Display', Georgia, serif;
+  color: #2D5A3D;
+  font-size: clamp(24px, 7vw, 36px);
+  line-height: 1.15;
+  font-weight: 400;
+}
+.headline-lg {
+  font-family: 'DM Serif Display', Georgia, serif;
+  color: #2D5A3D;
+  font-size: clamp(28px, 8vw, 40px);
+  line-height: 1.1;
+  font-weight: 400;
+}
+.body-text {
+  font-size: 16px;
+  color: rgba(26, 26, 26, 0.7);
+  line-height: 1.6;
+}
+.gold { color: #C4A052; }
+.green { color: #2D5A3D; }
+
+/* ── Mobile headline cap ─────────────────────── */
+@media (max-width: 480px) {
+  .headline { font-size: clamp(24px, 7vw, 36px); }
+  .headline-lg { font-size: clamp(28px, 8vw, 36px); }
+}
+
+/* ── Layout ──────────────────────────────────── */
+.content {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+section { padding: 64px 0; }
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+
+/* ── Cards ───────────────────────────────────── */
+.card {
+  background: #fff;
+  border: 1px solid #E8E5E0;
+  border-radius: 8px;
+  padding: 24px;
+}
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+.tag-green { background: #2D5A3D; color: #fff; }
+.tag-gold { background: #C4A052; color: #fff; }
+.tag-outline { background: transparent; color: #2D5A3D; border: 1px solid #2D5A3D; }
+
+/* ── Scroll Animations (800ms, ease-out) ─────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-slide-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal-slide-right.revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Down Arrow ──────────────────────────────── */
+.scroll-arrow {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+.scroll-arrow svg {
+  animation: gentle-bounce 2s ease-in-out infinite;
+  opacity: 0.4;
+}
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+/* ── Wizard Step Cards ───────────────────────── */
+.wizard-card {
+  background: #fff;
+  border: 1px solid #E8E5E0;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 320px;
+  margin: 0 auto 16px;
+}
+.wizard-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(26, 26, 26, 0.4);
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.wizard-question {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 18px;
+  color: #1A1A1A;
+  margin-bottom: 14px;
+}
+.wizard-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E8E5E0;
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #1A1A1A;
+  background: #FAFAF7;
+}
+.wizard-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: #1A1A1A;
+  vertical-align: middle;
+  margin-left: 1px;
+  animation: blink 0.8s step-end infinite;
+}
+.wizard-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.wizard-option {
+  padding: 8px 14px;
+  border: 1px solid #E8E5E0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: rgba(26, 26, 26, 0.6);
+  background: #fff;
+  cursor: default;
+  transition: all 0.35s ease-out;
+}
+.wizard-option.selected { background: #2D5A3D; color: #fff; border-color: #2D5A3D; }
+.province-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.province-cell {
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #E8E5E0;
+  border-radius: 4px;
+  color: rgba(26, 26, 26, 0.5);
+  transition: all 0.35s ease-out;
+}
+.province-cell.selected { background: #2D5A3D; color: #fff; border-color: #2D5A3D; }
+.wizard-tag-hidden {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.wizard-tag-hidden.visible { opacity: 1; transform: translateY(0); }
+
+/* ── Buttons ─────────────────────────────────── */
+.btn-generate {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 24px auto 0;
+  padding: 14px 24px;
+  background: #2D5A3D;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s, box-shadow 0.2s;
+  animation: btn-pulse 2.5s ease-in-out infinite;
+}
+.btn-generate:hover { filter: brightness(0.9); box-shadow: 0 4px 16px rgba(45,90,61,0.2); }
+.btn-cta {
+  display: inline-block;
+  padding: 16px 40px;
+  background: #2D5A3D;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 0.2s, box-shadow 0.2s;
+  animation: btn-pulse 2.5s ease-in-out infinite;
+}
+.btn-cta:hover { filter: brightness(0.9); box-shadow: 0 6px 24px rgba(45,90,61,0.25); }
+@keyframes btn-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* ── Loading Animation ───────────────────────── */
+.loading-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+}
+.loading-logo {
+  animation: logo-pulse 1.5s ease-in-out infinite;
+  margin-bottom: 32px;
+}
+.loading-logo img { width: 180px; height: auto; }
+@keyframes logo-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.04); }
+}
+.progress-track {
+  width: min(60%, 300px);
+  height: 4px;
+  background: #E8E5E0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: #2D5A3D;
+  border-radius: 2px;
+  transition: width 0.4s ease-out;
+}
+.loading-checklist {
+  list-style: none;
+  text-align: left;
+  max-width: 240px;
+  margin: 0 auto;
+}
+.loading-checklist li {
+  font-size: 14px;
+  color: rgba(26, 26, 26, 0.4);
+  padding: 6px 0 6px 28px;
+  position: relative;
+  transition: color 0.3s;
+}
+.loading-checklist li.done { color: #2D5A3D; }
+.loading-checklist li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%) scale(1);
+  width: 16px; height: 16px;
+  border: 1.5px solid #E8E5E0;
+  border-radius: 50%;
+  transition: all 0.3s ease-out;
+}
+.loading-checklist li.done::before {
+  border-color: #2D5A3D;
+  background: #2D5A3D;
+  transform: translateY(-50%) scale(1);
+  animation: check-pop 0.35s ease-out;
+}
+@keyframes check-pop {
+  0% { transform: translateY(-50%) scale(0); }
+  60% { transform: translateY(-50%) scale(1.15); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+.loading-checklist li.done::after {
+  content: '';
+  position: absolute;
+  left: 5px; top: 50%;
+  transform: translateY(-60%) rotate(45deg);
+  width: 4px; height: 8px;
+  border-bottom: 2px solid #fff;
+  border-right: 2px solid #fff;
+}
+
+/* ── Pathway Cards ───────────────────────────── */
+.pathway-card {
+  background: #fff;
+  border: 1px solid #E8E5E0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+.pathway-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
+.pathway-number {
+  position: absolute;
+  top: -10px; left: 16px;
+  background: #2D5A3D;
+  color: #fff;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+.pathway-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 17px;
+  color: #1A1A1A;
+  margin-bottom: 8px;
+  padding-top: 4px;
+}
+.pathway-desc {
+  font-size: 14px;
+  color: rgba(26, 26, 26, 0.6);
+  line-height: 1.5;
+}
+.pathway-tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* ── Chat ────────────────────────────────────── */
+.chat-bubble-user {
+  background: #2D5A3D;
+  color: #fff;
+  padding: 14px 18px;
+  border-radius: 16px 16px 4px 16px;
+  font-size: 15px;
+  max-width: 85%;
+  margin-left: auto;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.chat-bubble-user:hover { transform: scale(1.01); }
+.chat-thinking {
+  display: none;
+  padding: 12px 0;
+  font-size: 14px;
+  color: rgba(26, 26, 26, 0.45);
+  font-style: italic;
+}
+.chat-thinking.active { display: flex; align-items: center; gap: 8px; }
+.thinking-dots { display: flex; gap: 4px; }
+.thinking-dots span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #2D5A3D;
+  opacity: 0.3;
+  animation: think-dot 1.2s ease-in-out infinite;
+}
+.thinking-dots span:nth-child(2) { animation-delay: 0.15s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes think-dot {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.3); }
+}
+.chat-response {
+  background: #fff;
+  border: 1px solid #E8E5E0;
+  border-radius: 4px 16px 16px 16px;
+  padding: 20px;
+  max-width: 95%;
+  display: none;
+}
+.chat-response.active { display: block; }
+.chat-section {
+  margin-bottom: 16px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.chat-section.visible { opacity: 1; transform: translateY(0); }
+.chat-section-title { font-weight: 600; font-size: 14px; color: #2D5A3D; margin-bottom: 6px; }
+.chat-section-text { font-size: 14px; color: rgba(26, 26, 26, 0.7); line-height: 1.5; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── Operator Pivot Divider Line ─────────────── */
+.pivot-line {
+  width: 0;
+  height: 1px;
+  background: #C4A052;
+  margin: 0 auto 32px;
+  transition: width 0.6s ease-out;
+}
+.pivot-line.expanded { width: 100%; }
+
+/* ── Background shift ────────────────────────── */
+.bg-warm { background: #F5F0E8; }
+
+/* ── Dark Green Divider ──────────────────────── */
+.divider-card {
+  background: #2D5A3D;
+  color: #fff;
+  padding: 32px 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+.divider-card .section-label { color: #C4A052; }
+.divider-card h3 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 22px;
+  color: #fff;
+}
+
+/* ── Insight Cards ───────────────────────────── */
+.insight-card {
+  background: #fff;
+  border: 1px solid #E8E5E0;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.insight-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 19px;
+  color: #1A1A1A;
+  margin-bottom: 8px;
+}
+.insight-text { font-size: 14px; color: rgba(26, 26, 26, 0.65); line-height: 1.5; }
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 80px;
+  margin: 16px 0 8px;
+}
+.bar-chart .bar {
+  flex: 1;
+  background: #2D5A3D;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.8s ease-out;
+}
+.bar-chart .bar-label {
+  font-size: 10px;
+  text-align: center;
+  color: rgba(26, 26, 26, 0.5);
+  margin-top: 6px;
+}
+
+/* ── Gap Map Heatmap ─────────────────────────── */
+.gap-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -24px;
+  padding: 0 24px;
+}
+.gap-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 3px;
+}
+.gap-table th {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 6px 4px;
+  color: rgba(26, 26, 26, 0.5);
+  text-align: center;
+}
+.gap-table th:first-child { text-align: left; }
+.gap-table td {
+  width: 44px; height: 24px;
+  text-align: center;
+  border-radius: 3px;
+}
+.gap-table td:first-child {
+  width: auto;
+  text-align: left;
+  font-weight: 500;
+  font-size: 12px;
+  color: #1A1A1A;
+  background: none !important;
+}
+.gap-strong { background: #2D5A3D; }
+.gap-ok { background: #48B87A; }
+.gap-weak { background: #D4A052; }
+.gap-gap { background: #C0392B; }
+.gap-table tr {
+  opacity: 0;
+  transform: translateX(-16px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.gap-table tr.row-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.gap-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 12px;
+  font-size: 11px;
+  color: rgba(26, 26, 26, 0.5);
+}
+.gap-legend-item { display: flex; align-items: center; gap: 5px; }
+.gap-legend-swatch {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+}
+
+/* ── Gap Drill-down ──────────────────────────── */
+.gap-drill {
+  background: #1A1A1A;
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 20px;
+  color: #fff;
+}
+.gap-drill-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.gap-drill-badge {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px; background: #D4A052; color: #fff;
+}
+.gap-drill-title { font-family: 'DM Serif Display', Georgia, serif; font-size: 18px; }
+.gap-drill-section { margin-bottom: 14px; }
+.gap-drill-section-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: #C4A052; margin-bottom: 6px; font-weight: 600;
+}
+.gap-drill-section-text { font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.5; }
+.feedback-buttons { display: flex; gap: 10px; margin-top: 16px; }
+.feedback-btn {
+  padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: default;
+}
+.feedback-btn-yes { border-color: #48B87A; color: #48B87A; }
+.feedback-btn-no { border-color: rgba(255,255,255,0.3); }
+
+/* ── Built Together section ──────────────────── */
+.built-together { background: #2D5A3D; padding: 48px 0; }
+.feedback-carousel { position: relative; min-height: 68px; }
+.feedback-example {
+  background: #fff;
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #1A1A1A;
+  position: absolute;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.feedback-example.active {
+  opacity: 1;
+  transform: translateY(0);
+  position: relative;
+}
+.feedback-example-icon { font-size: 18px; flex-shrink: 0; }
+.feedback-example-label { font-size: 12px; color: rgba(26,26,26,0.5); margin-top: 2px; }
+
+/* ── Roadmap ─────────────────────────────────── */
+.roadmap-item { margin-bottom: 28px; }
+.roadmap-name {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 20px; color: #2D5A3D; margin-bottom: 4px;
+}
+.roadmap-desc { font-size: 15px; color: rgba(26,26,26,0.6); margin-bottom: 10px; }
+.roadmap-preview {
+  background: #FAFAF7;
+  border: 1px solid #E8E5E0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: rgba(26,26,26,0.6);
+  line-height: 1.5;
+}
+.roadmap-preview strong { color: #1A1A1A; font-weight: 600; }
+.status-dot {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; margin-right: 4px; vertical-align: middle;
+}
+.status-dot-yellow { background: #D4A052; }
+
+/* ── Counter / Responsive ────────────────────── */
+.counter { display: inline; }
+@media (min-width: 600px) { .content { padding: 0; } }
+
+/* ── Loading section collapsed by default ────── */
+.loading-section {
+  height: 0;
+  overflow: hidden;
+  min-height: 0;
+  padding: 0;
+}
+.loading-section.active {
+  height: auto;
+  overflow: visible;
+  min-height: 60vh;
+  padding: 48px 24px;
+}
+
+/* ── Click hint ──────────────────────────────── */
+.click-hint {
+  text-align: center;
+  color: #C4A052;
+  font-style: italic;
+  font-size: 14px;
+  margin-top: 12px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.click-hint.visible { opacity: 1; }
+
+/* ── Desktop phone mockup ────────────────────── */
+@media (min-width: 768px) {
+  html { overflow: hidden; height: 100%; }
+  body {
+    background: #1C2E22;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .scroll-progress {
+    position: absolute;
+    border-radius: 0 0 0 0;
+  }
+  #phone-frame {
+    position: relative;
+    width: 420px;
+    max-height: 90vh;
+    background: #FAFAF7;
+    border-radius: 40px;
+    border: 2px solid #333;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-notch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    background: #F0EDE6;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .phone-notch-pill {
+    width: 80px;
+    height: 6px;
+    background: rgba(26,26,26,0.15);
+    border-radius: 3px;
+  }
+  .phone-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .phone-content::-webkit-scrollbar { display: none; }
+  /* Inside phone, content needs padding again */
+  .phone-content .content { padding: 0 24px; }
+}
+/* On mobile, phone-frame and notch are transparent wrappers */
+@media (max-width: 767px) {
+  #phone-frame { display: contents; }
+  .phone-notch { display: none; }
+  .phone-content { display: contents; }
+}
+</style>
+</head>
+<body>
+
+<!-- Phone frame wrapper (transparent on mobile, visible on desktop) -->
+<div id="phone-frame">
+<div class="phone-notch"><div class="phone-notch-pill"></div></div>
+<div class="phone-content" id="phone-content">
+
+<!-- Scroll progress bar -->
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 1 — THE OPENING
+     ═══════════════════════════════════════════════ -->
+<section style="padding: 80px 0 48px;">
+  <div class="content text-center">
+    <h1 class="headline-lg reveal" style="margin-bottom: 20px;">
+      Canada's ag innovation ecosystem is powerful.
+    </h1>
+    <p class="headline-lg reveal" style="transition-delay: 0.2s; margin-bottom: 20px;">
+      It's also a <span class="gold">maze</span>.
+    </p>
+    <p class="body-text reveal text-center" style="transition-delay: 0.4s; max-width: 400px; margin: 0 auto;">
+      The world's 5th largest agricultural exporter. 500+ support programs. And no map to connect them.
+    </p>
+    <div class="scroll-arrow reveal" style="transition-delay: 0.6s; margin-top: 32px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2D5A3D" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+    <p class="headline reveal gold font-display" style="transition-delay: 0.2s; font-size: clamp(28px, 7vw, 44px); margin-top: 32px;">
+      We mapped it.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 2 — THE REVEAL
+     ═══════════════════════════════════════════════ -->
+<section style="padding: 48px 0 64px;">
+  <div class="content text-center">
+    <div class="reveal" style="margin-bottom: 32px;">
+      <img src="../brand/trellis-logo-primary.svg" alt="Trellis — Navigate Canada's agtech ecosystem" style="width: 260px; max-width: 75%; height: auto;">
+    </div>
+    <p class="font-display reveal" style="font-size: clamp(20px, 5vw, 26px); color: #2D5A3D; transition-delay: 0.2s; margin-bottom: 8px;">
+      <span class="counter" data-target="497">0</span> programs. <span class="counter" data-target="167">0</span> ecosystem intelligence entries.
+    </p>
+    <p class="font-display reveal" style="font-size: clamp(20px, 5vw, 26px); color: #2D5A3D; transition-delay: 0.4s;">
+      &#x1F1E8;&#x1F1E6; All 10 provinces. <span class="gold">Free.</span>
+    </p>
+    <div class="scroll-arrow reveal" style="transition-delay: 0.6s; margin-top: 32px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2D5A3D" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 3 — THE FOUNDER EXPERIENCE
+     ═══════════════════════════════════════════════ -->
+<section style="padding: 48px 0 64px;">
+  <div class="content">
+    <p class="section-label text-center reveal">The Founder Experience</p>
+    <h2 class="headline text-center reveal" style="transition-delay: 0.2s; margin-bottom: 32px;">
+      30 seconds. 4 questions.<br>A personalized pathway.
+    </h2>
+    <div class="wizard-card reveal" id="wizard-step1" style="transition-delay: 0.4s;">
+      <div class="wizard-label">Step 1 of 4</div>
+      <div class="wizard-question">What are you building?</div>
+      <div class="wizard-input" id="typewriter-input" style="min-height: 36px;"></div>
+      <div style="margin-top: 10px;" class="wizard-tag-hidden" id="wizard-tag-bio">
+        <span class="tag tag-green" style="font-size: 12px;">Biologicals / Inputs</span>
+      </div>
+    </div>
+    <div class="wizard-card reveal" id="wizard-step2" style="transition-delay: 0.6s;">
+      <div class="wizard-label">Step 2 of 4</div>
+      <div class="wizard-question">What stage are you at?</div>
+      <div class="wizard-options">
+        <div class="wizard-option">Idea</div>
+        <div class="wizard-option">MVP</div>
+        <div class="wizard-option">Pilot</div>
+        <div class="wizard-option">Commercial</div>
+        <div class="wizard-option" data-auto-select="step2">Scale</div>
+      </div>
+    </div>
+    <div class="wizard-card reveal" id="wizard-step3" style="transition-delay: 0.8s;">
+      <div class="wizard-label">Step 3 of 4</div>
+      <div class="wizard-question">Where are you operating?</div>
+      <div class="province-grid">
+        <div class="province-cell">BC</div><div class="province-cell">AB</div>
+        <div class="province-cell">SK</div><div class="province-cell">MB</div>
+        <div class="province-cell" data-auto-select="step3">ON</div><div class="province-cell">QC</div>
+        <div class="province-cell">NB</div><div class="province-cell">NS</div>
+        <div class="province-cell">PE</div><div class="province-cell">NL</div>
+        <div class="province-cell" style="grid-column: span 2;">National</div>
+      </div>
+    </div>
+    <div class="wizard-card reveal" id="wizard-step4" style="transition-delay: 1s;">
+      <div class="wizard-label">Step 4 of 4</div>
+      <div class="wizard-question">What's holding you back?</div>
+      <div class="wizard-options">
+        <div class="wizard-option" data-auto-select="step4">Growth capital</div>
+        <div class="wizard-option">Market access</div>
+        <div class="wizard-option">Technical validation</div>
+        <div class="wizard-option">Mentorship</div>
+      </div>
+    </div>
+    <button class="btn-generate reveal" style="transition-delay: 1.2s;" id="btn-generate" onclick="triggerLoading()">
+      Generate my pathway &rarr;
+    </button>
+    <p class="click-hint" id="click-hint">&uarr; Click to see it work</p>
+  </div>
+</section>
+
+<!-- LOADING ANIMATION -->
+<div class="loading-section" id="loading-section">
+  <div class="loading-logo">
+    <img src="../brand/trellis-logo-primary.svg" alt="" aria-hidden="true">
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+  <ul class="loading-checklist" id="loading-checklist">
+    <li>Scanning programs</li>
+    <li>Matching to stage</li>
+    <li>Filtering by need</li>
+    <li>Building pathway</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 4 — THE PATHWAY RESULT
+     ═══════════════════════════════════════════════ -->
+<section id="pathway-section" style="padding: 80px 0 64px;">
+  <div class="content">
+    <h2 class="headline text-center reveal" style="margin-bottom: 32px;">
+      Your pathway. Built around what's actually blocking you.
+    </h2>
+    <div class="pathway-card reveal" style="transition-delay: 0.2s;">
+      <div class="pathway-number">1</div>
+      <div class="pathway-title">BDC Industrial Innovation Venture Fund II</div>
+      <div class="pathway-desc">Growth-stage venture capital for Canadian technology companies. Targets $2M-$20M investments in industrial innovation.</div>
+      <div class="pathway-tags">
+        <span class="tag tag-green">Funding</span>
+        <span class="tag tag-gold">Do now</span>
+        <span class="tag tag-outline">Strong fit</span>
+      </div>
+    </div>
+    <div class="pathway-card reveal" style="transition-delay: 0.4s;">
+      <div class="pathway-number">2</div>
+      <div class="pathway-title">AAFC AgriInnovate</div>
+      <div class="pathway-desc">Repayable contributions up to $10M for commercializing agri-based products, processes, or services.</div>
+      <div class="pathway-tags">
+        <span class="tag tag-green">Funding</span>
+        <span class="tag tag-gold">Do now</span>
+      </div>
+    </div>
+    <div class="pathway-card reveal" style="transition-delay: 0.6s;">
+      <div class="pathway-number">3</div>
+      <div class="pathway-title">Canadian Association of Agri-Retailers</div>
+      <div class="pathway-desc">Industry network connecting ag input manufacturers with retail distribution channels across Canada.</div>
+      <div class="pathway-tags">
+        <span class="tag tag-outline">Industry Org</span>
+        <span class="tag tag-gold">This month</span>
+      </div>
+    </div>
+    <p class="reveal text-center" style="transition-delay: 0.8s; margin-top: 20px; font-size: 15px; color: rgba(26,26,26,0.65);">
+      Prioritized. Sequenced. With prep steps for each one.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 5 — GO DEEPER (AI CHAT)
+     ═══════════════════════════════════════════════ -->
+<section style="padding: 48px 0 64px;">
+  <div class="content">
+    <p class="section-label text-center reveal">Go Deeper</p>
+    <h2 class="headline text-center reveal" style="transition-delay: 0.2s; margin-bottom: 32px;">
+      Ask follow-ups. Get preparation checklists.
+    </h2>
+    <div class="chat-bubble-user reveal" style="transition-delay: 0.4s;" id="chat-trigger">
+      Tell me how to approach the BDC fund &rarr;
+    </div>
+    <div class="chat-thinking" id="chat-thinking">
+      <div class="thinking-dots"><span></span><span></span><span></span></div>
+      Thinking...
+    </div>
+    <div class="chat-response" id="chat-response">
+      <div class="chat-section" id="chat-s1">
+        <div class="chat-section-title">Financial Package</div>
+        <div class="chat-section-text">Prepare 3-year projections showing path to $5M+ revenue. BDC prioritizes companies with existing revenue and clear unit economics. Include your current MRR trajectory and gross margin analysis.</div>
+      </div>
+      <div class="chat-section" id="chat-s2">
+        <div class="chat-section-title">Technical Validation</div>
+        <div class="chat-section-text">Document field trial results with at least two commercial partners. BDC's industrial innovation thesis requires proof that the technology works outside the lab. Include efficacy data and regulatory status.</div>
+      </div>
+      <div class="chat-section" id="chat-s3">
+        <div class="chat-section-title">Market Positioning</div>
+        <div class="chat-section-text">Map your competitive landscape against both chemical and biological alternatives. Show the total addressable market in Canadian agriculture specifically. BDC looks for domestic market traction first.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 6 — DEEPER THAN SEARCH
+     ═══════════════════════════════════════════════ -->
+<section style="padding: 48px 0;">
+  <div class="content text-center">
+    <h2 class="headline reveal" style="margin-bottom: 16px;">
+      Not a directory. Not a chatbot.<br>A system built on verified data.
+    </h2>
+    <p class="body-text reveal text-left" style="transition-delay: 0.2s; max-width: 420px; margin: 0 auto;">
+      Every program verified against federal and provincial databases. Filtered to your stage, province, and sector.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 7 — THE OPERATOR PIVOT
+     ═══════════════════════════════════════════════ -->
+<section id="pivot-section" style="padding: 64px 0 48px;">
+  <div class="content text-center">
+    <div class="pivot-line" id="pivot-line"></div>
+    <p class="headline-lg" id="pivot-text1" style="margin-bottom: 16px; opacity: 0; transform: translateY(16px); transition: opacity 0.8s ease-out, transform 0.8s ease-out;">That's what founders see.</p>
+    <p class="headline-lg gold" id="pivot-text2" style="opacity: 0; transform: translateY(16px); transition: opacity 0.8s ease-out, transform 0.8s ease-out;">Here's what you see.</p>
+  </div>
+</section>
+
+<div class="bg-warm">
+  <section style="padding: 48px 0;">
+    <div class="content">
+      <p class="section-label text-center reveal">Ecosystem Intelligence</p>
+      <h2 class="headline text-center reveal" style="transition-delay: 0.2s; margin-bottom: 16px;">
+        See what no single organization can see alone.
+      </h2>
+      <p class="body-text text-left reveal" style="transition-delay: 0.4s; margin-bottom: 0;">
+        Pre-computed coverage analysis across every province and program category. Gaps, patterns, and opportunities surfaced automatically.
+      </p>
+    </div>
+  </section>
+
+  <!-- SECTION 8 — INSIGHT CARDS -->
+  <section style="padding: 0 0 48px;">
+    <div class="content">
+      <p class="section-label reveal">What the Data Shows</p>
+      <div class="insight-card reveal" style="transition-delay: 0.2s;">
+        <div class="insight-title">The Scale Cliff</div>
+        <div class="insight-text">The ecosystem builds founders up, then drops them. Support falls off a cliff after pilot stage.</div>
+        <div class="bar-chart" id="scale-chart">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;"><div class="bar" data-height="95" style="height:0%;"></div><div class="bar-label">Idea</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;"><div class="bar" data-height="82" style="height:0%;"></div><div class="bar-label">MVP</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;"><div class="bar" data-height="68" style="height:0%;"></div><div class="bar-label">Pilot</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;"><div class="bar" data-height="35" style="height:0%;background:#C4A052;"></div><div class="bar-label">Comm.</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;"><div class="bar" data-height="18" style="height:0%;background:#C0392B;"></div><div class="bar-label">Scale</div></div>
+        </div>
+        <div style="text-align: right; font-size: 13px; color: #C0392B; font-weight: 600;">51% drop after pilot</div>
+      </div>
+      <div class="insight-card reveal" style="transition-delay: 0.4s;">
+        <div class="insight-title">Alberta's Paradox</div>
+        <div class="insight-text">76 programs. 1 for scale-stage ag. The province with the most agricultural output has almost no support for companies ready to scale.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 9 — GAP MAP + AI ANALYSIS -->
+  <section style="padding: 0 0 48px;">
+    <div class="content">
+      <div class="divider-card reveal" style="margin-bottom: 24px;">
+        <p class="section-label" style="margin-bottom: 8px;">Coverage Map</p>
+        <h3>Where the ecosystem is strong. Where it's not.</h3>
+      </div>
+      <div class="gap-table-wrapper" id="gap-table-area" style="margin-bottom: 8px;">
+        <table class="gap-table">
+          <thead>
+            <tr class="row-visible">
+              <th></th><th>Funding</th><th>Accelerator</th><th>Advisory</th><th>Training</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>BC</td><td class="gap-ok"></td><td class="gap-strong"></td><td class="gap-ok"></td><td class="gap-weak"></td></tr>
+            <tr><td>AB</td><td class="gap-strong"></td><td class="gap-ok"></td><td class="gap-weak"></td><td class="gap-ok"></td></tr>
+            <tr><td>SK</td><td class="gap-ok"></td><td class="gap-weak"></td><td class="gap-ok"></td><td class="gap-ok"></td></tr>
+            <tr><td>MB</td><td class="gap-weak"></td><td class="gap-weak"></td><td class="gap-ok"></td><td class="gap-ok"></td></tr>
+            <tr><td>ON</td><td class="gap-strong"></td><td class="gap-strong"></td><td class="gap-strong"></td><td class="gap-strong"></td></tr>
+            <tr><td>QC</td><td class="gap-ok"></td><td class="gap-ok"></td><td class="gap-weak"></td><td class="gap-ok"></td></tr>
+            <tr><td>NB</td><td class="gap-weak"></td><td class="gap-gap"></td><td class="gap-weak"></td><td class="gap-weak"></td></tr>
+            <tr><td>NS</td><td class="gap-ok"></td><td class="gap-ok"></td><td class="gap-ok"></td><td class="gap-weak"></td></tr>
+            <tr><td>PE</td><td class="gap-weak"></td><td class="gap-gap"></td><td class="gap-gap"></td><td class="gap-gap"></td></tr>
+            <tr><td>NL</td><td class="gap-gap"></td><td class="gap-gap"></td><td class="gap-weak"></td><td class="gap-gap"></td></tr>
+            <tr><td>Natl</td><td class="gap-strong"></td><td class="gap-strong"></td><td class="gap-ok"></td><td class="gap-ok"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="gap-legend">
+        <div class="gap-legend-item"><div class="gap-legend-swatch" style="background:#2D5A3D;"></div>Strong</div>
+        <div class="gap-legend-item"><div class="gap-legend-swatch" style="background:#48B87A;"></div>OK</div>
+        <div class="gap-legend-item"><div class="gap-legend-swatch" style="background:#D4A052;"></div>Weak</div>
+        <div class="gap-legend-item"><div class="gap-legend-swatch" style="background:#C0392B;"></div>Gap</div>
+      </div>
+
+      <div class="gap-drill reveal" style="transition-delay: 0.2s; margin-top: 24px;">
+        <div class="gap-drill-header">
+          <span class="gap-drill-badge">Weak</span>
+          <span class="gap-drill-title">BC Training</span>
+          <span style="font-size: 12px; opacity: 0.5; margin-left: auto;">1 program</span>
+        </div>
+        <div class="gap-drill-section">
+          <div class="gap-drill-section-label">Why</div>
+          <div class="gap-drill-section-text">BC relies entirely on the BC Institute of Agrologists for ag-specific professional development. No agtech-focused training programs exist. This creates concentration risk and leaves technical founders without sector-specific upskilling.</div>
+        </div>
+        <div class="gap-drill-section">
+          <div class="gap-drill-section-label">Opportunity</div>
+          <div class="gap-drill-section-text">Strong opportunity to develop agtech-specific training partnerships with UBC, SFU, and BCIT. The province's tech talent pool is deep but has no ag-specific on-ramp.</div>
+        </div>
+        <div class="feedback-buttons">
+          <span class="feedback-btn feedback-btn-yes">Looks right</span>
+          <span class="feedback-btn feedback-btn-no">Not quite</span>
+        </div>
+      </div>
+      <p class="reveal text-center" style="margin-top: 20px; font-size: 14px; color: #C4A052; font-style: italic;">
+        This is how Trellis gets smarter. Operators flag what's right. We fix what's not.
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- BUILT TOGETHER SECTION -->
+<div class="built-together">
+  <div class="content">
+    <p class="section-label reveal" style="color: #C4A052;">Built Together</p>
+    <h2 class="font-display reveal" style="color: #fff; font-size: clamp(22px, 5.5vw, 28px); line-height: 1.2; margin-bottom: 24px; transition-delay: 0.2s;">
+      Operators verify. We update.<br>The data gets sharper.
+    </h2>
+    <div class="feedback-carousel" id="feedback-carousel">
+      <div class="feedback-example active" data-carousel="0">
+        <span class="feedback-example-icon">&#x1F44D;</span>
+        <div><div style="font-weight: 600; color: #2D5A3D;">Looks right</div><div class="feedback-example-label">BC Training coverage confirmed</div></div>
+      </div>
+      <div class="feedback-example" data-carousel="1">
+        <span class="feedback-example-icon">&#x1F4AC;</span>
+        <div><div style="font-weight: 500;">Missing: SAIT AgTech Microcredential in AB</div><div class="feedback-example-label">New program flagged by operator</div></div>
+      </div>
+      <div class="feedback-example" data-carousel="2">
+        <span class="feedback-example-icon">&#x1F44E;</span>
+        <div><div style="font-weight: 500;">Program closed to new applicants Q1 2026</div><div class="feedback-example-label">Status correction submitted</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 10 — ROADMAP -->
+<div class="bg-warm">
+  <section style="padding: 48px 0 64px;">
+    <div class="content">
+      <p class="section-label reveal">On the Roadmap</p>
+      <div class="roadmap-item reveal" style="transition-delay: 0.2s;">
+        <div class="roadmap-name">Company profiles</div>
+        <div class="roadmap-desc">Pre-researched data on 100+ Canadian agtech companies. Stage, sector, team, and traction.</div>
+        <div class="roadmap-preview"><strong>ViveCrop</strong> &middot; Biologicals/Inputs &middot; Scale &middot; ON, AB</div>
+      </div>
+      <div class="roadmap-item reveal" style="transition-delay: 0.4s;">
+        <div class="roadmap-name">Pilot-readiness scores</div>
+        <div class="roadmap-desc">Which programs are open, competitive, or oversubscribed right now.</div>
+        <div class="roadmap-preview"><span class="status-dot status-dot-yellow"></span>BioAg Accelerator &mdash; Open &middot; 12 spots &middot; Competitive</div>
+      </div>
+      <div class="roadmap-item reveal" style="transition-delay: 0.6s;">
+        <div class="roadmap-name">Practitioner interviews</div>
+        <div class="roadmap-desc">Anonymous founder feedback on what programs actually deliver.</div>
+        <div class="roadmap-preview" style="font-style: italic;">"The mentorship didn't start until month 4." <span style="opacity:0.5;">&mdash; Anonymous founder, 2025</span></div>
+      </div>
+      <p class="reveal text-center" style="transition-delay: 0.8s; margin-top: 24px; font-size: 14px; color: rgba(26,26,26,0.45);">
+        Built in the open. Getting better every week.
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 11 — CTA
+     ═══════════════════════════════════════════════ -->
+<section style="padding: 80px 0 100px;">
+  <div class="content text-center">
+    <div class="reveal" style="margin-bottom: 32px;">
+      <img src="../brand/trellis-logo-primary.svg" alt="Trellis" style="width: 200px; max-width: 60%; height: auto;">
+    </div>
+    <h2 class="headline reveal" style="transition-delay: 0.2s; margin-bottom: 32px; font-size: clamp(22px, 5.5vw, 30px);">
+      See where your programs appear in founder pathways.
+    </h2>
+    <div class="reveal" style="transition-delay: 0.4s;">
+      <a class="btn-cta" id="cta-link" href="https://trellisag.ca">Try it yourself &rarr;</a>
+    </div>
+    <p class="reveal" id="cta-ref-text" style="transition-delay: 0.6s; margin-top: 20px; font-size: 14px; color: rgba(26,26,26,0.4);">
+      trellisag.ca
+    </p>
+  </div>
+</section>
+
+</div><!-- /phone-content -->
+</div><!-- /phone-frame -->
+
+<script>
+(function() {
+  'use strict';
+
+  /* ── Ref parameter ─────────────────────────── */
+  var params = new URLSearchParams(window.location.search);
+  var ref = params.get('ref');
+  if (ref) {
+    var ctaLink = document.getElementById('cta-link');
+    var ctaRefText = document.getElementById('cta-ref-text');
+    if (ctaLink) ctaLink.href = 'https://trellisag.ca/?ref=' + encodeURIComponent(ref) + '&mode=operator';
+    if (ctaRefText) ctaRefText.textContent = 'trellisag.ca/?ref=' + ref + '&mode=operator';
+  }
+
+  /* ── Scroll progress bar (works in phone frame or full page) ── */
+  var progressBar = document.getElementById('scroll-progress');
+  var phoneContent = document.getElementById('phone-content');
+  function updateProgress() {
+    var el = phoneContent && window.innerWidth >= 768 ? phoneContent : document.documentElement;
+    var scrollTop = el === document.documentElement ? window.scrollY : el.scrollTop;
+    var scrollH = el.scrollHeight - (el === document.documentElement ? window.innerHeight : el.clientHeight);
+    progressBar.style.width = (scrollH > 0 ? (scrollTop / scrollH) * 100 : 0) + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  if (phoneContent) phoneContent.addEventListener('scroll', updateProgress, { passive: true });
+
+  /* ── Intersection Observer (threshold 0.2) ─── */
+  var ioRoot = (phoneContent && window.innerWidth >= 768) ? phoneContent : null;
+  var revealEls = document.querySelectorAll('.reveal, .reveal-slide-right');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '0px 0px -30px 0px', root: ioRoot });
+  revealEls.forEach(function(el) { observer.observe(el); });
+
+  /* ── Counter animation (2 seconds) ─────────── */
+  var counters = document.querySelectorAll('.counter');
+  var counterObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target, parseInt(entry.target.getAttribute('data-target'), 10));
+        counterObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5, root: ioRoot });
+  counters.forEach(function(el) { counterObserver.observe(el); });
+
+  function animateCounter(el, target) {
+    var duration = 2000;
+    var start = performance.now();
+    function tick(now) {
+      var p = Math.min((now - start) / duration, 1);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ── Bar chart ─────────────────────────────── */
+  var chartEl = document.getElementById('scale-chart');
+  if (chartEl) {
+    var chartObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          chartEl.querySelectorAll('.bar').forEach(function(bar, i) {
+            setTimeout(function() { bar.style.height = bar.getAttribute('data-height') + '%'; }, i * 150);
+          });
+          chartObs.unobserve(chartEl);
+        }
+      });
+    }, { threshold: 0.3, root: ioRoot });
+    chartObs.observe(chartEl);
+  }
+
+  /* ── Typewriter (40ms per char) ────────────── */
+  var typeEl = document.getElementById('typewriter-input');
+  var tagEl = document.getElementById('wizard-tag-bio');
+  if (typeEl) {
+    var txt = 'Nanotechnology-enabled crop protection. Polymer delivery platform for biologicals.';
+    var tFired = false;
+    var tObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting && !tFired) {
+          tFired = true;
+          var i = 0;
+          typeEl.innerHTML = '<span class="wizard-cursor"></span>';
+          var cur = typeEl.querySelector('.wizard-cursor');
+          function t() {
+            if (i < txt.length) {
+              typeEl.insertBefore(document.createTextNode(txt.charAt(i)), cur);
+              i++;
+              setTimeout(t, 40);
+            } else if (tagEl) {
+              tagEl.classList.add('visible');
+            }
+          }
+          t();
+          tObs.unobserve(typeEl);
+        }
+      });
+    }, { threshold: 0.5, root: ioRoot });
+    tObs.observe(typeEl);
+  }
+
+  /* ── Wizard auto-select (800ms delay) ──────── */
+  function setupAutoSelect(cardId, selector) {
+    var card = document.getElementById(cardId);
+    if (!card) return;
+    var fired = false;
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting && !fired) {
+          fired = true;
+          setTimeout(function() {
+            var t = card.querySelector(selector);
+            if (t) t.classList.add('selected');
+          }, 800);
+          obs.unobserve(card);
+        }
+      });
+    }, { threshold: 0.5, root: ioRoot });
+    obs.observe(card);
+  }
+  setupAutoSelect('wizard-step2', '[data-auto-select="step2"]');
+  setupAutoSelect('wizard-step3', '[data-auto-select="step3"]');
+  setupAutoSelect('wizard-step4', '[data-auto-select="step4"]');
+
+  /* ── Chat: 1.5s thinking then stagger ──────── */
+  var chatTrigger = document.getElementById('chat-trigger');
+  var chatThinking = document.getElementById('chat-thinking');
+  var chatResponse = document.getElementById('chat-response');
+  var chatFired = false;
+  function fireChat() {
+    if (chatFired) return;
+    chatFired = true;
+    if (chatThinking) chatThinking.classList.add('active');
+    setTimeout(function() {
+      if (chatThinking) chatThinking.classList.remove('active');
+      if (chatResponse) chatResponse.classList.add('active');
+      ['chat-s1','chat-s2','chat-s3'].forEach(function(id, i) {
+        setTimeout(function() {
+          var el = document.getElementById(id);
+          if (el) el.classList.add('visible');
+        }, i * 400);
+      });
+    }, 1500);
+  }
+  if (chatTrigger) chatTrigger.addEventListener('click', fireChat);
+  if (chatTrigger) {
+    var cObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) { setTimeout(fireChat, 400); cObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.2, root: ioRoot });
+    cObs.observe(chatTrigger);
+  }
+
+  /* ── Operator pivot: line then text ────────── */
+  var pivotSection = document.getElementById('pivot-section');
+  if (pivotSection) {
+    var pivotFired = false;
+    var pObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting && !pivotFired) {
+          pivotFired = true;
+          var line = document.getElementById('pivot-line');
+          var t1 = document.getElementById('pivot-text1');
+          var t2 = document.getElementById('pivot-text2');
+          if (line) line.classList.add('expanded');
+          setTimeout(function() {
+            if (t1) { t1.style.opacity = '1'; t1.style.transform = 'translateY(0)'; }
+          }, 700);
+          setTimeout(function() {
+            if (t2) { t2.style.opacity = '1'; t2.style.transform = 'translateY(0)'; }
+          }, 1100);
+          pObs.unobserve(pivotSection);
+        }
+      });
+    }, { threshold: 0.2, root: ioRoot });
+    pObs.observe(pivotSection);
+  }
+
+  /* ── Gap map row stagger ───────────────────── */
+  var gapArea = document.getElementById('gap-table-area');
+  if (gapArea) {
+    var gapFired = false;
+    var gObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting && !gapFired) {
+          gapFired = true;
+          var rows = gapArea.querySelectorAll('tbody tr');
+          rows.forEach(function(row, i) {
+            setTimeout(function() { row.classList.add('row-visible'); }, i * 100);
+          });
+          gObs.unobserve(gapArea);
+        }
+      });
+    }, { threshold: 0.15, root: ioRoot });
+    gObs.observe(gapArea);
+  }
+
+  /* ── Built Together carousel (2s cycle) ────── */
+  var carousel = document.getElementById('feedback-carousel');
+  if (carousel) {
+    var cards = carousel.querySelectorAll('.feedback-example');
+    var current = 0;
+    setInterval(function() {
+      cards[current].classList.remove('active');
+      current = (current + 1) % cards.length;
+      cards[current].classList.add('active');
+    }, 2000);
+  }
+
+  /* ── Click hint on Generate button ─────────── */
+  var hintEl = document.getElementById('click-hint');
+  var btnEl = document.getElementById('btn-generate');
+  if (btnEl && hintEl) {
+    var hintFired = false;
+    var hintObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting && !hintFired) {
+          hintFired = true;
+          setTimeout(function() { hintEl.classList.add('visible'); }, 2000);
+          hintObs.unobserve(btnEl);
+        }
+      });
+    }, { threshold: 0.5, root: ioRoot });
+    hintObs.observe(btnEl);
+  }
+
+  /* ── Generate pathway (3s, 600ms steps) ────── */
+  window.triggerLoading = function() {
+    if (hintEl) hintEl.style.display = 'none';
+    var btn = document.getElementById('btn-generate');
+    var ls = document.getElementById('loading-section');
+    var pf = document.getElementById('progress-fill');
+    var cl = document.getElementById('loading-checklist');
+    if (!ls || !pf || !cl) return;
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.6';
+    ls.classList.add('active');
+    ls.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var items = cl.querySelectorAll('li');
+    [
+      { p: 25, i: 0, t: 600 },
+      { p: 50, i: 1, t: 1200 },
+      { p: 75, i: 2, t: 1800 },
+      { p: 100, i: 3, t: 2400 }
+    ].forEach(function(s) {
+      setTimeout(function() {
+        pf.style.width = s.p + '%';
+        if (items[s.i]) items[s.i].classList.add('done');
+      }, s.t);
+    });
+    setTimeout(function() {
+      ls.style.transition = 'opacity 0.5s ease-out';
+      ls.style.opacity = '0';
+      setTimeout(function() {
+        ls.classList.remove('active');
+        ls.style.opacity = '';
+        ls.style.transition = '';
+        var target = document.getElementById('pathway-section');
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 500);
+    }, 3000);
+  };
+
+})();
+</script>
+</body>
+</html>
