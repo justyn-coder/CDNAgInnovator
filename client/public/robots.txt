@@ -4,7 +4,7 @@ Allow: /
 Disallow: /api/
 
 # Sitemaps
-Sitemap: https://trellisag.ca/sitemap.xml
+Sitemap: https://www.trellisag.ca/sitemap.xml
 
 # AI Search Crawlers — allowed (appear in AI answers)
 User-agent: OAI-SearchBot
