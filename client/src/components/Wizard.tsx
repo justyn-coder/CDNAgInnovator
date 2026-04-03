@@ -7,6 +7,7 @@ interface WizardResult {
   productTypes: string[];
   stage: string;
   provinces: string[];
+  sector: string;
   need: string;
   expansionProvinces: string[];
   completedPrograms: string[];
@@ -17,6 +18,7 @@ interface Props {
   onComplete: (prompt: string, snapshot: {
     stage: string;
     provinces: string[];
+    sector?: string;
     need: string;
     companyUrl?: string;
     productType?: string;
@@ -44,6 +46,13 @@ const PROVINCES = [
   { key: "QC", label: "Quebec" },
   { key: "Atlantic", label: "Atlantic" },
   { key: "National", label: "National" },
+];
+
+const SECTORS = [
+  { key: "crops", label: "Crops", sub: "Grains, oilseeds, horticulture, greenhouse, specialty crops", icon: "🌾" },
+  { key: "livestock", label: "Livestock", sub: "Cattle, dairy, poultry, apiculture, aquaculture", icon: "🐄" },
+  { key: "mixed", label: "Mixed / Both", sub: "Products spanning crop and livestock operations", icon: "🔄" },
+  { key: "agnostic", label: "Not sector-specific", sub: "Software, data, supply chain — applies broadly", icon: "✦" },
 ];
 
 const EARLY_NEEDS = [
@@ -97,7 +106,7 @@ const backBtnCls = "bg-transparent border border-border rounded-sm px-4 py-2 tex
 export default function Wizard({ onComplete, programCount }: Props) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<WizardResult & { needs: string[] }>({
-    description: "", companyUrl: "", productTypes: [], stage: "", provinces: [], need: "", needs: [],
+    description: "", companyUrl: "", productTypes: [], stage: "", provinces: [], sector: "", need: "", needs: [],
     expansionProvinces: [], completedPrograms: [], otherPrograms: "",
   });
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
@@ -167,8 +176,8 @@ export default function Wizard({ onComplete, programCount }: Props) {
 
   // Step flow: 0 (what), 1 (stage), 2 (province), 3b (expansion, optional), 3c (completed, optional), 3 (need)
   // We use a sub-step system within the wizard
-  type WizardStep = "what" | "stage" | "province" | "expansion" | "completed" | "need";
-  const stepFlow: WizardStep[] = ["what", "stage", "province"];
+  type WizardStep = "what" | "stage" | "province" | "sector" | "expansion" | "completed" | "need";
+  const stepFlow: WizardStep[] = ["what", "stage", "province", "sector"];
   if (hasExpansionStep) stepFlow.push("expansion");
   if (hasCompletedStep) stepFlow.push("completed");
   stepFlow.push("need");
@@ -182,14 +191,15 @@ export default function Wizard({ onComplete, programCount }: Props) {
     if (currentStepName === "what") return 0;
     if (currentStepName === "stage") return 1;
     if (currentStepName === "province") return 2;
-    if (currentStepName === "expansion" || currentStepName === "completed") return 2; // sub-steps of step 3
+    if (currentStepName === "sector" || currentStepName === "expansion" || currentStepName === "completed") return 2; // sub-steps of step 3
     if (currentStepName === "need") return 3;
     return idx;
   })();
 
   const stepLabel = (() => {
-    if (currentStepName === "expansion") return "Step 3b of 4";
-    if (currentStepName === "completed") return "Step 3c of 4";
+    if (currentStepName === "sector") return "Step 3b of 4";
+    if (currentStepName === "expansion") return "Step 3c of 4";
+    if (currentStepName === "completed") return "Step 3d of 4";
     const mainStep = currentStepName === "what" ? 1 : currentStepName === "stage" ? 2 : currentStepName === "province" ? 3 : 4;
     return `Step ${mainStep} of 4`;
   })();
@@ -209,6 +219,8 @@ export default function Wizard({ onComplete, programCount }: Props) {
     const productTypeStr = data.productTypes.length > 0
       ? ` My product type${data.productTypes.length > 1 ? 's are' : ' is'} ${data.productTypes.join(", ")}.`
       : "";
+    const sectorLabel = SECTORS.find(s => s.key === data.sector)?.label || data.sector;
+    const sectorStr = data.sector ? ` My sector is ${sectorLabel}.` : "";
 
     let needStr: string;
     if (primaryNeed === "all") {
@@ -234,10 +246,11 @@ export default function Wizard({ onComplete, programCount }: Props) {
       expansionStr = ` I'm also looking to expand into ${data.expansionProvinces.join(", ")}.`;
     }
 
-    const prompt = `I'm building ${data.description}.${productTypeStr} I'm at the ${stageLabel} stage, based in ${provinceStr}.${expansionStr}${completedStr}${otherProgsStr} ${needStr}. What are the best programs for my situation?`;
+    const prompt = `I'm building ${data.description}.${productTypeStr}${sectorStr} I'm at the ${stageLabel} stage, based in ${provinceStr}.${expansionStr}${completedStr}${otherProgsStr} ${needStr}. What are the best programs for my situation?`;
     onComplete(prompt, {
       stage: data.stage,
       provinces: data.provinces,
+      sector: data.sector || undefined,
       need: primaryNeed,
       companyUrl: data.companyUrl || undefined,
       productType: data.productTypes.length > 0 ? data.productTypes.join(", ") : undefined,
@@ -251,6 +264,7 @@ export default function Wizard({ onComplete, programCount }: Props) {
     what: data.description.trim().length > 8,
     stage: !!data.stage,
     province: data.provinces.length > 0,
+    sector: !!data.sector,
     expansion: true, // optional step
     completed: true, // optional step
     need: data.needs.length > 0,
@@ -416,7 +430,47 @@ export default function Wizard({ onComplete, programCount }: Props) {
       </div>
     ),
 
-    // ── Step 3b: Expansion Provinces (FC/Scale only) ──
+    // ── Step 3b: Sector ──
+    sector: (
+      <div key="sector" className="animate-fade-in-up">
+        <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
+          What sector does your product serve?
+        </h2>
+        <p className="text-[0.82rem] text-text-secondary mb-4">
+          This filters out programs that aren't relevant to your market.
+        </p>
+        <div className="flex flex-col gap-2 max-w-[480px]">
+          {SECTORS.map(s => {
+            const active = data.sector === s.key;
+            return (
+              <button key={s.key}
+                onClick={() => { setData(d => ({ ...d, sector: s.key })); setTimeout(goNext, 150); }}
+                className={cn(
+                  "w-full px-4 py-3 rounded-sm font-semibold text-[0.85rem] cursor-pointer",
+                  "transition-all duration-100 font-sans text-left",
+                  "flex items-center gap-3",
+                )}
+                style={active
+                  ? { borderLeft: "3px solid #D4A828", background: "#FFF8E7", border: "0.5px solid #E5E5E0", borderLeftWidth: 3, borderLeftColor: "#D4A828" }
+                  : { border: "0.5px solid #E5E5E0", background: "white" }
+                }
+              >
+                <span className="text-[1.1rem] shrink-0">{s.icon}</span>
+                <div>
+                  <span className="font-bold">{s.label}</span>
+                  <span className={cn(
+                    "text-[0.72rem] font-normal block mt-0.5",
+                    active ? "text-text-secondary" : "text-text-tertiary"
+                  )}>{s.sub}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    ),
+
+    // ── Step 3c: Expansion Provinces (FC/Scale only) ──
     expansion: (
       <div key="expansion" className="animate-fade-in-up">
         <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
@@ -456,7 +510,7 @@ export default function Wizard({ onComplete, programCount }: Props) {
       </div>
     ),
 
-    // ── Step 3c: Completed Programs (Pilot/FC only) ──
+    // ── Step 3d: Completed Programs (Pilot/FC only) ──
     completed: (
       <div key="completed" className="animate-fade-in-up">
         <h2 className="font-display text-[1.25rem] md:text-[1.5rem] font-normal text-text mb-1.5">
@@ -656,8 +710,8 @@ export default function Wizard({ onComplete, programCount }: Props) {
         </div>
       )}
 
-      {/* Back button for stage and need steps */}
-      {(currentStepName === "stage" || currentStepName === "need") && (
+      {/* Back button for stage, sector, and need steps */}
+      {(currentStepName === "stage" || currentStepName === "sector" || currentStepName === "need") && (
         <button onClick={goBack} className={cn(backBtnCls, "mt-4")}>
           ← Back
         </button>

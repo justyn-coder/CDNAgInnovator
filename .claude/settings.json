@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs cat:*)",
+      "WebSearch",
+      "Bash(rm -f /tmp/og-image.svg.png)",
+      "Bash(qlmanage -t -s 1200 -o /tmp/ /Users/justynszymczyk/Documents/GitHub/CDNAgInnovator/client/public/og-image.svg)",
+      "Bash(sips -c 630 1200 /tmp/og-image.svg.png --out /Users/justynszymczyk/Documents/GitHub/CDNAgInnovator/client/public/og-image.png)",
+      "Bash(xxd /Users/justynszymczyk/Documents/GitHub/CDNAgInnovator/client/public/favicon.ico)",
+      "Bash(curl -sI https://trellisag.ca/favicon.ico)",
+      "Bash(curl -sI https://trellisag.ca/brand/trellis-favicon.svg)",
+      "Bash(curl -sI https://trellisag.ca/favicon.png)",
+      "Bash(curl -sI -L https://www.trellisag.ca/favicon.ico)",
+      "Bash(curl -sI -L https://www.trellisag.ca/brand/trellis-favicon.svg)",
+      "Bash(curl -sL https://www.trellisag.ca/favicon.ico -o /tmp/served-favicon.ico)",
+      "Read(//tmp/**)",
+      "Bash(md5 /tmp/served-favicon.ico)",
+      "Bash(md5 /Users/justynszymczyk/Documents/GitHub/CDNAgInnovator/client/public/favicon.ico)",
+      "Bash(qlmanage -t -s 128 -o /tmp/ /tmp/trellis-favicon-full.svg)",
+      "Read(//Users/justynszymczyk/Downloads/**)",
+      "Bash(node -e \":*)",
+      "mcp__claude_ai_Vercel__get_deployment"
+    ],
+    "additionalDirectories": [
+      "/private/tmp"
+    ]
+  }
+}

@@ -42,6 +42,15 @@ const STAGE_DISPLAY: Record<string, string> = {
   Comm: "First Customers", Scale: "Scale",
 };
 
+// ── Sector → production_systems mapping (Layer 1 hard filter) ───────────
+const SECTOR_MAP: Record<string, string[]> = {
+  crops:     ["crops", "specialty_crops", "horticulture", "greenhouse", "vertical_farming"],
+  livestock: ["livestock", "dairy", "poultry", "apiculture", "aquaculture"],
+  mixed:     ["crops", "specialty_crops", "horticulture", "greenhouse", "vertical_farming",
+              "livestock", "dairy", "poultry", "apiculture", "aquaculture", "mixed"],
+  agnostic:  ["agnostic", "food_processing"],
+};
+
 // ── Stage-specific framing guidance ──────────────────────────────────────
 const STAGE_FRAMING: Record<string, string> = {
   Idea: "This founder is pre-product. They need validation, mentorship, and seed funding. Recommend programs that help them test their idea with real farmers before building.",
@@ -133,7 +142,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const allowed = await checkRateLimit(req, res, { maxRequests: 10, windowSeconds: 60, endpoint: "pathway" });
   if (!allowed) return;
 
-  const { description, stage, provinces: rawProvinces = [], need = "all" } = req.body;
+  const { description, stage, provinces: rawProvinces = [], need = "all", sector } = req.body;
 
   if (!description || !stage) {
     return res.status(400).json({ error: "description and stage are required" });
@@ -152,29 +161,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const allCategories = [...new Set([...needCategories, ...stagePriorities])];
     const stageFraming = STAGE_FRAMING[stage] || STAGE_FRAMING["MVP"];
 
-    // 2. Query matching programs — broader query, let the LLM prioritize
+    // 2. Layer 1 hard filter — deterministic, no AI
     const provArray = provinces.length > 0 ? provinces : [];
+    const sectorTags: string[] = sector && SECTOR_MAP[sector] ? SECTOR_MAP[sector] : [];
+
     const rows = await client.unsafe(
-      `SELECT name, category, description, use_case, province, stage, website, funding_type, funding_max_cad
+      `SELECT name, category, description, use_case, province, stage, website,
+              funding_type, funding_max_cad, production_systems, featured
        FROM programs
-       WHERE status NOT IN ('closed', 'dissolved', 'inactive')
+       WHERE status NOT IN ('closed', 'dissolved', 'inactive', 'announced')
        AND (
          province && $1::text[]
+         OR national = true
          OR 'National' = ANY(province)
          ${provArray.length === 0 ? "OR TRUE" : ""}
        )
        AND ($2 = ANY(stage) OR $3 = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)
+       ${sectorTags.length > 0
+         ? `AND (
+             production_systems && $5::text[]
+             OR 'agnostic' = ANY(production_systems)
+             OR production_systems IS NULL
+             OR array_length(production_systems, 1) IS NULL
+           )`
+         : ""}
        ORDER BY
+         featured DESC NULLS LAST,
+         CASE WHEN confidence = 'high' THEN 0 WHEN confidence = 'medium' THEN 1 ELSE 2 END,
          CASE WHEN category = ANY($4::text[]) THEN 0 ELSE 1 END,
-         CASE WHEN province && $1::text[] THEN 0 ELSE 1 END,
          name
-       LIMIT 30`,
-      [
-        `{${provArray.join(",")}}`,
-        stage,
-        nextStage,
-        `{${allCategories.join(",")}}`,
-      ]
+       LIMIT 50`,
+      sectorTags.length > 0
+        ? [
+            `{${provArray.join(",")}}`,
+            stage,
+            nextStage,
+            `{${allCategories.join(",")}}`,
+            `{${sectorTags.join(",")}}`,
+          ]
+        : [
+            `{${provArray.join(",")}}`,
+            stage,
+            nextStage,
+            `{${allCategories.join(",")}}`,
+          ]
     );
 
     // 3. Gap detection

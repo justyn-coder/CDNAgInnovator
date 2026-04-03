@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { cn } from "../lib/cn";
 
 // ── Copy link button with inline toast ─────────────────────────────────────
-function CopyLinkButton({ stage, provinces, need }: { stage: string; provinces: string[]; need: string }) {
+function CopyLinkButton({ stage, provinces, need, sector }: { stage: string; provinces: string[]; need: string; sector?: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="mt-4 relative">
       <button onClick={() => {
         const url = new URL(window.location.origin + "/navigator");
         url.searchParams.set("stage", stage); url.searchParams.set("prov", provinces.join(",")); url.searchParams.set("need", need);
+        if (sector) url.searchParams.set("sector", sector);
         navigator.clipboard.writeText(url.toString()).then(() => {
           setCopied(true);
           setTimeout(() => setCopied(false), 2500);
@@ -73,6 +74,7 @@ interface Props {
   description: string;
   stage: string;
   provinces: string[];
+  sector?: string;
   need: string;
   onChatFollowUp: (question: string) => void;
   onReset?: () => void;
@@ -106,8 +108,8 @@ const CONFIDENCE: Record<string, { label: string; colorClass: string; bgClass: s
 
 // ── Loading messages ────────────────────────────────────────────────────────
 const LOADING_MESSAGES = [
-  "Scanning programs across Canada…",
-  "Matching to your stage and province…",
+  "Scanning programs across Canada\u2026",
+  "Filtering by stage, province, and sector…",
   "Filtering by your primary need…",
   "Building your personalized pathway…",
 ];
@@ -379,7 +381,7 @@ function EmailCapture({ stage, provinces, description, productType }: {
 }
 
 // ── Main Component ──────────────────────────────────────────────────────────
-export default function PathwayCard({ description, stage, provinces, need, onChatFollowUp, onReset, needLabel, expansionProvinces, completedPrograms }: Props) {
+export default function PathwayCard({ description, stage, provinces, sector, need, onChatFollowUp, onReset, needLabel, expansionProvinces, completedPrograms }: Props) {
   const [data, setData] = useState<PathwayResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -398,14 +400,14 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
     fetch("/api/pathway", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description, stage, provinces, need }),
+      body: JSON.stringify({ description, stage, provinces, need, sector }),
     })
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then((d: PathwayResponse) => { timers.forEach(clearTimeout); setData(d); setLoading(false); })
       .catch(() => { timers.forEach(clearTimeout); setError("We hit a temporary issue generating your pathway. Your answers are saved — click below to try again."); setLoading(false); });
 
     return () => timers.forEach(clearTimeout);
-  }, [description, stage, provinces.join(","), need]);
+  }, [description, stage, provinces.join(","), need, sector]);
 
   if (loading) {
     return (
@@ -543,7 +545,7 @@ export default function PathwayCard({ description, stage, provinces, need, onCha
       )}
 
       {/* ── Shareable link ─────────────────────────────────────────────── */}
-      <CopyLinkButton stage={stage} provinces={provinces} need={need} />
+      <CopyLinkButton stage={stage} provinces={provinces} need={need} sector={sector} />
 
       {/* ── Thin-pathway note (Scale stage, <4 strong fits) ──────────── */}
       {(() => {

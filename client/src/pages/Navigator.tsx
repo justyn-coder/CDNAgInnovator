@@ -25,6 +25,7 @@ interface Message { role: "user" | "assistant"; content: string; }
 interface WizardSnapshot {
   stage: string;
   provinces: string[];
+  sector?: string;
   need: string;
   companyUrl?: string;
   productType?: string;
@@ -1079,8 +1080,9 @@ export default function Navigator() {
       const urlStage = params.get("stage");
       const urlProv = params.get("prov");
       const urlNeed = params.get("need");
+      const urlSector = params.get("sector");
       if (urlStage && urlProv) {
-        const snapshot = { stage: urlStage, provinces: urlProv.split(","), need: urlNeed || "all" };
+        const snapshot = { stage: urlStage, provinces: urlProv.split(","), sector: urlSector || undefined, need: urlNeed || "all" };
         setWizardSnapshot(snapshot);
         setWizardDescription(params.get("desc") || "an agtech company");
         setShowWizard(false);
@@ -1138,7 +1140,7 @@ export default function Navigator() {
     setMessages(newMessages);
     setLoading(true);
     const context = wizardSnapshot
-      ? `Context: I'm building ${wizardDescription}. Stage: ${wizardSnapshot.stage}. Province: ${wizardSnapshot.provinces.join(", ")}. Need: ${wizardSnapshot.need}.\n\n${question}`
+      ? `Context: I'm building ${wizardDescription}. Stage: ${wizardSnapshot.stage}. Province: ${wizardSnapshot.provinces.join(", ")}. Sector: ${wizardSnapshot.sector || "not specified"}. Need: ${wizardSnapshot.need}.\n\n${question}`
       : question;
     fetch("/api/chat", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -1182,6 +1184,7 @@ export default function Navigator() {
     if (wizardSnapshot && !isEco) {
       const parts = [`Stage: ${wizardSnapshot.stage}`, `Province: ${wizardSnapshot.provinces.join(", ")}`, `Need: ${wizardSnapshot.need}`];
       if (wizardDescription) parts.unshift(`Building: ${wizardDescription}`);
+      if (wizardSnapshot.sector) parts.push(`Sector: ${wizardSnapshot.sector}`);
       if (wizardSnapshot.productType) parts.push(`Product type: ${wizardSnapshot.productType}`);
       if (wizardSnapshot.companyUrl) parts.push(`Website: ${wizardSnapshot.companyUrl}`);
       if (wizardSnapshot.expansionProvinces?.length) parts.push(`Expanding into: ${wizardSnapshot.expansionProvinces.join(", ")}`);
@@ -1540,6 +1543,7 @@ export default function Navigator() {
               description={wizardDescription}
               stage={wizardSnapshot.stage}
               provinces={wizardSnapshot.provinces}
+              sector={wizardSnapshot.sector}
               need={wizardSnapshot.need}
               onChatFollowUp={handlePathwayFollowUp}
               onReset={handleReset}
