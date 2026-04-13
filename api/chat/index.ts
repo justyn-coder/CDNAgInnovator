@@ -204,7 +204,7 @@ ${finalKnowledge.length ? `ECOSYSTEM INTELLIGENCE:\n${finalKnowledge.map((k: any
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model: process.env.CLAUDE_SONNET_MODEL || "claude-sonnet-4-6",
         max_tokens: 2048,
         system: (mode === "ec" ? SYSTEM_EC : SYSTEM_E) + "\n\n" + context,
         messages: [
@@ -215,6 +215,11 @@ ${finalKnowledge.length ? `ECOSYSTEM INTELLIGENCE:\n${finalKnowledge.map((k: any
     });
 
     const data = await apiRes.json() as any;
+
+    if (!apiRes.ok) {
+      console.error("Anthropic API error (chat):", apiRes.status, data?.error?.type, data?.error?.message);
+    }
+
     const reply = data.content?.[0]?.text || "Something went wrong.";
     return res.status(200).json({ reply });
   } catch (e) {

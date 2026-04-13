@@ -319,7 +319,7 @@ Generate the pathway now. Remember: prioritize programs whose description closel
 
     // 5. Call Anthropic API (retry once on parse failure)
     const apiBody = JSON.stringify({
-      model: "claude-sonnet-4-6",
+      model: process.env.CLAUDE_SONNET_MODEL || "claude-sonnet-4-6",
       max_tokens: 2000,
       temperature: 0,
       system: SYSTEM_PROMPT,

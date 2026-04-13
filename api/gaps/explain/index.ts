@@ -225,7 +225,7 @@ Generate the JSON explanation now.`;
     // 7. Call Anthropic API (retry once on failure)
     let explanation: { classification_label: string; why: string; action: string } | null = null;
     const apiBody = JSON.stringify({
-      model: "claude-sonnet-4-6",
+      model: process.env.CLAUDE_SONNET_MODEL || "claude-sonnet-4-6",
       max_tokens: 512,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],
@@ -244,6 +244,11 @@ Generate the JSON explanation now.`;
         });
 
         const data = await apiRes.json() as any;
+
+        if (!apiRes.ok) {
+          console.error(`Anthropic API error (gaps/explain, attempt ${attempt + 1}):`, apiRes.status, data?.error?.type, data?.error?.message);
+        }
+
         const raw = data.content?.[0]?.text || "";
         const cleaned = raw.replace(/```json|```/g, "").trim();
         explanation = JSON.parse(cleaned);

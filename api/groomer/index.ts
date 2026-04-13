@@ -56,7 +56,7 @@ async function callClaude(system: string, userMessage: string): Promise<{ ok: bo
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-opus-4-6",
+      model: process.env.CLAUDE_OPUS_MODEL || "claude-opus-4-6",
       max_tokens: 8192,
       temperature: 0,
       system,
