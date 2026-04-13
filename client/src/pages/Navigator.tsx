@@ -1081,6 +1081,14 @@ export default function Navigator() {
     setTimeout(() => { el.style.transform = "translateY(0)"; }, 300);
   }
 
+  // Restored journey state (Save My Journey)
+  const [restoredPathwayData, setRestoredPathwayData] = useState<any>(null);
+  const [restoredName, setRestoredName] = useState<string | null>(null);
+  const [restoredSavedAt, setRestoredSavedAt] = useState<string | null>(null);
+  const [isRestored, setIsRestored] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const [restoreError, setRestoreError] = useState("");
+
   // Dynamic counts for operator dashboard
   const [programCount, setProgramCount] = useState<number | null>(null);
 
@@ -1121,6 +1129,43 @@ export default function Navigator() {
       } else if (browse === "true") {
         // Founder chose "browse all programs"
         setShowBrowse(true);
+      }
+
+      // Handle saved journey restore
+      const journeyToken = params.get("journey");
+      if (journeyToken) {
+        setRestoreLoading(true);
+        setShowWizard(false);
+        fetch(`/api/journey/restore?token=${encodeURIComponent(journeyToken)}`)
+          .then(r => {
+            if (!r.ok) throw new Error("not found");
+            return r.json();
+          })
+          .then(data => {
+            const ws = data.wizardSnapshot;
+            setWizardSnapshot({
+              stage: ws.stage,
+              provinces: ws.provinces,
+              need: ws.need,
+              sector: ws.sector || undefined,
+              companyUrl: ws.companyUrl || undefined,
+              productType: ws.productType || undefined,
+              expansionProvinces: ws.expansionProvinces || undefined,
+              completedPrograms: ws.completedPrograms || undefined,
+            });
+            setWizardDescription(ws.description);
+            setRestoredPathwayData(data.pathwayData);
+            setRestoredName(data.name);
+            setRestoredSavedAt(data.savedAt);
+            setIsRestored(true);
+            setShowPathway(true);
+            setRestoreLoading(false);
+          })
+          .catch(() => {
+            setRestoreError("This link is no longer valid.");
+            setRestoreLoading(false);
+          });
+        return; // Don't process other URL params when restoring
       }
 
       // Handle shared pathway links
@@ -1581,7 +1626,58 @@ export default function Navigator() {
             </div>
           )}
 
-          {!isEco && showWizard && (
+          {/* Restore loading state */}
+          {restoreLoading && (
+            <div className="m-4 px-4 md:px-6 py-9 bg-bg border border-border rounded-lg shadow-md text-center animate-fade-in-up">
+              <div className="text-[0.88rem] text-text font-semibold mb-2">Restoring your pathway...</div>
+              <div className="text-[0.78rem] text-text-tertiary">Just a moment.</div>
+            </div>
+          )}
+
+          {/* Restore error state */}
+          {restoreError && (
+            <div className="m-4 px-4 md:px-6 py-7 bg-bg border border-border rounded-lg text-center animate-fade-in-up">
+              <div className="text-[0.88rem] text-text font-semibold mb-2">{restoreError}</div>
+              <button
+                onClick={() => { setRestoreError(""); setShowWizard(true); }}
+                className="bg-brand-gold text-brand-forest border-none rounded-sm px-5 py-2.5 font-semibold text-[0.82rem] mt-2"
+              >
+                Start a new pathway
+              </button>
+            </div>
+          )}
+
+          {/* Welcome-back banner (restored journeys) */}
+          {isRestored && showPathway && wizardSnapshot && (
+            <div
+              className="mx-4 mt-3 px-4 py-3 rounded-lg flex items-center justify-between gap-3 flex-wrap animate-fade-in-up"
+              style={{ background: "#E8F5E9", border: "0.5px solid rgba(76,175,80,0.3)" }}
+            >
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#2E7D32" }}>
+                  Welcome back{restoredName ? `, ${restoredName}` : ""}.
+                </div>
+                {restoredSavedAt && (
+                  <div style={{ fontSize: 12, color: "#6b6b6b", marginTop: 2 }}>
+                    Saved on {new Date(restoredSavedAt).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })}. Programs may have changed since then.
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setIsRestored(false);
+                  setRestoredPathwayData(null);
+                  setShowPathway(false);
+                  setShowWizard(true);
+                }}
+                className="shrink-0 px-3 py-1.5 bg-transparent text-[#2E7D32] border border-[rgba(76,175,80,0.3)] rounded-sm font-medium text-[0.72rem] transition-colors hover:bg-[rgba(76,175,80,0.1)]"
+              >
+                Edit profile
+              </button>
+            </div>
+          )}
+
+          {!isEco && showWizard && !restoreLoading && (
             <Wizard onComplete={handleWizardComplete} programCount={programCount} />
           )}
 
@@ -1597,6 +1693,10 @@ export default function Navigator() {
               needLabel={wizardSnapshot.need ? (NEED_META[wizardSnapshot.need]?.label || wizardSnapshot.need) : undefined}
               expansionProvinces={wizardSnapshot.expansionProvinces}
               completedPrograms={wizardSnapshot.completedPrograms}
+              companyUrl={wizardSnapshot.companyUrl}
+              productType={wizardSnapshot.productType}
+              initialData={restoredPathwayData || undefined}
+              isRestored={isRestored}
             />
           )}
 

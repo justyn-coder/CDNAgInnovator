@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "../lib/cn";
 import { formatSource } from "../lib/formatSource";
+import SaveJourney from "./SaveJourney";
 
 // ── Copy link button with inline toast ─────────────────────────────────────
 function CopyLinkButton({ stage, provinces, need, sector }: { stage: string; provinces: string[]; need: string; sector?: string }) {
@@ -85,6 +86,12 @@ interface Props {
   needLabel?: string;
   expansionProvinces?: string[];
   completedPrograms?: string[];
+  companyUrl?: string;
+  productType?: string;
+  /** Pre-loaded pathway data (for restore flow). Skips API call when provided. */
+  initialData?: PathwayResponse;
+  /** Whether this is a restored journey (show "already saved" state) */
+  isRestored?: boolean;
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -407,13 +414,17 @@ function EmailCapture({ stage, provinces, description, productType }: {
 }
 
 // ── Main Component ──────────────────────────────────────────────────────────
-export default function PathwayCard({ description, stage, provinces, sector, need, onChatFollowUp, onReset, needLabel, expansionProvinces, completedPrograms }: Props) {
-  const [data, setData] = useState<PathwayResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function PathwayCard({ description, stage, provinces, sector, need, onChatFollowUp, onReset, needLabel, expansionProvinces, completedPrograms, companyUrl, productType, initialData, isRestored }: Props) {
+  const [data, setData] = useState<PathwayResponse | null>(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState("");
   const [loadingStep, setLoadingStep] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
+    // Skip fetch if we have pre-loaded data (restore flow)
+    if (initialData && !refreshing) return;
+
     setLoading(true);
     setError("");
     setLoadingStep(0);
@@ -429,11 +440,11 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
       body: JSON.stringify({ description, stage, provinces, need, sector }),
     })
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then((d: PathwayResponse) => { timers.forEach(clearTimeout); setData(d); setLoading(false); })
-      .catch(() => { timers.forEach(clearTimeout); setError("We hit a temporary issue generating your pathway. Your answers are saved — click below to try again."); setLoading(false); });
+      .then((d: PathwayResponse) => { timers.forEach(clearTimeout); setData(d); setLoading(false); setRefreshing(false); })
+      .catch(() => { timers.forEach(clearTimeout); setError("We hit a temporary issue generating your pathway. Your answers are saved — click below to try again."); setLoading(false); setRefreshing(false); });
 
     return () => timers.forEach(clearTimeout);
-  }, [description, stage, provinces.join(","), need, sector]);
+  }, [description, stage, provinces.join(","), need, sector, refreshing]);
 
   if (loading) {
     return (
@@ -643,8 +654,34 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         </div>
       )}
 
-      {/* ── Email capture (only after successful pathway with steps) ── */}
-      {pathway.steps.length > 0 && <EmailCapture stage={stage} provinces={provinces} description={description} />}
+      {/* ── Save journey (replaces EmailCapture) ── */}
+      {pathway.steps.length > 0 && (
+        <SaveJourney
+          stage={stage}
+          provinces={provinces}
+          description={description}
+          need={need}
+          sector={sector}
+          companyUrl={companyUrl}
+          productType={productType}
+          expansionProvinces={expansionProvinces}
+          completedPrograms={completedPrograms}
+          pathwayData={data}
+          alreadySaved={isRestored}
+        />
+      )}
+
+      {/* ── Refresh pathway (restored journeys only) ── */}
+      {isRestored && !refreshing && (
+        <div className="mt-3">
+          <button
+            onClick={() => setRefreshing(true)}
+            className="px-3.5 py-[7px] bg-transparent text-text-tertiary border border-border rounded-sm font-medium text-[0.72rem] transition-colors duration-150 hover:text-text"
+          >
+            Refresh pathway with latest programs
+          </button>
+        </div>
+      )}
     </div>
   );
 }

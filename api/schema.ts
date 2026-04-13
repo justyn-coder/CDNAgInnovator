@@ -1,4 +1,4 @@
-import { pgTable, text, serial, boolean, integer, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, integer, date, timestamp, uuid, jsonb } from "drizzle-orm/pg-core";
 
 export const programs = pgTable("programs", {
   id: serial("id").primaryKey(),
@@ -37,6 +37,29 @@ export const programs = pgTable("programs", {
   eventCostNote: text("event_cost_note"),
   expectedAttendanceMin: integer("expected_attendance_min"),
   expectedAttendanceMax: integer("expected_attendance_max"),
+});
+
+export const savedJourneys = pgTable("saved_journeys", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  token: uuid("token").unique().notNull().defaultRandom(),
+  email: text("email").notNull(),
+  name: text("name"),
+  description: text("description").notNull(),
+  stage: text("stage").notNull(),
+  provinces: text("provinces").array().notNull(),
+  need: text("need").notNull(),
+  sector: text("sector"),
+  companyUrl: text("company_url"),
+  productType: text("product_type"),
+  expansionProvinces: text("expansion_provinces").array(),
+  completedPrograms: text("completed_programs").array(),
+  pathwayData: jsonb("pathway_data").notNull(),
+  notifyNewPrograms: boolean("notify_new_programs").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  lastAccessedAt: timestamp("last_accessed_at"),
+  accessCount: integer("access_count").default(0),
+  status: text("status").default("active"),
 });
 
 export const submissions = pgTable("submissions", {
