@@ -387,4 +387,4 @@ Generate the pathway now. Remember: prioritize programs whose description closel
   }
 }
 
-export const config = { maxDuration: 30 };
+export const config = { maxDuration: 60 };
