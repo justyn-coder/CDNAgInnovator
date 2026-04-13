@@ -20,6 +20,23 @@ export const programs = pgTable("programs", {
   productionSystems: text("production_systems").array(),
   techDomains: text("tech_domains").array(),
   featured: boolean("featured").default(false),
+  // Date fields (Part A migration)
+  eventStartDate: date("event_start_date"),
+  eventEndDate: date("event_end_date"),
+  applicationDeadline: date("application_deadline"),
+  dateVerified: boolean("date_verified").default(false),
+  dateSource: text("date_source"),
+  // Conference/event extension fields
+  eventLocation: text("event_location"),
+  eventCity: text("event_city"),
+  eventFormat: text("event_format"),
+  registrationUrl: text("registration_url"),
+  registrationDeadline: date("registration_deadline"),
+  eventCostMin: integer("event_cost_min"),
+  eventCostMax: integer("event_cost_max"),
+  eventCostNote: text("event_cost_note"),
+  expectedAttendanceMin: integer("expected_attendance_min"),
+  expectedAttendanceMax: integer("expected_attendance_max"),
 });
 
 export const submissions = pgTable("submissions", {

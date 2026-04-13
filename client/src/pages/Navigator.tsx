@@ -7,6 +7,7 @@ import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
 import PathwayCard from "../components/PathwayCard";
 import CorrectionHintTooltip from "../components/CorrectionHintTooltip";
+import DateFilter, { getDateBadge, DateBadge, type DateRange } from "../components/DateFilter";
 
 interface Program {
   id: number; name: string; category: string;
@@ -18,6 +19,17 @@ interface Program {
   intakeFrequency: string | null; deadlineNotes: string | null;
   productionSystems: string[] | null; techDomains: string[] | null;
   featured: boolean | null;
+  eventStartDate?: string | null;
+  eventEndDate?: string | null;
+  applicationDeadline?: string | null;
+  eventLocation?: string | null;
+  eventCity?: string | null;
+  eventFormat?: string | null;
+  registrationUrl?: string | null;
+  registrationDeadline?: string | null;
+  eventCostMin?: number | null;
+  eventCostMax?: number | null;
+  eventCostNote?: string | null;
 }
 
 interface Message { role: "user" | "assistant"; content: string; }
@@ -351,6 +363,10 @@ function ProgramCard({ p }: { p: Program }) {
               {STAGE_LABELS[st] || st}
             </span>
           ))}
+          {(() => {
+            const badge = getDateBadge(p);
+            return badge ? <DateBadge badge={badge} /> : null;
+          })()}
         </div>
       </div>
       {p.description && (
@@ -480,6 +496,8 @@ function BrowsePanel({
   const [catFilter, setCatFilter] = useState("All");
   const [stageFilter, setStageFilter] = useState("All");
   const [provFilter, setProvFilter] = useState("All");
+  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+  const [sortMode, setSortMode] = useState<"default" | "upcoming">("default");
   const [programsLoadedAt] = useState(() => Date.now());
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -527,11 +545,34 @@ function BrowsePanel({
     const matchCat = catFilter === "All" || p.category === catFilter;
     const matchStage = stageFilter === "All" || (p.stage || []).includes(stageFilter);
     const matchProv = provFilter === "All" || (p.province || []).includes(provFilter) || (p.province || []).includes("National");
-    return matchText && matchCat && matchStage && matchProv;
+    // Date filter: check if any date field falls within the selected range
+    let matchDate = true;
+    if (dateRange.from || dateRange.to) {
+      const dates = [p.eventStartDate, p.eventEndDate, p.applicationDeadline].filter(Boolean) as string[];
+      if (dates.length === 0) {
+        matchDate = false;
+      } else {
+        matchDate = dates.some(d => {
+          if (dateRange.from && d < dateRange.from) return false;
+          if (dateRange.to && d > dateRange.to) return false;
+          return true;
+        });
+      }
+    }
+    return matchText && matchCat && matchStage && matchProv && matchDate;
   });
 
   const sorted = [...filtered].sort((a, b) => {
-    // Featured first
+    if (sortMode === "upcoming") {
+      // Programs with dates first, sorted chronologically
+      const aDate = a.eventStartDate || a.applicationDeadline;
+      const bDate = b.eventStartDate || b.applicationDeadline;
+      if (aDate && !bDate) return -1;
+      if (!aDate && bDate) return 1;
+      if (aDate && bDate) return aDate.localeCompare(bDate);
+      return a.name.localeCompare(b.name);
+    }
+    // Default sort: featured first, then alphabetical
     const aFeat = a.featured ? 1 : 0;
     const bFeat = b.featured ? 1 : 0;
     if (aFeat !== bFeat) return bFeat - aFeat;
@@ -767,6 +808,12 @@ function BrowsePanel({
           className="px-3 py-2 rounded-sm border-[1.5px] border-border text-[0.78rem] bg-bg text-text font-sans">
           <option value="All">All Provinces</option>
           {PROVINCES_LIST.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
+        </select>
+        <DateFilter onChange={(range) => { setDateRange(range); }} />
+        <select value={sortMode} onChange={e => setSortMode(e.target.value as "default" | "upcoming")}
+          className="px-3 py-2 rounded-sm border-[1.5px] border-border text-[0.78rem] bg-bg text-text font-sans">
+          <option value="default">Sort: Default</option>
+          <option value="upcoming">Sort: Upcoming dates</option>
         </select>
       </div>
 
