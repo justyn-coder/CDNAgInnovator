@@ -319,7 +319,7 @@ Generate the pathway now. Remember: prioritize programs whose description closel
 
     // 5. Call Anthropic API (retry once on parse failure)
     const apiBody = JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 2000,
       temperature: 0,
       system: SYSTEM_PROMPT,
@@ -341,6 +341,11 @@ Generate the pathway now. Remember: prioritize programs whose description closel
         });
 
         const data = await apiRes.json() as any;
+
+        if (!apiRes.ok) {
+          console.error(`Anthropic API error (attempt ${attempt + 1}):`, apiRes.status, data?.error?.type, data?.error?.message);
+        }
+
         const raw = data.content?.[0]?.text || "";
         const cleaned = raw.replace(/```json|```/g, "").trim();
         const parsed = JSON.parse(cleaned);

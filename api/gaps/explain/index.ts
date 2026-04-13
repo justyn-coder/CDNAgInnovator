@@ -225,7 +225,7 @@ Generate the JSON explanation now.`;
     // 7. Call Anthropic API (retry once on failure)
     let explanation: { classification_label: string; why: string; action: string } | null = null;
     const apiBody = JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 512,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],
