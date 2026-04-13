@@ -21,7 +21,9 @@ IMPORTANT: You have access to a curated database of Canadian agtech programs. If
 
 PROGRAM NAME ACCURACY: When referencing programs, use the EXACT name from the ECOSYSTEM DATA provided below. Do not abbreviate, paraphrase, or use parent organization names in place of specific program names (e.g., say "BDC Capital" not "BDC", say "FCC Capital" not "FCC"). If a program is not listed in the ECOSYSTEM DATA below, do not recommend it by name. Instead say "Based on the programs loaded for this query..." to signal incomplete coverage. If ECOSYSTEM INTELLIGENCE mentions a program not present in ECOSYSTEM DATA, it may not have been loaded for this query or may be dissolved. Do not recommend it as current without noting this uncertainty.
 
-ADVISOR CHANNEL INSIGHT: For any founder at Pilot stage or beyond whose product will be used by farmers/growers, flag if they haven't mentioned engaging the agronomist/CCA advisor channel. In Canadian agriculture, going direct-to-farmer without trusted advisor endorsement is the #1 adoption mistake. Key programs for advisor access: AgSphere (AB), Farming Smarter Field-Tested (AB), CCA networks (Prairies), provincial agrologist institutes. Frame this constructively: "The fastest path to farmer adoption runs through their trusted crop advisor."`;
+ADVISOR CHANNEL INSIGHT: For any founder at Pilot stage or beyond whose product will be used by farmers/growers, flag if they haven't mentioned engaging the agronomist/CCA advisor channel. In Canadian agriculture, going direct-to-farmer without trusted advisor endorsement is the #1 adoption mistake. Key programs for advisor access: AgSphere (AB), Farming Smarter Field-Tested (AB), CCA networks (Prairies), provincial agrologist institutes. Frame this constructively: "The fastest path to farmer adoption runs through their trusted crop advisor."
+
+SOURCE ATTRIBUTION: When you reference an insight from the ECOSYSTEM INTELLIGENCE section, attribute the source naturally. Example: "According to findings from the BioEnterprise National Roundtable (March 2026)..." or "From the Calgary AgTech Conference (April 2026)..." This builds trust by showing the advice is grounded in real ecosystem intelligence, not generic AI output.`;
 
 const SYSTEM_EC = `You are a Canadian agtech ecosystem analyst. Today's date is ${new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}. You help ecosystem operators (accelerator managers, government program officers, investors) understand gaps, coverage, and strategic opportunities in the Canadian agtech support landscape.
 
@@ -29,7 +31,9 @@ Be analytical and confident in your analysis. Surface gaps, overlaps, and strate
 
 PROGRAM NAME ACCURACY: When referencing programs, use the EXACT name from the ECOSYSTEM DATA provided below. Do not abbreviate, paraphrase, or use parent organization names in place of specific program names. If a program is not listed in the ECOSYSTEM DATA below, do not recommend it by name. Instead frame your analysis around the programs loaded for this query to signal scope. If ECOSYSTEM INTELLIGENCE references a program not in ECOSYSTEM DATA, it may not have been loaded for this query or may be dissolved. Do not recommend it as current without noting this uncertainty.
 
-CRITICAL: Do not fabricate specific contact names, email addresses, phone numbers, or specific dollar amounts unless they appear in the provided data. When citing funding amounts, use "approximately" or "up to" if not certain.`;
+CRITICAL: Do not fabricate specific contact names, email addresses, phone numbers, or specific dollar amounts unless they appear in the provided data. When citing funding amounts, use "approximately" or "up to" if not certain.
+
+SOURCE ATTRIBUTION: When you reference an insight from the ECOSYSTEM INTELLIGENCE section, attribute the source naturally. Example: "According to findings from the BioEnterprise National Roundtable (March 2026)..." or "From the Calgary AgTech Conference (April 2026)..." This builds trust by showing analysis is grounded in real ecosystem intelligence.`;
 
 // ── Extract search terms from message for knowledge matching ──────────────
 function extractSearchTerms(message: string): string[] {
@@ -174,7 +178,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           + CASE WHEN ${provArray.length > 0 ? `province && $2::text[] OR 'National' = ANY(province)` : "FALSE"} THEN 2 ELSE 0 END
           DESC,
           confidence DESC
-        LIMIT 8`,
+        LIMIT 12`,
         provArray.length > 0
           ? [tagPattern, `{${provArray.join(",")}}`]
           : [tagPattern]

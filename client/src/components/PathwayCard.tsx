@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { cn } from "../lib/cn";
+import { formatSource } from "../lib/formatSource";
 
 // ── Copy link button with inline toast ─────────────────────────────────────
 function CopyLinkButton({ stage, provinces, need, sector }: { stage: string; provinces: string[]; need: string; sector?: string }) {
@@ -48,6 +49,8 @@ interface PathwayStep {
   prepare?: string;
   timing: "now" | "next_month" | "next_quarter" | "horizon";
   horizon?: boolean;
+  ecosystem_insight?: string | null;
+  insight_source?: string | null;
 }
 
 interface PathwayData {
@@ -248,6 +251,28 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp }: {
         <div className="text-[0.78rem] text-text-secondary leading-[1.55]">
           {step.why}
         </div>
+
+        {step.ecosystem_insight && (
+          <div className="bg-amber-50/60 border-l-2 border-amber-400 rounded-r-lg p-2.5 mt-2">
+            <div className="flex items-start gap-1.5">
+              <svg className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+              </svg>
+              <div>
+                <span className="text-[0.7rem] font-semibold text-amber-700">Ecosystem insight</span>
+                <div className="text-[0.75rem] text-text-secondary leading-[1.5] mt-0.5">
+                  {step.ecosystem_insight}
+                </div>
+                {step.insight_source && (
+                  <div className="text-xs text-amber-500 mt-1">
+                    {formatSource(step.insight_source)}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {step.prepare && (
           <div className={cn(

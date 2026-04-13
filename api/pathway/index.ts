@@ -126,7 +126,9 @@ Respond ONLY with a JSON object, no markdown, no backticks, no preamble:
       "fit_confidence": "high|medium|exploratory",
       "prepare": "What to have ready + best way in (1 sentence).",
       "timing": "now|next_month|next_quarter|horizon",
-      "horizon": false
+      "horizon": false,
+      "ecosystem_insight": "Optional. A relevant ecosystem insight from the ECOSYSTEM INTELLIGENCE section. Include source attribution in the text. Null if no relevant insight exists for this step.",
+      "insight_source": "Optional. The raw source value from the knowledge entry used, e.g. 'calgary-agtech-conference-2026' or 'CFIN Foodtech in Canada 2025 Ecosystem Report'. Null if no insight."
     }
   ],
   "gap_warning": "If there's a significant gap in their province/stage combination, describe it here. Otherwise null.",
@@ -205,6 +207,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             nextStage,
             `{${allCategories.join(",")}}`,
           ]
+    );
+
+    // 2b. Knowledge entries — ecosystem intelligence for richer pathway
+    const knowledgeRows = await client.unsafe(
+      `SELECT id, title, body, tags, source, confidence, created_at
+       FROM knowledge
+       WHERE (
+         province && $1::text[]
+         OR 'National' = ANY(province)
+         OR 'national' = ANY(province)
+         OR province IS NULL
+         OR array_length(province, 1) IS NULL
+       )
+       AND confidence IN ('high', 'medium', 'verified')
+       ORDER BY
+         CASE WHEN province && $1::text[] THEN 0 ELSE 1 END,
+         CASE WHEN confidence = 'verified' THEN 0 WHEN confidence = 'high' THEN 1 ELSE 2 END,
+         created_at DESC
+       LIMIT 12`,
+      [`{${provArray.join(",")}}`]
     );
 
     // 3. Gap detection
@@ -315,12 +337,17 @@ PRIORITY CATEGORIES for ${stage} stage: ${stagePriorities.join(", ")}
 
 ${deterministicGaps.length > 0 ? `ECOSYSTEM GAPS DETECTED (include these in gap_warning if relevant):\n${deterministicGaps.map((g, i) => `${i + 1}. ${g}`).join("\n")}` : ""}
 
+${(knowledgeRows as any[]).length > 0 ? `ECOSYSTEM INTELLIGENCE (${(knowledgeRows as any[]).length} entries — curated insights from conferences, roundtables, and ecosystem analysis):
+${(knowledgeRows as any[]).map((k: any) => `[${k.title}] (source: ${k.source}, ${k.created_at ? new Date(k.created_at).toISOString().split("T")[0] : "undated"}): ${k.body}`).join("\n\n")}
+
+INSTRUCTION: Where an ecosystem intelligence entry is directly relevant to a recommended program or step, include it as an ecosystem_insight in that step. Cite the source naturally. Not every step needs an insight — include only when genuinely relevant. Expect 1-3 insights per pathway.` : ""}
+
 Generate the pathway now. Remember: prioritize programs whose description closely matches what this specific founder is building. Generic programs should come after industry-specific ones.`;
 
     // 5. Call Anthropic API (retry once on parse failure)
     const apiBody = JSON.stringify({
       model: process.env.CLAUDE_SONNET_MODEL || "claude-sonnet-4-6",
-      max_tokens: 2000,
+      max_tokens: 2500,
       temperature: 0,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],
