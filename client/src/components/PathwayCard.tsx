@@ -67,6 +67,7 @@ interface PathwayResponse {
     need: string;
     programsConsidered: number;
     gapInfo: Record<string, number>;
+    deterministicGaps?: string[];
   };
 }
 
@@ -503,10 +504,16 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         </div>
       </div>
 
-      {/* ── Gap warning ───────────────────────────────────────────────── */}
+      {/* ── Gap warnings (AI-generated + deterministic) ────────────── */}
       {pathway.gap_warning && (
         <div className="px-4 md:px-[22px] py-3 bg-[#fffbeb] border-l-[3px] border-l-amber text-[0.78rem] text-[#78350f] leading-[1.55]">
           <strong className="font-bold">⚠ Gap detected:</strong> {pathway.gap_warning}
+        </div>
+      )}
+      {meta.deterministicGaps && (meta.deterministicGaps as string[]).length > 0 && !pathway.gap_warning && (
+        <div className="px-4 md:px-[22px] py-3 bg-[#f0f9ff] border-l-[3px] border-l-[#0284c7] text-[0.78rem] text-[#0c4a6e] leading-[1.55]">
+          <strong className="font-bold">Ecosystem note:</strong>{" "}
+          {(meta.deterministicGaps as string[]).join(" ")}
         </div>
       )}
 
@@ -590,6 +597,26 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         }
         return null;
       })()}
+
+      {/* ── Chat CTA (Kevin's #1 issue: didn't know chat existed) ──── */}
+      {pathway.steps.length > 0 && (
+        <div
+          className="mt-5 mx-0 cursor-pointer group"
+          style={{ background: "linear-gradient(135deg, #1B4332 0%, #2D5A45 100%)", borderRadius: 12, padding: "18px 18px" }}
+          onClick={() => onChatFollowUp("What should I focus on first from my pathway, and what should I prepare?")}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-[1.5rem]">💬</span>
+            <div>
+              <div className="text-white font-bold text-[0.88rem] mb-0.5">Want to go deeper?</div>
+              <div className="text-white/70 text-[0.78rem] leading-snug">
+                Ask Trellis anything about these programs, your strategy, or what to prepare. The chat below knows your full profile.
+              </div>
+            </div>
+            <span className="text-white/50 text-[1.2rem] ml-auto group-hover:text-white transition-colors">↓</span>
+          </div>
+        </div>
+      )}
 
       {/* ── Email capture (only after successful pathway with steps) ── */}
       {pathway.steps.length > 0 && <EmailCapture stage={stage} provinces={provinces} description={description} />}

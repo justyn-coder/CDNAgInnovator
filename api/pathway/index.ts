@@ -221,6 +221,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       gapInfo[cat] = parseInt((countRows as any[])[0]?.cnt || "0", 10);
     }
 
+    // 3b. Deterministic gap detection (Layer 3)
+    const deterministicGaps: string[] = [];
+    const resultCount = (rows as any[]).length;
+
+    // Gap: very few results
+    if (resultCount < 3) {
+      deterministicGaps.push(
+        `We found ${resultCount === 0 ? "no" : `only ${resultCount}`} programs matching your profile in ${provinces.join(", ") || "your region"}. This is a real gap in the ecosystem, not a limitation of our data.`
+      );
+    }
+
+    // Gap: sector-aware advisor channel
+    if (sector === "livestock") {
+      const hasLivestockAdvisor = (rows as any[]).some((p: any) =>
+        p.use_case?.includes("advisor-channel") && p.production_systems?.some((ps: string) => ["livestock", "dairy", "poultry"].includes(ps))
+      );
+      if (!hasLivestockAdvisor) {
+        deterministicGaps.push(
+          "There is limited formal advisor support for livestock technology companies in this region. Consider connecting directly with provincial livestock associations or veterinary colleges."
+        );
+      }
+    } else if (sector === "crops") {
+      const hasCropAdvisor = (rows as any[]).some((p: any) =>
+        p.use_case?.includes("advisor-channel")
+      );
+      if (!hasCropAdvisor) {
+        deterministicGaps.push(
+          "No formal agronomist or Certified Crop Advisor channel programs are available for this province/stage combination."
+        );
+      }
+    }
+
+    // Gap: pre-revenue capital (Alberta specific)
+    if (provinces.includes("AB") && (stage === "Pilot" || stage === "Comm") && need !== "all") {
+      const hasFundingAB = (rows as any[]).some((p: any) =>
+        p.category === "Fund" && p.province?.includes("AB") && p.funding_type && !p.funding_type.includes("grant")
+      );
+      if (!hasFundingAB) {
+        deterministicGaps.push(
+          "Alberta currently has limited pre-revenue capital attraction support for agtech companies at this stage. This is a known gap in the ecosystem."
+        );
+      }
+    }
+
     // 4. Build context for the LLM — include full descriptions and use_case
     const programList = (rows as any[]).map((p: any) => {
       const parts = [
@@ -268,6 +312,8 @@ CATEGORY AVAILABILITY for ${provinces.join("/")}:
 ${gapSummary}
 
 PRIORITY CATEGORIES for ${stage} stage: ${stagePriorities.join(", ")}
+
+${deterministicGaps.length > 0 ? `ECOSYSTEM GAPS DETECTED (include these in gap_warning if relevant):\n${deterministicGaps.map((g, i) => `${i + 1}. ${g}`).join("\n")}` : ""}
 
 Generate the pathway now. Remember: prioritize programs whose description closely matches what this specific founder is building. Generic programs should come after industry-specific ones.`;
 
@@ -327,6 +373,7 @@ Generate the pathway now. Remember: prioritize programs whose description closel
         need,
         programsConsidered: (rows as any[]).length,
         gapInfo,
+        deterministicGaps,
       },
     });
   } catch (e) {

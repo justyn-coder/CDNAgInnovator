@@ -354,6 +354,13 @@ export default function Wizard({ onComplete, programCount }: Props) {
             style={{ border: "0.5px solid #E5E5E0" }}
           />
         </div>
+
+        {/* Privacy disclosure */}
+        <p className="mt-4 text-[0.7rem] text-text-tertiary leading-relaxed">
+          Trellis uses AI to match you with programs based on what you tell us.
+          Your information is only used to personalize your experience.
+          We never share your data with programs or third parties without your permission.
+        </p>
       </div>
     ),
 
