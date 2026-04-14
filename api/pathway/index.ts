@@ -118,7 +118,6 @@ Respond ONLY with a JSON object, no markdown, no backticks, no preamble:
   "steps": [
     {
       "order": 1,
-      "program_id": "The integer ID from [ID:N] in the program list",
       "program_name": "Exact program name from the list",
       "program_website": "URL if provided, otherwise null",
       "category": "Fund|Accel|Pilot|Event|Org|Train",
@@ -291,7 +290,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 4. Build context for the LLM — include full descriptions and use_case
     const programList = (rows as any[]).map((p: any) => {
       const parts = [
-        `[ID:${p.id}] ${p.name} [${p.category}]`,
+        `${p.name} [${p.category}]`,
         `Stages: ${(p.stage || []).join(", ") || "all"}`,
         `Province: ${(p.province || []).join(", ")}`,
         p.use_case?.length ? `Use cases: ${p.use_case.join(", ")}` : "",
@@ -395,6 +394,18 @@ Generate the pathway now. Remember: prioritize programs whose description closel
       return res.status(502).json({
         error: "Pathway generation is temporarily unavailable. Your answers are saved — please try again in a moment.",
       });
+    }
+
+    // Map program_id from DB by matching program_name
+    const programNameToId = new Map<string, number>();
+    for (const p of rows as any[]) {
+      programNameToId.set(p.name.toLowerCase(), p.id);
+    }
+    if (pathway.steps) {
+      for (const step of pathway.steps) {
+        const id = programNameToId.get(step.program_name?.toLowerCase());
+        step.program_id = id || null;
+      }
     }
 
     return res.status(200).json({
