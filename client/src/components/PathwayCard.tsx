@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "../lib/cn";
 import { formatSource } from "../lib/formatSource";
 import SaveJourney from "./SaveJourney";
 import type { InterestStatus, InterestMap } from "../lib/interests";
+import { useStreamedPathway } from "../hooks/useStreamedPathway";
 
 // ── Copy link button with inline toast ─────────────────────────────────────
 function CopyLinkButton({ stage, provinces, need, sector }: { stage: string; provinces: string[]; need: string; sector?: string }) {
@@ -42,7 +43,7 @@ const STAGE_ICONS: Record<string, string> = {
 // ── Types ──────────────────────────────────────────────────────────────────
 interface PathwayStep {
   order: number;
-  program_id?: number;
+  program_id?: number | null;
   program_name: string;
   program_website?: string;
   category: string;
@@ -199,7 +200,7 @@ const INTEREST_OPTIONS: { key: InterestStatus; label: string; icon: string; acti
 ];
 
 function InterestButtons({ programId, programName, currentStatus, onChange }: {
-  programId: number | undefined;
+  programId: number | null | undefined;
   programName: string;
   currentStatus: InterestStatus | undefined;
   onChange?: (programId: number, programName: string, status: InterestStatus | null) => void;
@@ -501,80 +502,56 @@ function EmailCapture({ stage, provinces, description, productType }: {
 
 // ── Main Component ──────────────────────────────────────────────────────────
 export default function PathwayCard({ description, stage, provinces, sector, need, onChatFollowUp, onReset, needLabel, expansionProvinces, completedPrograms, companyUrl, productType, initialData, isRestored, interests, onInterestChange }: Props) {
-  const [data, setData] = useState<PathwayResponse | null>(initialData || null);
-  const [loading, setLoading] = useState(!initialData);
-  const [error, setError] = useState("");
-  const [loadingStep, setLoadingStep] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
 
+  // Build profile for streaming hook
+  const profile = useMemo(() => (
+    !initialData || refreshing
+      ? { description, stage, provinces, need, sector }
+      : null
+  ), [description, stage, provinces.join(","), need, sector, initialData, refreshing]);
+
+  const stream = useStreamedPathway(profile, !initialData || refreshing);
+
+  // Derive data from stream or initialData
+  const data: PathwayResponse | null = stream.fullData
+    ? stream.fullData as PathwayResponse
+    : initialData || null;
+  const streamedSteps = stream.steps;
+  const loading = !initialData && !stream.isComplete && stream.steps.length === 0 && !stream.error;
+  const error = stream.error || "";
+
+  // Loading step animation (for initial load before first step arrives)
   useEffect(() => {
-    // Skip fetch if we have pre-loaded data (restore flow)
-    if (initialData && !refreshing) return;
-
-    setLoading(true);
-    setError("");
+    if (!loading) return;
     setLoadingStep(0);
     const timers = [
       setTimeout(() => setLoadingStep(1), 2000),
       setTimeout(() => setLoadingStep(2), 4500),
       setTimeout(() => setLoadingStep(3), 7000),
     ];
-
-    fetch("/api/pathway", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description, stage, provinces, need, sector }),
-    })
-      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then((d: PathwayResponse) => { timers.forEach(clearTimeout); setData(d); setLoading(false); setRefreshing(false); })
-      .catch(() => { timers.forEach(clearTimeout); setError("We hit a temporary issue generating your pathway. Your answers are saved — click below to try again."); setLoading(false); setRefreshing(false); });
-
     return () => timers.forEach(clearTimeout);
-  }, [description, stage, provinces.join(","), need, sector, refreshing]);
+  }, [loading]);
 
-  if (loading) {
-    return (
-      <div className="m-4 px-4 md:px-6 py-9 bg-bg border border-border rounded-lg shadow-md overflow-hidden box-border max-w-full" style={{ maxWidth: "calc(100% - 2rem)", overflowWrap: "break-word" }}>
-        <div className="h-[3px] bg-bg-tertiary rounded-[2px] overflow-hidden mb-6">
-          <div
-            className="h-full bg-brand-green rounded-[2px] transition-[width] duration-2000 ease-in-out"
-            style={{ width: `${Math.min(25 + loadingStep * 25, 95)}%` }}
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          {LOADING_MESSAGES.map((msg, i) => (
-            <div key={i} className={cn(
-              "flex items-center gap-2.5 transition-opacity duration-500",
-              i <= loadingStep ? "opacity-100" : "opacity-25",
-            )}>
-              <div className={cn(
-                "w-5 h-5 rounded-full shrink-0 flex items-center justify-center transition-all duration-300",
-                i < loadingStep && "bg-brand-green",
-                i === loadingStep && "bg-bg-tertiary border-2 border-brand-green",
-                i > loadingStep && "bg-bg-secondary",
-              )}>
-                {i < loadingStep && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                {i === loadingStep && <div className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse-dot" />}
-              </div>
-              <span className={cn(
-                "text-[0.82rem]",
-                i <= loadingStep ? "font-semibold text-text" : "font-normal text-text-tertiary",
-              )}>{msg}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  // Reset refreshing when stream completes
+  useEffect(() => {
+    if (refreshing && (stream.isComplete || stream.error)) {
+      setRefreshing(false);
+    }
+  }, [refreshing, stream.isComplete, stream.error]);
 
-  if (error || !data) {
+  // Old loading block removed — handled above with streaming-aware logic
+
+  // Error state (only when we have NO steps at all)
+  if (error && streamedSteps.length === 0 && !data) {
     return (
       <div className="m-4 px-4 md:px-6 py-7 bg-red-soft border border-[#fecaca] rounded-lg text-center" style={{ maxWidth: "calc(100% - 2rem)" }}>
         <div className="text-[0.88rem] text-[#991b1b] font-semibold mb-2.5">
           {error || "Something went wrong."}
         </div>
         <button
-          onClick={() => { setError(""); setLoading(true); }}
+          onClick={() => setRefreshing(true)}
           className="bg-brand-gold text-brand-forest border-none rounded-sm px-5 py-2.5 font-semibold text-[0.82rem]"
         >
           Try Again
@@ -583,13 +560,49 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
     );
   }
 
-  const { pathway, meta } = data;
+  // Use full data if available, otherwise build from streamed steps
+  const allSteps = data ? data.pathway.steps : streamedSteps;
+  const pathway = data ? data.pathway : {
+    pathway_title: `Your ${SL[stage] || stage} Pathway`,
+    summary: "",
+    steps: allSteps,
+    gap_warning: null,
+    next_stage_note: null,
+  };
+  const meta = data ? data.meta : stream.meta || {
+    stage, nextStage: "", provinces, need,
+    programsConsidered: 0, gapInfo: {},
+  };
+
+  // If we have no data and no steps yet, keep showing loading
+  if (!data && allSteps.length === 0) {
+    return (
+      <div className="m-4 px-4 md:px-6 py-9 bg-bg border border-border rounded-lg shadow-md overflow-hidden box-border max-w-full" style={{ maxWidth: "calc(100% - 2rem)", overflowWrap: "break-word" }}>
+        <div className="h-[3px] bg-bg-tertiary rounded-[2px] overflow-hidden mb-6">
+          <div className="h-full bg-brand-green rounded-[2px] transition-[width] duration-2000 ease-in-out" style={{ width: `${Math.min(25 + loadingStep * 25, 95)}%` }} />
+        </div>
+        <div className="flex flex-col gap-2">
+          {LOADING_MESSAGES.map((msg, i) => (
+            <div key={i} className={cn("flex items-center gap-2.5 transition-opacity duration-500", i <= loadingStep ? "opacity-100" : "opacity-25")}>
+              <div className={cn("w-5 h-5 rounded-full shrink-0 flex items-center justify-center transition-all duration-300", i < loadingStep && "bg-brand-green", i === loadingStep && "bg-bg-tertiary border-2 border-brand-green", i > loadingStep && "bg-bg-secondary")}>
+                {i < loadingStep && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                {i === loadingStep && <div className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse-dot" />}
+              </div>
+              <span className={cn("text-[0.82rem]", i <= loadingStep ? "font-semibold text-text" : "font-normal text-text-tertiary")}>{msg}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const stageLabel = SL[stage] || stage;
-  const nextStageLabel = SL[meta.nextStage] || meta.nextStage;
+  const nextStageLabel = SL[meta.nextStage] || meta.nextStage || stage;
   const titleOverride = stage === meta.nextStage ? `Your ${stageLabel} Growth Pathway` : `${stageLabel} → ${nextStageLabel}`;
 
-  const currentSteps = pathway.steps.filter(s => !s.horizon && s.timing !== "horizon");
-  const futureSteps = pathway.steps.filter(s => s.horizon || s.timing === "horizon");
+  const currentSteps = allSteps.filter((s: any) => !s.horizon && s.timing !== "horizon");
+  const futureSteps = allSteps.filter((s: any) => s.horizon || s.timing === "horizon");
+  const isStillStreaming = stream.isStreaming && !stream.isComplete;
 
   return (
     <div className="mx-4 mt-3 flex flex-col animate-fade-in-up overflow-hidden max-w-full" style={{ maxWidth: "calc(100% - 2rem)", overflowWrap: "break-word", wordBreak: "break-word" }}>
@@ -674,6 +687,14 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         </div>
       )}
 
+      {/* ── Streaming indicator ────────────────────────────────────────── */}
+      {isStillStreaming && (
+        <div className="px-4 md:px-[22px] py-3 bg-bg border border-border border-t-0 flex items-center gap-2.5">
+          <div className="w-4 h-4 rounded-full border-2 border-brand-green border-t-transparent animate-spin" />
+          <span className="text-[0.78rem] text-text-tertiary">Generating next steps...</span>
+        </div>
+      )}
+
       {/* ── Next stage note ───────────────────────────────────────────── */}
       {pathway.next_stage_note && (
         <div className="px-4 md:px-[22px] py-3 bg-bg-secondary border border-border border-t-0 rounded-b-lg text-[0.78rem] text-text-secondary leading-[1.55]">
@@ -750,7 +771,7 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
       )}
 
       {/* ── Save journey (replaces EmailCapture) ── */}
-      {pathway.steps.length > 0 && (
+      {!isStillStreaming && allSteps.length > 0 && (
         <SaveJourney
           stage={stage}
           provinces={provinces}

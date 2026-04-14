@@ -135,6 +135,46 @@ Respond ONLY with a JSON object, no markdown, no backticks, no preamble:
   "next_stage_note": "One sentence about what changes when they reach the next stage."
 }`;
 
+// ── Step extraction from partial JSON stream ─────────────────────────────
+function extractCompleteSteps(text: string): any[] {
+  const stepsIdx = text.indexOf('"steps"');
+  if (stepsIdx === -1) return [];
+  const arrayStart = text.indexOf("[", stepsIdx);
+  if (arrayStart === -1) return [];
+
+  const steps: any[] = [];
+  let i = arrayStart + 1;
+  let stepStart = -1;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  while (i < text.length) {
+    const ch = text[i];
+    if (escaped) { escaped = false; i++; continue; }
+    if (ch === "\\") { escaped = true; i++; continue; }
+    if (ch === '"') { inString = !inString; i++; continue; }
+    if (inString) { i++; continue; }
+
+    if (ch === "{") {
+      if (depth === 0) stepStart = i;
+      depth++;
+    } else if (ch === "}") {
+      depth--;
+      if (depth === 0 && stepStart !== -1) {
+        try {
+          steps.push(JSON.parse(text.substring(stepStart, i + 1)));
+        } catch {}
+        stepStart = -1;
+      }
+    } else if (ch === "]" && depth === 0) {
+      break;
+    }
+    i++;
+  }
+  return steps;
+}
+
 // ── Handler ──────────────────────────────────────────────────────────────
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!setCors(req, res)) return;
@@ -342,7 +382,125 @@ INSTRUCTION: Where an ecosystem intelligence entry is directly relevant to a rec
 
 Generate the pathway now. Remember: prioritize programs whose description closely matches what this specific founder is building. Generic programs should come after industry-specific ones.`;
 
-    // 5. Call Anthropic API (retry once on parse failure)
+    // Build program_id lookup
+    const programNameToId = new Map<string, number>();
+    for (const p of rows as any[]) {
+      programNameToId.set(p.name.toLowerCase(), p.id);
+    }
+
+    const meta = {
+      stage,
+      nextStage,
+      provinces,
+      need,
+      programsConsidered: (rows as any[]).length,
+      gapInfo,
+      deterministicGaps,
+    };
+
+    const isStream = req.query.stream === "true";
+
+    // ── Streaming path ──────────────────────────────────────────────
+    if (isStream) {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      res.flushHeaders();
+
+      // Send meta immediately
+      res.write(`event: meta\ndata: ${JSON.stringify(meta)}\n\n`);
+
+      try {
+        const apiRes = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.ANTHROPIC_API_KEY || "",
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: process.env.CLAUDE_SONNET_MODEL || "claude-sonnet-4-6",
+            max_tokens: 2500,
+            temperature: 0,
+            system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+            messages: [{ role: "user", content: userMessage }],
+            stream: true,
+          }),
+        });
+
+        if (!apiRes.ok || !apiRes.body) {
+          const errBody = !apiRes.ok ? await apiRes.text().catch(() => "") : "no body";
+          console.error("Pathway stream API error:", apiRes.status, errBody);
+          res.write(`event: error\ndata: ${JSON.stringify({ error: "API error: " + apiRes.status })}\n\n`);
+          res.end();
+          return;
+        }
+
+        // Read Anthropic SSE stream, accumulate text, detect complete steps
+        let accumulated = "";
+        let emittedStepCount = 0;
+        const reader = apiRes.body.getReader();
+        const decoder = new TextDecoder();
+        let sseBuffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          sseBuffer += decoder.decode(value, { stream: true });
+
+          // Process complete SSE lines
+          const lines = sseBuffer.split("\n");
+          sseBuffer = lines.pop() || ""; // Keep incomplete line
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const data = line.slice(6);
+            if (data === "[DONE]") continue;
+
+            try {
+              const event = JSON.parse(data);
+              if (event.type === "content_block_delta" && event.delta?.text) {
+                accumulated += event.delta.text;
+
+                // Try to extract complete steps
+                const steps = extractCompleteSteps(accumulated);
+                while (emittedStepCount < steps.length) {
+                  const step = steps[emittedStepCount];
+                  // Map program_id
+                  step.program_id = programNameToId.get(step.program_name?.toLowerCase()) || null;
+                  res.write(`event: step\ndata: ${JSON.stringify(step)}\n\n`);
+                  emittedStepCount++;
+                }
+              }
+            } catch {}
+          }
+        }
+
+        // Parse complete response and send final event
+        try {
+          const cleaned = accumulated.replace(/```json|```/g, "").trim();
+          const pathway = JSON.parse(cleaned);
+          if (pathway.steps) {
+            for (const step of pathway.steps) {
+              step.program_id = programNameToId.get(step.program_name?.toLowerCase()) || null;
+            }
+          }
+          res.write(`event: complete\ndata: ${JSON.stringify({ pathway, meta })}\n\n`);
+        } catch {
+          res.write(`event: error\ndata: ${JSON.stringify({ error: "Failed to parse complete response" })}\n\n`);
+        }
+
+        res.end();
+        return;
+      } catch (e) {
+        res.write(`event: error\ndata: ${JSON.stringify({ error: "Stream failed" })}\n\n`);
+        res.end();
+        return;
+      }
+    }
+
+    // ── Non-streaming path (unchanged) ──────────────────────────────
     const apiBody = JSON.stringify({
       model: process.env.CLAUDE_SONNET_MODEL || "claude-sonnet-4-6",
       max_tokens: 2500,
@@ -355,7 +513,6 @@ Generate the pathway now. Remember: prioritize programs whose description closel
 
     const startTime = Date.now();
     for (let attempt = 0; attempt < 2; attempt++) {
-      // Skip retry if we've already spent 60s+ (avoid hitting maxDuration on retry)
       if (attempt > 0 && Date.now() - startTime > 60_000) {
         console.warn("Pathway: skipping retry, insufficient time remaining");
         break;
@@ -381,13 +538,11 @@ Generate the pathway now. Remember: prioritize programs whose description closel
         const cleaned = raw.replace(/```json|```/g, "").trim();
         const parsed = JSON.parse(cleaned);
 
-        // Validate: must have non-empty steps array
         if (Array.isArray(parsed.steps) && parsed.steps.length > 0) {
           pathway = parsed;
           break;
         }
 
-        // Valid JSON but empty steps — retry
         console.warn(`Pathway attempt ${attempt + 1}: parsed OK but steps empty`);
       } catch (parseErr) {
         console.warn(`Pathway attempt ${attempt + 1} parse failed:`, parseErr);
@@ -400,30 +555,13 @@ Generate the pathway now. Remember: prioritize programs whose description closel
       });
     }
 
-    // Map program_id from DB by matching program_name
-    const programNameToId = new Map<string, number>();
-    for (const p of rows as any[]) {
-      programNameToId.set(p.name.toLowerCase(), p.id);
-    }
     if (pathway.steps) {
       for (const step of pathway.steps) {
-        const id = programNameToId.get(step.program_name?.toLowerCase());
-        step.program_id = id || null;
+        step.program_id = programNameToId.get(step.program_name?.toLowerCase()) || null;
       }
     }
 
-    return res.status(200).json({
-      pathway,
-      meta: {
-        stage,
-        nextStage,
-        provinces,
-        need,
-        programsConsidered: (rows as any[]).length,
-        gapInfo,
-        deterministicGaps,
-      },
-    });
+    return res.status(200).json({ pathway, meta });
   } catch (e) {
     console.error("Pathway generation error:", e);
     return res.status(500).json({ error: "Failed to generate pathway. Please try again." });
