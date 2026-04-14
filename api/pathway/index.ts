@@ -167,80 +167,78 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const provArray = provinces.length > 0 ? provinces : [];
     const sectorTags: string[] = sector && SECTOR_MAP[sector] ? SECTOR_MAP[sector] : [];
 
-    const rows = await client.unsafe(
-      `SELECT name, category, description, use_case, province, stage, website,
-              funding_type, funding_max_cad, production_systems, featured
-       FROM programs
-       WHERE status NOT IN ('closed', 'dissolved', 'inactive', 'announced')
-       AND (
-         province && $1::text[]
-         OR national = true
-         OR 'National' = ANY(province)
-         ${provArray.length === 0 ? "OR TRUE" : ""}
-       )
-       AND ($2 = ANY(stage) OR $3 = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)
-       ${sectorTags.length > 0
-         ? `AND (
-             production_systems && $5::text[]
-             OR 'agnostic' = ANY(production_systems)
-             OR production_systems IS NULL
-             OR array_length(production_systems, 1) IS NULL
-           )`
-         : ""}
-       ORDER BY
-         featured DESC NULLS LAST,
-         CASE WHEN confidence = 'high' THEN 0 WHEN confidence = 'medium' THEN 1 ELSE 2 END,
-         CASE WHEN category = ANY($4::text[]) THEN 0 ELSE 1 END,
-         name
-       LIMIT 50`,
-      sectorTags.length > 0
-        ? [
-            `{${provArray.join(",")}}`,
-            stage,
-            nextStage,
-            `{${allCategories.join(",")}}`,
-            `{${sectorTags.join(",")}}`,
-          ]
-        : [
-            `{${provArray.join(",")}}`,
-            stage,
-            nextStage,
-            `{${allCategories.join(",")}}`,
-          ]
-    );
+    // 2. Run all DB queries in parallel (programs, knowledge, gap detection)
+    const provParam = `{${provArray.join(",")}}`;
+    const catParam = `{${allCategories.join(",")}}`;
 
-    // 2b. Knowledge entries — ecosystem intelligence for richer pathway
-    const knowledgeRows = await client.unsafe(
-      `SELECT id, title, body, tags, source, confidence, created_at
-       FROM knowledge
-       WHERE (
-         province && $1::text[]
-         OR 'National' = ANY(province)
-         OR 'national' = ANY(province)
-         OR province IS NULL
-         OR array_length(province, 1) IS NULL
-       )
-       AND confidence IN ('high', 'medium', 'verified')
-       ORDER BY
-         CASE WHEN province && $1::text[] THEN 0 ELSE 1 END,
-         CASE WHEN confidence = 'verified' THEN 0 WHEN confidence = 'high' THEN 1 ELSE 2 END,
-         created_at DESC
-       LIMIT 12`,
-      [`{${provArray.join(",")}}`]
-    );
+    const [rows, knowledgeRows, gapRows] = await Promise.all([
+      // 2a. Programs
+      client.unsafe(
+        `SELECT id, name, category, description, use_case, province, stage, website,
+                funding_type, funding_max_cad, production_systems, featured
+         FROM programs
+         WHERE status NOT IN ('closed', 'dissolved', 'inactive', 'announced')
+         AND (
+           province && $1::text[]
+           OR national = true
+           OR 'National' = ANY(province)
+           ${provArray.length === 0 ? "OR TRUE" : ""}
+         )
+         AND ($2 = ANY(stage) OR $3 = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)
+         ${sectorTags.length > 0
+           ? `AND (
+               production_systems && $5::text[]
+               OR 'agnostic' = ANY(production_systems)
+               OR production_systems IS NULL
+               OR array_length(production_systems, 1) IS NULL
+             )`
+           : ""}
+         ORDER BY
+           featured DESC NULLS LAST,
+           CASE WHEN confidence = 'high' THEN 0 WHEN confidence = 'medium' THEN 1 ELSE 2 END,
+           CASE WHEN category = ANY($4::text[]) THEN 0 ELSE 1 END,
+           name
+         LIMIT 30`,
+        sectorTags.length > 0
+          ? [provParam, stage, nextStage, catParam, `{${sectorTags.join(",")}}`]
+          : [provParam, stage, nextStage, catParam]
+      ),
+      // 2b. Knowledge entries
+      client.unsafe(
+        `SELECT id, title, body, tags, source, confidence, created_at
+         FROM knowledge
+         WHERE (
+           province && $1::text[]
+           OR 'National' = ANY(province)
+           OR 'national' = ANY(province)
+           OR province IS NULL
+           OR array_length(province, 1) IS NULL
+         )
+         AND confidence IN ('high', 'medium', 'verified')
+         ORDER BY
+           CASE WHEN province && $1::text[] THEN 0 ELSE 1 END,
+           CASE WHEN confidence = 'verified' THEN 0 WHEN confidence = 'high' THEN 1 ELSE 2 END,
+           created_at DESC
+         LIMIT 8`,
+        [provParam]
+      ),
+      // 2c. Gap detection (single grouped query, replaces N+1 loop)
+      client.unsafe(
+        `SELECT category, COUNT(*) as cnt FROM programs
+         WHERE status NOT IN ('closed', 'dissolved', 'inactive')
+           AND category = ANY($1::text[])
+           AND (province && $2::text[] OR 'National' = ANY(province) ${provArray.length === 0 ? "OR TRUE" : ""})
+           AND ($3 = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)
+         GROUP BY category`,
+        [catParam, provParam, stage]
+      ),
+    ]);
 
-    // 3. Gap detection
+    // 3. Build gap info from grouped query results
     const gapInfo: Record<string, number> = {};
     for (const cat of allCategories) {
-      const countRows = await client.unsafe(
-        `SELECT COUNT(*) as cnt FROM programs
-         WHERE status NOT IN ('closed', 'dissolved', 'inactive')
-           AND category = $1
-           AND (province && $2::text[] OR 'National' = ANY(province) ${provArray.length === 0 ? "OR TRUE" : ""})
-           AND ($3 = ANY(stage) OR stage IS NULL OR array_length(stage, 1) IS NULL)`,
-        [cat, `{${provArray.join(",")}}`, stage]
-      );
-      gapInfo[cat] = parseInt((countRows as any[])[0]?.cnt || "0", 10);
+      const row = (gapRows as any[]).find((r: any) => r.category === cat);
+      gapInfo[cat] = parseInt(row?.cnt || "0", 10);
     }
 
     // 3b. Deterministic gap detection (Layer 3)
@@ -349,7 +347,7 @@ Generate the pathway now. Remember: prioritize programs whose description closel
       model: process.env.CLAUDE_SONNET_MODEL || "claude-sonnet-4-6",
       max_tokens: 2500,
       temperature: 0,
-      system: SYSTEM_PROMPT,
+      system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content: userMessage }],
     });
 
@@ -362,7 +360,7 @@ Generate the pathway now. Remember: prioritize programs whose description closel
           headers: {
             "Content-Type": "application/json",
             "x-api-key": process.env.ANTHROPIC_API_KEY || "",
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": "2024-10-22",
           },
           body: apiBody,
         });
