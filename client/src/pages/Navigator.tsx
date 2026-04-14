@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "wouter";
 import { cn } from "../lib/cn";
 import { SIGNAL_RESPONSES } from "../lib/signal-responses";
+import { readInterests, writeInterest, mergeInterests, type InterestMap, type InterestStatus } from "../lib/interests";
 
 import Wizard from "../components/Wizard";
 import GapMatrix from "../components/GapMatrix";
@@ -1088,6 +1089,24 @@ export default function Navigator() {
   const [isRestored, setIsRestored] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
   const [restoreError, setRestoreError] = useState("");
+  const [journeyToken, setJourneyToken] = useState<string | null>(null);
+
+  // Interest tracking
+  const [interests, setInterests] = useState<InterestMap>(() => readInterests());
+
+  const handleInterestChange = useCallback((programId: number, programName: string, status: InterestStatus | null) => {
+    const updated = writeInterest(programId, programName, status);
+    setInterests({ ...updated });
+
+    // Sync to Supabase if we have a journey token
+    if (journeyToken && status) {
+      fetch(`/api/journey/${journeyToken}/interest`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ programId, programName, status }),
+      }).catch(() => {}); // Fire-and-forget, localStorage is authoritative
+    }
+  }, [journeyToken]);
 
   // Dynamic counts for operator dashboard
   const [programCount, setProgramCount] = useState<number | null>(null);
@@ -1158,8 +1177,27 @@ export default function Navigator() {
             setRestoredName(data.name);
             setRestoredSavedAt(data.savedAt);
             setIsRestored(true);
+            setJourneyToken(journeyToken);
             setShowPathway(true);
             setRestoreLoading(false);
+            // Merge interests from Supabase
+            fetch(`/api/journey/${journeyToken}/interests`)
+              .then(r => r.ok ? r.json() : [])
+              .then((remote: any[]) => {
+                if (remote.length > 0) {
+                  const remoteMap: InterestMap = {};
+                  for (const r of remote) {
+                    remoteMap[String(r.programId)] = {
+                      status: r.status,
+                      programName: r.programName,
+                      updatedAt: r.updatedAt,
+                    };
+                  }
+                  const merged = mergeInterests(readInterests(), remoteMap);
+                  setInterests({ ...merged });
+                }
+              })
+              .catch(() => {});
           })
           .catch(() => {
             setRestoreError("This link is no longer valid.");
@@ -1697,6 +1735,8 @@ export default function Navigator() {
               productType={wizardSnapshot.productType}
               initialData={restoredPathwayData || undefined}
               isRestored={isRestored}
+              interests={interests}
+              onInterestChange={handleInterestChange}
             />
           )}
 

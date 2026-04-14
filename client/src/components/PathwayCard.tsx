@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { cn } from "../lib/cn";
 import { formatSource } from "../lib/formatSource";
 import SaveJourney from "./SaveJourney";
+import type { InterestStatus, InterestMap } from "../lib/interests";
 
 // ── Copy link button with inline toast ─────────────────────────────────────
 function CopyLinkButton({ stage, provinces, need, sector }: { stage: string; provinces: string[]; need: string; sector?: string }) {
@@ -41,6 +42,7 @@ const STAGE_ICONS: Record<string, string> = {
 // ── Types ──────────────────────────────────────────────────────────────────
 interface PathwayStep {
   order: number;
+  program_id?: number;
   program_name: string;
   program_website?: string;
   category: string;
@@ -92,6 +94,10 @@ interface Props {
   initialData?: PathwayResponse;
   /** Whether this is a restored journey (show "already saved" state) */
   isRestored?: boolean;
+  /** Interest tracking state */
+  interests?: InterestMap;
+  /** Callback when interest status changes */
+  onInterestChange?: (programId: number, programName: string, status: InterestStatus | null) => void;
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -185,21 +191,90 @@ function StageJourney({ current, next }: { current: string; next: string }) {
   );
 }
 
+// ── Interest Buttons ──────────────────────────────────────────────────────
+const INTEREST_OPTIONS: { key: InterestStatus; label: string; icon: string; activeBg: string; activeText: string; activeBorder: string }[] = [
+  { key: "interested", label: "Interested", icon: "★", activeBg: "bg-[#fef3c7]", activeText: "text-[#92400e]", activeBorder: "border-[#92400e44]" },
+  { key: "applied", label: "Applied", icon: "✓", activeBg: "bg-[#dcfce7]", activeText: "text-[#166534]", activeBorder: "border-[#16653444]" },
+  { key: "dismissed", label: "Not for me", icon: "✕", activeBg: "bg-[#f0f0ec]", activeText: "text-[#555560]", activeBorder: "border-[#55556044]" },
+];
+
+function InterestButtons({ programId, programName, currentStatus, onChange }: {
+  programId: number | undefined;
+  programName: string;
+  currentStatus: InterestStatus | undefined;
+  onChange?: (programId: number, programName: string, status: InterestStatus | null) => void;
+}) {
+  if (!programId || !onChange) return null;
+  return (
+    <div className="flex gap-1.5 mt-2.5">
+      {INTEREST_OPTIONS.map(opt => {
+        const isActive = currentStatus === opt.key;
+        return (
+          <button
+            key={opt.key}
+            onClick={() => onChange(programId, programName, isActive ? null : opt.key)}
+            className={cn(
+              "flex items-center gap-1 px-2.5 py-[4px] rounded-full text-[0.65rem] font-semibold border transition-all duration-200 cursor-pointer",
+              isActive
+                ? cn(opt.activeBg, opt.activeText, opt.activeBorder)
+                : "bg-transparent text-text-tertiary border-border hover:border-[#ccc] hover:text-text-secondary",
+            )}
+          >
+            <span className={cn("text-[0.7rem]", isActive && opt.key === "applied" && "scale-110 transition-transform duration-200")}>{opt.icon}</span>
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Progress Summary ──────────────────────────────────────────────────────
+function ProgressSummary({ interests, totalSteps }: { interests: InterestMap; totalSteps: number }) {
+  let interested = 0, applied = 0, dismissed = 0;
+  for (const entry of Object.values(interests)) {
+    if (entry.status === "interested") interested++;
+    else if (entry.status === "applied") applied++;
+    else if (entry.status === "dismissed") dismissed++;
+  }
+  const tracked = interested + applied + dismissed;
+  if (tracked === 0) return null;
+  const remaining = Math.max(0, totalSteps - tracked);
+
+  return (
+    <div className="px-4 md:px-[22px] py-2.5 bg-bg-secondary border border-border border-b-0 flex items-center gap-3 text-[0.72rem]">
+      <span className="font-semibold text-text-secondary">Your progress:</span>
+      {applied > 0 && <span className="text-[#166534] font-semibold">{applied} applied</span>}
+      {interested > 0 && <span className="text-[#92400e] font-semibold">{interested} interested</span>}
+      {remaining > 0 && <span className="text-text-tertiary">{remaining} remaining</span>}
+      <div className="flex-1 h-1.5 bg-bg-tertiary rounded-full overflow-hidden flex">
+        {applied > 0 && <div className="h-full bg-[#166534]" style={{ width: `${(applied / totalSteps) * 100}%` }} />}
+        {interested > 0 && <div className="h-full bg-[#D4A828]" style={{ width: `${(interested / totalSteps) * 100}%` }} />}
+        {dismissed > 0 && <div className="h-full bg-[#ccc]" style={{ width: `${(dismissed / totalSteps) * 100}%` }} />}
+      </div>
+    </div>
+  );
+}
+
 // ── Step Card ───────────────────────────────────────────────────────────────
-function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp }: {
+function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp, interestStatus, onInterestChange }: {
   step: PathwayStep; isLast: boolean; isHorizon: boolean; animDelay: number;
   onFollowUp: (q: string) => void;
+  interestStatus?: InterestStatus;
+  onInterestChange?: (programId: number, programName: string, status: InterestStatus | null) => void;
 }) {
   const cat = CAT_STYLE[step.category] || CAT_STYLE.Org;
   const timing = TIMING_LABEL[step.timing] || TIMING_LABEL.now;
   const conf = step.fit_confidence ? CONFIDENCE[step.fit_confidence] : null;
+  const isDismissed = interestStatus === "dismissed";
 
   return (
     <div
       className={cn(
-        "px-3.5 md:px-[22px] py-4 flex gap-3.5 min-w-0",
+        "px-3.5 md:px-[22px] py-4 flex gap-3.5 min-w-0 transition-opacity duration-300",
         !isLast && "border-b border-border",
         isHorizon ? "opacity-75 bg-bg-secondary" : "bg-bg",
+        isDismissed && "opacity-[0.55]",
       )}
       style={{ animation: `fadeInUp 0.4s ease ${animDelay}s both` }}
     >
@@ -297,6 +372,17 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp }: {
           >
             Tell me how to approach this →
           </button>
+        )}
+
+        {/* Interest tracking buttons */}
+        <InterestButtons
+          programId={step.program_id}
+          programName={step.program_name}
+          currentStatus={interestStatus}
+          onChange={onInterestChange}
+        />
+        {isDismissed && (
+          <span className="text-[0.65rem] text-text-tertiary mt-1 inline-block">Dismissed</span>
         )}
       </div>
     </div>
@@ -414,7 +500,7 @@ function EmailCapture({ stage, provinces, description, productType }: {
 }
 
 // ── Main Component ──────────────────────────────────────────────────────────
-export default function PathwayCard({ description, stage, provinces, sector, need, onChatFollowUp, onReset, needLabel, expansionProvinces, completedPrograms, companyUrl, productType, initialData, isRestored }: Props) {
+export default function PathwayCard({ description, stage, provinces, sector, need, onChatFollowUp, onReset, needLabel, expansionProvinces, completedPrograms, companyUrl, productType, initialData, isRestored, interests, onInterestChange }: Props) {
   const [data, setData] = useState<PathwayResponse | null>(initialData || null);
   const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState("");
@@ -553,6 +639,9 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         </div>
       )}
 
+      {/* ── Progress Summary ────────────────────────────────────────── */}
+      {interests && <ProgressSummary interests={interests} totalSteps={pathway.steps.length} />}
+
       {/* ── Current Stage Steps ───────────────────────────────────────── */}
       {currentSteps.length > 0 && (
         <div className="bg-bg border border-border border-t-0">
@@ -561,7 +650,10 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
             <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-brand-green">Your next moves</span>
           </div>
           {currentSteps.map((step, i) => (
-            <StepCard key={`c-${i}`} step={step} isLast={i === currentSteps.length - 1 && futureSteps.length === 0} isHorizon={false} animDelay={i * 0.08} onFollowUp={onChatFollowUp} />
+            <StepCard key={`c-${i}`} step={step} isLast={i === currentSteps.length - 1 && futureSteps.length === 0} isHorizon={false} animDelay={i * 0.08} onFollowUp={onChatFollowUp}
+              interestStatus={step.program_id ? interests?.[String(step.program_id)]?.status : undefined}
+              onInterestChange={onInterestChange}
+            />
           ))}
         </div>
       )}
@@ -574,7 +666,10 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
             <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-[#6b21a8]">Looking ahead</span>
           </div>
           {futureSteps.map((step, i) => (
-            <StepCard key={`f-${i}`} step={step} isLast={i === futureSteps.length - 1} isHorizon={true} animDelay={(currentSteps.length + i) * 0.08} onFollowUp={onChatFollowUp} />
+            <StepCard key={`f-${i}`} step={step} isLast={i === futureSteps.length - 1} isHorizon={true} animDelay={(currentSteps.length + i) * 0.08} onFollowUp={onChatFollowUp}
+              interestStatus={step.program_id ? interests?.[String(step.program_id)]?.status : undefined}
+              onInterestChange={onInterestChange}
+            />
           ))}
         </div>
       )}
