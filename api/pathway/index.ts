@@ -353,7 +353,13 @@ Generate the pathway now. Remember: prioritize programs whose description closel
 
     let pathway: any = null;
 
+    const startTime = Date.now();
     for (let attempt = 0; attempt < 2; attempt++) {
+      // Skip retry if we've already spent 60s+ (avoid hitting maxDuration on retry)
+      if (attempt > 0 && Date.now() - startTime > 60_000) {
+        console.warn("Pathway: skipping retry, insufficient time remaining");
+        break;
+      }
       try {
         const apiRes = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
