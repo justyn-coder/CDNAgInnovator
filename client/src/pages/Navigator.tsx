@@ -10,6 +10,7 @@ import PathwayCard from "../components/PathwayCard";
 import CorrectionHintTooltip from "../components/CorrectionHintTooltip";
 import DateFilter, { getDateBadge, DateBadge, type DateRange } from "../components/DateFilter";
 import ResourceCenter from "../components/ResourceCenter";
+import ProductTour, { shouldShowTour, dismissTour } from "../components/ProductTour";
 
 interface Program {
   id: number; name: string; category: string;
@@ -1068,6 +1069,7 @@ export default function Navigator() {
   const [showNudgeBanner, setShowNudgeBanner] = useState(false);
   const [showResourceCenter, setShowResourceCenter] = useState(false);
   const isEco = mode === "ec";
+  const [showTour, setShowTour] = useState(() => shouldShowTour(isEco ? "operator" : "founder"));
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
   const feedbackFooterRef = useRef<HTMLButtonElement>(null);
@@ -1143,12 +1145,14 @@ export default function Navigator() {
         setOrgParam(org);
         setBrowseInitialSearch(org);
         setShowBrowse(true);
+        setShowTour(false); // Skip tour on deep link
         try { sessionStorage.setItem("ag_eco_onboarded", "1"); } catch {}
       } else if (eco === "true") {
         // Operator without org — show normal eco dashboard
       } else if (browse === "true") {
         // Founder chose "browse all programs"
         setShowBrowse(true);
+        setShowTour(false); // Skip tour on deep link
       }
 
       // Handle saved journey restore
@@ -1156,6 +1160,7 @@ export default function Navigator() {
       if (journeyToken) {
         setRestoreLoading(true);
         setShowWizard(false);
+        setShowTour(false); // Skip tour on journey restore
         fetch(`/api/journey/restore?token=${encodeURIComponent(journeyToken)}`)
           .then(r => {
             if (!r.ok) throw new Error("not found");
@@ -1367,6 +1372,14 @@ export default function Navigator() {
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} onFeedback={() => { setShowGapMap(false); setShowFeedback(true); }} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
       {showResourceCenter && <ResourceCenter onClose={() => setShowResourceCenter(false)} />}
+
+      {showTour && (
+        <ProductTour
+          mode={isEco ? "operator" : "founder"}
+          programCount={programCount}
+          onComplete={() => setShowTour(false)}
+        />
+      )}
 
       <div className="fixed inset-0 bg-bg flex flex-col font-sans overflow-hidden" style={{ paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
 
