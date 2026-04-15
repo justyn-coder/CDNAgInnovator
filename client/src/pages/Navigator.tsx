@@ -567,9 +567,15 @@ function BrowsePanel({
 
   const sorted = [...filtered].sort((a, b) => {
     if (sortMode === "upcoming") {
-      // Programs with dates first, sorted chronologically
+      // Programs with future dates first, sorted chronologically. Filter out past events.
+      const today = new Date().toISOString().slice(0, 10);
       const aDate = a.eventStartDate || a.applicationDeadline;
       const bDate = b.eventStartDate || b.applicationDeadline;
+      // Push past dates to the end
+      const aFuture = aDate && aDate >= today;
+      const bFuture = bDate && bDate >= today;
+      if (aFuture && !bFuture) return -1;
+      if (!aFuture && bFuture) return 1;
       if (aDate && !bDate) return -1;
       if (!aDate && bDate) return 1;
       if (aDate && bDate) return aDate.localeCompare(bDate);
