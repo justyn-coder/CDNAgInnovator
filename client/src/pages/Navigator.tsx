@@ -1054,7 +1054,18 @@ function LoadingMessages({ programCount }: { programCount?: number | null }) {
 
 // ── Main component ──────────────────────────────────────────────────────────
 export default function Navigator() {
-  const [mode] = useState<"e" | "ec">(() => { try { return (localStorage.getItem("ag_nav_mode") as "e" | "ec") || "e"; } catch { return "e"; } });
+  const [mode] = useState<"e" | "ec">(() => {
+    try {
+      // Check URL params first (for direct links like ?mode=operator)
+      const params = new URLSearchParams(window.location.search);
+      const urlMode = params.get("mode");
+      if (urlMode === "operator" || params.get("eco") === "true") {
+        localStorage.setItem("ag_nav_mode", "ec");
+        return "ec";
+      }
+      return (localStorage.getItem("ag_nav_mode") as "e" | "ec") || "e";
+    } catch { return "e"; }
+  });
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
