@@ -603,7 +603,7 @@ function BrowsePanel({
           </span>
           {!loading && (
             <span className="text-[0.72rem] text-text-tertiary ml-2.5">
-              {filtered.length} of {activeData.length}
+              Showing {filtered.length} of {activeData.length} programs
             </span>
           )}
         </div>
@@ -1496,7 +1496,7 @@ export default function Navigator() {
               )}
               title={isEco ? "Switch to founder view" : "Switch to partner view"}
             >
-              {isEco ? "Partners" : "Founders"}
+              {isEco ? "Ecosystem" : "Founders"}
               <span className="ml-1 opacity-60">▾</span>
             </button>
           </div>
@@ -1905,6 +1905,100 @@ export default function Navigator() {
                     >{chip.label}</button>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Ask AI empty state — founder, chat tab, no messages yet */}
+          {!isEco && !showWizard && activeTab === "chat" && messages.length === 0 && !loading && (
+            <div className="px-4 py-8 animate-fade-in-up flex flex-col items-center gap-5 max-w-[480px] mx-auto">
+              {/* Icon */}
+              <div className="w-14 h-14 rounded-full bg-brand-green/10 flex items-center justify-center">
+                <svg width="28" height="28" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H6l-3 2.5V11H3a1 1 0 01-1-1V3z" stroke="#2D7A4F" strokeWidth="1.3" fill="none"/>
+                  <circle cx="5.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                  <circle cx="8" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                  <circle cx="10.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                </svg>
+              </div>
+              {/* Heading */}
+              <div className="text-center">
+                <h2 className="font-display text-[1.2rem] text-text font-normal leading-[1.3] mb-1.5">
+                  Ask your AI advisor anything
+                </h2>
+                <p className="text-[0.78rem] text-text-secondary leading-[1.6]">
+                  Trained on {programCount ?? 490}+ Canadian agtech programs, conference insights, and ecosystem data
+                </p>
+              </div>
+              {/* Suggestion chips */}
+              <div className="flex flex-wrap justify-center gap-2 w-full">
+                {(wizardSnapshot ? [
+                  { label: "What grants am I missing?", q: "Based on my pathway, what grants or funding programs am I missing that I should know about?" },
+                  { label: `Best programs in ${PROVINCES_LIST.find(p => p.key === wizardSnapshot.provinces[0])?.label || wizardSnapshot.provinces[0] || "my province"}`, q: `What are the best programs for my stage in ${PROVINCES_LIST.find(p => p.key === wizardSnapshot.provinces[0])?.label || wizardSnapshot.provinces[0] || "my province"}? Walk me through what to apply for first.` },
+                  { label: "Upcoming deadlines", q: "What program deadlines are coming up in the next 3 months that I should know about based on my profile?" },
+                  { label: "Compare provinces", q: "Compare the ecosystem support across provinces for a startup like mine. Where would I get the best support?" },
+                  { label: "Who should I talk to?", q: "Based on my pathway, which organizations should I reach out to first? Who are the key contacts?" },
+                ] : [
+                  { label: "What funding exists for agtech?", q: "What are the main funding programs available for agtech startups in Canada? Give me an overview by province." },
+                  { label: "Best province for agtech?", q: "Which Canadian province has the strongest support ecosystem for agtech startups? Compare the top options." },
+                  { label: "How do accelerators work?", q: "What agtech accelerator programs exist in Canada and how do they work? What should I expect?" },
+                  { label: "Upcoming events", q: "What agtech events, conferences, or demo days are coming up in Canada in the next few months?" },
+                  { label: "Getting started guide", q: "I'm a new agtech founder in Canada. What are the first 3 things I should do to connect with the ecosystem?" },
+                ]).map((chip, i) => (
+                  <button
+                    key={i}
+                    onClick={() => send(chip.q)}
+                    className="cursor-pointer font-sans transition-all bg-white border border-border text-text-secondary hover:border-brand-green hover:text-text hover:bg-bg-secondary shadow-sm"
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: 100,
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      whiteSpace: "nowrap",
+                    }}
+                  >{chip.label}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Ask AI empty state — operator, chat tab, no messages yet */}
+          {isEco && activeTab === "chat" && messages.length === 0 && !loading && (
+            <div className="px-4 py-8 animate-fade-in-up flex flex-col items-center gap-5 max-w-[480px] mx-auto">
+              {/* Icon */}
+              <div className="w-14 h-14 rounded-full bg-brand-green/10 flex items-center justify-center">
+                <svg width="28" height="28" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H6l-3 2.5V11H3a1 1 0 01-1-1V3z" stroke="#2D7A4F" strokeWidth="1.3" fill="none"/>
+                  <circle cx="5.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                  <circle cx="8" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                  <circle cx="10.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                </svg>
+              </div>
+              {/* Heading */}
+              <div className="text-center">
+                <h2 className="font-display text-[1.2rem] text-text font-normal leading-[1.3] mb-1.5">
+                  Ask the ecosystem anything
+                </h2>
+                <p className="text-[0.78rem] text-text-secondary leading-[1.6]">
+                  Trained on {programCount ?? 490}+ Canadian agtech programs, conference insights, and ecosystem data
+                </p>
+              </div>
+              {/* Suggestion chips */}
+              <div className="flex flex-wrap justify-center gap-2 w-full">
+                {ECO_SUGGESTIONS.slice(0, 5).map((s, i) => (
+                  <button
+                    key={i}
+                    onClick={() => send(s.q)}
+                    className="cursor-pointer font-sans transition-all bg-white border border-border text-text-secondary hover:border-brand-green hover:text-text hover:bg-bg-secondary shadow-sm"
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: 100,
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      whiteSpace: "nowrap",
+                    }}
+                  >{s.label}</button>
+                ))}
               </div>
             </div>
           )}

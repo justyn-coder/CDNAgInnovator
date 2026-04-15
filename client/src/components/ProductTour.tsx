@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "../lib/cn";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -326,12 +326,47 @@ function getOperatorSlides(programCount: number): Slide[] {
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
+const AUTO_ADVANCE_MS = 5000;
+
 export default function ProductTour({ mode, programCount, onComplete }: Props) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startRef = useRef(Date.now());
 
   const count = programCount ?? 490;
   const slides = mode === "founder" ? getFounderSlides(count) : getOperatorSlides(count);
   const isLast = currentSlide === slides.length - 1;
+
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+  }, []);
+
+  // Start/restart the progress timer whenever the slide changes
+  useEffect(() => {
+    startRef.current = Date.now();
+    setProgress(0);
+
+    const tick = () => {
+      const elapsed = Date.now() - startRef.current;
+      const pct = Math.min(elapsed / AUTO_ADVANCE_MS, 1);
+      setProgress(pct);
+      if (pct >= 1) {
+        clearTimer();
+      }
+    };
+
+    clearTimer();
+    timerRef.current = setInterval(tick, 30);
+    return clearTimer;
+  }, [currentSlide, clearTimer]);
+
+  // Auto-advance when progress reaches 1 (but not on last slide)
+  useEffect(() => {
+    if (progress >= 1 && !isLast) {
+      setCurrentSlide(prev => prev + 1);
+    }
+  }, [progress, isLast]);
 
   function goTo(index: number) {
     setCurrentSlide(index);
@@ -350,6 +385,7 @@ export default function ProductTour({ mode, programCount, onComplete }: Props) {
   }
 
   function finish() {
+    clearTimer();
     dismissTour(mode);
     onComplete();
   }
@@ -391,6 +427,17 @@ export default function ProductTour({ mode, programCount, onComplete }: Props) {
         </button>
       </div>
 
+      {/* Progress bar */}
+      <div className="h-[3px] bg-border/40 w-full shrink-0">
+        <div
+          className={cn(
+            "h-full transition-none",
+            isFounder ? "bg-brand-gold" : "bg-brand-forest"
+          )}
+          style={{ width: `${progress * 100}%` }}
+        />
+      </div>
+
       {/* Slide content */}
       <div className="flex-1 flex flex-col items-center justify-center px-5 overflow-y-auto">
         <div
@@ -408,7 +455,10 @@ export default function ProductTour({ mode, programCount, onComplete }: Props) {
           </div>
 
           {/* Visual — pointer-events disabled so mockups don't feel interactive */}
-          <div className="w-full pointer-events-none select-none" style={{ opacity: 0.92 }}>
+          <div className="w-full pointer-events-none select-none relative" style={{ opacity: 0.92 }}>
+            <div className="absolute top-2 right-2 z-10 bg-white/80 backdrop-blur-sm border border-border/60 rounded px-2 py-0.5 text-[0.55rem] font-bold tracking-[0.08em] uppercase text-text-tertiary shadow-sm">
+              Preview
+            </div>
             {slide.visual}
           </div>
 
