@@ -375,15 +375,19 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp, interestStat
           </button>
         )}
 
-        {/* Interest tracking buttons */}
-        <InterestButtons
-          programId={step.program_id}
-          programName={step.program_name}
-          currentStatus={interestStatus}
-          onChange={onInterestChange}
-        />
-        {isDismissed && (
-          <span className="text-[0.65rem] text-text-tertiary mt-1 inline-block">Dismissed</span>
+        {/* Interest tracking buttons — hidden for demo clarity */}
+        {false && (
+          <>
+            <InterestButtons
+              programId={step.program_id}
+              programName={step.program_name}
+              currentStatus={interestStatus}
+              onChange={onInterestChange}
+            />
+            {isDismissed && (
+              <span className="text-[0.65rem] text-text-tertiary mt-1 inline-block">Dismissed</span>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -640,7 +644,7 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
   const isStillStreaming = stream.isStreaming && !stream.isComplete;
 
   return (
-    <div className="mx-4 mt-3 flex flex-col animate-fade-in-up overflow-hidden max-w-full" style={{ maxWidth: "calc(100% - 2rem)", overflowWrap: "break-word", wordBreak: "break-word" }}>
+    <div className="mx-auto mt-3 flex flex-col animate-fade-in-up overflow-hidden w-full max-w-3xl px-4" style={{ overflowWrap: "break-word", wordBreak: "break-word" }}>
 
       {/* ── Header with Stage Journey ──────────────────────────────────── */}
       <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] rounded-t-lg px-4 md:px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
@@ -650,11 +654,28 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
             <div className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-white/[0.82]">
               Your Innovation Pathway
             </div>
-            {onReset && (
-              <button onClick={onReset} className="bg-transparent border-none text-[0.68rem] text-white/50 underline cursor-pointer p-0">
-                Start over
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const url = new URL(window.location.origin + "/navigator");
+                  url.searchParams.set("stage", stage); url.searchParams.set("prov", provinces.join(",")); url.searchParams.set("need", need);
+                  if (sector) url.searchParams.set("sector", sector);
+                  navigator.clipboard.writeText(url.toString());
+                }}
+                className="bg-white/10 hover:bg-white/20 border-none rounded p-1.5 cursor-pointer transition-colors"
+                title="Copy shareable link"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                </svg>
               </button>
-            )}
+              {onReset && (
+                <button onClick={onReset} className="bg-transparent border-none text-[0.68rem] text-white/50 underline cursor-pointer p-0">
+                  Start over
+                </button>
+              )}
+            </div>
           </div>
           <h2 className="font-display text-[1.35rem] font-normal tracking-tight text-white mb-2.5 leading-[1.2]">
             {titleOverride}
@@ -733,8 +754,8 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         </div>
       )}
 
-      {/* ── Shareable link ─────────────────────────────────────────────── */}
-      <CopyLinkButton stage={stage} provinces={provinces} need={need} sector={sector} />
+      {/* ── Shareable link — hidden, moved to header icon ─────────────── */}
+      {false && <CopyLinkButton stage={stage} provinces={provinces} need={need} sector={sector} />}
 
       {/* ── Thin-pathway note (Scale stage, <4 strong fits) ──────────── */}
       {(() => {
@@ -780,28 +801,21 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         return null;
       })()}
 
-      {/* ── Chat CTA (Kevin's #1 issue: didn't know chat existed) ──── */}
+      {/* ── Chat CTA (compact single-line) ───────────────────────── */}
       {pathway.steps.length > 0 && (
         <div
-          className="mt-5 mx-0 cursor-pointer group"
-          style={{ background: "linear-gradient(135deg, #1B4332 0%, #2D5A45 100%)", borderRadius: 12, padding: "18px 18px" }}
+          className="mt-3 mx-0 cursor-pointer group border border-border rounded-lg px-4 py-3 flex items-center gap-3 hover:border-brand-green/40 hover:bg-green-soft/30 transition-all"
           onClick={() => onChatFollowUp("What should I focus on first from my pathway, and what should I prepare?")}
         >
-          <div className="flex items-center gap-3">
-            <span className="text-[1.5rem]">💬</span>
-            <div>
-              <div className="text-white font-bold text-[0.88rem] mb-0.5">Want to go deeper?</div>
-              <div className="text-white/70 text-[0.78rem] leading-snug">
-                Ask Trellis anything about these programs, your strategy, or what to prepare. The chat below knows your full profile.
-              </div>
-            </div>
-            <span className="text-white/50 text-[1.2rem] ml-auto group-hover:text-white transition-colors">↓</span>
-          </div>
+          <span className="text-[1.1rem]">💬</span>
+          <span className="text-[0.82rem] text-text-secondary group-hover:text-text transition-colors">
+            Want to go deeper? <span className="font-semibold text-brand-green">Ask your AI advisor &rarr;</span>
+          </span>
         </div>
       )}
 
-      {/* ── Save journey (replaces EmailCapture) ── */}
-      {!isStillStreaming && allSteps.length > 0 && (
+      {/* ── Save journey — hidden for demo clarity ── */}
+      {false && !isStillStreaming && allSteps.length > 0 && (
         <SaveJourney
           stage={stage}
           provinces={provinces}
