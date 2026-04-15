@@ -281,20 +281,14 @@ function EcoDashboardVisual() {
 function getFounderSlides(programCount: number): Slide[] {
   return [
     {
-      tag: "4 questions",
-      heading: "Tell us about your company",
-      description: `Answer 4 quick questions about your stage, province, and what you need. We'll match you against ${programCount}+ programs.`,
-      visual: <WizardVisual />,
-    },
-    {
-      tag: "AI-powered",
-      heading: "Get a personalized pathway",
-      description: "Not a list. A sequenced plan: what to apply for now, what to prepare for next, and what's on the horizon.",
+      tag: "How it works",
+      heading: "Answer 4 questions, get a plan",
+      description: `Tell us your stage, province, and what you need. In under a minute, you'll get a personalized pathway through ${programCount}+ programs.`,
       visual: <PathwayVisual />,
     },
     {
-      tag: "Ask anything",
-      heading: "Talk to your AI advisor",
+      tag: "AI-powered",
+      heading: "Then talk to your AI advisor",
       description: "Ask follow-up questions, compare provinces, find deadlines, or get advice on your specific situation.",
       visual: <AIChatVisual />,
     },
@@ -413,8 +407,8 @@ export default function ProductTour({ mode, programCount, onComplete }: Props) {
             {slide.tag}
           </div>
 
-          {/* Visual */}
-          <div className="w-full">
+          {/* Visual — pointer-events disabled so mockups don't feel interactive */}
+          <div className="w-full pointer-events-none select-none" style={{ opacity: 0.92 }}>
             {slide.visual}
           </div>
 
