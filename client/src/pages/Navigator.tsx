@@ -1135,6 +1135,33 @@ export default function Navigator() {
   const [orgParam, setOrgParam] = useState<string | null>(null);
   const [browseInitialSearch, setBrowseInitialSearch] = useState<string>("");
 
+  // ── Tab navigation ──────────────────────────────────────────────────────────
+  type TabId = "pathway" | "dashboard" | "browse" | "gapmap" | "chat";
+  const defaultTab: TabId = isEco ? "dashboard" : "pathway";
+  const [activeTab, setActiveTab] = useState<TabId>(defaultTab);
+
+  // Compute effective active tab (overlays override)
+  const effectiveTab: TabId = showBrowse ? "browse" : showGapMap ? "gapmap" : activeTab;
+
+  // Tab bar visible when: not in wizard, not in tour, not restoring
+  const showTabBar = !showTour && !restoreLoading && (isEco ? true : (showPathway && !showWizard));
+
+  function handleTabClick(tab: TabId) {
+    // Close any open overlays first
+    if (showBrowse) { setShowBrowse(false); setOrgParam(null); }
+    if (showGapMap) setShowGapMap(false);
+
+    if (tab === "browse") {
+      setBrowseInitialSearch("");
+      setOrgParam(null);
+      setShowBrowse(true);
+    } else if (tab === "gapmap") {
+      setShowGapMap(true);
+    } else {
+      setActiveTab(tab);
+    }
+  }
+
   // Fetch dynamic counts for operator dashboard
   useEffect(() => {
     fetch("/api/programs").then(r => r.json()).then((d: any[]) => {
@@ -1434,7 +1461,7 @@ export default function Navigator() {
           <div className="flex items-center gap-2.5">
             {isEco && messages.length > 0 && (
               <button
-                onClick={() => setMessages([])}
+                onClick={() => { setMessages([]); setActiveTab("dashboard"); }}
                 style={{
                   background: "none", border: "none", cursor: "pointer",
                   fontSize: "0.78rem", color: "#2D7A4F", fontWeight: 600,
@@ -1475,12 +1502,61 @@ export default function Navigator() {
           </div>
         </div>
 
+        {/* ── Tab navigation bar ──────────────────────────────────── */}
+        {showTabBar && (
+          <nav
+            className="shrink-0 border-b border-border bg-[rgba(250,250,248,0.96)] overflow-x-auto [&::-webkit-scrollbar]:hidden"
+            style={{ scrollbarWidth: "none" }}
+            aria-label="Feature navigation"
+          >
+            <div className="flex px-4 md:px-6 gap-0">
+              {(isEco
+                ? [
+                    { id: "dashboard" as TabId, label: "Dashboard" },
+                    { id: "browse" as TabId, label: "Browse Programs" },
+                    { id: "gapmap" as TabId, label: "Gap Map" },
+                    { id: "chat" as TabId, label: "Ask AI" },
+                  ]
+                : [
+                    { id: "pathway" as TabId, label: "My Pathway" },
+                    { id: "browse" as TabId, label: "Browse Programs" },
+                    { id: "gapmap" as TabId, label: "Gap Map" },
+                    { id: "chat" as TabId, label: "Ask AI" },
+                  ]
+              ).map(tab => {
+                const isActive = effectiveTab === tab.id;
+                const accentColor = isEco ? "#48B87A" : "#D4A828";
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabClick(tab.id)}
+                    className={cn(
+                      "relative bg-transparent border-none cursor-pointer px-4 py-2.5 text-[0.78rem] font-semibold whitespace-nowrap transition-colors font-sans",
+                      isActive
+                        ? "text-text"
+                        : "text-text-tertiary hover:text-text-secondary"
+                    )}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {tab.label}
+                    {isActive && (
+                      <span
+                        className="absolute bottom-0 left-2 right-2 h-[2.5px] rounded-full"
+                        style={{ backgroundColor: accentColor }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+        )}
 
         {/* ── Messages area ────────────────────────────────────────── */}
         <div data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain pt-4 pb-3" role="log" aria-live="polite">
 
-          {/* Eco operator welcome */}
-          {isEco && messages.length === 0 && !loading && (
+          {/* Eco operator welcome — only on dashboard tab */}
+          {isEco && (activeTab === "dashboard" || !showTabBar) && messages.length === 0 && !loading && (
             <div className="px-4 py-5 animate-fade-in-up flex flex-col gap-3.5">
 
               {/* First-visit onboarding tip */}
@@ -1763,7 +1839,7 @@ export default function Navigator() {
             <Wizard onComplete={handleWizardComplete} programCount={programCount} />
           )}
 
-          {!isEco && showPathway && wizardSnapshot && (
+          {!isEco && showPathway && wizardSnapshot && activeTab === "pathway" && (
             <PathwayCard
               description={wizardDescription}
               stage={wizardSnapshot.stage}
@@ -1785,7 +1861,7 @@ export default function Navigator() {
           )}
 
           {/* AI Advisor prompt — shown after pathway loads, before chat messages */}
-          {!isEco && showPathway && wizardSnapshot && messages.length === 0 && !loading && (
+          {!isEco && showPathway && wizardSnapshot && activeTab === "pathway" && messages.length === 0 && !loading && (
             <div className="mx-4 mb-3 animate-fade-in-up">
               <div
                 className="rounded-lg border border-border overflow-hidden"
@@ -1834,7 +1910,7 @@ export default function Navigator() {
           )}
 
           {/* Chat messages */}
-          {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => (
+          {((!showWizard && !isEco) || (isEco && (messages.length > 0 || activeTab === "chat"))) && messages.map((m, i) => (
             <div key={i} ref={i === messages.length - 1 ? lastMsgRef : undefined}><ChatBubble msg={m} /></div>
           ))}
           {loading && <LoadingMessages programCount={programCount} />}
