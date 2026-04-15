@@ -500,6 +500,41 @@ function EmailCapture({ stage, provinces, description, productType }: {
   );
 }
 
+// ── Future Steps (collapsible) ────────────────────────────────────────────
+function FutureStepsSection({ futureSteps, currentStepsLength, onFollowUp, interests, onInterestChange }: {
+  futureSteps: PathwayStep[];
+  currentStepsLength: number;
+  onFollowUp: (q: string) => void;
+  interests?: InterestMap;
+  onInterestChange?: (programId: number, programName: string, status: InterestStatus | null) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className={cn("bg-bg-secondary border border-border", currentStepsLength > 0 && "border-t-0")}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full text-left px-4 md:px-[22px] py-2.5 bg-gradient-to-r from-[#f3e8ff] to-bg-secondary border-b border-border flex items-center gap-2 cursor-pointer hover:from-[#ede4fd] transition-colors"
+      >
+        <span className="text-[0.85rem]">🔭</span>
+        <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-[#6b21a8]">Looking ahead</span>
+        <span className="text-[0.65rem] text-text-tertiary ml-1">{futureSteps.length} programs</span>
+        <span className="ml-auto text-[0.7rem] text-text-tertiary">{expanded ? "▲" : "▼"}</span>
+      </button>
+      {expanded && futureSteps.map((step, i) => (
+        <StepCard key={`f-${i}`} step={step} isLast={i === futureSteps.length - 1} isHorizon={true} animDelay={i * 0.05} onFollowUp={onFollowUp}
+          interestStatus={step.program_id ? interests?.[String(step.program_id)]?.status : undefined}
+          onInterestChange={onInterestChange}
+        />
+      ))}
+      {!expanded && (
+        <div className="px-4 md:px-[22px] py-3 text-[0.75rem] text-text-tertiary">
+          {futureSteps.map(s => s.program_name).slice(0, 3).join(", ")}{futureSteps.length > 3 ? `, +${futureSteps.length - 3} more` : ""}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Component ──────────────────────────────────────────────────────────
 export default function PathwayCard({ description, stage, provinces, sector, need, onChatFollowUp, onReset, needLabel, expansionProvinces, completedPrograms, companyUrl, productType, initialData, isRestored, interests, onInterestChange }: Props) {
   const [refreshing, setRefreshing] = useState(false);
@@ -671,20 +706,15 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         </div>
       )}
 
-      {/* ── Future Stage Steps ────────────────────────────────────────── */}
+      {/* ── Future Stage Steps (collapsible, collapsed by default) ───── */}
       {futureSteps.length > 0 && (
-        <div className={cn("bg-bg-secondary border border-border", currentSteps.length > 0 && "border-t-0")}>
-          <div className="px-4 md:px-[22px] py-2.5 bg-gradient-to-r from-[#f3e8ff] to-bg-secondary border-b border-border flex items-center gap-2">
-            <span className="text-[0.85rem]">🔭</span>
-            <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-[#6b21a8]">Looking ahead</span>
-          </div>
-          {futureSteps.map((step, i) => (
-            <StepCard key={`f-${i}`} step={step} isLast={i === futureSteps.length - 1} isHorizon={true} animDelay={(currentSteps.length + i) * 0.08} onFollowUp={onChatFollowUp}
-              interestStatus={step.program_id ? interests?.[String(step.program_id)]?.status : undefined}
-              onInterestChange={onInterestChange}
-            />
-          ))}
-        </div>
+        <FutureStepsSection
+          futureSteps={futureSteps}
+          currentStepsLength={currentSteps.length}
+          onFollowUp={onChatFollowUp}
+          interests={interests}
+          onInterestChange={onInterestChange}
+        />
       )}
 
       {/* ── Streaming indicator ────────────────────────────────────────── */}

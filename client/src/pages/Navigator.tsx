@@ -9,6 +9,7 @@ import GapMatrix from "../components/GapMatrix";
 import PathwayCard from "../components/PathwayCard";
 import CorrectionHintTooltip from "../components/CorrectionHintTooltip";
 import DateFilter, { getDateBadge, DateBadge, type DateRange } from "../components/DateFilter";
+import ResourceCenter from "../components/ResourceCenter";
 
 interface Program {
   id: number; name: string; category: string;
@@ -1055,7 +1056,6 @@ export default function Navigator() {
   const [mode] = useState<"e" | "ec">(() => { try { return (localStorage.getItem("ag_nav_mode") as "e" | "ec") || "e"; } catch { return "e"; } });
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [chatFocused, setChatFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showBrowse, setShowBrowse] = useState(false);
   const [showGapMap, setShowGapMap] = useState(false);
@@ -1066,6 +1066,7 @@ export default function Navigator() {
   const [ecoMsgCount, setEcoMsgCount] = useState(0);
   // showEcoCta removed — was set but never used in JSX
   const [showNudgeBanner, setShowNudgeBanner] = useState(false);
+  const [showResourceCenter, setShowResourceCenter] = useState(false);
   const isEco = mode === "ec";
   const [showWizard, setShowWizard] = useState(!isEco);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -1365,6 +1366,7 @@ export default function Navigator() {
       )}
       {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} onFeedback={() => { setShowGapMap(false); setShowFeedback(true); }} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
+      {showResourceCenter && <ResourceCenter onClose={() => setShowResourceCenter(false)} />}
 
       <div className="fixed inset-0 bg-bg flex flex-col font-sans overflow-hidden" style={{ paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
 
@@ -1412,6 +1414,18 @@ export default function Navigator() {
                 ← Back to start
               </button>
             )}
+            <button
+              onClick={() => setShowResourceCenter(true)}
+              className="w-7 h-7 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-text-secondary hover:text-text hover:border-brand-green transition-all"
+              title="Help & Resources"
+              aria-label="Help and resources"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3"/>
+                <path d="M6.5 6.2c0-1 .7-1.7 1.5-1.7s1.5.7 1.5 1.7c0 .7-.5 1-1 1.3-.3.2-.5.4-.5.8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                <circle cx="8" cy="10.5" r="0.6" fill="currentColor"/>
+              </svg>
+            </button>
             <button
               onClick={() => {
                 localStorage.setItem("ag_nav_mode", isEco ? "e" : "ec");
@@ -1740,6 +1754,55 @@ export default function Navigator() {
             />
           )}
 
+          {/* AI Advisor prompt — shown after pathway loads, before chat messages */}
+          {!isEco && showPathway && wizardSnapshot && messages.length === 0 && !loading && (
+            <div className="mx-4 mb-3 animate-fade-in-up">
+              <div
+                className="rounded-lg border border-border overflow-hidden"
+                style={{ background: "linear-gradient(135deg, #f8faf8 0%, #f0f5f0 100%)" }}
+              >
+                <div className="px-4 py-3 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H6l-3 2.5V11H3a1 1 0 01-1-1V3z" stroke="#2D7A4F" strokeWidth="1.3" fill="none"/>
+                      <circle cx="5.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                      <circle cx="8" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                      <circle cx="10.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-[0.85rem] font-semibold text-text">Your AI advisor is ready</div>
+                    <div className="text-[0.7rem] text-text-secondary">Ask follow-up questions about your pathway below</div>
+                  </div>
+                </div>
+                <div
+                  className="px-4 pb-3 flex gap-2 flex-wrap"
+                >
+                  {[
+                    { label: "What grants am I missing?", q: "Based on my pathway, what grants or funding programs am I missing that I should know about?" },
+                    { label: `How do I apply to ${wizardSnapshot.provinces[0] || "my province"} programs?`, q: `What's the application process for the top programs in ${wizardSnapshot.provinces[0] || "my province"}? Walk me through the steps.` },
+                    { label: "Compare provinces", q: "Compare the ecosystem support across provinces for a startup like mine. Where would I get the best support?" },
+                    { label: "Upcoming deadlines", q: "What program deadlines are coming up in the next 3 months that I should know about based on my profile?" },
+                    { label: "Who should I talk to?", q: "Based on my pathway, which organizations should I reach out to first? Who are the key contacts or program managers?" },
+                  ].map((chip, i) => (
+                    <button
+                      key={i}
+                      onClick={() => send(chip.q)}
+                      className="cursor-pointer font-sans transition-all bg-white border border-border text-text-secondary hover:border-brand-green hover:text-text hover:bg-bg-secondary shadow-sm"
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 100,
+                        fontSize: "0.72rem",
+                        fontWeight: 500,
+                        whiteSpace: "nowrap",
+                      }}
+                    >{chip.label}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Chat messages */}
           {((!showWizard && !isEco) || (isEco && messages.length > 0)) && messages.map((m, i) => (
             <div key={i} ref={i === messages.length - 1 ? lastMsgRef : undefined}><ChatBubble msg={m} /></div>
@@ -1750,7 +1813,7 @@ export default function Navigator() {
 
         {/* ── Chat input ───────────────────────────────────────────── */}
         {(!showWizard || isEco) && (
-        <div className="shrink-0 border-t border-border-strong shadow-[0_-2px_12px_rgba(0,0,0,0.04)] max-w-full overflow-hidden box-border">
+        <div className="shrink-0 border-t border-border-strong shadow-[0_-2px_12px_rgba(0,0,0,0.04)] max-w-full overflow-hidden box-border" style={{ background: "rgba(245, 248, 245, 0.95)" }}>
           {/* Eco suggestion chips — above input */}
           {isEco && messages.length < 4 && (() => {
             const chips = ECO_SUGGESTIONS.filter(s => !messages.some(m => m.content === s.q));
@@ -1779,26 +1842,15 @@ export default function Navigator() {
           {/* Input row */}
           <div className="px-4 md:px-6 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
             <div className="flex-1 min-w-0 relative">
-              {!input && !chatFocused && (
-                <div className="absolute inset-0 flex flex-col justify-center pointer-events-none pl-3 md:pl-3.5">
-                  <div className="text-[0.82rem] md:text-[0.85rem] text-text-tertiary leading-tight">
-                    <span className="font-semibold">AI Chat:</span> Ask me anything.
-                  </div>
-                  <div className="text-[0.65rem] text-text-tertiary/60 mt-0.5">
-                    Built from public data · Still learning
-                  </div>
-                </div>
-              )}
               <textarea
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-                onFocus={() => setChatFocused(true)}
-                onBlur={() => setChatFocused(false)}
-                placeholder=""
+                placeholder="Ask your AI advisor anything..."
+                aria-label="Ask your AI advisor a question about the Canadian agtech ecosystem"
                 rows={1}
-                style={{ minHeight: "44px" }}
-                className="w-full resize-none border-[1.5px] border-border rounded-lg px-3 py-2 md:px-3.5 md:py-2.5 text-[16px] md:text-[0.85rem] leading-[1.4] outline-none bg-white transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.08)]"
+                style={{ minHeight: "48px" }}
+                className="w-full resize-none border-[2px] border-brand-green/30 rounded-lg px-3 py-2.5 md:px-3.5 md:py-3 text-[16px] md:text-[0.88rem] leading-[1.4] outline-none bg-white transition-all font-sans focus:border-brand-green focus:shadow-[0_0_0_3px_rgba(45,122,79,0.1)] placeholder:text-text-tertiary placeholder:font-medium"
               />
             </div>
             <button

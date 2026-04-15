@@ -5,82 +5,31 @@ const SECTIONS = [
     title: "Founder Pathway",
     icon: "🧭",
     items: [
-      { label: "Build My Pathway", desc: "Answer 4 questions (stage, province, need, product) → get a sequenced pathway of programs tailored to you." },
-      { label: "Chat follow-up", desc: "After your pathway loads, ask questions in the chat. It knows your context and can dig deeper." },
+      { label: "Build My Pathway", desc: "Answer 4 questions (stage, province, need, product) and get a sequenced pathway of programs tailored to you." },
+      { label: "AI follow-up", desc: "After your pathway loads, ask questions in the chat below. It knows your context and can dig deeper into any program." },
       { label: "Shareable link", desc: "Click 'Copy shareable link' on any pathway to send it to a co-founder or advisor." },
-      { label: "Email capture", desc: "Drop your email on the pathway page to get notified when new programs match your profile." },
-      { label: "Gap warnings", desc: "Orange badges flag provinces or categories where programs are thin — so you know where to look beyond your province." },
+      { label: "Track your progress", desc: "Mark programs as Interested, Applied, or Not for me to keep track of where you are." },
+      { label: "Gap warnings", desc: "Orange badges flag provinces or categories where programs are thin, so you know where to look beyond your province." },
     ],
   },
   {
     title: "Ecosystem Operator View",
     icon: "📊",
     items: [
-      { label: "Gap Matrix", desc: "See coverage across all provinces × categories. Click any cell for AI analysis of what's missing." },
-      { label: "Browse Programs", desc: "Filter the full database by province, category, and stage. Find overlaps or whitespace." },
-      { label: "Ecosystem Chat", desc: "Ask strategic questions: 'Where are the advisor gaps in the Prairies?' — backed by real data." },
-      { label: "Correction form", desc: "Spot something wrong? Click 'Suggest correction' on any program to flag it for review." },
+      { label: "Gap Matrix", desc: "See coverage across all provinces and categories. Click any cell for AI analysis of what's missing." },
+      { label: "Browse Programs", desc: "Filter the full database by province, category, and stage. Find overlaps or whitespace in your region." },
+      { label: "Ecosystem Chat", desc: "Ask strategic questions like 'Where are the advisor gaps in the Prairies?' backed by real program data." },
+      { label: "Suggest corrections", desc: "Spot something wrong? Flag it for review. Every correction makes the data better for everyone." },
     ],
   },
   {
     title: "Data & Intelligence",
     icon: "🗄️",
     items: [
-      { label: "480+ programs", desc: "Accelerators, funds, pilot sites, events, orgs, and training — verified against federal and provincial databases." },
-      { label: "143 knowledge entries", desc: "Conference insights, ecosystem analysis, and sector intelligence from real events and research." },
-      { label: "AI-powered pathways", desc: "Claude Sonnet 4 sequences programs by stage and province, with gap detection and next-step logic." },
-      { label: "Community corrections", desc: "Every correction and suggestion feeds back into the database. The data gets better with use." },
-    ],
-  },
-  {
-    title: "Tally HQ (Your Cockpit)",
-    icon: "🎛️",
-    items: [
-      { label: "Task dashboard", desc: "All your tasks in one view — grouped by status (intake → review → in_progress → done). Priority-sorted." },
-      { label: "Morning view", desc: "Toggle ☀️ Morning to see only what needs your attention right now. Scan, decide, move." },
-      { label: "Step tracking", desc: "Expanded cards show per-step status — green checks for done, blue pulse for in-progress, 'Your turn' badge when it's on you." },
-      { label: "Deploy button", desc: "When Claude finishes code changes, a blue 'Copy deploy command' button gives you a one-paste terminal command." },
-      { label: "Action buttons", desc: "Code, Work, Cowork, Chrome buttons on cards — one click copies the right prompt to clipboard." },
-    ],
-  },
-  {
-    title: "iPhone Shortcut",
-    icon: "📱",
-    items: [
-      { label: "1-tap voice capture", desc: "Tap the Tally icon on your home screen → dictate a task → it lands in HQ intake automatically." },
-      { label: "Back Tap trigger", desc: "Double-tap the back of your iPhone to start dictation. Settings → Accessibility → Touch → Back Tap → Tally." },
-      { label: "Auto-routing", desc: "Say the project name ('trellis', 'best in show') and it auto-assigns the right track." },
-      { label: "Claude voice widget", desc: "Add the Claude widget to your home screen for 1-tap voice conversations with AI." },
-    ],
-  },
-  {
-    title: "Chrome Extension",
-    icon: "🌐",
-    items: [
-      { label: "Browser agent", desc: "Claude navigates, clicks, fills forms, and extracts data from web pages. Drag tabs into Claude's tab group for batch work." },
-      { label: "Shortcuts", desc: "Record a workflow once, Claude repeats it. Schedule shortcuts to run recurring browser tasks." },
-      { label: "Testing", desc: "Test Trellis in a real browser — Claude reads console errors, checks DOM state, verifies UI changes." },
-      { label: "Research", desc: "Multi-site comparison, competitor monitoring, program page scraping for data enrichment." },
-    ],
-  },
-  {
-    title: "Claude Code (VS Code)",
-    icon: "🔧",
-    items: [
-      { label: "Resume task", desc: "Say 'resume T-XX' — Claude pulls the HQ card, follows the approach steps, updates status when done." },
-      { label: "Subagents", desc: "Claude spawns specialized agents for parallel work — one writes code, another tests, another researches." },
-      { label: "Checkpoints", desc: "Auto-saves code state before changes. Press Esc-Esc or /rewind to go back. Safe to be ambitious." },
-      { label: "Skills", desc: "Reusable instruction packages in .claude/skills/ — auto-loaded when relevant to your task." },
-    ],
-  },
-  {
-    title: "Cowork (Claude Desktop)",
-    icon: "🤖",
-    items: [
-      { label: "Scheduled tasks", desc: "Morning briefings, intake grooming, weekly reviews — run automatically while you sleep." },
-      { label: "Research tasks", desc: "Web scraping, competitor monitoring, grant research — Claude works while you're away." },
-      { label: "File workspaces", desc: "Point Cowork at a folder, it reads/writes files there. Context persists between runs via files." },
-      { label: "Tool scout", desc: "Biweekly scan for new Claude capabilities and automation patterns. Finds upgrades you'd miss." },
+      { label: "490+ programs", desc: "Accelerators, funds, pilot sites, events, orgs, and training verified against federal and provincial databases." },
+      { label: "Knowledge base", desc: "Conference insights, ecosystem analysis, and sector intelligence from real events and research across Canada." },
+      { label: "AI-powered pathways", desc: "Programs are sequenced by stage and province with gap detection and next-step logic." },
+      { label: "Community-driven", desc: "Every correction and suggestion feeds back into the database. The data gets better with use." },
     ],
   },
 ];
@@ -104,8 +53,8 @@ export default function ResourceCenter({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div className="px-5 pt-5 pb-3 border-b border-border flex items-center justify-between">
           <div>
-            <h2 className="font-display text-[1.3rem] font-normal text-text mb-0.5">Resource Center</h2>
-            <p className="text-[0.75rem] text-text-secondary">Everything you've built — and how to use it</p>
+            <h2 className="font-display text-[1.3rem] font-normal text-text mb-0.5">How Trellis Works</h2>
+            <p className="text-[0.75rem] text-text-secondary">What you can do here and how to get the most from it</p>
           </div>
           <button
             onClick={onClose}
@@ -149,7 +98,7 @@ export default function ResourceCenter({ onClose }: { onClose: () => void }) {
         {/* Footer */}
         <div className="px-5 py-3 border-t border-border text-center">
           <p className="text-[0.7rem] text-text-tertiary">
-            Built with Claude · Updated March 2026 · Ask Claude Code for details on any feature
+            490+ programs across Canada · Updated weekly · AI-powered recommendations
           </p>
         </div>
       </div>

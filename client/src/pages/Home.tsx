@@ -144,167 +144,92 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-bg flex flex-col font-sans">
 
-      {/* ── First-Visit Popup ───────────────────────────────────── */}
+      {/* ── First-Visit Banner (subtle top banner instead of blocking modal) ── */}
       {showPopup && (
         <div
-          className="fixed inset-0 z-[1000] flex items-center justify-center p-5"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Welcome to Trellis"
-          onClick={closePopup}
-          style={{
-            background: "rgba(245, 243, 237, 0.45)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-          }}
+          className="sticky top-20 md:top-24 z-[200] mx-auto w-full max-w-[700px] px-4"
+          style={{ animation: "fadeInUp 0.4s ease both" }}
         >
           <div
-            className="bg-white w-full max-w-[460px] animate-slide-up"
-            onClick={e => e.stopPropagation()}
-            style={{
-              borderRadius: 16,
-              padding: "32px 24px 24px",
-              border: "1px solid #E5E5E0",
-            }}
+            className="bg-white rounded-lg shadow-lg border border-border overflow-hidden"
+            style={{ marginTop: 12 }}
           >
-            {/* Icon */}
-            <div className="flex justify-center mb-5">
-              <TrellisIcon size={48} />
-            </div>
-
             {urlMode === "founder" ? (
-              /* ── VARIANT A: Founder ──────────────────────── */
-              <>
-                <h2
-                  className="font-display font-normal text-center leading-[1.2] mb-4 popup-headline"
-                  style={{ fontSize: 28, color: "#1a1a18" }}
-                >
-                  Find your path through<br />Canada's ag ecosystem.
-                </h2>
-
-                <p
-                  className="text-center leading-[1.6] mb-6"
-                  style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 15, color: "#6b6b6b" }}
-                >
-                  Answer 4 quick questions. Get a personalized pathway to the accelerators, funding, and pilot sites that match your stage and province.
-                </p>
-
-                {/* CTA */}
-                <button
-                  onClick={() => dismissPopup("pathway")}
-                  className="w-full font-medium transition-colors hover:!bg-[#BF9624]"
-                  style={{
-                    background: "#D4A828",
-                    color: "#1B4332",
-                    fontSize: 15,
-                    fontWeight: 500,
-                    padding: 14,
-                    borderRadius: 12,
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                >
-                  Build My Pathway →
-                </button>
-                <div className="text-center mt-1.5" style={{ fontSize: 12, color: "#999" }}>
-                  Takes 30 seconds. Tell us what's wrong.
+              <div className="flex items-center gap-3 px-4 py-3 flex-wrap">
+                <TrellisIcon size={32} />
+                <div className="flex-1 min-w-[200px]">
+                  <div className="font-display text-[1rem] text-text leading-tight mb-0.5">
+                    Find your path through Canada's ag ecosystem
+                  </div>
+                  <div className="text-[0.75rem] text-text-secondary">
+                    Answer 4 questions. Get a personalized pathway to programs that match your stage.
+                  </div>
                 </div>
-
-                {/* Footer stats */}
-                <div
-                  className="text-center mt-4"
-                  style={{ fontSize: 13, color: "#999", borderTop: "0.5px solid #E5E5E0", paddingTop: 12 }}
-                >
-                  {programCount} programs · 10 provinces · Updated weekly
-                </div>
-
-                {/* Secondary link */}
-                <div className="text-center mt-3">
+                <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={() => dismissPopup("browse")}
-                    className="bg-transparent border-none cursor-pointer hover:underline"
-                    style={{ fontSize: 13, color: "#2D7A4F" }}
+                    onClick={() => dismissPopup("pathway")}
+                    className="font-medium transition-colors hover:!bg-[#BF9624]"
+                    style={{
+                      background: "#D4A828",
+                      color: "#1B4332",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      padding: "8px 16px",
+                      borderRadius: 8,
+                      border: "none",
+                      cursor: "pointer",
+                    }}
                   >
-                    Or: Browse all programs →
+                    Build My Pathway →
+                  </button>
+                  <button
+                    onClick={closePopup}
+                    className="w-7 h-7 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-text-tertiary hover:text-text transition-colors shrink-0"
+                    aria-label="Dismiss"
+                    style={{ fontSize: 12 }}
+                  >
+                    ✕
                   </button>
                 </div>
-              </>
+              </div>
             ) : (
-              /* ── VARIANT B: Operator ─────────────────────── */
-              <>
-                <h2
-                  className="font-display font-normal text-center leading-[1.2] mb-4 popup-headline"
-                  style={{ fontSize: 28, color: "#1a1a18" }}
-                >
-                  Your programs are already in Trellis.
-                </h2>
-
-                <p
-                  className="text-center leading-[1.6] mb-4"
-                  style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 15, color: "#6b6b6b" }}
-                >
-                  We've mapped {programCount} programs across 10 provinces and built AI-powered pathways that sequence them for founders by stage and province. Yours are in there — but before we send founders through, we need your eyes on it.
-                </p>
-
-                {/* Highlight box */}
-                <div
-                  className="mb-5"
-                  style={{
-                    background: "#FFF8E7",
-                    borderLeft: "3px solid #D4A828",
-                    borderRadius: "0 8px 8px 0",
-                    padding: "10px 14px",
-                    fontSize: 13,
-                    color: "#6b6b6b",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  Review how your programs appear. Flag anything we got wrong. See where founders in your region have coverage gaps.
+              <div className="flex items-center gap-3 px-4 py-3 flex-wrap">
+                <TrellisIcon size={32} />
+                <div className="flex-1 min-w-[200px]">
+                  <div className="font-display text-[1rem] text-text leading-tight mb-0.5">
+                    Your programs are already in Trellis
+                  </div>
+                  <div className="text-[0.75rem] text-text-secondary">
+                    We've mapped {programCount} programs. Review how yours appear and flag what we got wrong.
+                  </div>
                 </div>
-
-                {/* CTA */}
-                <button
-                  onClick={() => dismissPopup("programs")}
-                  className="w-full font-medium transition-colors hover:!bg-[#2D7A4F]"
-                  style={{
-                    background: "#1B4332",
-                    color: "#FFFFFF",
-                    fontSize: 15,
-                    fontWeight: 500,
-                    padding: 14,
-                    borderRadius: 12,
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                >
-                  Check Your Programs →
-                </button>
-                <div className="text-center mt-1.5" style={{ fontSize: 12, color: "#999" }}>
-                  No signup · Takes 2 minutes
-                </div>
-
-                {/* Footer credit */}
-                <div
-                  className="text-center mt-4"
-                  style={{ fontSize: 12, color: "#999", borderTop: "0.5px solid #E5E5E0", paddingTop: 12 }}
-                >
-                  Built by{" "}
-                  <a href="https://www.linkedin.com/in/justynszymczyk/" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, color: "inherit" }}>Justyn Szymczyk</a>
-                  {" "}<MapleLeaf size={14} className="inline-block align-[-2px]" />{" "}
-                  · <a href="https://www.bestinshow.ag" target="_blank" rel="noopener noreferrer" style={{ color: "#D4A843", fontWeight: 500 }}>BestInShow.ag</a>
-                </div>
-
-                {/* Secondary link */}
-                <div className="text-center mt-3">
+                <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={() => dismissPopup("founder-experience")}
-                    className="bg-transparent border-none cursor-pointer hover:underline"
-                    style={{ fontSize: 13, color: "#2D7A4F" }}
+                    onClick={() => dismissPopup("programs")}
+                    className="font-medium transition-colors hover:!bg-[#2D7A4F]"
+                    style={{
+                      background: "#1B4332",
+                      color: "#FFFFFF",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      padding: "8px 16px",
+                      borderRadius: 8,
+                      border: "none",
+                      cursor: "pointer",
+                    }}
                   >
-                    Or: See the founder experience →
+                    Check Your Programs →
+                  </button>
+                  <button
+                    onClick={closePopup}
+                    className="w-7 h-7 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-text-tertiary hover:text-text transition-colors shrink-0"
+                    aria-label="Dismiss"
+                    style={{ fontSize: 12 }}
+                  >
+                    ✕
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
