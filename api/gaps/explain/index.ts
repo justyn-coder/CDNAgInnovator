@@ -141,7 +141,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "province and category are required" });
   }
 
+  const normalizedMode = mode === "ec" ? "ec" : "founder";
+  const normalizedStage = stage || "All";
+
   try {
+    // 0. Cache check — return immediately if we've already generated this cell
+    const cached = await client.unsafe(
+      `SELECT response FROM gap_explanations WHERE province = $1 AND category = $2 AND stage = $3 AND mode = $4 LIMIT 1`,
+      [province, category, normalizedStage, normalizedMode]
+    );
+    const cachedRow = (cached as any[])[0];
+    if (cachedRow?.response) {
+      return res.status(200).json(cachedRow.response);
+    }
+
     // 1. Get programs in this cell (with stage filter)
     const cellPrograms = stage && stage !== "All"
       ? await client.unsafe(
@@ -265,7 +278,7 @@ Generate the JSON explanation now.`;
       }
     }
 
-    return res.status(200).json({
+    const responseBody = {
       province,
       category,
       stage,
@@ -278,7 +291,24 @@ Generate the JSON explanation now.`;
         nationalCount,
         neighborCounts,
       },
-    });
+    };
+
+    // Cache write (skip on fallback so we retry next time)
+    const isFallback = explanation?.why === "Our AI analysis is temporarily unavailable for this cell.";
+    if (!isFallback) {
+      try {
+        await client.unsafe(
+          `INSERT INTO gap_explanations (province, category, stage, mode, response)
+           VALUES ($1, $2, $3, $4, $5::jsonb)
+           ON CONFLICT (province, category, stage, mode) DO UPDATE SET response = EXCLUDED.response, created_at = now()`,
+          [province, category, normalizedStage, normalizedMode, JSON.stringify(responseBody)]
+        );
+      } catch (cacheErr) {
+        console.error("Gap explain cache write failed:", cacheErr);
+      }
+    }
+
+    return res.status(200).json(responseBody);
   } catch (e) {
     console.error("Gap explain error:", e);
     return res.status(500).json({ error: String(e) });
