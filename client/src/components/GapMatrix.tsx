@@ -416,27 +416,35 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
       .catch(() => { setError("Failed to load gap data."); setLoading(false); });
   }, [stage]);
 
-  // Reset and preload the most interesting gap when data/stage changes
+  // Reset and preload the most interesting gap after a delay
   useEffect(() => {
     setSelected(null);
-    if (!data) { setBottomAnalysis(null); return; }
-    // Find ON/Accel gap first (for BioEnterprise demo), then fall back to first zero cell
+    setBottomAnalysis(null);
+    if (!data) return;
+
+    // Find the best gap to preload
+    let preload: { prov: string; cat: string } | null = null;
     const onAccel = data.matrix["ON"]?.["Accel"];
     if (onAccel && onAccel.count === 0) {
-      setBottomAnalysis({ prov: "ON", cat: "Accel" });
-      return;
-    }
-    // Fall back to first gap cell
-    for (const prov of data.provinces) {
-      if (prov === "National") continue;
-      for (const cat of data.categories) {
-        if ((data.matrix[prov]?.[cat]?.count ?? 0) === 0) {
-          setBottomAnalysis({ prov, cat });
-          return;
+      preload = { prov: "ON", cat: "Accel" };
+    } else {
+      for (const prov of data.provinces) {
+        if (prov === "National") continue;
+        for (const cat of data.categories) {
+          if ((data.matrix[prov]?.[cat]?.count ?? 0) === 0) {
+            preload = { prov, cat };
+            break;
+          }
         }
+        if (preload) break;
       }
     }
-    setBottomAnalysis(null);
+
+    // Delay so the user can see the map first
+    if (preload) {
+      const timer = setTimeout(() => setBottomAnalysis(preload), 3000);
+      return () => clearTimeout(timer);
+    }
   }, [data, stage]);
 
   // Dismiss guide on first cell click
@@ -618,11 +626,10 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
             </tbody>
           </table>
         )}
-      </div>
 
-      {/* AI analysis — inset panel, always visible, updates on cell click */}
-      {!loading && data && (
-        <div className="px-4 py-3 shrink-0">
+        {/* AI analysis — below table, scrolls with it */}
+        {!loading && data && (
+          <div className="px-0 py-3">
           <div className="bg-gradient-to-br from-[#2D2438] to-[#3D3248] rounded-xl border border-[#4D4458] overflow-hidden">
             {/* Header */}
             <div className="px-4 pt-3 pb-2">
@@ -704,7 +711,8 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
             </div>
           )}
         </div>
-      )}
+        )}
+      </div>
 
       {selectedCell && (
         <CellDetail
