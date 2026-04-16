@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "../lib/cn";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -68,18 +68,18 @@ const PROV_LABELS: Record<string, string> = {
 
 // ── Color scale ────────────────────────────────────────────────────────────
 function cellColorClasses(count: number): { bg: string; text: string; border: string; outlineBorder: string } {
-  if (count === 0) return { bg: "bg-[#fde8e8]", text: "text-[#b91c1c]", border: "border-[#fca5a5]", outlineBorder: "#b91c1c" };
-  if (count === 1) return { bg: "bg-[#fef9c3]", text: "text-[#854d0e]", border: "border-[#fde047]", outlineBorder: "#854d0e" };
-  if (count === 2) return { bg: "bg-[#dcfce7]", text: "text-[#166534]", border: "border-[#86efac]", outlineBorder: "#166534" };
-  return              { bg: "bg-[#d1fae5]", text: "text-[#064e3b]", border: "border-[#34d399]", outlineBorder: "#064e3b" };
+  if (count === 0) return { bg: "bg-[#FEF2F2]", text: "text-[#991B1B]", border: "border-[#FECACA]", outlineBorder: "#991B1B" };
+  if (count === 1) return { bg: "bg-[#FFFBEB]", text: "text-[#92400E]", border: "border-[#FDE68A]", outlineBorder: "#92400E" };
+  if (count === 2) return { bg: "bg-[#F0FDF4]", text: "text-[#166534]", border: "border-[#BBF7D0]", outlineBorder: "#166534" };
+  return              { bg: "bg-[#DCFCE7]", text: "text-[#064E3B]", border: "border-[#86EFAC]", outlineBorder: "#064E3B" };
 }
 
 // For inline-style contexts (badge borders etc.) we still need raw hex values
 function cellColorRaw(count: number): { bg: string; text: string; border: string } {
-  if (count === 0) return { bg: "#fde8e8", text: "#b91c1c", border: "#fca5a5" };
-  if (count === 1) return { bg: "#fef9c3", text: "#854d0e", border: "#fde047" };
-  if (count === 2) return { bg: "#dcfce7", text: "#166534", border: "#86efac" };
-  return            { bg: "#d1fae5", text: "#064e3b", border: "#34d399" };
+  if (count === 0) return { bg: "#FEF2F2", text: "#991B1B", border: "#FECACA" };
+  if (count === 1) return { bg: "#FFFBEB", text: "#92400E", border: "#FDE68A" };
+  if (count === 2) return { bg: "#F0FDF4", text: "#166534", border: "#BBF7D0" };
+  return            { bg: "#DCFCE7", text: "#064E3B", border: "#86EFAC" };
 }
 
 function gapLabel(count: number): string {
@@ -101,13 +101,14 @@ const GAP_TYPE_CLASSES: Record<string, { bg: string; text: string; border: strin
 
 // ── AI Explain card ────────────────────────────────────────────────────────
 function ExplainCard({
-  prov, cat, stage, mode,
+  prov, cat, stage, mode, autoFetch = false,
 }: {
-  prov: string; cat: string; stage: string; mode: string;
+  prov: string; cat: string; stage: string; mode: string; autoFetch?: boolean;
 }) {
   const [data, setData] = useState<ExplainResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const hasFetched = useRef(false);
   const [showMeta, setShowMeta] = useState(false);
   const [gapFeedback, setGapFeedback] = useState("");
 
@@ -147,6 +148,14 @@ function ExplainCard({
         setLoading(false);
       });
   }
+
+  // Auto-fetch on mount for gap cells (count=0)
+  useEffect(() => {
+    if (autoFetch && !hasFetched.current) {
+      hasFetched.current = true;
+      fetchExplain();
+    }
+  }, [autoFetch]);
 
   const typeClasses = data ? (GAP_TYPE_CLASSES[data.gapType] || GAP_TYPE_CLASSES.adequate) : null;
 
@@ -311,14 +320,21 @@ function CellDetail({
           >Close</button>
         </div>
 
-        <ExplainCard prov={prov} cat={cat} stage={stage} mode={mode} />
+        <ExplainCard prov={prov} cat={cat} stage={stage} mode={mode} autoFetch={cell.count === 0} />
 
         {cell.count === 0 ? (
-          <div className="px-4 py-5 bg-bg-secondary rounded text-center border border-dashed border-border">
-            <div className="text-[1.2rem] mb-1.5">🤔</div>
-            <div className="font-semibold text-[0.85rem] text-text mb-1">We didn't find any programs here</div>
-            <div className="text-[0.75rem] text-text-secondary leading-[1.5]">
-              This looks like a gap — but we might be missing something. If you know of a program that belongs here, we'd love to hear about it.
+          <div className="mt-3 px-4 py-4 bg-gradient-to-br from-[#FEF2F2] to-[#FFFBEB] rounded-lg border border-[#FECACA]/60">
+            <div className="font-semibold text-[0.85rem] text-[#991B1B] mb-1">
+              Uncovered gap: {prov === "National" ? "National" : prov} {(CAT_LABELS[cat] || cat).toLowerCase()}
+            </div>
+            <div className="text-[0.75rem] text-text-secondary leading-[1.5] mb-2.5">
+              {stage !== "All"
+                ? `No ${(CAT_LABELS[cat] || cat).toLowerCase()} programs catalogued for ${stage}-stage companies in ${prov}. This is either a real gap in the ecosystem or something we haven't found yet.`
+                : `No ${(CAT_LABELS[cat] || cat).toLowerCase()} programs catalogued in ${prov}. This is either a real gap or something we're missing.`
+              }
+            </div>
+            <div className="text-[0.72rem] text-brand-green font-semibold">
+              Know a program that fills this? Use "Suggest a correction" in Browse Programs to tell us.
             </div>
           </div>
         ) : (
@@ -370,6 +386,14 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
     } catch { return true; }
   });
 
+  // Push history entry so browser back closes the gap map
+  useEffect(() => {
+    window.history.pushState({ gapMap: true }, "");
+    const handlePop = () => onClose();
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, [onClose]);
+
   useEffect(() => {
     setLoading(true);
     setError("");
@@ -418,10 +442,10 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
                 </p>
                 <div className="flex gap-2 flex-wrap mb-3">
                   {[
-                    { label: "Gap (0)", bg: "bg-[#fde8e8]", color: "text-[#b91c1c]" },
-                    { label: "Weak (1)", bg: "bg-[#fef9c3]", color: "text-[#854d0e]" },
-                    { label: "Fair (2)", bg: "bg-[#dcfce7]", color: "text-[#166534]" },
-                    { label: "Strong (3+)", bg: "bg-[#d1fae5]", color: "text-[#064e3b]" },
+                    { label: "Gap (0)", bg: "bg-[#FEF2F2]", color: "text-[#991B1B]" },
+                    { label: "Weak (1)", bg: "bg-[#FFFBEB]", color: "text-[#92400E]" },
+                    { label: "Fair (2)", bg: "bg-[#F0FDF4]", color: "text-[#166534]" },
+                    { label: "Strong (3+)", bg: "bg-[#DCFCE7]", color: "text-[#064E3B]" },
                   ].map(l => (
                     <span key={l.label} className={cn(
                       "text-[0.7rem] font-bold px-2.5 py-[3px] rounded-[6px]",
