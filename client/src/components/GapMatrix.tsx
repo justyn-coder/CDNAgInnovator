@@ -106,7 +106,7 @@ function ExplainCard({
   prov: string; cat: string; stage: string; mode: string; autoFetch?: boolean;
 }) {
   const [data, setData] = useState<ExplainResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(autoFetch);
   const [error, setError] = useState("");
   const hasFetched = useRef(false);
   const [showMeta, setShowMeta] = useState(true);
@@ -574,6 +574,7 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
                     const cell = data.matrix[prov][cat];
                     const colors = cellColorClasses(cell.count);
                     const isSelected = selected?.prov === prov && selected?.cat === cat;
+                    const isAnalyzing = bottomAnalysis?.prov === prov && bottomAnalysis?.cat === cat;
                     return (
                       <td
                         key={cat}
@@ -583,12 +584,16 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
                         }}
                         className={cn(
                           "px-2 py-2.5 text-center cursor-pointer transition-all duration-100 hover:scale-[1.05]",
-                          isSelected ? undefined : colors.bg,
+                          !isSelected && !isAnalyzing && colors.bg,
                         )}
                         style={isSelected ? {
                           background: cellColorRaw(cell.count).border,
                           outline: `2px solid ${colors.outlineBorder}`,
                           outlineOffset: -2,
+                        } : isAnalyzing ? {
+                          outline: `2.5px solid #7A6A8A`,
+                          outlineOffset: -2,
+                          background: cellColorRaw(cell.count).bg,
                         } : undefined}
                       >
                         <div className={cn("text-[0.88rem] font-extrabold leading-none", colors.text)}>
@@ -604,41 +609,61 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
         )}
       </div>
 
-      {/* AI analysis section — always visible at bottom, updates on cell click */}
+      {/* AI analysis — inset panel, always visible, updates on cell click */}
       {!loading && data && (
-        <div className="shrink-0 border-t border-border">
-          <div className="bg-gradient-to-br from-[#2D2438] to-[#3D3248] px-4 py-3">
-            <div className="flex items-center justify-between mb-1">
+        <div className="px-4 py-3 shrink-0">
+          <div className="bg-gradient-to-br from-[#2D2438] to-[#3D3248] rounded-xl border border-[#4D4458] overflow-hidden">
+            {/* Header */}
+            <div className="px-4 pt-3 pb-2">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+                <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
                     <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
                 </div>
-                <span className="text-[0.72rem] font-bold text-[#EDE9F0]">AI Analysis</span>
+                <div>
+                  <div className="text-[0.72rem] font-bold text-[#EDE9F0]">Ask AI: why this gap?</div>
+                  <div className="text-[0.58rem] text-[#A098A8]">Our best guess — we're still learning this landscape</div>
+                </div>
               </div>
-              {bottomAnalysis && (
-                <span className="text-[0.65rem] font-semibold text-[#A098A8]">
-                  {bottomAnalysis.prov} · {CAT_LABELS[bottomAnalysis.cat] || bottomAnalysis.cat}
-                  {stage !== "All" && ` · ${STAGE_LABELS[stage]}`}
-                </span>
-              )}
             </div>
+
+            {/* What's being analyzed */}
+            {bottomAnalysis && (
+              <div className="px-4 pb-2">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="text-[0.62rem] font-bold px-2 py-[2px] rounded-full border"
+                    style={{ background: cellColorRaw(0).bg, color: cellColorRaw(0).text, borderColor: cellColorRaw(0).border }}
+                  >Gap</span>
+                  <span className="text-[0.72rem] font-semibold text-white">
+                    {bottomAnalysis.prov} · {CAT_LABELS[bottomAnalysis.cat] || bottomAnalysis.cat}
+                    {stage !== "All" && ` · ${STAGE_LABELS[stage]} stage`}
+                  </span>
+                </div>
+                <div className="text-[0.6rem] text-[#8A7A9A] mt-1">
+                  Click any cell in the map to analyze a different gap
+                </div>
+              </div>
+            )}
+
             {!bottomAnalysis && (
-              <div className="text-[0.7rem] text-[#A098A8] py-2">
+              <div className="px-4 pb-3 text-[0.7rem] text-[#A098A8]">
                 Tap any cell in the map above to see our analysis
               </div>
             )}
+
+            {/* Analysis content */}
             {bottomAnalysis && (
-              <div key={`${bottomAnalysis.prov}-${bottomAnalysis.cat}-${stage}`}>
+              <div key={`${bottomAnalysis.prov}-${bottomAnalysis.cat}-${stage}`} className="px-1 pb-1">
                 <ExplainCard prov={bottomAnalysis.prov} cat={bottomAnalysis.cat} stage={stage} mode={mode} autoFetch={true} />
               </div>
             )}
           </div>
 
           {onFeedback && (
-            <div className="px-4 py-2 bg-[#1a1525] text-center">
-              <button onClick={onFeedback} className="bg-transparent border-none text-[#A098A8] text-[0.65rem] p-0 cursor-pointer hover:text-[#D8D0E0] transition-colors">
+            <div className="mt-2 text-center">
+              <button onClick={onFeedback} className="bg-transparent border-none text-text-tertiary text-[0.65rem] p-0 cursor-pointer hover:text-text-secondary transition-colors">
                 Know a program we're missing? Tell us →
               </button>
             </div>
