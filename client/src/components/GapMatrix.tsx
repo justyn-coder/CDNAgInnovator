@@ -372,7 +372,7 @@ function CellDetail({
 }
 
 // ── Main component ─────────────────────────────────────────────────────────
-export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { onClose: () => void; onFeedback?: () => void; mode?: string }) {
+export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founder" }: { onClose: () => void; onFeedback?: () => void; onAskAI?: (question: string) => void; mode?: string }) {
   const [stage, setStage] = useState("All");
   const [data, setData] = useState<GapData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -508,10 +508,10 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
         </div>
         <div className="flex gap-1.5 items-center ml-auto">
           {[
-            { label: "Gap (0)", bg: "bg-[#fde8e8]", text: "text-[#b91c1c]" },
-            { label: "Weak (1)", bg: "bg-[#fef9c3]", text: "text-[#854d0e]" },
-            { label: "Fair (2)", bg: "bg-[#dcfce7]", text: "text-[#166534]" },
-            { label: "Strong (3+)", bg: "bg-[#d1fae5]", text: "text-[#064e3b]" },
+            { label: "Gap (0)", bg: "bg-[#FEF2F2]", text: "text-[#991B1B]" },
+            { label: "Weak (1)", bg: "bg-[#FFFBEB]", text: "text-[#92400E]" },
+            { label: "Fair (2)", bg: "bg-[#F0FDF4]", text: "text-[#166534]" },
+            { label: "Strong (3+)", bg: "bg-[#DCFCE7]", text: "text-[#064E3B]" },
           ].map(l => (
             <span key={l.label} className={cn(
               "text-[0.58rem] font-bold px-1.5 py-[2px] rounded-[4px]",
@@ -521,7 +521,37 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-auto">
+      {/* AI prompt — above the table, not a footer */}
+      {!loading && data && onAskAI && (
+        <div className="px-4 pt-3 pb-2 shrink-0">
+          <div className="bg-gradient-to-br from-[#2D2438] to-[#3D3248] rounded-xl px-4 py-3 border border-[#4D4458]">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <span className="text-[0.72rem] font-bold text-[#EDE9F0]">Go deeper with AI</span>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {[
+                { label: `Scale gaps in Ontario`, q: `Looking at the gap map, Ontario has zero accelerators and zero pilot sites at Scale stage. Why does this gap exist and what should ecosystem builders do about it?` },
+                { label: `Where do founders fall through?`, q: `Based on the gap map data, which provinces have the most critical gaps for founders moving from pilot to commercialization? Where does support disappear?` },
+                { label: `Atlantic Canada`, q: `The gap map shows significant gaps in Atlantic Canada across multiple categories. What's the structural reason and what would it take to fill them?` },
+                ...(stage !== "All" ? [{ label: `${STAGE_LABELS[stage]} stage nationally`, q: `What are the most critical ecosystem gaps at the ${STAGE_LABELS[stage]} stage across Canada? Where should new programs be created?` }] : []),
+              ].map((chip, i) => (
+                <button
+                  key={i}
+                  onClick={() => onAskAI(chip.q)}
+                  className="bg-white/10 hover:bg-white/20 border border-white/15 hover:border-white/30 rounded-full px-3 py-1.5 text-[0.65rem] font-medium text-[#D8D0E0] hover:text-white cursor-pointer transition-all font-sans"
+                >{chip.label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto overflow-x-auto px-4 pb-3">
         {loading && (
           <div className="p-12 text-center text-text-tertiary text-[0.85rem]">Loading gap data…</div>
         )}
@@ -529,7 +559,7 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
           <div className="p-12 text-center text-[#b91c1c] text-[0.85rem]">{error}</div>
         )}
         {data && !loading && (
-          <table className="border-collapse w-full min-w-[520px]">
+          <table className="border-collapse w-full min-w-[520px] rounded-lg overflow-hidden border border-border">
             <thead>
               <tr>
                 <th className="px-3 py-2.5 text-left font-bold text-[0.65rem] text-text-secondary border-b-2 border-border bg-bg sticky top-0 left-0 z-[2] min-w-[52px]">
@@ -579,69 +609,11 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
         )}
       </div>
 
-      {/* Where we're light */}
-      {!loading && data && (
-        <div className="px-[18px] py-3 border-t border-border bg-bg-secondary shrink-0">
-          <div className="text-[0.72rem] font-semibold text-text mb-0.5">
-            Where we're light
-          </div>
-          <div className="text-[0.65rem] text-text-tertiary mb-2">
-            Know a program we're missing? Flag it and we'll investigate.
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {(() => {
-              if (!data) return null;
-              // Compute gaps dynamically from the matrix
-              const provGaps: { prov: string; gap: string; severity: string; weakestCat: string }[] = [];
-              for (const prov of data.provinces) {
-                if (prov === "National") continue;
-                const row = data.matrix[prov];
-                if (!row) continue;
-                const zeroCats: string[] = [];
-                const oneCats: string[] = [];
-                let minCount = Infinity;
-                let weakest = data.categories[0];
-                for (const cat of data.categories) {
-                  const c = row[cat]?.count ?? 0;
-                  if (c === 0) zeroCats.push(CAT_LABELS[cat] || cat);
-                  else if (c === 1) oneCats.push(`1 ${(CAT_LABELS[cat] || cat).toLowerCase()}`);
-                  if (c < minCount) { minCount = c; weakest = cat; }
-                }
-                if (zeroCats.length === 0 && oneCats.length === 0) continue;
-                const parts: string[] = [];
-                if (zeroCats.length > 0) parts.push(`0 ${zeroCats.map(c => c.toLowerCase() + "s").join(", 0 ")}`);
-                if (oneCats.length > 0) parts.push(oneCats.join(", "));
-                const severity = zeroCats.length >= 2 ? "high" : zeroCats.length >= 1 ? "high" : "medium";
-                provGaps.push({ prov, gap: parts.join(", "), severity, weakestCat: weakest });
-              }
-              // Sort: most zeros first, then show top 4
-              provGaps.sort((a, b) => (b.severity === "high" ? 1 : 0) - (a.severity === "high" ? 1 : 0));
-              return provGaps.slice(0, 4).map((g, i) => (
-                <div
-                  key={i}
-                  onClick={() => setSelected({ prov: g.prov, cat: g.weakestCat })}
-                  className={`flex-[1_1_calc(50%-4px)] min-w-[130px] px-2.5 py-2 rounded-sm bg-bg border border-border cursor-pointer transition-all ${
-                    g.severity === "high" ? "hover:border-[#ef4444]" : "hover:border-[#D4A828]"
-                  }`}
-                >
-                  <div className="flex items-center gap-[5px] mb-[3px]">
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      g.severity === "high" ? "bg-[#ef4444]" : "bg-[#D4A828]"
-                    }`} />
-                    <span className="font-bold text-[0.75rem] text-text">{g.prov}</span>
-                  </div>
-                  <div className="text-[0.65rem] text-text-secondary leading-[1.4]">{g.gap}</div>
-                </div>
-              ));
-            })()}
-          </div>
-        </div>
-      )}
-
-      {onFeedback && (
-        <div className="px-[18px] py-2.5 border-t border-border bg-gradient-to-r from-[#122b1f] to-[#1B4332] shrink-0 text-center">
-          <button onClick={onFeedback} className="bg-transparent border-none text-white/90 text-[0.72rem] font-semibold p-0 cursor-pointer hover:text-white transition-colors">
-            Know a program we're missing? Tell us and we'll investigate →
+      {/* Feedback link — subtle, below table */}
+      {onFeedback && !loading && (
+        <div className="px-4 pb-3 pt-1 shrink-0 text-center">
+          <button onClick={onFeedback} className="bg-transparent border-none text-text-tertiary text-[0.65rem] p-0 cursor-pointer hover:text-text-secondary transition-colors">
+            Know a program we're missing? Tell us →
           </button>
         </div>
       )}

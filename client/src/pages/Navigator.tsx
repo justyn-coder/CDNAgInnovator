@@ -1464,7 +1464,7 @@ export default function Navigator() {
           onOpenChat={(question) => { setShowBrowse(false); setOrgParam(null); if (question) send(question); }}
         />
       )}
-      {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} onFeedback={() => { setShowGapMap(false); setShowFeedback(true); }} mode={mode === "ec" ? "ec" : "founder"} />}
+      {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} onFeedback={() => { setShowGapMap(false); setShowFeedback(true); }} onAskAI={(q) => { setShowGapMap(false); send(q); }} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
       {showResourceCenter && <ResourceCenter onClose={() => setShowResourceCenter(false)} />}
 
