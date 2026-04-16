@@ -169,15 +169,15 @@ function SectionReveal() {
       )}
       <p style={{
         fontFamily: F.serif, fontSize: "clamp(20px, 5vw, 26px)", color: C.green, lineHeight: 1.4,
-        opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(12px)",
-        transition: "opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s",
+        opacity: shouldCount ? 1 : 0, transform: shouldCount ? "none" : "translateY(12px)",
+        transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
       }}>
         {p497} programs. {p167} ecosystem intelligence entries.
       </p>
       <p style={{
         fontFamily: F.serif, fontSize: "clamp(20px, 5vw, 26px)", color: C.green, lineHeight: 1.4, marginTop: 4,
-        opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(12px)",
-        transition: "opacity 0.5s ease-out 0.35s, transform 0.5s ease-out 0.35s",
+        opacity: shouldCount ? 1 : 0, transform: shouldCount ? "none" : "translateY(12px)",
+        transition: "opacity 0.5s ease-out 0.15s, transform 0.5s ease-out 0.15s",
       }}>
         All 10 provinces. <span style={{ color: C.gold }}>Free</span>.
       </p>
