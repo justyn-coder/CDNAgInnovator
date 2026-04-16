@@ -111,8 +111,8 @@ function SectionOpening() {
 
 function SectionReveal() {
   const { ref, visible } = useFadeIn(0.2);
-  const p497 = useCountUp(497, visible);
-  const p167 = useCountUp(167, visible);
+  const p497 = useCountUp(503, visible);
+  const p167 = useCountUp(172, visible);
   return (
     <div ref={ref} style={{ padding: "48px 24px 56px", maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
       <div style={{
@@ -221,6 +221,21 @@ function SectionFounder() {
         <h2 style={{ fontFamily: F.serif, fontSize: "clamp(24px, 5vw, 36px)", color: C.green, marginTop: 6, marginBottom: 24, lineHeight: 1.2 }}>
           30 seconds. 4 questions. A personalized pathway.
         </h2>
+
+        {/* Trust banner */}
+        <div style={{
+          maxWidth: 320, marginLeft: "auto", marginRight: "auto", marginBottom: 16,
+          padding: "10px 14px", background: "linear-gradient(to right, #f0f5f0, #f8faf8)",
+          border: `1px solid ${C.border}`, borderRadius: 10,
+          display: "flex", alignItems: "flex-start", gap: 10,
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}>
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <p style={{ fontFamily: F.sans, fontSize: 11, color: C.muted, lineHeight: 1.45 }}>
+            <strong style={{ color: C.text }}>Your information stays with you.</strong> We never share your data with programs or third parties.
+          </p>
+        </div>
 
         <WizardStep step={1} question="What are you building?" delay={0}>
           <div style={{
@@ -361,6 +376,40 @@ function SectionPathway() {
       <p style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, textAlign: "center", marginTop: 8 }}>
         ... and 3 more programs in your pipeline
       </p>
+
+      {/* Save your pathway mockup */}
+      <div style={{
+        marginTop: 28, padding: "16px 18px",
+        background: "#FFF8E7", border: "0.5px solid rgba(212,168,40,0.3)",
+        borderRadius: 10,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B6914" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+          </svg>
+          <span style={{ fontFamily: F.sans, fontSize: 14, fontWeight: 600, color: "#1a1a18" }}>
+            Save your pathway
+          </span>
+        </div>
+        <p style={{ fontFamily: F.sans, fontSize: 12, color: "#6b6b6b", marginBottom: 10 }}>
+          Get a personal link. Come back anytime. No account needed.
+        </p>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <div style={{
+            flex: 1, background: "#fff", border: "0.5px solid #E5E5E0",
+            borderRadius: 6, padding: "7px 10px", fontFamily: F.sans, fontSize: 12, color: "#999",
+          }}>
+            your@email.com
+          </div>
+          <div style={{
+            background: "#D4A828", color: "#1B4332",
+            fontFamily: F.sans, fontSize: 12, fontWeight: 600,
+            borderRadius: 6, padding: "7px 16px",
+          }}>
+            Save
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -620,18 +669,26 @@ function SectionGapMap() {
         opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.35s",
       }}>
         <div style={{ marginBottom: 10 }}>
-          <span style={{ fontFamily: F.serif, fontSize: 16, color: C.green }}>BC Training </span>
-          <Tag bg="#FFF3E0" color="#E65100">Weak · 1 program</Tag>
+          <span style={{ fontFamily: F.serif, fontSize: 16, color: C.green }}>Ontario · Accelerator · Scale </span>
+          <Tag bg="#FEF2F2" color="#991B1B">Gap · 0 programs</Tag>
         </div>
-        <div style={{ background: C.green, borderRadius: 8, padding: "16px 18px", color: "#fff" }}>
-          <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: C.gold, fontWeight: 700, marginBottom: 8, fontFamily: F.sans }}>AI ANALYSIS</p>
-          <p style={{ fontWeight: 600, fontSize: 13, marginBottom: 3, fontFamily: F.sans }}>WHY</p>
-          <p style={{ fontSize: 12, opacity: 0.9, lineHeight: 1.6, marginBottom: 10, fontFamily: F.sans }}>
-            BC relies entirely on the BC Institute of Agrologists for ag training — concentration risk. No agtech-specific training programs exist.
+        <div style={{ background: "linear-gradient(135deg, #2D2438, #3D3248)", borderRadius: 10, padding: "16px 18px", color: "#fff" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <div style={{ width: 20, height: 20, borderRadius: 5, background: "linear-gradient(135deg, #5B4A6B, #7A6A8A)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, fontFamily: F.sans, letterSpacing: "0.05em" }}>AI ANALYSIS</span>
+            <span style={{ marginLeft: "auto", fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 10, background: "#fef3c7", color: "#92400e", fontFamily: F.sans }}>Stage Mismatch</span>
+          </div>
+          <p style={{ fontWeight: 600, fontSize: 12, marginBottom: 4, fontFamily: F.sans, color: "#8A7A9A", textTransform: "uppercase", letterSpacing: "0.08em" }}>Why</p>
+          <p style={{ fontSize: 12, color: "#D8D0E0", lineHeight: 1.55, marginBottom: 10, fontFamily: F.sans }}>
+            Ontario's 24 accelerator programs are concentrated at early stages — SaaS and deep-tech timelines that don't fit agricultural seasonality. Scaling agtech falls into a structural blind spot.
           </p>
-          <p style={{ fontWeight: 600, fontSize: 13, marginBottom: 3, fontFamily: F.sans }}>OPPORTUNITY</p>
-          <p style={{ fontSize: 12, opacity: 0.9, lineHeight: 1.6, fontFamily: F.sans }}>
-            Strong opportunity to develop agtech-specific training leveraging BC's existing tech ecosystem.
+          <p style={{ fontWeight: 600, fontSize: 12, marginBottom: 4, fontFamily: F.sans, color: "#8CC63F", textTransform: "uppercase", letterSpacing: "0.08em" }}>Opportunity</p>
+          <p style={{ fontSize: 12, color: "#D8D0E0", lineHeight: 1.55, fontFamily: F.sans }}>
+            Real opportunity for an Ontario operator to launch a scale-stage agtech cohort — in partnership with Bioenterprise or through a new program.
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "center" }}>
