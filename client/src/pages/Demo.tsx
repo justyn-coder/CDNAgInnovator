@@ -111,7 +111,7 @@ function SectionOpening() {
 
 function SectionReveal() {
   const { ref, visible } = useFadeIn(0.2);
-  const p497 = useCountUp(503, visible);
+  const p497 = useCountUp(483, visible);
   const p167 = useCountUp(172, visible);
   return (
     <div ref={ref} style={{ padding: "48px 24px 56px", maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
@@ -759,6 +759,70 @@ function RoadmapItem({ name, desc, delay }: { name: string; desc: string; delay:
   );
 }
 
+function IntelligenceEngineCard({ visible }: { visible: boolean }) {
+  const sources = [
+    { type: "Podcast", label: "RealAg Radio — April 14", finding: "New Alberta Innovates voucher batch opening May 2026" },
+    { type: "Press", label: "OMAFRA announcement", finding: "GOAH cohort 7 applications close June 3" },
+    { type: "Conference", label: "Canadian AgTech Hub 2026", finding: "3 new Scale-stage investor partnerships flagged" },
+    { type: "Website", label: "Bioenterprise Canada", finding: "SmartGrowth Program intake confirmed for Q3" },
+  ];
+  const [idx, setIdx] = useState(0);
+  const [scanning, setScanning] = useState(true);
+  useEffect(() => {
+    if (!visible) return;
+    const scanTimer = setInterval(() => {
+      setScanning(true);
+      setTimeout(() => {
+        setScanning(false);
+        setIdx(i => (i + 1) % sources.length);
+      }, 1100);
+    }, 3400);
+    return () => clearInterval(scanTimer);
+  }, [visible, sources.length]);
+
+  const current = sources[idx];
+  return (
+    <div style={{
+      background: "linear-gradient(135deg, #2D2438, #3D3248)",
+      borderRadius: 12, padding: "18px 20px", border: "1px solid #4D4458",
+      marginBottom: 28, color: "#fff",
+      opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(16px)",
+      transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+        <div style={{ width: 24, height: 24, borderRadius: 6, background: "linear-gradient(135deg, #5B4A6B, #7A6A8A)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{ animation: scanning ? "pulse 1.2s ease-in-out infinite" : "none" }}>
+            <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#8CC63F" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, fontFamily: F.sans, color: "#EDE9F0", letterSpacing: "0.03em" }}>
+            Intelligence Engine
+          </div>
+          <div style={{ fontSize: 10, fontFamily: F.sans, color: "#8CC63F", display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 3, background: "#8CC63F", animation: "pulse 1.2s ease-in-out infinite" }} />
+            {scanning ? "Scanning…" : "New insight captured"}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ minHeight: 72 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, opacity: scanning ? 0.4 : 1, transition: "opacity 0.3s ease" }}>
+          <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 10, background: "#5B4A6B", color: "#EDE9F0", fontFamily: F.sans, textTransform: "uppercase", letterSpacing: "0.05em" }}>{current.type}</span>
+          <span style={{ fontSize: 11, fontFamily: F.sans, color: "#A098A8" }}>{current.label}</span>
+        </div>
+        <p style={{ fontSize: 13, fontFamily: F.sans, color: "#D8D0E0", lineHeight: 1.55, opacity: scanning ? 0.3 : 1, transition: "opacity 0.3s ease" }}>
+          {current.finding}
+        </p>
+      </div>
+
+      <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.08)", fontSize: 10, fontFamily: F.sans, color: "#8A7A9A", lineHeight: 1.5 }}>
+        Daily scraping across podcasts, press releases, conferences, and program websites. Every finding feeds the database.
+      </div>
+    </div>
+  );
+}
+
 function SectionRoadmap() {
   const { ref, visible } = useFadeIn(0.1);
   return (
@@ -768,6 +832,16 @@ function SectionRoadmap() {
         opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out",
       }}>
         Getting better every week.
+      </p>
+
+      <IntelligenceEngineCard visible={visible} />
+
+      <p style={{
+        fontFamily: F.sans, fontSize: 11, color: C.muted, fontWeight: 600, marginBottom: 14,
+        letterSpacing: "0.08em", textTransform: "uppercase",
+        opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.2s",
+      }}>
+        Coming next
       </p>
       <RoadmapItem name="Company profiles" desc="Pre-researched data on 100+ Canadian agtech companies" delay={0} />
       <RoadmapItem name="Pilot-readiness scores" desc="Which programs are open, competitive, or oversubscribed" delay={150} />
