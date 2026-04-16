@@ -135,9 +135,19 @@ function SectionOpening() {
 }
 
 function SectionReveal() {
-  const { ref, visible } = useFadeIn(0.2);
-  const p497 = useCountUp(483, visible);
-  const p167 = useCountUp(172, visible);
+  const { ref, visible } = useFadeIn(0.55);
+  // Only start counting once user has actually scrolled (not on initial load)
+  const [hasScrolled, setHasScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 40) setHasScrolled(true);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  const shouldCount = visible && hasScrolled;
+  const p497 = useCountUp(483, shouldCount);
+  const p167 = useCountUp(172, shouldCount);
   const refParam = useRefParam();
   const orgName = orgFromRef(refParam);
   return (
