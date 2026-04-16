@@ -61,6 +61,31 @@ function useCountUp(target: number, visible: boolean, duration = 1200) {
 const F = { serif: "'DM Serif Display', serif", sans: "'DM Sans', system-ui, sans-serif" };
 const C = { green: "#2D5A3D", gold: "#C4A052", bg: "#FAFAF7", bgWarm: "#F5F0E8", text: "#1A1A1A", muted: "#6B7C6B", cardBg: "#fff", border: "#E8E5E0" };
 
+// Detect ref for personalization (e.g., ?ref=bioenterprise)
+function useRefParam() {
+  const [ref, setRef] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      setRef(params.get("ref"));
+    } catch {}
+  }, []);
+  return ref;
+}
+
+// Known organization lookup
+const ORG_NAMES: Record<string, string> = {
+  bioenterprise: "Bioenterprise",
+  fcc: "FCC",
+  goah: "GOAH",
+  mars: "MaRS",
+  communitech: "Communitech",
+};
+function orgFromRef(ref: string | null): string | null {
+  if (!ref) return null;
+  return ORG_NAMES[ref.toLowerCase()] || null;
+}
+
 function Tag({ children, color = C.green, bg = "#E8F5E9" }: { children: React.ReactNode; color?: string; bg?: string }) {
   return (
     <span style={{
@@ -113,6 +138,8 @@ function SectionReveal() {
   const { ref, visible } = useFadeIn(0.2);
   const p497 = useCountUp(483, visible);
   const p167 = useCountUp(172, visible);
+  const refParam = useRefParam();
+  const orgName = orgFromRef(refParam);
   return (
     <div ref={ref} style={{ padding: "48px 24px 56px", maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
       <div style={{
@@ -122,6 +149,14 @@ function SectionReveal() {
       }}>
         <TrellisLogoSvg width={220} />
       </div>
+      {orgName && (
+        <p style={{
+          fontFamily: F.sans, fontSize: 12, color: C.gold, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12,
+          opacity: visible ? 1 : 0, transition: "opacity 0.5s ease-out 0.15s",
+        }}>
+          Built for operators like {orgName}
+        </p>
+      )}
       <p style={{
         fontFamily: F.serif, fontSize: "clamp(20px, 5vw, 26px)", color: C.green, lineHeight: 1.4,
         opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(12px)",
@@ -166,7 +201,7 @@ function SectionFounder() {
   const { ref, visible } = useFadeIn(0.1);
   const pathwayRef = useRef<HTMLDivElement>(null);
   const [typing, setTyping] = useState(0);
-  const fullText = "Nanotechnology-enabled crop protection. Polymer delivery platform for biologicals.";
+  const fullText = "Precision soil biology testing platform for Ontario crop farmers. MVP built, need to validate with real growers.";
   useEffect(() => {
     if (!visible) return;
     if (typing >= fullText.length) return;
@@ -210,7 +245,7 @@ function SectionFounder() {
 
   const stages = ["Idea", "MVP", "Pilot", "Customers", "Scaling"];
   const provinces = ["AB", "BC", "MB", "NB", "NL", "NS", "ON", "PE", "QC", "SK"];
-  const bottlenecks = ["Dealers & distribution", "Go-to-market strategy", "Growth capital", "Regulatory", "Talent"];
+  const bottlenecks = ["Non-dilutive capital", "Validate with farmers", "Structured program", "Credibility", "Industry connections"];
 
   return (
     <>
@@ -252,9 +287,9 @@ function SectionFounder() {
             {stages.map(s => (
               <div key={s} style={{
                 padding: "8px 12px", borderRadius: 6, fontFamily: F.sans, fontSize: 13,
-                border: s === "Scaling" && selectedStage ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
-                background: s === "Scaling" && selectedStage ? "#FBF7ED" : "#fff",
-                color: C.text, fontWeight: s === "Scaling" && selectedStage ? 600 : 400,
+                border: s === "MVP" && selectedStage ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
+                background: s === "MVP" && selectedStage ? "#FBF7ED" : "#fff",
+                color: C.text, fontWeight: s === "MVP" && selectedStage ? 600 : 400,
                 transition: "all 0.3s ease",
               }}>{s}</div>
             ))}
@@ -280,10 +315,10 @@ function SectionFounder() {
             {bottlenecks.map(b => (
               <div key={b} style={{
                 padding: "8px 12px", borderRadius: 6, fontFamily: F.sans, fontSize: 13,
-                background: b === "Growth capital" && selectedBottle ? C.green : "#fff",
-                color: b === "Growth capital" && selectedBottle ? "#fff" : C.text,
-                border: b === "Growth capital" && selectedBottle ? "none" : `1px solid ${C.border}`,
-                fontWeight: b === "Growth capital" && selectedBottle ? 600 : 400,
+                background: b === "Validate with farmers" && selectedBottle ? C.green : "#fff",
+                color: b === "Validate with farmers" && selectedBottle ? "#fff" : C.text,
+                border: b === "Validate with farmers" && selectedBottle ? "none" : `1px solid ${C.border}`,
+                fontWeight: b === "Validate with farmers" && selectedBottle ? 600 : 400,
                 transition: "all 0.3s ease",
               }}>{b}</div>
             ))}
@@ -312,7 +347,7 @@ function SectionFounder() {
               <div style={{ height: "100%", background: C.green, borderRadius: 20, width: `${progress}%`, transition: "width 0.08s linear" }} />
             </div>
             <p style={{ fontFamily: F.sans, fontSize: 14, color: C.muted, marginTop: 16 }}>
-              {progress < 25 ? "Scanning programs across Canada..." : progress < 50 ? "Matching to your stage and province..." : progress < 75 ? "Filtering by growth capital needs..." : "Building your pathway..."}
+              {progress < 25 ? "Scanning 483 programs across Canada..." : progress < 50 ? "Matching to MVP stage in Ontario..." : progress < 75 ? "Filtering by farmer validation..." : "Building your personalized pathway..."}
             </p>
           </div>
         )}
@@ -354,9 +389,9 @@ function PathwayCard({ num, name, desc, tags, highlight }: {
 function SectionPathway() {
   const { ref, visible } = useFadeIn();
   const programs = [
-    { num: 1, name: "BDC Industrial Innovation Venture Fund II", desc: "Apply for Series A+ funding from BDC's $200M fund targeting AgTech at scale stage.", tags: [{ label: "Funding", bg: "#E8F5E9" }, { label: "Do now", bg: "#FFF8E1" }, { label: "Strong fit", bg: "#E8F5E9" }] },
-    { num: 2, name: "AAFC AgriInnovate", desc: "Secure up to $5M in non-dilutive, interest-free funding to accelerate commercialization.", tags: [{ label: "Funding", bg: "#E8F5E9" }, { label: "Do now", bg: "#FFF8E1" }] },
-    { num: 3, name: "Canadian Association of Agri-Retailers (CAAR)", desc: "Build distribution partnerships through the national retailer network.", tags: [{ label: "Industry Org", bg: "#F3E8FF" }, { label: "This month", bg: "#FFF8E1" }, { label: "Strong fit", bg: "#E8F5E9" }] },
+    { num: 1, name: "Bioenterprise Canada", desc: "Start here. Ontario's agtech concierge — connects you to farmers, advisors, and applied research for validation before you build more.", tags: [{ label: "Accelerator", bg: "#FFF3E0" }, { label: "Do now", bg: "#FFF8E1" }, { label: "Strong fit", bg: "#E8F5E9" }] },
+    { num: 2, name: "Grow Ontario Accelerator Hub (GOAH)", desc: "Ontario-anchored cohort program for commercializing agtech. Applications close June 3.", tags: [{ label: "Accelerator", bg: "#FFF3E0" }, { label: "This month", bg: "#FFF8E1" }, { label: "Strong fit", bg: "#E8F5E9" }] },
+    { num: 3, name: "AAFC AgriInnovate", desc: "Up to $5M in non-dilutive capital for commercialization. Best paired with validated pilot data from a program partner.", tags: [{ label: "Funding", bg: "#E8F5E9" }, { label: "Next quarter", bg: "#FFF8E1" }] },
   ];
   return (
     <div ref={ref} style={{
@@ -418,11 +453,11 @@ function SectionGoDeeper() {
   const { ref, visible } = useFadeIn(0.15);
   const [typingIdx, setTypingIdx] = useState(0);
   const [showPrep, setShowPrep] = useState([false, false, false]);
-  const responseTitle = "BDC Industrial Innovation Venture Fund II — How to Prepare";
+  const responseTitle = "Bioenterprise Canada — How to approach them";
   const preps = [
-    { title: "Financial Package", detail: "Series A pitch deck with commercialization metrics and regulatory pathway clarity" },
-    { title: "Technical Validation", detail: "Third-party efficacy data for your polymer delivery system across crop types" },
-    { title: "Market Positioning", detail: "Competitive analysis showing differentiation from conventional crop protection" },
+    { title: "Problem statement", detail: "One-page description of the soil biology problem you're solving and the grower you've identified as the end user" },
+    { title: "Pilot readiness", detail: "What you'd test with farmers first — methodology, number of sites, what success looks like" },
+    { title: "Why you, why now", detail: "Your technical background and what makes this the right moment for this approach in Ontario agriculture" },
   ];
   const fullResponse = responseTitle;
 
@@ -454,7 +489,7 @@ function SectionGoDeeper() {
           opacity: visible ? 1 : 0, transform: visible ? "none" : "translateX(12px)",
           transition: "opacity 0.4s ease-out 0.15s, transform 0.4s ease-out 0.15s",
         }}>
-          Tell me how to approach the BDC fund &rarr;
+          How do I approach Bioenterprise? What should I bring to the first call? &rarr;
         </div>
 
         <div style={{
@@ -496,14 +531,50 @@ function SectionTransition() {
         fontFamily: F.serif, fontSize: "clamp(22px, 5vw, 28px)", color: C.green, lineHeight: 1.3,
         opacity: visible ? 1 : 0, transition: "opacity 0.5s ease-out",
       }}>
-        Not a directory. Not a chatbot. A system built on verified data.
+        Not a directory. Not a chatbot. A system built on public data — getting sharper every week.
       </h2>
       <p style={{
         fontFamily: F.sans, fontSize: 15, color: C.text, lineHeight: 1.7, marginTop: 12,
         opacity: visible ? 0.75 : 0, transform: visible ? "none" : "translateY(10px)",
         transition: "opacity 0.4s ease-out 0.2s, transform 0.4s ease-out 0.2s",
       }}>
-        Every program verified against federal and provincial databases. Filtered to your stage, province, and sector.
+        Built from federal and provincial databases. Filtered to your stage, province, and sector. Cross-referenced with ecosystem intelligence we keep adding to.
+      </p>
+
+      {/* What's done vs. coming */}
+      <div style={{
+        marginTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10,
+        opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(10px)",
+        transition: "opacity 0.5s ease-out 0.35s, transform 0.5s ease-out 0.35s",
+      }}>
+        <div style={{ background: "#fff", border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px" }}>
+          <p style={{ fontFamily: F.sans, fontSize: 10, fontWeight: 700, color: C.green, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
+            ✓ Live today
+          </p>
+          <ul style={{ fontFamily: F.sans, fontSize: 12, color: C.text, lineHeight: 1.6, listStyle: "none", padding: 0 }}>
+            <li>• 483 programs verified</li>
+            <li>• Pathways by stage + province</li>
+            <li>• AI gap analysis</li>
+            <li>• Daily scraping engine</li>
+          </ul>
+        </div>
+        <div style={{ background: C.bgWarm, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px" }}>
+          <p style={{ fontFamily: F.sans, fontSize: 10, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
+            Coming soon
+          </p>
+          <ul style={{ fontFamily: F.sans, fontSize: 12, color: C.muted, lineHeight: 1.6, listStyle: "none", padding: 0 }}>
+            <li>• Operator verification</li>
+            <li>• Founder testimonials</li>
+            <li>• Agronomist insights</li>
+            <li>• Pilot-readiness scores</li>
+          </ul>
+        </div>
+      </div>
+      <p style={{
+        fontFamily: F.sans, fontSize: 12, color: C.muted, lineHeight: 1.6, marginTop: 14, fontStyle: "italic", textAlign: "center",
+        opacity: visible ? 1 : 0, transition: "opacity 0.5s ease-out 0.5s",
+      }}>
+        The promise to founders: trust the data because it's been through the people who know it best.
       </p>
     </div>
   );
@@ -535,8 +606,9 @@ function SectionOperatorPivot() {
 function SectionOperatorDashboard() {
   const { ref, visible } = useFadeIn(0.1);
   const insights = [
-    { title: "The Scale Cliff", body: "The ecosystem builds founders up through idea and pilot stages — then drops them. 51% drop in available programs between pilot and scale.", color: "#C62828" },
-    { title: "Alberta's Paradox", body: "76 programs across the province. Only 1 specifically for scale-stage agtech companies.", color: "#E65100" },
+    { title: "The Scale Cliff", body: "The ecosystem builds founders up through commercialization — then drops them. 314 programs at Customers stage. 149 at Scale. A 53% drop.", color: "#C62828" },
+    { title: "Alberta's Paradox", body: "85 programs across the province. Only 24 serve scale-stage companies — and most weren't built for agtech.", color: "#E65100" },
+    { title: "The Funding Valley", body: "20 programs fund under $150K. 21 fund over $1M. Only 13 in the $500K-$1M band where real agtech ventures live.", color: "#B45309" },
   ];
   return (
     <div ref={ref} style={{ padding: "48px 24px", maxWidth: 480, margin: "0 auto" }}>
@@ -585,6 +657,8 @@ function SectionOperatorDashboard() {
 
 function SectionGapMap() {
   const { ref, visible } = useFadeIn(0.1);
+  const refParam = useRefParam();
+  const orgName = orgFromRef(refParam);
   const provinces = ["BC", "AB", "SK", "MB", "ON", "QC", "NB", "NS", "NL", "Natl"];
   const categories = ["Funding", "Accel.", "Advisory", "Training"];
   type Level = "strong" | "ok" | "weak" | "gap";
@@ -657,8 +731,24 @@ function SectionGapMap() {
         </div>
       </div>
 
+      {orgName === "Bioenterprise" && (
+        <div style={{
+          marginTop: 20, padding: "14px 16px", background: "#FBF7ED",
+          border: `1.5px solid ${C.gold}`, borderRadius: 10,
+          opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(12px)",
+          transition: "opacity 0.5s ease-out 0.3s, transform 0.5s ease-out 0.3s",
+        }}>
+          <p style={{ fontFamily: F.sans, fontSize: 11, color: C.gold, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>
+            FOR BIOENTERPRISE
+          </p>
+          <p style={{ fontFamily: F.serif, fontSize: 17, color: C.green, lineHeight: 1.35 }}>
+            This is the gap your programs already fill.
+          </p>
+        </div>
+      )}
+
       <div style={{
-        marginTop: 24, background: C.cardBg, borderRadius: 8, padding: "18px 20px", border: `1px solid ${C.border}`,
+        marginTop: orgName === "Bioenterprise" ? 14 : 24, background: C.cardBg, borderRadius: 8, padding: "18px 20px", border: `1px solid ${C.border}`,
         opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.35s",
       }}>
         <div style={{ marginBottom: 10 }}>
@@ -940,8 +1030,9 @@ function IntelligenceEngineCard({ visible }: { visible: boolean }) {
   const sources = [
     { type: "Podcast", label: "RealAg Radio — April 14", finding: "New Alberta Innovates voucher batch opening May 2026" },
     { type: "Press", label: "OMAFRA announcement", finding: "GOAH cohort 7 applications close June 3" },
-    { type: "Conference", label: "Canadian AgTech Hub 2026", finding: "3 new Scale-stage investor partnerships flagged" },
     { type: "Website", label: "Bioenterprise Canada", finding: "SmartGrowth Program intake confirmed for Q3" },
+    { type: "Conference", label: "Canadian AgTech Hub 2026", finding: "3 new Scale-stage investor partnerships flagged" },
+    { type: "Roundtable", label: "Bioenterprise National Series", finding: "Advisor channel gap confirmed across Atlantic region" },
   ];
   const [idx, setIdx] = useState(0);
   const [scanning, setScanning] = useState(true);
@@ -1044,6 +1135,7 @@ function SectionCTA() {
   const { ref, visible } = useFadeIn(0.2);
   const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const refParam = params.get("ref");
+  const orgName = orgFromRef(refParam);
   const ctaUrl = refParam ? `https://trellisag.ca/?ref=${refParam}&mode=operator` : "https://trellisag.ca";
   const displayUrl = refParam ? `trellisag.ca/?ref=${refParam}&mode=operator` : "trellisag.ca";
 
@@ -1055,12 +1147,28 @@ function SectionCTA() {
           opacity: visible ? 1 : 0, transform: visible ? "scale(1)" : "scale(0.92)",
           transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
         }}><TrellisLogoSvg width={180} /></div>
+        {orgName && (
+          <p style={{
+            fontFamily: F.sans, fontSize: 12, color: C.gold, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10,
+            opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.1s",
+          }}>
+            A note for {orgName}
+          </p>
+        )}
         <p style={{
           fontFamily: F.serif, fontSize: "clamp(20px, 5vw, 28px)", color: C.green, lineHeight: 1.35, marginBottom: 4,
           opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.15s",
         }}>
-          See where your programs appear in founder pathways.
+          {orgName ? `See where ${orgName}'s programs appear in founder pathways.` : "See where your programs appear in founder pathways."}
         </p>
+        {orgName && (
+          <p style={{
+            fontFamily: F.sans, fontSize: 14, color: C.muted, lineHeight: 1.6, marginTop: 10, marginBottom: 4,
+            opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.2s",
+          }}>
+            We built this because Canada's agtech ecosystem deserves better navigation. Your feedback makes it sharper.
+          </p>
+        )}
         <a href={ctaUrl} target="_blank" rel="noopener noreferrer" className="cta-pulse" style={{
           display: "inline-block", marginTop: 20, background: C.green, color: "#fff",
           borderRadius: 8, padding: "16px 40px", fontFamily: F.sans, fontWeight: 600,
