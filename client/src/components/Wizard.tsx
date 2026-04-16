@@ -671,6 +671,18 @@ export default function Wizard({ onComplete, programCount }: Props) {
 
   return (
     <div ref={wizardRef} className="m-4 p-4 md:p-6 bg-bg border border-border rounded-lg shadow-md overflow-hidden">
+      {/* Trust banner */}
+      {step === 0 && (
+        <div className="mb-4 px-3.5 py-2.5 bg-gradient-to-r from-[#f0f5f0] to-[#f8faf8] border border-border rounded-lg flex items-start gap-2.5">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D7A4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <div className="text-[0.7rem] text-text-secondary leading-[1.5]">
+            <span className="font-semibold text-text">Your information stays with you.</span> Trellis uses AI to match you with programs based on what you tell us. We never share your data with programs or third parties.
+          </div>
+        </div>
+      )}
+
       {/* Progress — always 4 segments */}
       <div className="flex gap-1 mb-1.5">
         {[0, 1, 2, 3].map(i => (
