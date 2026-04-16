@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Open Dev Preview",
+      "type": "shell",
+      "command": "sleep 3 && open http://localhost:5173",
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "silent"
+      }
+    }
+  ]
+}

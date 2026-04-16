@@ -1,0 +1,13 @@
+Here's everything I see on the page:
+
+*   Trellis CANADA'S AGTECH ECOSYSTEM
+*   Founders
+*   Scanning programs across Canada…
+*   Filtering by stage, province, and sector…
+*   Filtering by your primary need…
+*   Building your personalized pathway…
+*   ✓ Done
+*   AI Chat: Ask me anything.
+*   Built from public data · Still learning
+*   Send message
+*   💬 Something wrong or missing? Tell us →
