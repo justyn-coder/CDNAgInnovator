@@ -109,7 +109,7 @@ function ExplainCard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const hasFetched = useRef(false);
-  const [showMeta, setShowMeta] = useState(false);
+  const [showMeta, setShowMeta] = useState(true);
   const [gapFeedback, setGapFeedback] = useState("");
 
   function submitGapFeedback(rating: string) {
@@ -405,7 +405,28 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
       .catch(() => { setError("Failed to load gap data."); setLoading(false); });
   }, [stage]);
 
-  useEffect(() => { setSelected(null); setBottomAnalysis(null); }, [stage]);
+  // Reset and preload the most interesting gap when data/stage changes
+  useEffect(() => {
+    setSelected(null);
+    if (!data) { setBottomAnalysis(null); return; }
+    // Find ON/Accel gap first (for BioEnterprise demo), then fall back to first zero cell
+    const onAccel = data.matrix["ON"]?.["Accel"];
+    if (onAccel && onAccel.count === 0) {
+      setBottomAnalysis({ prov: "ON", cat: "Accel" });
+      return;
+    }
+    // Fall back to first gap cell
+    for (const prov of data.provinces) {
+      if (prov === "National") continue;
+      for (const cat of data.categories) {
+        if ((data.matrix[prov]?.[cat]?.count ?? 0) === 0) {
+          setBottomAnalysis({ prov, cat });
+          return;
+        }
+      }
+    }
+    setBottomAnalysis(null);
+  }, [data, stage]);
 
   // Dismiss guide on first cell click
   useEffect(() => {
@@ -556,7 +577,10 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
                     return (
                       <td
                         key={cat}
-                        onClick={() => setSelected({ prov, cat })}
+                        onClick={() => {
+                          setBottomAnalysis({ prov, cat });
+                          if (cell.count > 0) setSelected({ prov, cat });
+                        }}
                         className={cn(
                           "px-2 py-2.5 text-center cursor-pointer transition-all duration-100 hover:scale-[1.05]",
                           isSelected ? undefined : colors.bg,
@@ -580,57 +604,33 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
         )}
       </div>
 
-      {/* AI analysis section — bottom of gap map, in-page */}
+      {/* AI analysis section — always visible at bottom, updates on cell click */}
       {!loading && data && (
         <div className="shrink-0 border-t border-border">
           <div className="bg-gradient-to-br from-[#2D2438] to-[#3D3248] px-4 py-3">
-            <div className="flex items-center gap-2 mb-2.5">
-              <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-                  <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <span className="text-[0.72rem] font-bold text-[#EDE9F0]">AI Analysis</span>
               </div>
-              <span className="text-[0.72rem] font-bold text-[#EDE9F0]">Go deeper</span>
-              <span className="text-[0.6rem] text-[#A098A8]">Pick a gap to analyze</span>
+              {bottomAnalysis && (
+                <span className="text-[0.65rem] font-semibold text-[#A098A8]">
+                  {bottomAnalysis.prov} · {CAT_LABELS[bottomAnalysis.cat] || bottomAnalysis.cat}
+                  {stage !== "All" && ` · ${STAGE_LABELS[stage]}`}
+                </span>
+              )}
             </div>
-
-            {/* Prompt chips — each triggers an in-page ExplainCard */}
-            <div className="flex gap-2 flex-wrap mb-3">
-              {(() => {
-                // Build chips from actual gaps in the data
-                const chips: { label: string; prov: string; cat: string }[] = [];
-                for (const prov of data.provinces) {
-                  if (prov === "National") continue;
-                  const row = data.matrix[prov];
-                  if (!row) continue;
-                  for (const cat of data.categories) {
-                    if ((row[cat]?.count ?? 0) === 0) {
-                      chips.push({ label: `${prov} ${(CAT_LABELS[cat] || cat).toLowerCase()}`, prov, cat });
-                    }
-                  }
-                }
-                // Show top 5 gaps + any weak (1) cells as secondary
-                return chips.slice(0, 5).map((chip, i) => {
-                  const isActive = bottomAnalysis?.prov === chip.prov && bottomAnalysis?.cat === chip.cat;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => setBottomAnalysis(isActive ? null : { prov: chip.prov, cat: chip.cat })}
-                      className={cn(
-                        "rounded-full px-3 py-1.5 text-[0.65rem] font-medium cursor-pointer transition-all font-sans border",
-                        isActive
-                          ? "bg-white/20 border-white/40 text-white"
-                          : "bg-white/8 hover:bg-white/15 border-white/15 hover:border-white/30 text-[#D8D0E0] hover:text-white"
-                      )}
-                    >{chip.label}</button>
-                  );
-                });
-              })()}
-            </div>
-
-            {/* In-page AI analysis — shows when a chip is clicked */}
+            {!bottomAnalysis && (
+              <div className="text-[0.7rem] text-[#A098A8] py-2">
+                Tap any cell in the map above to see our analysis
+              </div>
+            )}
             {bottomAnalysis && (
-              <div key={`${bottomAnalysis.prov}-${bottomAnalysis.cat}`} className="animate-fade-in-up">
+              <div key={`${bottomAnalysis.prov}-${bottomAnalysis.cat}-${stage}`}>
                 <ExplainCard prov={bottomAnalysis.prov} cat={bottomAnalysis.cat} stage={stage} mode={mode} autoFetch={true} />
               </div>
             )}
