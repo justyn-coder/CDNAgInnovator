@@ -602,13 +602,6 @@ function SectionGapMap() {
     ["strong", "strong", "ok", "ok"],
   ];
 
-  const [feedbackStep, setFeedbackStep] = useState(0);
-  useEffect(() => {
-    if (!visible) return;
-    const id = setInterval(() => setFeedbackStep(p => (p + 1) % 3), 2500);
-    return () => clearInterval(id);
-  }, [visible]);
-
   return (
     <div ref={ref} style={{ padding: "48px 24px", maxWidth: 480, margin: "0 auto" }}>
       <h2 style={{
@@ -697,36 +690,134 @@ function SectionGapMap() {
         </div>
       </div>
 
-      <div style={{
-        marginTop: 20, textAlign: "center", minHeight: 48,
-        opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.5s",
-      }}>
-        <p style={{ fontFamily: F.sans, fontSize: 13, color: C.gold, fontStyle: "italic", marginBottom: 10 }}>
-          This is how Trellis gets smarter. Operators flag what's right. We fix what's not.
-        </p>
-        <div style={{ position: "relative", height: 36, overflow: "hidden" }}>
-          {[
-            <span key={0} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-              <span style={{ background: "#E8F5E9", padding: "4px 10px", borderRadius: 6, fontSize: 11, fontFamily: F.sans, color: C.green, fontWeight: 600 }}>Looks right 👍</span>
-              <span style={{ fontSize: 11, color: C.muted, fontFamily: F.sans }}>clicked</span>
-            </span>,
-            <span key={1} style={{ fontSize: 12, fontFamily: F.sans, color: C.muted, fontStyle: "italic" }}>
-              "Missing: SAIT AgTech program in AB"
-            </span>,
-            <span key={2} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-              <span style={{ background: "#FFF3E0", padding: "4px 10px", borderRadius: 6, fontSize: 11, fontFamily: F.sans, color: "#E65100", fontWeight: 600 }}>Not quite 👎</span>
-              <span style={{ fontSize: 11, color: C.muted, fontFamily: F.sans }}>correction sent</span>
-            </span>,
-          ].map((el, i) => (
-            <div key={i} style={{
-              position: "absolute", top: 0, left: 0, right: 0,
-              display: "flex", alignItems: "center", justifyContent: "center", height: 36,
-              opacity: feedbackStep === i ? 1 : 0,
-              transform: feedbackStep === i ? "translateY(0)" : "translateY(8px)",
-              transition: "opacity 0.4s ease, transform 0.4s ease",
-            }}>{el}</div>
-          ))}
+    </div>
+  );
+}
+
+function SectionCommunity() {
+  const { ref, visible } = useFadeIn(0.1);
+  const [activeIdx, setActiveIdx] = useState(0);
+  useEffect(() => {
+    if (!visible) return;
+    const id = setInterval(() => setActiveIdx(i => (i + 1) % 4), 2200);
+    return () => clearInterval(id);
+  }, [visible]);
+
+  const touchpoints = [
+    {
+      label: "Suggest a correction",
+      sub: "on every program page",
+      mockup: (
+        <div style={{ background: "#fff", border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px", fontFamily: F.sans }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.green, marginBottom: 3 }}>Bioenterprise Canada</div>
+          <div style={{ fontSize: 10, color: C.muted, marginBottom: 6 }}>ON · Accelerator</div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, color: C.gold, fontWeight: 600, background: "#FFF8E7", padding: "3px 8px", borderRadius: 12 }}>
+            + Suggest a correction
+          </div>
         </div>
+      ),
+    },
+    {
+      label: "Interest tracking",
+      sub: "per program in the pathway",
+      mockup: (
+        <div style={{ background: "#fff", border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px", fontFamily: F.sans }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.green, marginBottom: 6 }}>AAFC AgriInnovate</div>
+          <div style={{ display: "flex", gap: 4 }}>
+            {[
+              { label: "★ Interested", bg: "#fef3c7", color: "#92400e" },
+              { label: "✓ Applied", bg: "#dcfce7", color: "#166534" },
+              { label: "✕ Not for me", bg: "#f0f0ec", color: "#555560" },
+            ].map((b, i) => (
+              <span key={i} style={{ fontSize: 10, padding: "3px 8px", borderRadius: 12, background: b.bg, color: b.color, fontWeight: 600 }}>{b.label}</span>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      label: "AI analysis feedback",
+      sub: "on every gap explanation",
+      mockup: (
+        <div style={{ background: "linear-gradient(135deg, #2D2438, #3D3248)", borderRadius: 8, padding: "10px 12px", fontFamily: F.sans, color: "#fff" }}>
+          <div style={{ fontSize: 10, color: "#8CC63F", fontWeight: 700, letterSpacing: "0.05em", marginBottom: 5 }}>AI ANALYSIS</div>
+          <div style={{ fontSize: 10, color: "#D8D0E0", marginBottom: 7, lineHeight: 1.45 }}>Is this analysis accurate?</div>
+          <div style={{ display: "flex", gap: 5 }}>
+            <span style={{ fontSize: 10, padding: "3px 10px", borderRadius: 10, background: "rgba(255,255,255,0.1)", color: "#D8D0E0", border: "1px solid rgba(255,255,255,0.2)" }}>👍 Looks right</span>
+            <span style={{ fontSize: 10, padding: "3px 10px", borderRadius: 10, background: "rgba(255,255,255,0.1)", color: "#D8D0E0", border: "1px solid rgba(255,255,255,0.2)" }}>👎 Not quite</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      label: "Something wrong or missing?",
+      sub: "fixed feedback bar on every page",
+      mockup: (
+        <div style={{ background: C.bgWarm, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px", fontFamily: F.sans, textAlign: "center" }}>
+          <div style={{ fontSize: 11, color: C.green, fontWeight: 600 }}>
+            💬 Something wrong or missing? Tell us →
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div ref={ref} style={{ padding: "48px 24px", maxWidth: 480, margin: "0 auto" }}>
+      <p style={{
+        fontFamily: F.sans, textTransform: "uppercase", fontSize: 12, letterSpacing: "0.1em", color: C.gold, fontWeight: 600, marginBottom: 8,
+        opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out",
+      }}>
+        BUILT WITH OPERATORS
+      </p>
+      <h2 style={{
+        fontFamily: F.serif, fontSize: "clamp(24px, 5vw, 32px)", color: C.green, marginBottom: 12, lineHeight: 1.2,
+        opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(12px)",
+        transition: "opacity 0.5s ease-out 0.1s, transform 0.5s ease-out 0.1s",
+      }}>
+        This is how Trellis gets smarter.
+      </h2>
+      <p style={{
+        fontFamily: F.sans, fontSize: 14, color: C.muted, lineHeight: 1.6, marginBottom: 24,
+        opacity: visible ? 1 : 0, transition: "opacity 0.5s ease-out 0.25s",
+      }}>
+        Operators flag what's right. We fix what's not. Every page has a way to tell us.
+      </p>
+
+      {/* Active feedback surface (cycles) */}
+      <div style={{
+        background: "#fff", border: `2px solid ${C.gold}`, borderRadius: 12,
+        padding: "18px 18px", marginBottom: 20, minHeight: 140,
+        boxShadow: "0 4px 20px rgba(196,160,82,0.15)",
+        opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(16px)",
+        transition: "opacity 0.5s ease-out 0.35s, transform 0.5s ease-out 0.35s",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+          <span style={{ width: 6, height: 6, borderRadius: 3, background: C.gold, animation: "pulse 1.2s ease-in-out infinite" }} />
+          <span style={{ fontSize: 10, color: C.gold, fontWeight: 700, fontFamily: F.sans, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            {touchpoints[activeIdx].label}
+          </span>
+          <span style={{ fontSize: 10, color: C.muted, fontFamily: F.sans, marginLeft: "auto" }}>
+            {touchpoints[activeIdx].sub}
+          </span>
+        </div>
+        <div key={activeIdx} style={{ animation: "fadeIn 0.4s ease" }}>
+          {touchpoints[activeIdx].mockup}
+        </div>
+      </div>
+
+      {/* Dots showing which surface is active */}
+      <div style={{
+        display: "flex", justifyContent: "center", gap: 6,
+        opacity: visible ? 1 : 0, transition: "opacity 0.5s ease-out 0.5s",
+      }}>
+        {touchpoints.map((_, i) => (
+          <div key={i} style={{
+            width: i === activeIdx ? 20 : 6, height: 6, borderRadius: 3,
+            background: i === activeIdx ? C.gold : C.border,
+            transition: "width 0.3s ease, background 0.3s ease",
+          }} />
+        ))}
       </div>
     </div>
   );
@@ -906,6 +997,7 @@ function App() {
       <div style={{ background: C.bgWarm, transition: "background 0.5s ease" }}>
         <SectionOperatorDashboard />
         <SectionGapMap />
+        <SectionCommunity />
         <SectionRoadmap />
       </div>
       <SectionCTA />
