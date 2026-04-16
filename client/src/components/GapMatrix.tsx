@@ -629,23 +629,47 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
             </div>
 
             {/* What's being analyzed */}
-            {bottomAnalysis && (
-              <div className="px-4 pb-2">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="text-[0.62rem] font-bold px-2 py-[2px] rounded-full border"
-                    style={{ background: cellColorRaw(0).bg, color: cellColorRaw(0).text, borderColor: cellColorRaw(0).border }}
-                  >Gap</span>
-                  <span className="text-[0.72rem] font-semibold text-white">
-                    {bottomAnalysis.prov} · {CAT_LABELS[bottomAnalysis.cat] || bottomAnalysis.cat}
-                    {stage !== "All" && ` · ${STAGE_LABELS[stage]} stage`}
-                  </span>
+            {bottomAnalysis && (() => {
+              const analysisCell = data.matrix[bottomAnalysis.prov]?.[bottomAnalysis.cat];
+              const cellCount = analysisCell?.count ?? 0;
+              const rawColors = cellColorRaw(cellCount);
+              return (
+                <div className="px-4 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-[0.62rem] font-bold px-2 py-[2px] rounded-full border"
+                      style={{ background: rawColors.bg, color: rawColors.text, borderColor: rawColors.border }}
+                    >{gapLabel(cellCount)}</span>
+                    <span className="text-[0.72rem] font-semibold text-white">
+                      {bottomAnalysis.prov} · {CAT_LABELS[bottomAnalysis.cat] || bottomAnalysis.cat}
+                      {stage !== "All" && ` · ${STAGE_LABELS[stage]} stage`}
+                    </span>
+                    <span className="text-[0.62rem] text-[#A098A8]">
+                      {cellCount} program{cellCount !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[0.6rem] text-[#8A7A9A]">
+                      Click any cell in the map to analyze a different gap
+                    </span>
+                    {cellCount > 0 && onAskAI && (
+                      <button
+                        onClick={() => {
+                          // Close gap map and open browse with this province + category as search
+                          onClose();
+                          // Use localStorage to signal browse should open with filter
+                          try { localStorage.setItem("trellis_browse_filter", JSON.stringify({ search: CAT_LABELS[bottomAnalysis.cat] || bottomAnalysis.cat, province: bottomAnalysis.prov })); } catch {}
+                          window.location.href = "/navigator?eco=true&browse=true";
+                        }}
+                        className="text-[0.62rem] font-semibold text-[#48B87A] hover:text-[#8CC63F] transition-colors bg-transparent border-none cursor-pointer p-0"
+                      >
+                        View {cellCount} program{cellCount !== 1 ? "s" : ""} →
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="text-[0.6rem] text-[#8A7A9A] mt-1">
-                  Click any cell in the map to analyze a different gap
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {!bottomAnalysis && (
               <div className="px-4 pb-3 text-[0.7rem] text-[#A098A8]">
