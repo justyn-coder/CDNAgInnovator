@@ -26,7 +26,7 @@ const SECTIONS = [
     title: "Data & Intelligence",
     icon: "🗄️",
     items: [
-      { label: "490+ programs", desc: "Accelerators, funds, pilot sites, events, orgs, and training verified against federal and provincial databases." },
+      { label: "500+ programs", desc: "Accelerators, funds, pilot sites, events, orgs, and training verified against federal and provincial databases." },
       { label: "Knowledge base", desc: "Conference insights, ecosystem analysis, and sector intelligence from real events and research across Canada." },
       { label: "AI-powered pathways", desc: "Programs are sequenced by stage and province with gap detection and next-step logic." },
       { label: "Community-driven", desc: "Every correction and suggestion feeds back into the database. The data gets better with use." },
@@ -98,7 +98,7 @@ export default function ResourceCenter({ onClose }: { onClose: () => void }) {
         {/* Footer */}
         <div className="px-5 py-3 border-t border-border text-center">
           <p className="text-[0.7rem] text-text-tertiary">
-            490+ programs across Canada · Updated weekly · AI-powered recommendations
+            500+ programs across Canada · Updated weekly · AI-powered recommendations
           </p>
         </div>
       </div>

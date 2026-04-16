@@ -135,7 +135,7 @@ function TrellisLogo() {
 // ── Main Component ─────────────────────────────────────────────────────────
 
 export default function ProductTour({ mode, programCount, onComplete }: Props) {
-  const count = programCount ?? 490;
+  const count = programCount ?? 500;
   const isFounder = mode === "founder";
 
   function finish() {

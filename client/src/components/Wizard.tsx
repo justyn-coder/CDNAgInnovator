@@ -524,7 +524,7 @@ export default function Wizard({ onComplete, programCount }: Props) {
           Been through any Canadian programs already?
         </h2>
         <p className="text-[0.82rem] text-text-secondary mb-4">
-          Search our database of {programCount ?? 410}+ Canadian programs. Helps us skip what you've already done.
+          Search our database of {programCount ?? 500}+ Canadian programs. Helps us skip what you've already done.
         </p>
 
         {/* Search input */}

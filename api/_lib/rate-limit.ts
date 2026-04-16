@@ -7,6 +7,7 @@ const ALLOWED_ORIGINS = [
   "https://cdn-ag-innovator.vercel.app",
   "http://localhost:5173", // vite dev
   "http://localhost:3000", // vercel dev
+  "http://localhost:3001", // vercel dev (alt port)
 ];
 
 /**

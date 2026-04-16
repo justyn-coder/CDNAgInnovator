@@ -447,29 +447,47 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
         </div>
       )}
 
-      <div className="h-14 px-[18px] flex justify-between items-center border-b border-border shrink-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px]">
-        <span className="font-display font-normal text-[1.05rem] text-text">Gap Map</span>
-        <button
-          onClick={onClose}
-          className="bg-bg-secondary border border-border rounded-sm px-4 py-1.5 text-[0.78rem] font-semibold text-text transition-all duration-[120ms]"
-        >Done</button>
+      {/* ── Header ─────────────────────────────────────────── */}
+      <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] px-5 pt-4 pb-3 text-white relative overflow-hidden shrink-0">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+        <div className="relative flex items-start justify-between">
+          <div>
+            <div className="text-[0.58rem] font-bold tracking-[0.12em] uppercase text-white/60 mb-1">Ecosystem Coverage</div>
+            <h2 className="font-display text-[1.15rem] font-normal text-white leading-[1.2] mb-1.5">
+              Where support exists — and where it doesn't
+            </h2>
+            {data && !loading && (
+              <div className="text-[0.72rem] text-white/70 leading-[1.5]">
+                {data.summary.emptyCells} gaps across {data.provinces.length} provinces. {data.summary.weakCells} cells with only 1 program.
+                {stage !== "All" && <span className="text-brand-chartreuse font-semibold"> Filtered to {STAGE_LABELS[stage]} stage.</span>}
+              </div>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="bg-white/10 hover:bg-white/20 border-none rounded px-3 py-1.5 text-[0.72rem] font-semibold text-white/80 cursor-pointer transition-colors shrink-0 mt-1"
+          >Done</button>
+        </div>
       </div>
 
-      {/* Compact filter + legend bar */}
-      <div className="px-4 py-2 border-b border-border bg-bg-secondary shrink-0 flex items-center gap-2.5">
-        <select
-          value={stage}
-          onChange={e => setStage(e.target.value)}
-          className="px-2.5 py-[5px] rounded-sm border-[1.5px] border-border text-[0.75rem] font-semibold bg-bg text-text font-sans"
-        >
-          {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
-        </select>
-        <div className="flex gap-1 items-center ml-auto">
+      {/* ── Filter + legend bar ─────────────────────────────── */}
+      <div className="px-4 py-2.5 border-b border-border bg-bg shrink-0 flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[0.65rem] font-semibold text-text-secondary">Stage:</span>
+          <select
+            value={stage}
+            onChange={e => setStage(e.target.value)}
+            className="px-2.5 py-[5px] rounded-sm border-[1.5px] border-border text-[0.75rem] font-semibold bg-bg text-text font-sans"
+          >
+            {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
+          </select>
+        </div>
+        <div className="flex gap-1.5 items-center ml-auto">
           {[
-            { label: "Gap", bg: "bg-[#fde8e8]", text: "text-[#b91c1c]" },
-            { label: "Weak", bg: "bg-[#fef9c3]", text: "text-[#854d0e]" },
-            { label: "OK", bg: "bg-[#dcfce7]", text: "text-[#166534]" },
-            { label: "Strong", bg: "bg-[#d1fae5]", text: "text-[#064e3b]" },
+            { label: "Gap (0)", bg: "bg-[#fde8e8]", text: "text-[#b91c1c]" },
+            { label: "Weak (1)", bg: "bg-[#fef9c3]", text: "text-[#854d0e]" },
+            { label: "Fair (2)", bg: "bg-[#dcfce7]", text: "text-[#166534]" },
+            { label: "Strong (3+)", bg: "bg-[#d1fae5]", text: "text-[#064e3b]" },
           ].map(l => (
             <span key={l.label} className={cn(
               "text-[0.58rem] font-bold px-1.5 py-[2px] rounded-[4px]",
@@ -490,11 +508,11 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
           <table className="border-collapse w-full min-w-[520px]">
             <thead>
               <tr>
-                <th className="px-2.5 py-2 text-left font-semibold text-[0.65rem] text-text-secondary border-b border-border bg-bg-secondary sticky top-0 left-0 z-[2] min-w-[48px]">
-                  Prov
+                <th className="px-3 py-2.5 text-left font-bold text-[0.65rem] text-text-secondary border-b-2 border-border bg-bg sticky top-0 left-0 z-[2] min-w-[52px]">
+                  Province
                 </th>
                 {data.categories.map(cat => (
-                  <th key={cat} className="px-1.5 py-2 text-center font-semibold text-[0.62rem] text-text-secondary border-b border-border bg-bg-secondary sticky top-0 z-[1] tracking-[0.02em]">
+                  <th key={cat} className="px-2 py-2.5 text-center font-bold text-[0.62rem] text-text-secondary border-b-2 border-border bg-bg sticky top-0 z-[1] tracking-[0.02em]">
                     {CAT_LABELS[cat]}
                   </th>
                 ))}
@@ -502,8 +520,8 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
             </thead>
             <tbody>
               {data.provinces.map(prov => (
-                <tr key={prov} className="border-b border-border">
-                  <td className="px-2.5 py-[7px] font-bold text-[0.72rem] text-text bg-bg-secondary sticky left-0 z-[1] border-r border-border">
+                <tr key={prov} className="border-b border-border/60 hover:bg-bg-secondary/50 transition-colors">
+                  <td className="px-3 py-2 font-bold text-[0.72rem] text-text bg-bg sticky left-0 z-[1] border-r border-border/60">
                     {PROV_LABELS[prov] || prov}
                   </td>
                   {data.categories.map(cat => {
@@ -515,7 +533,7 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
                         key={cat}
                         onClick={() => setSelected({ prov, cat })}
                         className={cn(
-                          "px-1 py-1.5 text-center cursor-pointer transition-colors duration-100",
+                          "px-2 py-2.5 text-center cursor-pointer transition-all duration-100 hover:scale-[1.05]",
                           isSelected ? undefined : colors.bg,
                         )}
                         style={isSelected ? {
@@ -524,7 +542,7 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
                           outlineOffset: -2,
                         } : undefined}
                       >
-                        <div className={cn("text-[0.82rem] font-bold leading-none", colors.text)}>
+                        <div className={cn("text-[0.88rem] font-extrabold leading-none", colors.text)}>
                           {cell.count}
                         </div>
                       </td>
@@ -547,26 +565,37 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
             Know a program we're missing? Flag it and we'll investigate.
           </div>
           <div className="flex gap-2 flex-wrap">
-            {[
-              { prov: "NB", gap: "0 pilot sites, 0 events", severity: "high" },
-              { prov: "NL", gap: "0 pilot sites, 0 events, 0 orgs", severity: "high" },
-              { prov: "QC", gap: "0 events, 1 industry org", severity: "medium" },
-              { prov: "BC", gap: "1 training, 2 events", severity: "medium" },
-            ].map((g, i) => {
-              // Find the weakest category for this province from live data
-              const provRow = data?.matrix[g.prov];
-              let weakestCat: string | null = null;
-              if (provRow) {
+            {(() => {
+              if (!data) return null;
+              // Compute gaps dynamically from the matrix
+              const provGaps: { prov: string; gap: string; severity: string; weakestCat: string }[] = [];
+              for (const prov of data.provinces) {
+                if (prov === "National") continue;
+                const row = data.matrix[prov];
+                if (!row) continue;
+                const zeroCats: string[] = [];
+                const oneCats: string[] = [];
                 let minCount = Infinity;
-                for (const cat of data!.categories) {
-                  const c = provRow[cat]?.count ?? 0;
-                  if (c < minCount) { minCount = c; weakestCat = cat; }
+                let weakest = data.categories[0];
+                for (const cat of data.categories) {
+                  const c = row[cat]?.count ?? 0;
+                  if (c === 0) zeroCats.push(CAT_LABELS[cat] || cat);
+                  else if (c === 1) oneCats.push(`1 ${(CAT_LABELS[cat] || cat).toLowerCase()}`);
+                  if (c < minCount) { minCount = c; weakest = cat; }
                 }
+                if (zeroCats.length === 0 && oneCats.length === 0) continue;
+                const parts: string[] = [];
+                if (zeroCats.length > 0) parts.push(`0 ${zeroCats.map(c => c.toLowerCase() + "s").join(", 0 ")}`);
+                if (oneCats.length > 0) parts.push(oneCats.join(", "));
+                const severity = zeroCats.length >= 2 ? "high" : zeroCats.length >= 1 ? "high" : "medium";
+                provGaps.push({ prov, gap: parts.join(", "), severity, weakestCat: weakest });
               }
-              return (
+              // Sort: most zeros first, then show top 4
+              provGaps.sort((a, b) => (b.severity === "high" ? 1 : 0) - (a.severity === "high" ? 1 : 0));
+              return provGaps.slice(0, 4).map((g, i) => (
                 <div
                   key={i}
-                  onClick={() => weakestCat ? setSelected({ prov: g.prov, cat: weakestCat }) : undefined}
+                  onClick={() => setSelected({ prov: g.prov, cat: g.weakestCat })}
                   className={`flex-[1_1_calc(50%-4px)] min-w-[130px] px-2.5 py-2 rounded-sm bg-bg border border-border cursor-pointer transition-all ${
                     g.severity === "high" ? "hover:border-[#ef4444]" : "hover:border-[#D4A828]"
                   }`}
@@ -579,16 +608,16 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
                   </div>
                   <div className="text-[0.65rem] text-text-secondary leading-[1.4]">{g.gap}</div>
                 </div>
-              );
-            })}
+              ));
+            })()}
           </div>
         </div>
       )}
 
       {onFeedback && (
-        <div className="px-[18px] py-2 border-t border-border bg-brand-gold shrink-0 text-center">
-          <button onClick={onFeedback} className="bg-transparent border-none text-white text-[0.72rem] font-semibold p-0">
-            💬 Something wrong or missing? Tell us →
+        <div className="px-[18px] py-2.5 border-t border-border bg-gradient-to-r from-[#122b1f] to-[#1B4332] shrink-0 text-center">
+          <button onClick={onFeedback} className="bg-transparent border-none text-white/90 text-[0.72rem] font-semibold p-0 cursor-pointer hover:text-white transition-colors">
+            Know a program we're missing? Tell us and we'll investigate →
           </button>
         </div>
       )}

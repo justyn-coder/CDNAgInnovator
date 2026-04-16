@@ -139,7 +139,7 @@ export default function Home() {
     }
   }
 
-  const programCount = count ?? 410;
+  const programCount = count ?? 500;
 
   return (
     <div className="min-h-screen bg-bg flex flex-col font-sans">
@@ -233,22 +233,68 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Value props */}
+        {/* Value props — three pillars */}
         <div
-          className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 max-w-[700px] w-full mb-12"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-[760px] w-full mb-12"
           style={{ animation: "fadeInUp 0.6s ease 0.4s both" }}
         >
-          {[
-            { icon: "📊", title: "Verified data", desc: `${programCount} programs verified against federal and provincial databases` },
-            { icon: "🗺", title: "Ordered pathway", desc: "Not a list — a clear sequence: what to do now, next, and later" },
-            { icon: "⚠️", title: "Gap warnings", desc: "We flag gaps in your province — and point you to the next best option." },
-          ].map((item, i) => (
-            <div key={i} className="bg-bg-secondary border border-border border-t-[3px] border-t-brand-green rounded px-4 py-4.5">
-              <div className="text-[1.2rem] mb-2">{item.icon}</div>
-              <div className="font-bold text-[0.82rem] text-text mb-1">{item.title}</div>
-              <div className="text-[0.75rem] text-text-secondary leading-[1.5]">{item.desc}</div>
+          {/* Personalized Pathway */}
+          <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); } catch {} }}
+            className="bg-gradient-to-br from-[#122b1f] to-[#1B4332] rounded-lg px-5 py-5 text-white relative overflow-hidden no-underline transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer block">
+            <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 30% 70%, white 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-brand-chartreuse/20 flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8CC63F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                  </svg>
+                </div>
+                <span className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-white/60">Personalized</span>
+              </div>
+              <div className="font-display text-[1.05rem] leading-[1.2] mb-2">Your pathway, not a directory</div>
+              <div className="text-[0.72rem] text-white/75 leading-[1.5]">
+                {programCount} programs filtered to your stage, province, and need. Sequenced in order. Start with #1.
+              </div>
             </div>
-          ))}
+          </Link>
+
+          {/* AI Advisor */}
+          <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "e"); localStorage.setItem("trellis_skip_to", "chat"); } catch {} }}
+            className="bg-[#FFF8E7] border border-[rgba(212,168,40,0.2)] rounded-lg px-5 py-5 relative no-underline transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer block">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-brand-gold/15 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H6l-3 2.5V11H3a1 1 0 01-1-1V3z" stroke="#8B6914" strokeWidth="1.3" fill="none"/>
+                  <circle cx="5.5" cy="6.5" r="0.8" fill="#8B6914"/>
+                  <circle cx="8" cy="6.5" r="0.8" fill="#8B6914"/>
+                  <circle cx="10.5" cy="6.5" r="0.8" fill="#8B6914"/>
+                </svg>
+              </div>
+              <span className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-[#8B6914]/60">AI-powered</span>
+            </div>
+            <div className="font-display text-[1.05rem] text-text leading-[1.2] mb-2">Ask it anything</div>
+            <div className="text-[0.72rem] text-text-secondary leading-[1.5]">
+              "Who should I call first?" "What's the deadline?" An AI trained on the full ecosystem, not just program names.
+            </div>
+          </Link>
+
+          {/* Ecosystem Intelligence */}
+          <Link href="/navigator" onClick={() => { try { localStorage.setItem("ag_nav_mode", "ec"); localStorage.setItem("trellis_skip_to", "gapmap"); } catch {} }}
+            className="bg-bg-secondary border border-border rounded-lg px-5 py-5 relative no-underline transition-all duration-150 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer block">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2D7A4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                </svg>
+              </div>
+              <span className="text-[0.6rem] font-bold tracking-[0.1em] uppercase text-text-tertiary">Intelligence</span>
+            </div>
+            <div className="font-display text-[1.05rem] text-text leading-[1.2] mb-2">Gaps nobody talks about</div>
+            <div className="text-[0.72rem] text-text-secondary leading-[1.5]">
+              We flag where support disappears by stage and province. Real data, not pitch decks.
+            </div>
+          </Link>
         </div>
 
         {/* Footer */}

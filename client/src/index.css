@@ -125,6 +125,10 @@
   from { opacity: 0; transform: translateY(-12px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes softBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
 
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
