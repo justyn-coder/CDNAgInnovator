@@ -378,6 +378,7 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<{ prov: string; cat: string } | null>(null);
+  const [bottomAnalysis, setBottomAnalysis] = useState<{ prov: string; cat: string } | null>(null);
   const [showGuide, setShowGuide] = useState(() => {
     try {
       if (sessionStorage.getItem("ag_gap_guided")) return false;
@@ -404,7 +405,7 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
       .catch(() => { setError("Failed to load gap data."); setLoading(false); });
   }, [stage]);
 
-  useEffect(() => { setSelected(null); }, [stage]);
+  useEffect(() => { setSelected(null); setBottomAnalysis(null); }, [stage]);
 
   // Dismiss guide on first cell click
   useEffect(() => {
@@ -521,36 +522,6 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
         </div>
       </div>
 
-      {/* AI prompt — above the table, not a footer */}
-      {!loading && data && onAskAI && (
-        <div className="px-4 pt-3 pb-2 shrink-0">
-          <div className="bg-gradient-to-br from-[#2D2438] to-[#3D3248] rounded-xl px-4 py-3 border border-[#4D4458]">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-                  <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <span className="text-[0.72rem] font-bold text-[#EDE9F0]">Go deeper with AI</span>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {[
-                { label: `Scale gaps in Ontario`, q: `Looking at the gap map, Ontario has zero accelerators and zero pilot sites at Scale stage. Why does this gap exist and what should ecosystem builders do about it?` },
-                { label: `Where do founders fall through?`, q: `Based on the gap map data, which provinces have the most critical gaps for founders moving from pilot to commercialization? Where does support disappear?` },
-                { label: `Atlantic Canada`, q: `The gap map shows significant gaps in Atlantic Canada across multiple categories. What's the structural reason and what would it take to fill them?` },
-                ...(stage !== "All" ? [{ label: `${STAGE_LABELS[stage]} stage nationally`, q: `What are the most critical ecosystem gaps at the ${STAGE_LABELS[stage]} stage across Canada? Where should new programs be created?` }] : []),
-              ].map((chip, i) => (
-                <button
-                  key={i}
-                  onClick={() => onAskAI(chip.q)}
-                  className="bg-white/10 hover:bg-white/20 border border-white/15 hover:border-white/30 rounded-full px-3 py-1.5 text-[0.65rem] font-medium text-[#D8D0E0] hover:text-white cursor-pointer transition-all font-sans"
-                >{chip.label}</button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="flex-1 overflow-y-auto overflow-x-auto px-4 pb-3">
         {loading && (
           <div className="p-12 text-center text-text-tertiary text-[0.85rem]">Loading gap data…</div>
@@ -609,12 +580,69 @@ export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founde
         )}
       </div>
 
-      {/* Feedback link — subtle, below table */}
-      {onFeedback && !loading && (
-        <div className="px-4 pb-3 pt-1 shrink-0 text-center">
-          <button onClick={onFeedback} className="bg-transparent border-none text-text-tertiary text-[0.65rem] p-0 cursor-pointer hover:text-text-secondary transition-colors">
-            Know a program we're missing? Tell us →
-          </button>
+      {/* AI analysis section — bottom of gap map, in-page */}
+      {!loading && data && (
+        <div className="shrink-0 border-t border-border">
+          <div className="bg-gradient-to-br from-[#2D2438] to-[#3D3248] px-4 py-3">
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <span className="text-[0.72rem] font-bold text-[#EDE9F0]">Go deeper</span>
+              <span className="text-[0.6rem] text-[#A098A8]">Pick a gap to analyze</span>
+            </div>
+
+            {/* Prompt chips — each triggers an in-page ExplainCard */}
+            <div className="flex gap-2 flex-wrap mb-3">
+              {(() => {
+                // Build chips from actual gaps in the data
+                const chips: { label: string; prov: string; cat: string }[] = [];
+                for (const prov of data.provinces) {
+                  if (prov === "National") continue;
+                  const row = data.matrix[prov];
+                  if (!row) continue;
+                  for (const cat of data.categories) {
+                    if ((row[cat]?.count ?? 0) === 0) {
+                      chips.push({ label: `${prov} ${(CAT_LABELS[cat] || cat).toLowerCase()}`, prov, cat });
+                    }
+                  }
+                }
+                // Show top 5 gaps + any weak (1) cells as secondary
+                return chips.slice(0, 5).map((chip, i) => {
+                  const isActive = bottomAnalysis?.prov === chip.prov && bottomAnalysis?.cat === chip.cat;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setBottomAnalysis(isActive ? null : { prov: chip.prov, cat: chip.cat })}
+                      className={cn(
+                        "rounded-full px-3 py-1.5 text-[0.65rem] font-medium cursor-pointer transition-all font-sans border",
+                        isActive
+                          ? "bg-white/20 border-white/40 text-white"
+                          : "bg-white/8 hover:bg-white/15 border-white/15 hover:border-white/30 text-[#D8D0E0] hover:text-white"
+                      )}
+                    >{chip.label}</button>
+                  );
+                });
+              })()}
+            </div>
+
+            {/* In-page AI analysis — shows when a chip is clicked */}
+            {bottomAnalysis && (
+              <div key={`${bottomAnalysis.prov}-${bottomAnalysis.cat}`} className="animate-fade-in-up">
+                <ExplainCard prov={bottomAnalysis.prov} cat={bottomAnalysis.cat} stage={stage} mode={mode} autoFetch={true} />
+              </div>
+            )}
+          </div>
+
+          {onFeedback && (
+            <div className="px-4 py-2 bg-[#1a1525] text-center">
+              <button onClick={onFeedback} className="bg-transparent border-none text-[#A098A8] text-[0.65rem] p-0 cursor-pointer hover:text-[#D8D0E0] transition-colors">
+                Know a program we're missing? Tell us →
+              </button>
+            </div>
+          )}
         </div>
       )}
 
