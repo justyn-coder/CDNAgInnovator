@@ -99,16 +99,27 @@ const GAP_TYPE_CLASSES: Record<string, { bg: string; text: string; border: strin
   adequate:       { bg: "bg-[#d1fae5]", text: "text-[#064e3b]", border: "border-[#34d399]" },
 };
 
+// ── Pre-cached AI analyses for key cells (instant load during demo) ────────
+const EXPLAIN_CACHE: Record<string, ExplainResponse> = {
+  "ON|Accel|Scale": {"gapType":"stage_mismatch","explanation":{"classification_label":"Stage Mismatch \u2014 Acceleration Ends at Early Stage","why":"Ontario's 24 catalogued accelerator-adjacent programs are concentrated at early and growth stages, leaving scaling agtech companies without structured acceleration support. The Bioenterprise roundtable flagged this directly: Ontario's dominant generalist ecosystem (MaRS, Communitech, etc.) runs on SaaS and deep-tech timelines that don't accommodate agricultural seasonality, hardware cycles, or regulatory pathways.","action":"This is a real opportunity for an Ontario-based operator to launch a scale-stage agtech cohort, potentially in partnership with existing infrastructure like Bioenterprise or Lakehead's NORCAT. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":24,"nationalCount":13,"neighborCounts":{"MB":1,"QC":1}}},
+  "NB|Train|All": {"gapType":"market_failure","explanation":{"classification_label":"Possible Structural Gap","why":"New Brunswick has no catalogued agtech-specific training programs, which aligns with the Bioenterprise finding that the province lacks full-stack agtech support infrastructure entirely. With neighbors NS and PE also showing zero, this appears to be a regional market failure rather than a data blind spot.","action":"This is a greenfield opportunity for an operator willing to deliver agtech-calibrated training regionally \u2014 a Maritime cohort model partnering with ACOA and the existing QC program could be viable without building from scratch. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":0,"nationalCount":2,"neighborCounts":{"QC":1,"NS":0,"PE":0}}},
+  "NL|Train|All": {"gapType":"market_failure","explanation":{"classification_label":"Possible Structural Gap (Low Priority Market)","why":"NL and NS both show zero catalogued agtech training programs, suggesting a regional pattern rather than an isolated omission. NL's minimal agricultural base means agtech-specific training likely lacks the founder density to justify dedicated programming.","action":"The two national programs are the most realistic entry point for Atlantic founders today. For operators, the opportunity may be a regionally-bundled Atlantic cohort model \u2014 partnering with NS, NB, and PEI to reach critical mass. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":0,"nationalCount":2,"neighborCounts":{"NS":0}}},
+  "NS|Train|All": {"gapType":"market_failure","explanation":{"classification_label":"Structural Regional Gap","why":"NS shows zero agtech-specific training programs, mirroring NB and PEI \u2014 suggesting this isn't a Nova Scotia oversight but a systemic Atlantic-wide gap. General entrepreneurship training dominates the region, failing to address agtech-specific realities like seasonal producer sales cycles and regulatory pathways.","action":"The Atlantic cluster creates a compelling case for a shared regional agtech training cohort \u2014 Perennia Food and Agriculture or ACOA may be natural anchors. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":0,"nationalCount":2,"neighborCounts":{"NB":0,"PE":0}}},
+  "BC|Event|Scale": {"gapType":"stage_mismatch","explanation":{"classification_label":"Stage Mismatch \u2014 Events Serve Early Stages","why":"BC's 4 catalogued agtech events appear oriented toward early-stage founders. Scaling companies need different rooms: customer introductions, investor syndication, and export market access. BC's fragmented ecosystem likely means no single convener has stepped up to program explicitly for scale-stage companies.","action":"This is a programming gap a convener like Innovate BC or BCAC could own \u2014 a curated scale-stage event or deal-flow dinner requires less infrastructure than a conference. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":4,"nationalCount":11,"neighborCounts":{"AB":5}}},
+};
+
 // ── AI Explain card ────────────────────────────────────────────────────────
 function ExplainCard({
   prov, cat, stage, mode, autoFetch = false,
 }: {
   prov: string; cat: string; stage: string; mode: string; autoFetch?: boolean;
 }) {
-  const [data, setData] = useState<ExplainResponse | null>(null);
-  const [loading, setLoading] = useState(autoFetch);
+  const cacheKey = `${prov}|${cat}|${stage}`;
+  const cached = EXPLAIN_CACHE[cacheKey] || null;
+  const [data, setData] = useState<ExplainResponse | null>(cached);
+  const [loading, setLoading] = useState<boolean>(autoFetch && !cached);
   const [error, setError] = useState("");
-  const hasFetched = useRef(false);
+  const hasFetched = useRef(!!cached);
   const [showMeta, setShowMeta] = useState(true);
   const [gapFeedback, setGapFeedback] = useState("");
 
