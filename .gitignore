@@ -8,3 +8,4 @@ hq_dashboard.html
 tally-extension/
 link-audit/
 url-audit-review.csv
+.env.test
