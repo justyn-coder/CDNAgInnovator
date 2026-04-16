@@ -106,6 +106,8 @@ const EXPLAIN_CACHE: Record<string, ExplainResponse> = {
   "NL|Train|All": {"gapType":"market_failure","explanation":{"classification_label":"Possible Structural Gap (Low Priority Market)","why":"NL and NS both show zero catalogued agtech training programs, suggesting a regional pattern rather than an isolated omission. NL's minimal agricultural base means agtech-specific training likely lacks the founder density to justify dedicated programming.","action":"The two national programs are the most realistic entry point for Atlantic founders today. For operators, the opportunity may be a regionally-bundled Atlantic cohort model \u2014 partnering with NS, NB, and PEI to reach critical mass. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":0,"nationalCount":2,"neighborCounts":{"NS":0}}},
   "NS|Train|All": {"gapType":"market_failure","explanation":{"classification_label":"Structural Regional Gap","why":"NS shows zero agtech-specific training programs, mirroring NB and PEI \u2014 suggesting this isn't a Nova Scotia oversight but a systemic Atlantic-wide gap. General entrepreneurship training dominates the region, failing to address agtech-specific realities like seasonal producer sales cycles and regulatory pathways.","action":"The Atlantic cluster creates a compelling case for a shared regional agtech training cohort \u2014 Perennia Food and Agriculture or ACOA may be natural anchors. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":0,"nationalCount":2,"neighborCounts":{"NB":0,"PE":0}}},
   "BC|Event|Scale": {"gapType":"stage_mismatch","explanation":{"classification_label":"Stage Mismatch \u2014 Events Serve Early Stages","why":"BC's 4 catalogued agtech events appear oriented toward early-stage founders. Scaling companies need different rooms: customer introductions, investor syndication, and export market access. BC's fragmented ecosystem likely means no single convener has stepped up to program explicitly for scale-stage companies.","action":"This is a programming gap a convener like Innovate BC or BCAC could own \u2014 a curated scale-stage event or deal-flow dinner requires less infrastructure than a conference. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":4,"nationalCount":11,"neighborCounts":{"AB":5}}},
+  "ON|Fund|All": {"gapType":"adequate","explanation":{"classification_label":"Adequate \u2014 With Structural Concentration Risks","why":"Ontario's 18 catalogued programs look strong on paper, but most are generalist vehicles competing with non-ag deal flow. Genuinely ag-specific instruments cluster at either end \u2014 early research (OMAFRA, Alliance) or commercial-scale (Ag Capital, SGAP) \u2014 leaving TRL 4-7 served mainly by OCE and OCI, both facing mandate drift risk.","action":"The operator opportunity is a dedicated agtech bridge fund targeting TRL 5-7 \u2014 Bioenterprise's SmartGrowth Program and RHA's 519 Growth Fund prove demand exists. Study Effet Levier Agriculture in Quebec as a structural model. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":18,"nationalCount":66,"neighborCounts":{"MB":11,"QC":15}}},
+  "ON|Event|All": {"gapType":"adequate","explanation":{"classification_label":"Adequate \u2014 With Stage and Sector Concentration Risks","why":"Ontario's 15 catalogued events are the strongest count nationally, but the distribution skews heavily toward Comm and Scale stages. Most events are commodity-sector-specific (swine, dairy, poultry, grain), meaning cross-sector or platform agtech companies may find few natural networking homes.","action":"The operator opportunity is a dedicated early-stage agtech pitch or demo event serving Idea-to-Pilot founders across sectors. The ARIO or Bioenterprise Ontario network would be natural anchors. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":15,"nationalCount":11,"neighborCounts":{"MB":6,"QC":7}}},
 };
 
 // ── AI Explain card ────────────────────────────────────────────────────────
@@ -331,21 +333,16 @@ function CellDetail({
           >Close</button>
         </div>
 
-        <ExplainCard prov={prov} cat={cat} stage={stage} mode={mode} autoFetch={cell.count === 0} />
+        {/* AI analysis — always auto-fires, pushes programs down */}
+        <ExplainCard prov={prov} cat={cat} stage={stage} mode={mode} autoFetch={true} />
 
         {cell.count === 0 ? (
           <div className="mt-3 px-4 py-4 bg-gradient-to-br from-[#FEF2F2] to-[#FFFBEB] rounded-lg border border-[#FECACA]/60">
-            <div className="font-semibold text-[0.85rem] text-[#991B1B] mb-1">
-              Uncovered gap: {prov === "National" ? "National" : prov} {(CAT_LABELS[cat] || cat).toLowerCase()}
+            <div className="font-semibold text-[0.82rem] text-[#991B1B] mb-1">
+              No programs catalogued here yet
             </div>
-            <div className="text-[0.75rem] text-text-secondary leading-[1.5] mb-2.5">
-              {stage !== "All"
-                ? `No ${(CAT_LABELS[cat] || cat).toLowerCase()} programs catalogued for ${stage}-stage companies in ${prov}. This is either a real gap in the ecosystem or something we haven't found yet.`
-                : `No ${(CAT_LABELS[cat] || cat).toLowerCase()} programs catalogued in ${prov}. This is either a real gap or something we're missing.`
-              }
-            </div>
-            <div className="text-[0.72rem] text-brand-green font-semibold">
-              Know a program that fills this? Use "Suggest a correction" in Browse Programs to tell us.
+            <div className="text-[0.72rem] text-text-secondary leading-[1.5]">
+              Know a program that belongs here? Use "Suggest a correction" in Browse Programs.
             </div>
           </div>
         ) : (
