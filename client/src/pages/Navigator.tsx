@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link } from "wouter";
 import { cn } from "../lib/cn";
 import { SIGNAL_RESPONSES } from "../lib/signal-responses";
@@ -11,6 +11,7 @@ import CorrectionHintTooltip from "../components/CorrectionHintTooltip";
 import DateFilter, { getDateBadge, DateBadge, type DateRange } from "../components/DateFilter";
 import ResourceCenter from "../components/ResourceCenter";
 import ProductTour, { shouldShowTour, dismissTour } from "../components/ProductTour";
+import SaveJourney from "../components/SaveJourney";
 
 interface Program {
   id: number; name: string; category: string;
@@ -831,7 +832,11 @@ function BrowsePanel({
         {loading ? (
           <div className="p-12 text-center text-text-tertiary">🌾 Loading programs…</div>
         ) : sorted.length === 0 ? (
-          <div className="p-12 text-center text-text-tertiary">🔍 No programs match those filters — try broadening your search.</div>
+          <div className="p-12 text-center text-text-tertiary">
+            {dateRange.from || dateRange.to
+              ? "📅 No programs with dates in this range yet. We're adding event dates and deadlines regularly — try removing the date filter to see all programs."
+              : "🔍 No programs match those filters — try broadening your search."}
+          </div>
         ) : (
           <div className="flex flex-col gap-px">
             {sorted.map(p => (
@@ -1027,7 +1032,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
 // ── Loading Messages ─────────────────────────────────────────────────────────
 function LoadingMessages({ programCount }: { programCount?: number | null }) {
   const LOADING_MSGS = [
-    `Searching across ${programCount ?? 410} programs…`,
+    `Searching across ${programCount ?? 500} programs…`,
     "This usually takes 10–15 seconds — hang tight.",
     "Cross-referencing with ecosystem insights…",
     "Almost there…",
@@ -1162,13 +1167,45 @@ export default function Navigator() {
     }
   }
 
-  // Fetch dynamic counts for operator dashboard
+  // Fetch programs for counts and signal card stats
+  const [allPrograms, setAllPrograms] = useState<Program[]>([]);
   useEffect(() => {
     fetch("/api/programs").then(r => r.json()).then((d: any[]) => {
       const hidden = new Set(["closed", "dissolved", "inactive", "announced"]);
-      setProgramCount(d.filter((p: any) => !hidden.has(p.status || "")).length);
+      const active = d.filter((p: any) => !hidden.has(p.status || ""));
+      setProgramCount(active.length);
+      setAllPrograms(active);
     }).catch(() => {});
   }, []);
+
+  // Compute signal card stats from live data
+  const signalStats = useMemo(() => {
+    if (allPrograms.length === 0) return null;
+    const stageCounts: Record<string, number> = { Idea: 0, MVP: 0, Pilot: 0, Comm: 0, Scale: 0 };
+    for (const p of allPrograms) for (const s of (p.stage || [])) if (s in stageCounts) stageCounts[s]++;
+
+    const abPrograms = allPrograms.filter(p => (p.province || []).includes("AB"));
+    const abScale = abPrograms.filter(p => (p.stage || []).includes("Scale"));
+
+    const fundProgs = allPrograms.filter(p => p.category === "Fund" && p.fundingMaxCad);
+    const under150k = fundProgs.filter(p => p.fundingMaxCad! <= 150000).length;
+    const mid500k1m = fundProgs.filter(p => p.fundingMaxCad! >= 500000 && p.fundingMaxCad! <= 1000000).length;
+    const over1m = fundProgs.filter(p => p.fundingMaxCad! > 1000000).length;
+
+    const commToScaleDrop = stageCounts.Comm > 0 ? Math.round((1 - stageCounts.Scale / stageCounts.Comm) * 100) : 0;
+
+    return {
+      stageCounts,
+      maxStageCount: Math.max(...Object.values(stageCounts)),
+      abTotal: abPrograms.length,
+      abScale: abScale.length,
+      abAgPct: abPrograms.length > 0 ? Math.round((abPrograms.filter(p => (p.category === "Fund" || p.category === "Accel") && (p.use_case || []).some(u => /agri|farm|crop|food/i.test(u))).length / abPrograms.length) * 100) : 0,
+      under150k,
+      mid500k1m,
+      over1m,
+      commToScaleDrop,
+    };
+  }, [allPrograms]);
 
   // Read URL params on mount
   useEffect(() => {
@@ -1198,6 +1235,22 @@ export default function Navigator() {
         setShowBrowse(true);
         setShowTour(false); // Skip tour on deep link
       }
+
+      // Handle skip_to from home page cards
+      try {
+        const skipTo = localStorage.getItem("trellis_skip_to");
+        if (skipTo) {
+          localStorage.removeItem("trellis_skip_to");
+          if (skipTo === "chat") {
+            setShowWizard(false);
+            setActiveTab("chat");
+            setShowTour(false);
+          } else if (skipTo === "gapmap") {
+            setShowGapMap(true);
+            setShowTour(false);
+          }
+        }
+      } catch {}
 
       // Handle saved journey restore
       const journeyToken = params.get("journey");
@@ -1297,11 +1350,9 @@ export default function Navigator() {
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => {
-        if (loading) {
-          bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        } else {
-          lastMsgRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        // Always scroll to show the latest message from the top,
+        // so the user's question stays visible while AI responds
+        lastMsgRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
     }
   }, [messages.length, loading]);
@@ -1413,7 +1464,7 @@ export default function Navigator() {
           onOpenChat={(question) => { setShowBrowse(false); setOrgParam(null); if (question) send(question); }}
         />
       )}
-      {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} onFeedback={() => { setShowGapMap(false); setShowFeedback(true); }} mode={mode === "ec" ? "ec" : "founder"} />}
+      {showGapMap && <GapMatrix onClose={() => setShowGapMap(false)} onFeedback={() => { setShowGapMap(false); setShowFeedback(true); }} onAskAI={(q) => { setShowGapMap(false); send(q); }} mode={mode === "ec" ? "ec" : "founder"} />}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isEco={isEco} pageContext={showPathway ? "pathway results" : showWizard ? "wizard" : isEco ? "ecosystem chat" : "chat"} />}
       {showResourceCenter && <ResourceCenter onClose={() => setShowResourceCenter(false)} />}
 
@@ -1520,7 +1571,6 @@ export default function Navigator() {
                 : [
                     { id: "pathway" as TabId, label: "My Pathway" },
                     { id: "browse" as TabId, label: "Browse Programs" },
-                    { id: "gapmap" as TabId, label: "Gap Map" },
                     { id: "chat" as TabId, label: "Ask AI" },
                   ]
               ).map(tab => {
@@ -1663,39 +1713,36 @@ export default function Navigator() {
                       </div>
 
                       {/* Stage funnel sparkline */}
+                      {signalStats && (
                       <div className="flex items-end gap-1 mt-3 mb-1" style={{ height: 64 }}>
-                        {[
-                          { label: "Idea", count: 154 },
-                          { label: "MVP", count: 280 },
-                          { label: "Pilot", count: 235 },
-                          { label: "Comm", count: 240 },
-                          { label: "Scale", count: 117 },
-                        ].map((s) => {
-                          const barH = Math.round((s.count / 280) * 48);
-                          const isScale = s.label === "Scale";
+                        {(["Idea", "MVP", "Pilot", "Comm", "Scale"] as const).map((label) => {
+                          const count = signalStats.stageCounts[label];
+                          const barH = Math.round((count / signalStats.maxStageCount) * 48);
+                          const isScale = label === "Scale";
                           return (
-                            <div key={s.label} className="flex flex-col items-center justify-end flex-1" style={{ height: "100%" }}>
+                            <div key={label} className="flex flex-col items-center justify-end flex-1" style={{ height: "100%" }}>
                               <div
                                 className="w-full rounded-sm"
                                 style={{
                                   height: barH,
                                   backgroundColor: isScale ? "#B45309" : "#2D5A3D",
-                                  opacity: isScale ? 1 : s.label === "Idea" ? 0.3 : s.label === "MVP" ? 0.6 : 0.45,
+                                  opacity: isScale ? 1 : label === "Idea" ? 0.3 : label === "MVP" ? 0.6 : 0.45,
                                 }}
                               />
                               <span className={cn(
                                 "text-[0.55rem] mt-0.5",
                                 isScale ? "text-[#B45309] font-semibold" : "text-text-tertiary"
                               )}>
-                                {s.label}
+                                {label}
                               </span>
                             </div>
                           );
                         })}
                       </div>
+                      )}
 
                       <div className="text-[0.72rem] text-text-secondary leading-[1.5] mb-3 max-w-[380px]">
-                        240 programs help at commercialization. By the time a founder needs to scale, 117 remain. A 51% drop.
+                        {signalStats ? `${signalStats.stageCounts.Comm} programs help at commercialization. By the time a founder needs to scale, ${signalStats.stageCounts.Scale} remain. A ${signalStats.commToScaleDrop}% drop.` : "Loading..."}
                       </div>
                       <button
                         onClick={() => send("Where does support disappear between pilot and scale stage?")}
@@ -1720,10 +1767,10 @@ export default function Navigator() {
                           Alberta's Paradox
                         </div>
                         <div className="font-display text-[1rem] md:text-[1.1rem] text-text leading-[1.2] mb-1.5">
-                          76 programs. 1 for scale-stage ag.
+                          {signalStats ? `${signalStats.abTotal} programs. ${signalStats.abScale} for scale-stage.` : "Loading..."}
                         </div>
                         <div className="text-[0.72rem] text-text-secondary leading-[1.5] mb-2.5">
-                          Alberta has more programs than any province. But only 12% are ag-food specific. For a scale-stage agtech company, there's exactly one dedicated option.
+                          Alberta has one of the largest program ecosystems. But scale-stage agtech companies have {signalStats ? `only ${signalStats.abScale} dedicated options` : "limited options"}.
                         </div>
                         <button
                           onClick={() => send("What's actually available for a scale-stage agtech company in Alberta?")}
@@ -1745,10 +1792,10 @@ export default function Navigator() {
                           The Funding Valley
                         </div>
                         <div className="font-display text-[1rem] md:text-[1.1rem] text-text leading-[1.2] mb-1.5">
-                          6 programs in the $500K-$1M band.
+                          {signalStats ? `${signalStats.mid500k1m} programs in the $500K-$1M band.` : "Loading..."}
                         </div>
                         <div className="text-[0.72rem] text-text-secondary leading-[1.5] mb-2.5">
-                          23 programs fund under $150K. 20 fund over $1M. Founders who've outgrown grants but aren't ready for venture have almost nowhere to go.
+                          {signalStats ? `${signalStats.under150k} programs fund under $150K. ${signalStats.over1m} fund over $1M.` : ""} Founders who've outgrown grants but aren't ready for venture have limited options.
                         </div>
                         <button
                           onClick={() => send("What funding options exist between $500K and $1M for agtech companies with revenue?")}
@@ -1808,7 +1855,7 @@ export default function Navigator() {
           {/* Welcome-back banner (restored journeys) */}
           {isRestored && showPathway && wizardSnapshot && (
             <div
-              className="mx-4 mt-3 px-4 py-3 rounded-lg flex items-center justify-between gap-3 flex-wrap animate-fade-in-up"
+              className="mx-auto mt-3 px-4 py-3 max-w-3xl w-full rounded-lg flex items-center justify-between gap-3 flex-wrap animate-fade-in-up"
               style={{ background: "#E8F5E9", border: "0.5px solid rgba(76,175,80,0.3)" }}
             >
               <div>
@@ -1836,7 +1883,25 @@ export default function Navigator() {
           )}
 
           {!isEco && showWizard && !restoreLoading && (
-            <Wizard onComplete={handleWizardComplete} programCount={programCount} />
+            <>
+              {/* Skip wizard links */}
+              <div className="flex justify-center gap-4 px-4 pt-3 pb-0">
+                <button
+                  onClick={() => { setShowWizard(false); setShowBrowse(true); }}
+                  className="text-[0.72rem] text-text-tertiary hover:text-brand-green transition-colors bg-transparent border-none cursor-pointer p-0"
+                >
+                  Browse all programs →
+                </button>
+                <span className="text-[0.65rem] text-border">|</span>
+                <button
+                  onClick={() => { setShowWizard(false); setActiveTab("chat"); }}
+                  className="text-[0.72rem] text-text-tertiary hover:text-brand-green transition-colors bg-transparent border-none cursor-pointer p-0"
+                >
+                  Skip to AI chat →
+                </button>
+              </div>
+              <Wizard onComplete={handleWizardComplete} programCount={programCount} />
+            </>
           )}
 
           {!isEco && showPathway && wizardSnapshot && activeTab === "pathway" && (
@@ -1860,51 +1925,66 @@ export default function Navigator() {
             />
           )}
 
-          {/* AI Advisor prompt — shown after pathway loads, before chat messages */}
+          {/* AI Advisor + Save Pathway — side by side on desktop, stacked on mobile */}
           {!isEco && showPathway && wizardSnapshot && activeTab === "pathway" && messages.length === 0 && !loading && (
-            <div className="mx-4 mb-3 animate-fade-in-up">
-              <div
-                className="rounded-lg border border-border overflow-hidden"
-                style={{ background: "linear-gradient(135deg, #f8faf8 0%, #f0f5f0 100%)" }}
-              >
-                <div className="px-4 py-3 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center shrink-0">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H6l-3 2.5V11H3a1 1 0 01-1-1V3z" stroke="#2D7A4F" strokeWidth="1.3" fill="none"/>
-                      <circle cx="5.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
-                      <circle cx="8" cy="6.5" r="0.8" fill="#2D7A4F"/>
-                      <circle cx="10.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-[0.85rem] font-semibold text-text">Your AI advisor is ready</div>
-                    <div className="text-[0.7rem] text-text-secondary">Ask follow-up questions about your pathway below</div>
-                  </div>
-                </div>
+            <div className="mx-auto px-4 mb-3 max-w-3xl w-full animate-fade-in-up">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+                {/* AI Advisor card — compact, points to chat input below */}
                 <div
-                  className="px-4 pb-3 flex gap-2 flex-wrap"
+                  className="rounded-lg border border-border overflow-hidden"
+                  style={{ background: "linear-gradient(135deg, #f8faf8 0%, #f0f5f0 100%)" }}
                 >
-                  {[
-                    { label: "What grants am I missing?", q: "Based on my pathway, what grants or funding programs am I missing that I should know about?" },
-                    { label: `How do I apply to ${wizardSnapshot.provinces[0] || "my province"} programs?`, q: `What's the application process for the top programs in ${wizardSnapshot.provinces[0] || "my province"}? Walk me through the steps.` },
-                    { label: "Compare provinces", q: "Compare the ecosystem support across provinces for a startup like mine. Where would I get the best support?" },
-                    { label: "Upcoming deadlines", q: "What program deadlines are coming up in the next 3 months that I should know about based on my profile?" },
-                    { label: "Who should I talk to?", q: "Based on my pathway, which organizations should I reach out to first? Who are the key contacts or program managers?" },
-                  ].map((chip, i) => (
-                    <button
-                      key={i}
-                      onClick={() => send(chip.q)}
-                      className="cursor-pointer font-sans transition-all bg-white border border-border text-text-secondary hover:border-brand-green hover:text-text hover:bg-bg-secondary shadow-sm"
-                      style={{
-                        padding: "6px 12px",
-                        borderRadius: 100,
-                        fontSize: "0.72rem",
-                        fontWeight: 500,
-                        whiteSpace: "nowrap",
-                      }}
-                    >{chip.label}</button>
-                  ))}
+                  <div className="px-4 py-3 flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center shrink-0 animate-[softBounce_2s_ease-in-out_infinite]">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H6l-3 2.5V11H3a1 1 0 01-1-1V3z" stroke="#2D7A4F" strokeWidth="1.3" fill="none"/>
+                        <circle cx="5.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                        <circle cx="8" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                        <circle cx="10.5" cy="6.5" r="0.8" fill="#2D7A4F"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-[0.85rem] font-semibold text-text">Your AI advisor is ready</div>
+                      <div className="text-[0.7rem] text-text-secondary">Ask anything about your pathway below ↓</div>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-3 flex gap-2 flex-wrap">
+                    {[
+                      { label: "What grants am I missing?", q: "Based on my pathway, what grants or funding programs am I missing that I should know about?" },
+                      { label: `${wizardSnapshot.provinces[0] || "My province"} programs`, q: `What's the application process for the top programs in ${wizardSnapshot.provinces[0] || "my province"}? Walk me through the steps.` },
+                      { label: "Upcoming deadlines", q: "What program deadlines are coming up in the next 3 months that I should know about based on my profile?" },
+                      { label: "Who should I talk to?", q: "Based on my pathway, which organizations should I reach out to first? Who are the key contacts?" },
+                    ].map((chip, i) => (
+                      <button
+                        key={i}
+                        onClick={() => send(chip.q)}
+                        className="cursor-pointer font-sans transition-all bg-white border border-border text-text-secondary hover:border-brand-green hover:text-text hover:bg-bg-secondary shadow-sm"
+                        style={{
+                          padding: "6px 12px",
+                          borderRadius: 100,
+                          fontSize: "0.72rem",
+                          fontWeight: 500,
+                          whiteSpace: "nowrap",
+                        }}
+                      >{chip.label}</button>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Save Pathway card */}
+                <SaveJourney
+                  stage={wizardSnapshot.stage}
+                  provinces={wizardSnapshot.provinces}
+                  description={wizardDescription}
+                  need={wizardSnapshot.need}
+                  sector={wizardSnapshot.sector}
+                  companyUrl={wizardSnapshot.companyUrl}
+                  productType={wizardSnapshot.productType}
+                  expansionProvinces={wizardSnapshot.expansionProvinces}
+                  completedPrograms={wizardSnapshot.completedPrograms}
+                  pathwayData={restoredPathwayData}
+                  alreadySaved={isRestored}
+                />
               </div>
             </div>
           )}
@@ -1927,7 +2007,7 @@ export default function Navigator() {
                   Ask your AI advisor anything
                 </h2>
                 <p className="text-[0.78rem] text-text-secondary leading-[1.6]">
-                  Trained on {programCount ?? 490}+ Canadian agtech programs, conference insights, and ecosystem data
+                  Trained on {programCount ?? 500}+ Canadian agtech programs, conference insights, and ecosystem data
                 </p>
               </div>
               {/* Suggestion chips */}
@@ -1980,7 +2060,7 @@ export default function Navigator() {
                   Ask the ecosystem anything
                 </h2>
                 <p className="text-[0.78rem] text-text-secondary leading-[1.6]">
-                  Trained on {programCount ?? 490}+ Canadian agtech programs, conference insights, and ecosystem data
+                  Trained on {programCount ?? 500}+ Canadian agtech programs, conference insights, and ecosystem data
                 </p>
               </div>
               {/* Suggestion chips */}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "../lib/cn";
-import { formatSource } from "../lib/formatSource";
+
 import SaveJourney from "./SaveJourney";
 import type { InterestStatus, InterestMap } from "../lib/interests";
 import { useStreamedPathway } from "../hooks/useStreamedPathway";
@@ -137,7 +137,7 @@ function StageJourney({ current, next }: { current: string; next: string }) {
   const currentIdx = STAGE_ORDER.indexOf(current);
 
   return (
-    <div className="mt-4 max-w-full overflow-hidden">
+    <div className="max-w-full overflow-hidden">
       <div className="grid grid-cols-5">
         {STAGE_ORDER.map((s, i) => {
           const isCurrent = s === current;
@@ -345,13 +345,24 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp, interestStat
               <div>
                 <span className="text-[0.7rem] font-semibold text-amber-700">Ecosystem insight</span>
                 <div className="text-[0.75rem] text-text-secondary leading-[1.5] mt-0.5">
-                  {step.ecosystem_insight}
+                  {step.ecosystem_insight.replace(/\s*\(Source:[^)]*\)\s*/g, "")}
+                  {step.insight_source && (
+                    <span className="text-text-tertiary text-[0.68rem]">
+                      {" "}({step.insight_source
+                        .replace(/^From\s+/i, "")
+                        .replace(/GPT audit\s*[-—]\s*/i, "")
+                        .replace(/\s*via\s+/gi, ", ")
+                        .replace(/\s*[-—]+\s*/g, ", ")
+                        .replace(/,\s*\d{4}-\d{2}-\d{2}$/, "")
+                        .split(",")
+                        .map(s => s.trim())
+                        .filter(Boolean)
+                        .slice(0, 3)
+                        .join(", ")
+                      })
+                    </span>
+                  )}
                 </div>
-                {step.insight_source && (
-                  <div className="text-xs text-amber-500 mt-1">
-                    {formatSource(step.insight_source)}
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -375,19 +386,20 @@ function StepCard({ step, isLast, isHorizon, animDelay, onFollowUp, interestStat
           </button>
         )}
 
-        {/* Interest tracking buttons — hidden for demo clarity */}
-        {false && (
-          <>
-            <InterestButtons
-              programId={step.program_id}
-              programName={step.program_name}
-              currentStatus={interestStatus}
-              onChange={onInterestChange}
-            />
-            {isDismissed && (
-              <span className="text-[0.65rem] text-text-tertiary mt-1 inline-block">Dismissed</span>
-            )}
-          </>
+        {/* Interest tracking buttons — subtle, visible on hover or when active */}
+        <div className={cn(
+          "transition-opacity duration-200",
+          !interestStatus && "opacity-40 hover:opacity-100",
+        )}>
+          <InterestButtons
+            programId={step.program_id}
+            programName={step.program_name}
+            currentStatus={interestStatus}
+            onChange={onInterestChange}
+          />
+        </div>
+        {isDismissed && (
+          <span className="text-[0.65rem] text-text-tertiary mt-1 inline-block">Dismissed</span>
         )}
       </div>
     </div>
@@ -505,34 +517,91 @@ function EmailCapture({ stage, provinces, description, productType }: {
 }
 
 // ── Future Steps (collapsible) ────────────────────────────────────────────
-function FutureStepsSection({ futureSteps, currentStepsLength, onFollowUp, interests, onInterestChange }: {
+function FutureStepsSection({ futureSteps, currentStepsLength, onFollowUp, interests, onInterestChange, nextStageNote, nextStageLabel }: {
   futureSteps: PathwayStep[];
   currentStepsLength: number;
   onFollowUp: (q: string) => void;
   interests?: InterestMap;
   onInterestChange?: (programId: number, programName: string, status: InterestStatus | null) => void;
+  nextStageNote?: string | null;
+  nextStageLabel?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className={cn("bg-bg-secondary border border-border", currentStepsLength > 0 && "border-t-0")}>
+    <div className="bg-bg-secondary border border-border rounded-lg overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left px-4 md:px-[22px] py-2.5 bg-gradient-to-r from-[#f3e8ff] to-bg-secondary border-b border-border flex items-center gap-2 cursor-pointer hover:from-[#ede4fd] transition-colors"
+        className="w-full text-left px-4 md:px-[22px] py-3 bg-gradient-to-r from-[#f3e8ff] to-bg-secondary flex items-center gap-2 cursor-pointer hover:from-[#ede4fd] transition-colors"
       >
         <span className="text-[0.85rem]">🔭</span>
         <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-[#6b21a8]">Looking ahead</span>
-        <span className="text-[0.65rem] text-text-tertiary ml-1">{futureSteps.length} programs</span>
-        <span className="ml-auto text-[0.7rem] text-text-tertiary">{expanded ? "▲" : "▼"}</span>
+        <span className="text-[0.65rem] text-text-tertiary ml-1">{futureSteps.length} {futureSteps.length === 1 ? "program" : "programs"}</span>
+        <span className={cn("ml-auto text-[0.7rem] text-[#6b21a8] transition-transform duration-200", expanded && "rotate-180")}>▼</span>
       </button>
-      {expanded && futureSteps.map((step, i) => (
-        <StepCard key={`f-${i}`} step={step} isLast={i === futureSteps.length - 1} isHorizon={true} animDelay={i * 0.05} onFollowUp={onFollowUp}
-          interestStatus={step.program_id ? interests?.[String(step.program_id)]?.status : undefined}
-          onInterestChange={onInterestChange}
-        />
-      ))}
+
+      {/* Collapsed: show formatted preview of each future step */}
       {!expanded && (
-        <div className="px-4 md:px-[22px] py-3 text-[0.75rem] text-text-tertiary">
-          {futureSteps.map(s => s.program_name).slice(0, 3).join(", ")}{futureSteps.length > 3 ? `, +${futureSteps.length - 3} more` : ""}
+        <div className="border-t border-border/50">
+          {futureSteps.map((step, i) => {
+            const cat = CAT_STYLE[step.category] || CAT_STYLE.Org;
+            const timing = TIMING_LABEL[step.timing] || TIMING_LABEL.now;
+            const conf = step.fit_confidence ? CONFIDENCE[step.fit_confidence] : null;
+            return (
+              <div
+                key={`fp-${i}`}
+                className={cn(
+                  "px-3.5 md:px-[22px] py-3 flex items-center gap-3 cursor-pointer hover:bg-bg-tertiary/50 transition-colors",
+                  i < futureSteps.length - 1 && "border-b border-border/40",
+                )}
+                onClick={() => setExpanded(true)}
+              >
+                <div className={cn(
+                  "w-6 h-6 rounded-full border-2 flex items-center justify-center text-[0.6rem] font-extrabold shrink-0",
+                  "bg-bg-tertiary border-border text-text-tertiary",
+                )}>
+                  {step.order}
+                </div>
+                <span className="font-bold text-[0.82rem] text-text-secondary truncate">
+                  {step.program_website ? (
+                    <a href={step.program_website} target="_blank" rel="noopener noreferrer"
+                      className="text-brand-green no-underline border-b border-[rgba(45,122,79,0.2)] hover:border-brand-green"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      {step.program_name} ↗
+                    </a>
+                  ) : step.program_name}
+                </span>
+                <div className="flex gap-1 flex-wrap shrink-0 ml-auto">
+                  <span className={cn("text-[0.55rem] font-bold px-1.5 py-[1px] rounded-full", cat.bgClass, cat.colorClass)}>{cat.icon} {cat.label}</span>
+                  <span className={cn("text-[0.55rem] font-bold px-1.5 py-[1px] rounded-full border", timing.bgClass, timing.colorClass, timing.borderClass)}>{timing.icon} {timing.label}</span>
+                  {conf && <span className={cn("text-[0.55rem] font-semibold px-1.5 py-[1px] rounded-full border border-dashed", conf.bgClass, conf.colorClass, conf.borderClass)}>{conf.icon} {conf.label}</span>}
+                </div>
+                <svg width="12" height="12" viewBox="0 0 12 12" className="shrink-0 text-text-tertiary ml-1">
+                  <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </svg>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Expanded: full step cards */}
+      {expanded && (
+        <div className="border-t border-border">
+          {futureSteps.map((step, i) => (
+            <StepCard key={`f-${i}`} step={step} isLast={i === futureSteps.length - 1 && !nextStageNote} isHorizon={true} animDelay={i * 0.05} onFollowUp={onFollowUp}
+              interestStatus={step.program_id ? interests?.[String(step.program_id)]?.status : undefined}
+              onInterestChange={onInterestChange}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Next stage note — inside Looking Ahead */}
+      {nextStageNote && (
+        <div className="px-4 md:px-[22px] py-3 border-t border-border text-[0.75rem] text-text-secondary leading-[1.55]">
+          <strong className="font-semibold text-text">When you reach {nextStageLabel}:</strong>{" "}
+          {nextStageNote}
         </div>
       )}
     </div>
@@ -643,18 +712,25 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
   const futureSteps = allSteps.filter((s: any) => s.horizon || s.timing === "horizon");
   const isStillStreaming = stream.isStreaming && !stream.isComplete;
 
+  // Filter interests to only programs in THIS pathway (not stale global state)
+  const pathwayProgramIds = new Set(allSteps.map(s => String(s.program_id)).filter(Boolean));
+  const filteredInterests: InterestMap | undefined = interests
+    ? Object.fromEntries(Object.entries(interests).filter(([id]) => pathwayProgramIds.has(id)))
+    : undefined;
+
   return (
-    <div className="mx-auto mt-3 flex flex-col animate-fade-in-up overflow-hidden w-full max-w-3xl px-4" style={{ overflowWrap: "break-word", wordBreak: "break-word" }}>
+    <div className="mx-auto mt-3 mb-5 flex flex-col animate-fade-in-up overflow-hidden w-full max-w-3xl px-4" style={{ overflowWrap: "break-word", wordBreak: "break-word" }}>
 
       {/* ── Header with Stage Journey ──────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] rounded-t-lg px-4 md:px-[22px] pt-6 pb-4 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] rounded-t-lg px-4 md:px-[22px] pt-4 pb-4 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         <div className="relative">
-          <div className="flex items-center justify-between mb-1.5">
-            <div className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-white/[0.82]">
-              Your Innovation Pathway
+          {/* Stage journey + actions — same row */}
+          <div className="flex items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <StageJourney current={stage} next={meta.nextStage} />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0 pt-1">
               <button
                 onClick={() => {
                   const url = new URL(window.location.origin + "/navigator");
@@ -665,42 +741,57 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
                 className="bg-white/10 hover:bg-white/20 border-none rounded p-1.5 cursor-pointer transition-colors"
                 title="Copy shareable link"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                   <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                 </svg>
               </button>
               {onReset && (
-                <button onClick={onReset} className="bg-transparent border-none text-[0.68rem] text-white/50 underline cursor-pointer p-0">
+                <button onClick={onReset} className="bg-transparent border-none text-[0.62rem] text-white/50 underline cursor-pointer p-0">
                   Start over
                 </button>
               )}
             </div>
           </div>
-          <h2 className="font-display text-[1.35rem] font-normal tracking-tight text-white mb-2.5 leading-[1.2]">
+
+          {/* Title */}
+          <h2 className="font-display text-[1.3rem] font-normal tracking-tight text-white mt-3 mb-1.5 leading-[1.2]">
             {titleOverride}
           </h2>
-          <p className="text-[0.85rem] text-white/90 leading-[1.65] max-w-full md:max-w-[520px]">
+
+          {/* Summary — strategic context from the AI */}
+          <p className="text-[0.85rem] text-white/95 leading-[1.65] max-w-full md:max-w-[520px]">
             {pathway.summary}
           </p>
-          <div className="flex gap-1.5 flex-wrap mt-3">
-            <span className="text-[0.62rem] font-semibold px-2.5 py-[3px] rounded-full bg-white/15 text-white/[0.87]">
-              {provinces.join(", ")} · {SL[stage] || stage}{needLabel ? ` · ${needLabel}` : ""}
-            </span>
-            <span className="text-[0.62rem] font-semibold px-2.5 py-[3px] rounded-full bg-white/15 text-white/[0.87]">
-              {meta.programsConsidered} programs analyzed
-            </span>
+
+          {/* Personalization + instruction */}
+          <div className="mt-3 text-[0.75rem] text-brand-chartreuse font-semibold leading-[1.55]">
+            {meta.programsConsidered} programs analyzed. {currentSteps.length + futureSteps.length} matched to your stage, province, and need.
           </div>
-          <StageJourney current={stage} next={meta.nextStage} />
+          <div className="text-[0.7rem] text-white/60 mt-1 leading-[1.5] max-w-full md:max-w-[420px]">
+            Some you'll know, some you won't. Mark each as you go and the ones you haven't seen are where the value is.
+          </div>
         </div>
       </div>
 
       {/* ── Gap warnings (AI-generated + deterministic) ────────────── */}
-      {pathway.gap_warning && (
-        <div className="px-4 md:px-[22px] py-3 bg-[#fffbeb] border-l-[3px] border-l-amber text-[0.78rem] text-[#78350f] leading-[1.55]">
-          <strong className="font-bold">⚠ Gap detected:</strong> {pathway.gap_warning}
-        </div>
-      )}
+      {pathway.gap_warning && (() => {
+        // Show first 2 sentences, truncate the rest
+        const sentences = pathway.gap_warning.match(/[^.!?]+[.!?]+/g) || [pathway.gap_warning];
+        const preview = sentences.slice(0, 2).join("").trim();
+        const hasMore = sentences.length > 2;
+        return (
+          <div className="px-4 md:px-[22px] py-3 bg-[#fffbeb] border-l-[3px] border-l-amber text-[0.75rem] text-[#78350f] leading-[1.55]">
+            <strong className="font-bold">⚠ Ecosystem gap:</strong> {preview}{hasMore ? ".." : ""}
+            <button
+              onClick={() => onChatFollowUp(`I see a gap in my pathway: "${pathway.gap_warning}" What are my options to address this?`)}
+              className="ml-2 inline-flex items-center gap-1 px-2.5 py-[3px] rounded-full text-[0.65rem] font-semibold bg-[#78350f]/10 text-[#78350f] border border-[#78350f]/20 hover:bg-[#78350f]/20 transition-colors cursor-pointer"
+            >
+              Ask AI about this →
+            </button>
+          </div>
+        );
+      })()}
       {meta.deterministicGaps && (meta.deterministicGaps as string[]).length > 0 && !pathway.gap_warning && (
         <div className="px-4 md:px-[22px] py-3 bg-[#f0f9ff] border-l-[3px] border-l-[#0284c7] text-[0.78rem] text-[#0c4a6e] leading-[1.55]">
           <strong className="font-bold">Ecosystem note:</strong>{" "}
@@ -709,18 +800,14 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
       )}
 
       {/* ── Progress Summary ────────────────────────────────────────── */}
-      {interests && <ProgressSummary interests={interests} totalSteps={pathway.steps.length} />}
+      {filteredInterests && <ProgressSummary interests={filteredInterests} totalSteps={allSteps.length} />}
 
       {/* ── Current Stage Steps ───────────────────────────────────────── */}
       {currentSteps.length > 0 && (
         <div className="bg-bg border border-border border-t-0">
-          <div className="px-4 md:px-[22px] py-2.5 bg-gradient-to-r from-green-soft to-bg border-b border-border flex items-center gap-2">
-            <span className="text-[0.85rem]">🎯</span>
-            <span className="text-[0.7rem] font-bold tracking-[0.06em] uppercase text-brand-green">Your next moves</span>
-          </div>
           {currentSteps.map((step, i) => (
             <StepCard key={`c-${i}`} step={step} isLast={i === currentSteps.length - 1 && futureSteps.length === 0} isHorizon={false} animDelay={i * 0.08} onFollowUp={onChatFollowUp}
-              interestStatus={step.program_id ? interests?.[String(step.program_id)]?.status : undefined}
+              interestStatus={step.program_id ? filteredInterests?.[String(step.program_id)]?.status : undefined}
               onInterestChange={onInterestChange}
             />
           ))}
@@ -729,13 +816,17 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
 
       {/* ── Future Stage Steps (collapsible, collapsed by default) ───── */}
       {futureSteps.length > 0 && (
-        <FutureStepsSection
-          futureSteps={futureSteps}
-          currentStepsLength={currentSteps.length}
-          onFollowUp={onChatFollowUp}
-          interests={interests}
-          onInterestChange={onInterestChange}
-        />
+        <div className="mx-1 mt-1.5">
+          <FutureStepsSection
+            futureSteps={futureSteps}
+            currentStepsLength={0}
+            onFollowUp={onChatFollowUp}
+            interests={filteredInterests}
+            onInterestChange={onInterestChange}
+            nextStageNote={pathway.next_stage_note}
+            nextStageLabel={nextStageLabel}
+          />
+        </div>
       )}
 
       {/* ── Streaming indicator ────────────────────────────────────────── */}
@@ -746,16 +837,15 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         </div>
       )}
 
-      {/* ── Next stage note ───────────────────────────────────────────── */}
-      {pathway.next_stage_note && (
-        <div className="px-4 md:px-[22px] py-3 bg-bg-secondary border border-border border-t-0 rounded-b-lg text-[0.78rem] text-text-secondary leading-[1.55]">
-          <strong className="font-bold text-text">When you reach {nextStageLabel}:</strong>{" "}
+      {/* next_stage_note moved inside FutureStepsSection */}
+
+      {/* If no future steps but there IS a next_stage_note, show it standalone */}
+      {futureSteps.length === 0 && pathway.next_stage_note && (
+        <div className="mx-1 mt-1.5 px-4 md:px-[22px] py-3 bg-bg-secondary border border-border rounded-lg text-[0.75rem] text-text-secondary leading-[1.55]">
+          <strong className="font-semibold text-text">When you reach {nextStageLabel}:</strong>{" "}
           {pathway.next_stage_note}
         </div>
       )}
-
-      {/* ── Shareable link — hidden, moved to header icon ─────────────── */}
-      {false && <CopyLinkButton stage={stage} provinces={provinces} need={need} sector={sector} />}
 
       {/* ── Thin-pathway note (Scale stage, <4 strong fits) ──────────── */}
       {(() => {
@@ -801,35 +891,7 @@ export default function PathwayCard({ description, stage, provinces, sector, nee
         return null;
       })()}
 
-      {/* ── Chat CTA (compact single-line) ───────────────────────── */}
-      {pathway.steps.length > 0 && (
-        <div
-          className="mt-3 mx-0 cursor-pointer group border border-border rounded-lg px-4 py-3 flex items-center gap-3 hover:border-brand-green/40 hover:bg-green-soft/30 transition-all"
-          onClick={() => onChatFollowUp("What should I focus on first from my pathway, and what should I prepare?")}
-        >
-          <span className="text-[1.1rem]">💬</span>
-          <span className="text-[0.82rem] text-text-secondary group-hover:text-text transition-colors">
-            Want to go deeper? <span className="font-semibold text-brand-green">Ask your AI advisor &rarr;</span>
-          </span>
-        </div>
-      )}
-
-      {/* ── Save journey — hidden for demo clarity ── */}
-      {false && !isStillStreaming && allSteps.length > 0 && (
-        <SaveJourney
-          stage={stage}
-          provinces={provinces}
-          description={description}
-          need={need}
-          sector={sector}
-          companyUrl={companyUrl}
-          productType={productType}
-          expansionProvinces={expansionProvinces}
-          completedPrograms={completedPrograms}
-          pathwayData={data}
-          alreadySaved={isRestored}
-        />
-      )}
+      {/* Chat CTA + SaveJourney moved to Navigator for side-by-side layout */}
 
       {/* ── Refresh pathway (restored journeys only) ── */}
       {isRestored && !refreshing && (

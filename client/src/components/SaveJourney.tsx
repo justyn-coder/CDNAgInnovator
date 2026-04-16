@@ -36,7 +36,7 @@ export default function SaveJourney({
   if (saved) {
     return (
       <div
-        className="mt-4 animate-fade-in-up"
+        className="flex-1 flex items-center"
         style={{
           background: "#E8F5E9",
           border: "0.5px solid rgba(76,175,80,0.3)",
@@ -96,7 +96,7 @@ export default function SaveJourney({
 
   return (
     <div
-      className="mt-4 relative animate-fade-in-up"
+      className="relative flex-1 flex flex-col"
       style={{
         background: "#FFF8E7",
         border: "0.5px solid rgba(212,168,40,0.2)",

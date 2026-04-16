@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "../lib/cn";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -68,18 +68,18 @@ const PROV_LABELS: Record<string, string> = {
 
 // ── Color scale ────────────────────────────────────────────────────────────
 function cellColorClasses(count: number): { bg: string; text: string; border: string; outlineBorder: string } {
-  if (count === 0) return { bg: "bg-[#fde8e8]", text: "text-[#b91c1c]", border: "border-[#fca5a5]", outlineBorder: "#b91c1c" };
-  if (count === 1) return { bg: "bg-[#fef9c3]", text: "text-[#854d0e]", border: "border-[#fde047]", outlineBorder: "#854d0e" };
-  if (count === 2) return { bg: "bg-[#dcfce7]", text: "text-[#166534]", border: "border-[#86efac]", outlineBorder: "#166534" };
-  return              { bg: "bg-[#d1fae5]", text: "text-[#064e3b]", border: "border-[#34d399]", outlineBorder: "#064e3b" };
+  if (count === 0) return { bg: "bg-[#FEF2F2]", text: "text-[#991B1B]", border: "border-[#FECACA]", outlineBorder: "#991B1B" };
+  if (count === 1) return { bg: "bg-[#FFFBEB]", text: "text-[#92400E]", border: "border-[#FDE68A]", outlineBorder: "#92400E" };
+  if (count === 2) return { bg: "bg-[#F0FDF4]", text: "text-[#166534]", border: "border-[#BBF7D0]", outlineBorder: "#166534" };
+  return              { bg: "bg-[#DCFCE7]", text: "text-[#064E3B]", border: "border-[#86EFAC]", outlineBorder: "#064E3B" };
 }
 
 // For inline-style contexts (badge borders etc.) we still need raw hex values
 function cellColorRaw(count: number): { bg: string; text: string; border: string } {
-  if (count === 0) return { bg: "#fde8e8", text: "#b91c1c", border: "#fca5a5" };
-  if (count === 1) return { bg: "#fef9c3", text: "#854d0e", border: "#fde047" };
-  if (count === 2) return { bg: "#dcfce7", text: "#166534", border: "#86efac" };
-  return            { bg: "#d1fae5", text: "#064e3b", border: "#34d399" };
+  if (count === 0) return { bg: "#FEF2F2", text: "#991B1B", border: "#FECACA" };
+  if (count === 1) return { bg: "#FFFBEB", text: "#92400E", border: "#FDE68A" };
+  if (count === 2) return { bg: "#F0FDF4", text: "#166534", border: "#BBF7D0" };
+  return            { bg: "#DCFCE7", text: "#064E3B", border: "#86EFAC" };
 }
 
 function gapLabel(count: number): string {
@@ -99,16 +99,30 @@ const GAP_TYPE_CLASSES: Record<string, { bg: string; text: string; border: strin
   adequate:       { bg: "bg-[#d1fae5]", text: "text-[#064e3b]", border: "border-[#34d399]" },
 };
 
+// ── Pre-cached AI analyses for key cells (instant load during demo) ────────
+const EXPLAIN_CACHE: Record<string, ExplainResponse> = {
+  "ON|Accel|Scale": {"gapType":"stage_mismatch","explanation":{"classification_label":"Stage Mismatch \u2014 Acceleration Ends at Early Stage","why":"Ontario's 24 catalogued accelerator-adjacent programs are concentrated at early and growth stages, leaving scaling agtech companies without structured acceleration support. The Bioenterprise roundtable flagged this directly: Ontario's dominant generalist ecosystem (MaRS, Communitech, etc.) runs on SaaS and deep-tech timelines that don't accommodate agricultural seasonality, hardware cycles, or regulatory pathways.","action":"This is a real opportunity for an Ontario-based operator to launch a scale-stage agtech cohort, potentially in partnership with existing infrastructure like Bioenterprise or Lakehead's NORCAT. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":24,"nationalCount":13,"neighborCounts":{"MB":1,"QC":1}}},
+  "NB|Train|All": {"gapType":"market_failure","explanation":{"classification_label":"Possible Structural Gap","why":"New Brunswick has no catalogued agtech-specific training programs, which aligns with the Bioenterprise finding that the province lacks full-stack agtech support infrastructure entirely. With neighbors NS and PE also showing zero, this appears to be a regional market failure rather than a data blind spot.","action":"This is a greenfield opportunity for an operator willing to deliver agtech-calibrated training regionally \u2014 a Maritime cohort model partnering with ACOA and the existing QC program could be viable without building from scratch. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":0,"nationalCount":2,"neighborCounts":{"QC":1,"NS":0,"PE":0}}},
+  "NL|Train|All": {"gapType":"market_failure","explanation":{"classification_label":"Possible Structural Gap (Low Priority Market)","why":"NL and NS both show zero catalogued agtech training programs, suggesting a regional pattern rather than an isolated omission. NL's minimal agricultural base means agtech-specific training likely lacks the founder density to justify dedicated programming.","action":"The two national programs are the most realistic entry point for Atlantic founders today. For operators, the opportunity may be a regionally-bundled Atlantic cohort model \u2014 partnering with NS, NB, and PEI to reach critical mass. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":0,"nationalCount":2,"neighborCounts":{"NS":0}}},
+  "NS|Train|All": {"gapType":"market_failure","explanation":{"classification_label":"Structural Regional Gap","why":"NS shows zero agtech-specific training programs, mirroring NB and PEI \u2014 suggesting this isn't a Nova Scotia oversight but a systemic Atlantic-wide gap. General entrepreneurship training dominates the region, failing to address agtech-specific realities like seasonal producer sales cycles and regulatory pathways.","action":"The Atlantic cluster creates a compelling case for a shared regional agtech training cohort \u2014 Perennia Food and Agriculture or ACOA may be natural anchors. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":0,"nationalCount":2,"neighborCounts":{"NB":0,"PE":0}}},
+  "BC|Event|Scale": {"gapType":"stage_mismatch","explanation":{"classification_label":"Stage Mismatch \u2014 Events Serve Early Stages","why":"BC's 4 catalogued agtech events appear oriented toward early-stage founders. Scaling companies need different rooms: customer introductions, investor syndication, and export market access. BC's fragmented ecosystem likely means no single convener has stepped up to program explicitly for scale-stage companies.","action":"This is a programming gap a convener like Innovate BC or BCAC could own \u2014 a curated scale-stage event or deal-flow dinner requires less infrastructure than a conference. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":4,"nationalCount":11,"neighborCounts":{"AB":5}}},
+  "ON|Fund|All": {"gapType":"adequate","explanation":{"classification_label":"Adequate \u2014 With Structural Concentration Risks","why":"Ontario's 18 catalogued programs look strong on paper, but most are generalist vehicles competing with non-ag deal flow. Genuinely ag-specific instruments cluster at either end \u2014 early research (OMAFRA, Alliance) or commercial-scale (Ag Capital, SGAP) \u2014 leaving TRL 4-7 served mainly by OCE and OCI, both facing mandate drift risk.","action":"The operator opportunity is a dedicated agtech bridge fund targeting TRL 5-7 \u2014 Bioenterprise's SmartGrowth Program and RHA's 519 Growth Fund prove demand exists. Study Effet Levier Agriculture in Quebec as a structural model. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":18,"nationalCount":66,"neighborCounts":{"MB":11,"QC":15}}},
+  "ON|Event|All": {"gapType":"adequate","explanation":{"classification_label":"Adequate \u2014 With Stage and Sector Concentration Risks","why":"Ontario's 15 catalogued events are the strongest count nationally, but the distribution skews heavily toward Comm and Scale stages. Most events are commodity-sector-specific (swine, dairy, poultry, grain), meaning cross-sector or platform agtech companies may find few natural networking homes.","action":"The operator opportunity is a dedicated early-stage agtech pitch or demo event serving Idea-to-Pilot founders across sectors. The ARIO or Bioenterprise Ontario network would be natural anchors. Know something we don't? Use the buttons below to let us know."},"meta":{"unfilteredCount":15,"nationalCount":11,"neighborCounts":{"MB":6,"QC":7}}},
+};
+
 // ── AI Explain card ────────────────────────────────────────────────────────
 function ExplainCard({
-  prov, cat, stage, mode,
+  prov, cat, stage, mode, autoFetch = false,
 }: {
-  prov: string; cat: string; stage: string; mode: string;
+  prov: string; cat: string; stage: string; mode: string; autoFetch?: boolean;
 }) {
-  const [data, setData] = useState<ExplainResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const cacheKey = `${prov}|${cat}|${stage}`;
+  const cached = EXPLAIN_CACHE[cacheKey] || null;
+  const [data, setData] = useState<ExplainResponse | null>(cached);
+  const [loading, setLoading] = useState<boolean>(autoFetch && !cached);
   const [error, setError] = useState("");
-  const [showMeta, setShowMeta] = useState(false);
+  const hasFetched = useRef(!!cached);
+  const [showMeta, setShowMeta] = useState(true);
   const [gapFeedback, setGapFeedback] = useState("");
 
   function submitGapFeedback(rating: string) {
@@ -147,6 +161,14 @@ function ExplainCard({
         setLoading(false);
       });
   }
+
+  // Auto-fetch on mount for gap cells (count=0)
+  useEffect(() => {
+    if (autoFetch && !hasFetched.current) {
+      hasFetched.current = true;
+      fetchExplain();
+    }
+  }, [autoFetch]);
 
   const typeClasses = data ? (GAP_TYPE_CLASSES[data.gapType] || GAP_TYPE_CLASSES.adequate) : null;
 
@@ -311,14 +333,16 @@ function CellDetail({
           >Close</button>
         </div>
 
-        <ExplainCard prov={prov} cat={cat} stage={stage} mode={mode} />
+        {/* AI analysis — always auto-fires, pushes programs down */}
+        <ExplainCard prov={prov} cat={cat} stage={stage} mode={mode} autoFetch={true} />
 
         {cell.count === 0 ? (
-          <div className="px-4 py-5 bg-bg-secondary rounded text-center border border-dashed border-border">
-            <div className="text-[1.2rem] mb-1.5">🤔</div>
-            <div className="font-semibold text-[0.85rem] text-text mb-1">We didn't find any programs here</div>
-            <div className="text-[0.75rem] text-text-secondary leading-[1.5]">
-              This looks like a gap — but we might be missing something. If you know of a program that belongs here, we'd love to hear about it.
+          <div className="mt-3 px-4 py-4 bg-gradient-to-br from-[#FEF2F2] to-[#FFFBEB] rounded-lg border border-[#FECACA]/60">
+            <div className="font-semibold text-[0.82rem] text-[#991B1B] mb-1">
+              No programs catalogued here yet
+            </div>
+            <div className="text-[0.72rem] text-text-secondary leading-[1.5]">
+              Know a program that belongs here? Use "Suggest a correction" in Browse Programs.
             </div>
           </div>
         ) : (
@@ -356,12 +380,13 @@ function CellDetail({
 }
 
 // ── Main component ─────────────────────────────────────────────────────────
-export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { onClose: () => void; onFeedback?: () => void; mode?: string }) {
+export default function GapMatrix({ onClose, onFeedback, onAskAI, mode = "founder" }: { onClose: () => void; onFeedback?: () => void; onAskAI?: (question: string) => void; mode?: string }) {
   const [stage, setStage] = useState("All");
   const [data, setData] = useState<GapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<{ prov: string; cat: string } | null>(null);
+  const [bottomAnalysis, setBottomAnalysis] = useState<{ prov: string; cat: string } | null>(null);
   const [showGuide, setShowGuide] = useState(() => {
     try {
       if (sessionStorage.getItem("ag_gap_guided")) return false;
@@ -369,6 +394,14 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
       return true;
     } catch { return true; }
   });
+
+  // Push history entry so browser back closes the gap map
+  useEffect(() => {
+    window.history.pushState({ gapMap: true }, "");
+    const handlePop = () => onClose();
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, [onClose]);
 
   useEffect(() => {
     setLoading(true);
@@ -380,7 +413,36 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
       .catch(() => { setError("Failed to load gap data."); setLoading(false); });
   }, [stage]);
 
-  useEffect(() => { setSelected(null); }, [stage]);
+  // Reset and preload the most interesting gap after a delay
+  useEffect(() => {
+    setSelected(null);
+    setBottomAnalysis(null);
+    if (!data) return;
+
+    // Find the best gap to preload
+    let preload: { prov: string; cat: string } | null = null;
+    const onAccel = data.matrix["ON"]?.["Accel"];
+    if (onAccel && onAccel.count === 0) {
+      preload = { prov: "ON", cat: "Accel" };
+    } else {
+      for (const prov of data.provinces) {
+        if (prov === "National") continue;
+        for (const cat of data.categories) {
+          if ((data.matrix[prov]?.[cat]?.count ?? 0) === 0) {
+            preload = { prov, cat };
+            break;
+          }
+        }
+        if (preload) break;
+      }
+    }
+
+    // Delay so the user can see the map first
+    if (preload) {
+      const timer = setTimeout(() => setBottomAnalysis(preload), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [data, stage]);
 
   // Dismiss guide on first cell click
   useEffect(() => {
@@ -418,10 +480,10 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
                 </p>
                 <div className="flex gap-2 flex-wrap mb-3">
                   {[
-                    { label: "Gap (0)", bg: "bg-[#fde8e8]", color: "text-[#b91c1c]" },
-                    { label: "Weak (1)", bg: "bg-[#fef9c3]", color: "text-[#854d0e]" },
-                    { label: "Fair (2)", bg: "bg-[#dcfce7]", color: "text-[#166534]" },
-                    { label: "Strong (3+)", bg: "bg-[#d1fae5]", color: "text-[#064e3b]" },
+                    { label: "Gap (0)", bg: "bg-[#FEF2F2]", color: "text-[#991B1B]" },
+                    { label: "Weak (1)", bg: "bg-[#FFFBEB]", color: "text-[#92400E]" },
+                    { label: "Fair (2)", bg: "bg-[#F0FDF4]", color: "text-[#166534]" },
+                    { label: "Strong (3+)", bg: "bg-[#DCFCE7]", color: "text-[#064E3B]" },
                   ].map(l => (
                     <span key={l.label} className={cn(
                       "text-[0.7rem] font-bold px-2.5 py-[3px] rounded-[6px]",
@@ -447,29 +509,47 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
         </div>
       )}
 
-      <div className="h-14 px-[18px] flex justify-between items-center border-b border-border shrink-0 bg-[rgba(250,250,248,0.92)] backdrop-blur-[12px]">
-        <span className="font-display font-normal text-[1.05rem] text-text">Gap Map</span>
-        <button
-          onClick={onClose}
-          className="bg-bg-secondary border border-border rounded-sm px-4 py-1.5 text-[0.78rem] font-semibold text-text transition-all duration-[120ms]"
-        >Done</button>
+      {/* ── Header ─────────────────────────────────────────── */}
+      <div className="bg-gradient-to-br from-[#122b1f] via-[#1B4332] to-[#245940] px-5 pt-4 pb-3 text-white relative overflow-hidden shrink-0">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+        <div className="relative flex items-start justify-between">
+          <div>
+            <div className="text-[0.58rem] font-bold tracking-[0.12em] uppercase text-white/60 mb-1">Ecosystem Coverage</div>
+            <h2 className="font-display text-[1.15rem] font-normal text-white leading-[1.2] mb-1.5">
+              Where support exists — and where it doesn't
+            </h2>
+            {data && !loading && (
+              <div className="text-[0.72rem] text-white/70 leading-[1.5]">
+                {data.summary.emptyCells} gaps across {data.provinces.length} provinces. {data.summary.weakCells} cells with only 1 program.
+                {stage !== "All" && <span className="text-brand-chartreuse font-semibold"> Filtered to {STAGE_LABELS[stage]} stage.</span>}
+              </div>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="bg-white/10 hover:bg-white/20 border-none rounded px-3 py-1.5 text-[0.72rem] font-semibold text-white/80 cursor-pointer transition-colors shrink-0 mt-1"
+          >Done</button>
+        </div>
       </div>
 
-      {/* Compact filter + legend bar */}
-      <div className="px-4 py-2 border-b border-border bg-bg-secondary shrink-0 flex items-center gap-2.5">
-        <select
-          value={stage}
-          onChange={e => setStage(e.target.value)}
-          className="px-2.5 py-[5px] rounded-sm border-[1.5px] border-border text-[0.75rem] font-semibold bg-bg text-text font-sans"
-        >
-          {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
-        </select>
-        <div className="flex gap-1 items-center ml-auto">
+      {/* ── Filter + legend bar ─────────────────────────────── */}
+      <div className="px-4 py-2.5 border-b border-border bg-bg shrink-0 flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[0.65rem] font-semibold text-text-secondary">Stage:</span>
+          <select
+            value={stage}
+            onChange={e => setStage(e.target.value)}
+            className="px-2.5 py-[5px] rounded-sm border-[1.5px] border-border text-[0.75rem] font-semibold bg-bg text-text font-sans"
+          >
+            {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s] || s}</option>)}
+          </select>
+        </div>
+        <div className="flex gap-1.5 items-center ml-auto">
           {[
-            { label: "Gap", bg: "bg-[#fde8e8]", text: "text-[#b91c1c]" },
-            { label: "Weak", bg: "bg-[#fef9c3]", text: "text-[#854d0e]" },
-            { label: "OK", bg: "bg-[#dcfce7]", text: "text-[#166534]" },
-            { label: "Strong", bg: "bg-[#d1fae5]", text: "text-[#064e3b]" },
+            { label: "Gap (0)", bg: "bg-[#FEF2F2]", text: "text-[#991B1B]" },
+            { label: "Weak (1)", bg: "bg-[#FFFBEB]", text: "text-[#92400E]" },
+            { label: "Fair (2)", bg: "bg-[#F0FDF4]", text: "text-[#166534]" },
+            { label: "Strong (3+)", bg: "bg-[#DCFCE7]", text: "text-[#064E3B]" },
           ].map(l => (
             <span key={l.label} className={cn(
               "text-[0.58rem] font-bold px-1.5 py-[2px] rounded-[4px]",
@@ -479,7 +559,7 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-auto">
+      <div className="flex-1 overflow-y-auto overflow-x-auto px-4 pb-3">
         {loading && (
           <div className="p-12 text-center text-text-tertiary text-[0.85rem]">Loading gap data…</div>
         )}
@@ -487,14 +567,14 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
           <div className="p-12 text-center text-[#b91c1c] text-[0.85rem]">{error}</div>
         )}
         {data && !loading && (
-          <table className="border-collapse w-full min-w-[520px]">
+          <table className="border-collapse w-full min-w-[520px] rounded-lg overflow-hidden border border-border">
             <thead>
               <tr>
-                <th className="px-2.5 py-2 text-left font-semibold text-[0.65rem] text-text-secondary border-b border-border bg-bg-secondary sticky top-0 left-0 z-[2] min-w-[48px]">
-                  Prov
+                <th className="px-3 py-2.5 text-left font-bold text-[0.65rem] text-text-secondary border-b-2 border-border bg-bg sticky top-0 left-0 z-[2] min-w-[52px]">
+                  Province
                 </th>
                 {data.categories.map(cat => (
-                  <th key={cat} className="px-1.5 py-2 text-center font-semibold text-[0.62rem] text-text-secondary border-b border-border bg-bg-secondary sticky top-0 z-[1] tracking-[0.02em]">
+                  <th key={cat} className="px-2 py-2.5 text-center font-bold text-[0.62rem] text-text-secondary border-b-2 border-border bg-bg sticky top-0 z-[1] tracking-[0.02em]">
                     {CAT_LABELS[cat]}
                   </th>
                 ))}
@@ -502,29 +582,37 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
             </thead>
             <tbody>
               {data.provinces.map(prov => (
-                <tr key={prov} className="border-b border-border">
-                  <td className="px-2.5 py-[7px] font-bold text-[0.72rem] text-text bg-bg-secondary sticky left-0 z-[1] border-r border-border">
+                <tr key={prov} className="border-b border-border/60 hover:bg-bg-secondary/50 transition-colors">
+                  <td className="px-3 py-2 font-bold text-[0.72rem] text-text bg-bg sticky left-0 z-[1] border-r border-border/60">
                     {PROV_LABELS[prov] || prov}
                   </td>
                   {data.categories.map(cat => {
                     const cell = data.matrix[prov][cat];
                     const colors = cellColorClasses(cell.count);
                     const isSelected = selected?.prov === prov && selected?.cat === cat;
+                    const isAnalyzing = bottomAnalysis?.prov === prov && bottomAnalysis?.cat === cat;
                     return (
                       <td
                         key={cat}
-                        onClick={() => setSelected({ prov, cat })}
+                        onClick={() => {
+                          setBottomAnalysis({ prov, cat });
+                          if (cell.count > 0) setSelected({ prov, cat });
+                        }}
                         className={cn(
-                          "px-1 py-1.5 text-center cursor-pointer transition-colors duration-100",
-                          isSelected ? undefined : colors.bg,
+                          "px-2 py-2.5 text-center cursor-pointer transition-all duration-100 hover:scale-[1.05]",
+                          !isSelected && !isAnalyzing && colors.bg,
                         )}
                         style={isSelected ? {
                           background: cellColorRaw(cell.count).border,
                           outline: `2px solid ${colors.outlineBorder}`,
                           outlineOffset: -2,
+                        } : isAnalyzing ? {
+                          outline: `2.5px solid #7A6A8A`,
+                          outlineOffset: -2,
+                          background: cellColorRaw(cell.count).bg,
                         } : undefined}
                       >
-                        <div className={cn("text-[0.82rem] font-bold leading-none", colors.text)}>
+                        <div className={cn("text-[0.88rem] font-extrabold leading-none", colors.text)}>
                           {cell.count}
                         </div>
                       </td>
@@ -535,63 +623,93 @@ export default function GapMatrix({ onClose, onFeedback, mode = "founder" }: { o
             </tbody>
           </table>
         )}
-      </div>
 
-      {/* Where we're light */}
-      {!loading && data && (
-        <div className="px-[18px] py-3 border-t border-border bg-bg-secondary shrink-0">
-          <div className="text-[0.72rem] font-semibold text-text mb-0.5">
-            Where we're light
-          </div>
-          <div className="text-[0.65rem] text-text-tertiary mb-2">
-            Know a program we're missing? Flag it and we'll investigate.
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {[
-              { prov: "NB", gap: "0 pilot sites, 0 events", severity: "high" },
-              { prov: "NL", gap: "0 pilot sites, 0 events, 0 orgs", severity: "high" },
-              { prov: "QC", gap: "0 events, 1 industry org", severity: "medium" },
-              { prov: "BC", gap: "1 training, 2 events", severity: "medium" },
-            ].map((g, i) => {
-              // Find the weakest category for this province from live data
-              const provRow = data?.matrix[g.prov];
-              let weakestCat: string | null = null;
-              if (provRow) {
-                let minCount = Infinity;
-                for (const cat of data!.categories) {
-                  const c = provRow[cat]?.count ?? 0;
-                  if (c < minCount) { minCount = c; weakestCat = cat; }
-                }
-              }
+        {/* AI analysis — below table, scrolls with it */}
+        {!loading && data && (
+          <div className="px-0 py-3">
+          <div className="bg-gradient-to-br from-[#2D2438] to-[#3D3248] rounded-xl border border-[#4D4458] overflow-hidden">
+            {/* Header */}
+            <div className="px-4 pt-3 pb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 1v6M8 15v-6M1 8h6M15 8H8M3 3l4 4M13 13l-4-4M3 13l4-4M13 3l-4 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-[0.72rem] font-bold text-[#EDE9F0]">Ask AI: why this gap?</div>
+                  <div className="text-[0.58rem] text-[#A098A8]">Our best guess — we're still learning this landscape</div>
+                </div>
+              </div>
+            </div>
+
+            {/* What's being analyzed */}
+            {bottomAnalysis && (() => {
+              const analysisCell = data.matrix[bottomAnalysis.prov]?.[bottomAnalysis.cat];
+              const cellCount = analysisCell?.count ?? 0;
+              const rawColors = cellColorRaw(cellCount);
               return (
-                <div
-                  key={i}
-                  onClick={() => weakestCat ? setSelected({ prov: g.prov, cat: weakestCat }) : undefined}
-                  className={`flex-[1_1_calc(50%-4px)] min-w-[130px] px-2.5 py-2 rounded-sm bg-bg border border-border cursor-pointer transition-all ${
-                    g.severity === "high" ? "hover:border-[#ef4444]" : "hover:border-[#D4A828]"
-                  }`}
-                >
-                  <div className="flex items-center gap-[5px] mb-[3px]">
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      g.severity === "high" ? "bg-[#ef4444]" : "bg-[#D4A828]"
-                    }`} />
-                    <span className="font-bold text-[0.75rem] text-text">{g.prov}</span>
+                <div className="px-4 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-[0.62rem] font-bold px-2 py-[2px] rounded-full border"
+                      style={{ background: rawColors.bg, color: rawColors.text, borderColor: rawColors.border }}
+                    >{gapLabel(cellCount)}</span>
+                    <span className="text-[0.72rem] font-semibold text-white">
+                      {bottomAnalysis.prov} · {CAT_LABELS[bottomAnalysis.cat] || bottomAnalysis.cat}
+                      {stage !== "All" && ` · ${STAGE_LABELS[stage]} stage`}
+                    </span>
+                    <span className="text-[0.62rem] text-[#A098A8]">
+                      {cellCount} program{cellCount !== 1 ? "s" : ""}
+                    </span>
                   </div>
-                  <div className="text-[0.65rem] text-text-secondary leading-[1.4]">{g.gap}</div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[0.6rem] text-[#8A7A9A]">
+                      Click any cell in the map to analyze a different gap
+                    </span>
+                    {cellCount > 0 && onAskAI && (
+                      <button
+                        onClick={() => {
+                          // Close gap map and open browse with this province + category as search
+                          onClose();
+                          // Use localStorage to signal browse should open with filter
+                          try { localStorage.setItem("trellis_browse_filter", JSON.stringify({ search: CAT_LABELS[bottomAnalysis.cat] || bottomAnalysis.cat, province: bottomAnalysis.prov })); } catch {}
+                          window.location.href = "/navigator?eco=true&browse=true";
+                        }}
+                        className="text-[0.62rem] font-semibold text-[#48B87A] hover:text-[#8CC63F] transition-colors bg-transparent border-none cursor-pointer p-0"
+                      >
+                        View {cellCount} program{cellCount !== 1 ? "s" : ""} →
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
-            })}
-          </div>
-        </div>
-      )}
+            })()}
 
-      {onFeedback && (
-        <div className="px-[18px] py-2 border-t border-border bg-brand-gold shrink-0 text-center">
-          <button onClick={onFeedback} className="bg-transparent border-none text-white text-[0.72rem] font-semibold p-0">
-            💬 Something wrong or missing? Tell us →
-          </button>
+            {!bottomAnalysis && (
+              <div className="px-4 pb-3 text-[0.7rem] text-[#A098A8]">
+                Tap any cell in the map above to see our analysis
+              </div>
+            )}
+
+            {/* Analysis content */}
+            {bottomAnalysis && (
+              <div key={`${bottomAnalysis.prov}-${bottomAnalysis.cat}-${stage}`} className="px-1 pb-1">
+                <ExplainCard prov={bottomAnalysis.prov} cat={bottomAnalysis.cat} stage={stage} mode={mode} autoFetch={true} />
+              </div>
+            )}
+          </div>
+
+          {onFeedback && (
+            <div className="mt-2 text-center">
+              <button onClick={onFeedback} className="bg-transparent border-none text-text-tertiary text-[0.65rem] p-0 cursor-pointer hover:text-text-secondary transition-colors">
+                Know a program we're missing? Tell us →
+              </button>
+            </div>
+          )}
         </div>
-      )}
+        )}
+      </div>
 
       {selectedCell && (
         <CellDetail
