@@ -21,7 +21,7 @@ function TrellisLogoSvg({ width = 220 }: { width?: number }) {
         <circle cx="30" cy="2" r="2" fill="#D4A828" opacity="0.5"/>
       </g>
       <text x="46" y="32" fontFamily="'DM Serif Display', Georgia, serif" fontSize="32" fontWeight="400" letterSpacing="0.01em" fill="#1a1a18">Trellis</text>
-      <text x="46" y="46" fontFamily="'DM Sans', system-ui, sans-serif" fontSize="8" fontWeight="500" letterSpacing="0.08em" textTransform="uppercase" fill="#999">Canada's AgTech Ecosystem</text>
+      <text x="46" y="46" fontFamily="'DM Sans', system-ui, sans-serif" fontSize="8" fontWeight="500" letterSpacing="0.08em" fill="#999">CANADA'S AGTECH ECOSYSTEM</text>
     </svg>
   );
 }
@@ -292,7 +292,7 @@ function SectionFounder() {
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
             animation: "fadeIn 0.4s ease",
           }}>
-            <img src={logo} alt="Trellis" style={{ width: "min(140px, 40%)", margin: "0 auto 28px", display: "block", animation: "pulse 1.5s ease-in-out infinite" }} />
+            <div style={{ width: "min(140px, 40%)", margin: "0 auto 28px", animation: "pulse 1.5s ease-in-out infinite" }}><TrellisLogoSvg width={140} /></div>
             <div style={{ width: "80%", maxWidth: 360, background: "#E8E5DD", borderRadius: 20, height: 6, overflow: "hidden" }}>
               <div style={{ height: "100%", background: C.green, borderRadius: 20, width: `${progress}%`, transition: "width 0.08s linear" }} />
             </div>
@@ -729,11 +729,11 @@ function SectionCTA() {
   return (
     <div style={{ background: C.bg }}>
       <div ref={ref} style={{ padding: "56px 24px 80px", maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
-        <img src={logo} alt="Trellis" style={{
-          width: "min(180px, 50%)", margin: "0 auto 20px", display: "block",
+        <div style={{
+          width: "min(180px, 50%)", margin: "0 auto 20px",
           opacity: visible ? 1 : 0, transform: visible ? "scale(1)" : "scale(0.92)",
           transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
-        }} />
+        }}><TrellisLogoSvg width={180} /></div>
         <p style={{
           fontFamily: F.serif, fontSize: "clamp(20px, 5vw, 28px)", color: C.green, lineHeight: 1.35, marginBottom: 4,
           opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.15s",
