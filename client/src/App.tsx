@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react";
 
 const Home = lazy(() => import("./pages/Home"));
 const Navigator = lazy(() => import("./pages/Navigator"));
+const Demo = lazy(() => import("./pages/Demo"));
 
 export default function App() {
   return (
@@ -10,6 +11,7 @@ export default function App() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/navigator" component={Navigator} />
+        <Route path="/demo" component={Demo} />
         <Route>
           <div className="p-10 text-center font-sans">
             <div className="text-4xl mb-4">🚜</div>

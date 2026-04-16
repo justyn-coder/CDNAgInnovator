@@ -129,6 +129,16 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
 }
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+.bounce-arrow { animation: gentle-bounce 2s ease-in-out infinite; }
+@keyframes ctaPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+.cta-pulse { animation: ctaPulse 2.5s ease-in-out infinite; }
 
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
