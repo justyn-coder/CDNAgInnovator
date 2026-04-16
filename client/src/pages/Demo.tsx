@@ -850,6 +850,92 @@ function RoadmapItem({ name, desc, delay }: { name: string; desc: string; delay:
   );
 }
 
+function SectionCalling() {
+  const { ref, visible } = useFadeIn(0.1);
+  const roles = [
+    { emoji: "🏛", label: "Program operators", sub: "Tell us what we got wrong about your program" },
+    { emoji: "🌱", label: "Scrappy founders", sub: "What got you through the gap nobody funded?" },
+    { emoji: "🌾", label: "Agronomists & CCAs", sub: "The advisor channel we can't map without you" },
+    { emoji: "🚜", label: "Program alumni", sub: "Was it worth the paperwork? Tell the next cohort" },
+  ];
+  const [activeIdx, setActiveIdx] = useState(0);
+  useEffect(() => {
+    if (!visible) return;
+    const id = setInterval(() => setActiveIdx(i => (i + 1) % roles.length), 2000);
+    return () => clearInterval(id);
+  }, [visible, roles.length]);
+
+  return (
+    <div ref={ref} style={{ padding: "48px 24px", maxWidth: 480, margin: "0 auto" }}>
+      <p style={{
+        fontFamily: F.sans, textTransform: "uppercase", fontSize: 12, letterSpacing: "0.1em", color: C.gold, fontWeight: 600, marginBottom: 8,
+        opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out",
+      }}>
+        CURRENTLY IN BETA
+      </p>
+      <h2 style={{
+        fontFamily: F.serif, fontSize: "clamp(24px, 5vw, 32px)", color: C.green, marginBottom: 12, lineHeight: 1.2,
+        opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(12px)",
+        transition: "opacity 0.5s ease-out 0.1s, transform 0.5s ease-out 0.1s",
+      }}>
+        Kick the tires. Tell us where it breaks.
+      </h2>
+      <p style={{
+        fontFamily: F.sans, fontSize: 14, color: C.muted, lineHeight: 1.6, marginBottom: 24,
+        opacity: visible ? 1 : 0, transition: "opacity 0.5s ease-out 0.25s",
+      }}>
+        We built it from public data. You know what's missing. We need honest eyes across the ecosystem.
+      </p>
+
+      <div style={{
+        background: "#fff", border: `1px solid ${C.border}`, borderRadius: 12,
+        padding: "24px 20px", minHeight: 180,
+        opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(16px)",
+        transition: "opacity 0.5s ease-out 0.35s, transform 0.5s ease-out 0.35s",
+      }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+          {roles.map((r, i) => (
+            <div
+              key={i}
+              style={{
+                textAlign: "center",
+                opacity: i === activeIdx ? 1 : 0.35,
+                transform: i === activeIdx ? "scale(1.1)" : "scale(1)",
+                transition: "opacity 0.4s ease, transform 0.4s ease",
+              }}
+            >
+              <div style={{ fontSize: 32, marginBottom: 4 }}>{r.emoji}</div>
+              <div style={{
+                fontFamily: F.sans, fontSize: 9, color: i === activeIdx ? C.green : C.muted,
+                fontWeight: i === activeIdx ? 700 : 500, lineHeight: 1.3,
+              }}>
+                {r.label}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: "center", minHeight: 50 }}>
+          <div key={activeIdx} style={{ animation: "fadeIn 0.4s ease" }}>
+            <p style={{ fontFamily: F.serif, fontSize: 18, color: C.green, marginBottom: 6 }}>
+              {roles[activeIdx].label}
+            </p>
+            <p style={{ fontFamily: F.sans, fontSize: 13, color: C.muted, lineHeight: 1.5, fontStyle: "italic" }}>
+              "{roles[activeIdx].sub}"
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <p style={{
+        fontFamily: F.sans, fontSize: 12, color: C.muted, textAlign: "center", marginTop: 16, lineHeight: 1.6, fontStyle: "italic",
+        opacity: visible ? 1 : 0, transition: "opacity 0.5s ease-out 0.5s",
+      }}>
+        Every correction, every conversation, makes the next founder's pathway sharper.
+      </p>
+    </div>
+  );
+}
+
 function IntelligenceEngineCard({ visible }: { visible: boolean }) {
   const sources = [
     { type: "Podcast", label: "RealAg Radio — April 14", finding: "New Alberta Innovates voucher batch opening May 2026" },
@@ -919,24 +1005,37 @@ function SectionRoadmap() {
   return (
     <div ref={ref} style={{ padding: "48px 24px", maxWidth: 480, margin: "0 auto" }}>
       <p style={{
-        fontFamily: F.sans, fontSize: 14, color: C.gold, fontWeight: 600, marginBottom: 20,
+        fontFamily: F.sans, textTransform: "uppercase", fontSize: 12, letterSpacing: "0.1em", color: C.gold, fontWeight: 600, marginBottom: 8,
         opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out",
       }}>
-        Getting better every week.
+        GETTING BETTER EVERY WEEK
       </p>
+      <h2 style={{
+        fontFamily: F.serif, fontSize: "clamp(24px, 5vw, 32px)", color: C.green, marginBottom: 24, lineHeight: 1.2,
+        opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(12px)",
+        transition: "opacity 0.5s ease-out 0.1s, transform 0.5s ease-out 0.1s",
+      }}>
+        A database that learns while you sleep.
+      </h2>
 
       <IntelligenceEngineCard visible={visible} />
 
       <p style={{
-        fontFamily: F.sans, fontSize: 11, color: C.muted, fontWeight: 600, marginBottom: 14,
-        letterSpacing: "0.08em", textTransform: "uppercase",
-        opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.2s",
+        fontFamily: F.sans, textTransform: "uppercase", fontSize: 12, letterSpacing: "0.1em", color: C.gold, fontWeight: 600, marginTop: 40, marginBottom: 8,
+        opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.3s",
       }}>
-        Coming next
+        ON THE ROADMAP
       </p>
+      <h3 style={{
+        fontFamily: F.serif, fontSize: "clamp(20px, 4.5vw, 26px)", color: C.green, marginBottom: 20, lineHeight: 1.2,
+        opacity: visible ? 1 : 0, transition: "opacity 0.4s ease-out 0.4s",
+      }}>
+        What's next? Tell us.
+      </h3>
       <RoadmapItem name="Company profiles" desc="Pre-researched data on 100+ Canadian agtech companies" delay={0} />
       <RoadmapItem name="Pilot-readiness scores" desc="Which programs are open, competitive, or oversubscribed" delay={150} />
       <RoadmapItem name="Practitioner interviews" desc="Anonymous founder feedback on what programs actually deliver" delay={300} />
+      <RoadmapItem name="Advisor channel directory" desc="The agronomists and CCAs who actually move the needle on adoption" delay={450} />
     </div>
   );
 }
@@ -998,6 +1097,7 @@ function App() {
         <SectionOperatorDashboard />
         <SectionGapMap />
         <SectionCommunity />
+        <SectionCalling />
         <SectionRoadmap />
       </div>
       <SectionCTA />
