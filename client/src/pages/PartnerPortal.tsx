@@ -1184,20 +1184,30 @@ export default function PartnerPortal() {
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text }}>
       <Header identity={identity} view={view} setView={setView} />
-      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "14px 28px 0", display: "flex", justifyContent: "flex-end" }}>
+      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "18px 28px 0", display: "flex", justifyContent: "flex-end" }}>
         <a
           href="/"
           target="_blank"
           rel="noreferrer"
           style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "8px 14px", background: C.greenDark, color: "#fff",
-            fontFamily: F.sans, fontSize: 13, fontWeight: 600,
-            borderRadius: 6, textDecoration: "none",
-            boxShadow: "0 4px 12px -6px rgba(27,67,50,0.4)",
+            display: "inline-flex", alignItems: "center", gap: 8,
+            padding: "11px 20px", background: C.goldDeep, color: "#fff",
+            fontFamily: F.sans, fontSize: 14.5, fontWeight: 700,
+            letterSpacing: "0.01em",
+            borderRadius: 8, textDecoration: "none",
+            boxShadow: "0 8px 20px -8px rgba(212,168,40,0.55)",
+            transition: "transform 0.15s ease, box-shadow 0.15s ease",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-1px)";
+            (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 12px 28px -10px rgba(212,168,40,0.7)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.transform = "none";
+            (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 8px 20px -8px rgba(212,168,40,0.55)";
           }}
         >
-          Visit live site <span>↗</span>
+          Visit live site <span style={{ fontSize: 16 }}>↗</span>
         </a>
       </div>
       {view === "home" && <HomeView identity={identity} team={team} you={you} setView={setView} />}
