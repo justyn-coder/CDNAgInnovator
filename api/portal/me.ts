@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { portalCors, verifyPerson, sql } from "../_lib/portal.js";
+import { portalCors, verifyPerson, getOrgConfig, sql } from "../_lib/portal.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!portalCors(req, res)) return;
@@ -9,6 +9,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const person = String(req.query.person || "");
   const identity = await verifyPerson(org, person);
   if (!identity) return res.status(404).json({ error: "unknown portal identity" });
+
+  const orgConfig = await getOrgConfig(org);
 
   // Team activity: per-person event counts in the last 30 days (counters only, no content)
   const teamActivityRows = await sql`
@@ -39,6 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json({
     identity,
+    orgConfig,
     you: (yourSummaryRows as any[])[0],
     team: teamActivityRows,
   });

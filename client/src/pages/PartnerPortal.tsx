@@ -26,10 +26,18 @@ const F = {
   sans: "'DM Sans', system-ui, sans-serif",
 };
 
-const PORTAL_PASSWORD = "bioenterprise2026";
-const AUTH_KEY = "trellis-portal-auth-v1";
+const AUTH_KEY = (org: string) => `trellis-portal-auth-${org}-v1`;
 const TOUR_KEY = (org: string, person: string) => `trellis-portal-tour-${org}-${person}-v1`;
 const PATHWAY_KEY = (org: string, person: string) => `trellis-portal-pathway-${org}-${person}-v1`;
+
+interface OrgConfig {
+  slug: string;
+  display_name: string;
+  theme_color: string;
+  logo_url: string | null;
+  banner_text: string | null;
+  tour_variant: "partner" | "advisor";
+}
 
 type View = "home" | "programs" | "feedback" | "priority" | "sandbox";
 
@@ -91,31 +99,57 @@ function logEvent(org: string, person: string, event_type: string, path: string,
   }).catch(() => {});
 }
 
-function PasswordGate({ onPass }: { onPass: () => void }) {
+function PasswordGate({ org, onPass }: { org: string; onPass: () => void }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (value.trim().toLowerCase() === PORTAL_PASSWORD) {
-      try { localStorage.setItem(AUTH_KEY, "1"); } catch {}
-      onPass();
-    } else {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const r = await fetch("/api/portal/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ org, password: value.trim() }),
+      });
+      if (r.ok) {
+        try { localStorage.setItem(AUTH_KEY(org), "1"); } catch {}
+        onPass();
+      } else {
+        setError(true);
+      }
+    } catch {
       setError(true);
+    } finally {
+      setBusy(false);
     }
   }
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.sans }}>
       <form onSubmit={submit} style={{ width: 360, padding: "40px 32px", background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 8, boxShadow: "0 8px 24px -16px rgba(27,67,50,0.15)" }}>
-        <div style={{ fontFamily: F.serif, fontSize: 28, color: C.greenDark, marginBottom: 8, lineHeight: 1.15 }}>Partner portal</div>
+        <div style={{ fontFamily: F.serif, fontSize: 28, color: C.greenDark, marginBottom: 8, lineHeight: 1.15 }}>Portal</div>
         <div style={{ fontSize: 14, color: C.muted, marginBottom: 24, lineHeight: 1.5 }}>
           You should have received the password by email. One-time entry. We'll remember you after this.
         </div>
         <input autoFocus type="password" value={value} onChange={(e) => { setValue(e.target.value); setError(false); }} placeholder="password" style={{ width: "100%", padding: "12px 14px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${error ? C.red : C.border}`, borderRadius: 6, outline: "none", boxSizing: "border-box", marginBottom: 16 }} />
-        <button type="submit" style={{ width: "100%", padding: "12px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 15, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>Enter</button>
+        <button type="submit" disabled={busy} style={{ width: "100%", padding: "12px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 15, fontWeight: 600, border: "none", borderRadius: 6, cursor: busy ? "default" : "pointer", opacity: busy ? 0.7 : 1 }}>{busy ? "Checking…" : "Enter"}</button>
         {error && <div style={{ fontSize: 13, color: C.red, marginTop: 12 }}>That's not quite right. Try again, or email Justyn.</div>}
       </form>
+    </div>
+  );
+}
+
+function PortalBanner({ orgConfig }: { orgConfig: OrgConfig }) {
+  if (!orgConfig.banner_text) return null;
+  return (
+    <div style={{ background: orgConfig.theme_color, color: "#fff", fontFamily: F.sans, fontSize: 12, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", textAlign: "center", padding: "7px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+      {orgConfig.logo_url && (
+        <img src={orgConfig.logo_url} alt="" style={{ height: 14, width: "auto", display: "block" }} />
+      )}
+      <span>{orgConfig.banner_text}</span>
     </div>
   );
 }
@@ -155,7 +189,7 @@ function Header({ identity, view, setView }: { identity: Identity; view: View; s
 
 interface CardConfig { view: View; eyebrow: string; title: string; blurb: string; hero?: boolean; }
 const CARDS: Record<string, CardConfig> = {
-  programs: { view: "programs", eyebrow: "Audit", title: "Your programs", blurb: "Every Trellis entry that touches BioEnterprise. Corrections ship inside 24 hours." },
+  programs: { view: "programs", eyebrow: "Audit", title: "Your programs", blurb: "Every Trellis entry tagged to your world. Corrections ship inside 24 hours." },
   sandbox: { view: "sandbox", eyebrow: "The wild one", title: "Feature sandbox", blurb: "Type a feature you wish Trellis had. Claude designs three takes in seconds. Endorse one, it goes on the roadmap your team can see and build on.", hero: true },
   priority: { view: "priority", eyebrow: "Focus", title: "Priority programs", blurb: "Pin the programs you care about most. Shared with the team." },
   feedback: { view: "feedback", eyebrow: "Observations", title: "Feedback thread", blurb: "Half-baked thoughts, questions, things you notice. Private by default. Share with the team if you want." },
@@ -1175,10 +1209,10 @@ function SandboxView({ identity }: { identity: Identity }) {
   );
 }
 
-function GuidedTour({ identity, onDone, onJumpToSandbox }: { identity: Identity; onDone: () => void; onJumpToSandbox: () => void }) {
-  const [step, setStep] = useState(0);
+type TourStep = { title: string; body: string; art: string };
 
-  const steps = [
+function buildPartnerTourSteps(identity: Identity): TourStep[] {
+  return [
     {
       title: `Hi ${identity.display_name.split(" ")[0]}. Thirty seconds of context first.`,
       body: "Trellis is the public-facing navigation layer for Canadian agtech. 500+ programs, a wizard that builds pathways, and a gap-map that shows where the ecosystem is thin. This portal is your way in. Five minutes here on day one is worth more than any email I could send.",
@@ -1205,6 +1239,45 @@ function GuidedTour({ identity, onDone, onJumpToSandbox }: { identity: Identity;
       art: "end",
     },
   ];
+}
+
+function buildAdvisorTourSteps(identity: Identity): TourStep[] {
+  const first = identity.display_name.split(" ")[0];
+  return [
+    {
+      title: `Hey ${first}. You are here to break things.`,
+      body: "Trellis is a navigation layer for Canadian agtech. 500+ programs, a wizard that builds pathways for founders, a gap map for operators. You are not a customer. You are the person I trust to tell me what is wrong with it before a real user does.",
+      art: "welcome",
+    },
+    {
+      title: "The short version of what it does.",
+      body: "Founders answer four questions and get a personalized pathway. Operators (accelerators, investors) see where the ecosystem is thin. Everything you see in the main app is live and in front of real people. This portal is the backstage.",
+      art: "cards",
+    },
+    {
+      title: "Five views in this portal.",
+      body: "Home is this screen. Your programs is where you audit the program cards tied to your world. Priority is where you pin the ones you care about most. Feedback is a running thread where you tell me what feels off. The fifth one gets its own step.",
+      art: "cards",
+    },
+    {
+      title: "Sandbox is the one to try first.",
+      body: "Type a feature you wish Trellis did. Claude designs three takes on it in the Trellis visual style, in about 30 seconds. Pick the closest one. It lands on a roadmap the rest of the circle can riff on. Go do this before anything else. Seriously.",
+      art: "sandbox",
+    },
+    {
+      title: "Rip it apart. That is the whole job.",
+      body: "No hedging, no politeness tax. If copy reads weird, say so. If a flow feels slow, flag it. If a feature is obviously missing, tell me. Your first instincts are the signal I cannot get anywhere else. Okay, go.",
+      art: "end",
+    },
+  ];
+}
+
+function GuidedTour({ identity, orgConfig, onDone, onJumpToSandbox }: { identity: Identity; orgConfig: OrgConfig; onDone: () => void; onJumpToSandbox: () => void }) {
+  const [step, setStep] = useState(0);
+
+  const steps: TourStep[] = orgConfig.tour_variant === "advisor"
+    ? buildAdvisorTourSteps(identity)
+    : buildPartnerTourSteps(identity);
 
   const s = steps[step];
   const isLast = step === steps.length - 1;
@@ -1310,6 +1383,7 @@ export default function PartnerPortal() {
 
   const [authed, setAuthed] = useState(false);
   const [identity, setIdentity] = useState<Identity | null>(null);
+  const [orgConfig, setOrgConfig] = useState<OrgConfig | null>(null);
   const [team, setTeam] = useState<TeamRow[]>([]);
   const [you, setYou] = useState<YouSummary | null>(null);
   const [view, setViewState] = useState<View>("home");
@@ -1317,8 +1391,9 @@ export default function PartnerPortal() {
   const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
-    try { if (localStorage.getItem(AUTH_KEY) === "1") setAuthed(true); } catch {}
-  }, []);
+    if (!org) return;
+    try { if (localStorage.getItem(AUTH_KEY(org)) === "1") setAuthed(true); } catch {}
+  }, [org]);
 
   const onPass = () => setAuthed(true);
 
@@ -1329,6 +1404,7 @@ export default function PartnerPortal() {
       .then((d) => {
         if (!d) return;
         setIdentity(d.identity);
+        setOrgConfig(d.orgConfig || null);
         setTeam(d.team || []);
         setYou(d.you || null);
         logEvent(org, person, "view", "/portal/home");
@@ -1361,19 +1437,25 @@ export default function PartnerPortal() {
     const meta = document.createElement("meta");
     meta.name = "robots"; meta.content = "noindex, nofollow";
     document.head.appendChild(meta);
-
-    // Swap the favicon so the portal tab is visually distinct from the main site.
-    const iconLinks = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"], link[rel="apple-touch-icon"]'));
-    const prev = iconLinks.map((l) => ({ link: l, href: l.href }));
-    iconLinks.forEach((l) => { l.href = "/brand/trellis-favicon-portal.svg?v=1"; });
-
     return () => {
       document.head.removeChild(meta);
-      prev.forEach(({ link, href }) => { link.href = href; });
     };
   }, []);
 
-  if (!authed) return <PasswordGate onPass={onPass} />;
+  // Dynamic favicon tinted with the org's theme color so every portal tab looks visibly different.
+  useEffect(() => {
+    const color = orgConfig?.theme_color || "#1B4332";
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="${color}"/><path d="M10 22V10M16 22V10M22 22V10M7 18h18M7 12h18" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+    const dataUrl = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    const iconLinks = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"], link[rel="apple-touch-icon"]'));
+    const prev = iconLinks.map((l) => ({ link: l, href: l.href }));
+    iconLinks.forEach((l) => { l.href = dataUrl; });
+    return () => {
+      prev.forEach(({ link, href }) => { link.href = href; });
+    };
+  }, [orgConfig?.theme_color]);
+
+  if (!authed) return <PasswordGate org={org} onPass={onPass} />;
 
   if (notFound) {
     return (
@@ -1395,6 +1477,7 @@ export default function PartnerPortal() {
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text }}>
+      {orgConfig && <PortalBanner orgConfig={orgConfig} />}
       <Header identity={identity} view={view} setView={setView} />
       <div style={{ maxWidth: 1120, margin: "0 auto", padding: "18px 28px 0", display: "flex", justifyContent: "flex-end" }}>
         <a
@@ -1430,7 +1513,7 @@ export default function PartnerPortal() {
       {view === "feedback" && <FeedbackView identity={identity} />}
       {view === "priority" && <PriorityView identity={identity} />}
       {view === "sandbox" && <SandboxView identity={identity} />}
-      {showTour && <GuidedTour identity={identity} onDone={endTour} onJumpToSandbox={() => setView("sandbox")} />}
+      {showTour && orgConfig && <GuidedTour identity={identity} orgConfig={orgConfig} onDone={endTour} onJumpToSandbox={() => setView("sandbox")} />}
     </div>
   );
 }

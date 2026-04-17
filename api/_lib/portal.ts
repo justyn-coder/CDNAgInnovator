@@ -31,6 +31,15 @@ export interface PortalPerson {
   founder_profile: FounderProfile | null;
 }
 
+export interface OrgConfig {
+  slug: string;
+  display_name: string;
+  theme_color: string;
+  logo_url: string | null;
+  banner_text: string | null;
+  tour_variant: "partner" | "advisor";
+}
+
 export async function verifyPerson(org: string, person: string): Promise<PortalPerson | null> {
   if (!org || !person) return null;
   const rows = await sql`
@@ -42,6 +51,25 @@ export async function verifyPerson(org: string, person: string): Promise<PortalP
     LIMIT 1
   `;
   return ((rows as any[])[0] as PortalPerson) || null;
+}
+
+export async function getOrgConfig(org: string): Promise<OrgConfig | null> {
+  if (!org) return null;
+  const rows = await sql`
+    SELECT slug, display_name, theme_color, logo_url, banner_text, tour_variant
+    FROM portal_orgs
+    WHERE slug = ${org}
+    LIMIT 1
+  `;
+  return ((rows as any[])[0] as OrgConfig) || null;
+}
+
+export async function verifyPortalPassword(org: string, password: string): Promise<boolean> {
+  if (!org || !password) return false;
+  const rows = await sql`
+    SELECT 1 FROM portal_orgs WHERE slug = ${org} AND portal_password = ${password} LIMIT 1
+  `;
+  return (rows as any[]).length > 0;
 }
 
 export function hashIp(req: VercelRequest): string {
