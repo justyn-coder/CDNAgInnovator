@@ -1103,6 +1103,24 @@ export default function Navigator() {
   const [loading, setLoading] = useState(false);
   const [showBrowse, setShowBrowse] = useState(false);
   const [showGapMap, setShowGapMap] = useState(false);
+
+  // Hook full-screen overlays into browser history so Back closes them
+  // instead of leaving /navigator entirely.
+  useEffect(() => {
+    if (!showBrowse) return;
+    window.history.pushState({ trellisOverlay: "browse" }, "", window.location.href);
+    const onPop = () => setShowBrowse(false);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [showBrowse]);
+
+  useEffect(() => {
+    if (!showGapMap) return;
+    window.history.pushState({ trellisOverlay: "gapmap" }, "", window.location.href);
+    const onPop = () => setShowGapMap(false);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [showGapMap]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [wizardSnapshot, setWizardSnapshot] = useState<WizardSnapshot | null>(null);
   const [wizardDescription, setWizardDescription] = useState("");

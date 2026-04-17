@@ -2,6 +2,9 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import postgres from "postgres";
 import { checkRateLimit, setCors } from "../../_lib/rate-limit.js";
 
+// Anthropic calls for fresh (uncached) gaps take 6-15s. Default 10s was killing them.
+export const config = { maxDuration: 45 };
+
 const conn = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 const client = postgres(conn, { ssl: "require", max: 1 });
 
