@@ -130,14 +130,14 @@ function Header({ identity, view, setView }: { identity: Identity; view: View; s
   ];
   return (
     <header style={{ background: C.cardBg, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 10 }}>
-      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
+      <div className="portal-header-row" style={{ maxWidth: 1120, margin: "0 auto", padding: "16px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ fontFamily: F.serif, fontSize: 22, color: C.greenDark }}>Trellis</div>
           <div style={{ fontSize: 11, letterSpacing: "0.18em", fontWeight: 600, color: C.gold, textTransform: "uppercase" }}>
             · Partner portal
           </div>
         </div>
-        <nav style={{ display: "flex", gap: 4 }}>
+        <nav className="portal-header-nav" style={{ display: "flex", gap: 4 }}>
           {navItems.map((item) => (
             <button key={item.key} onClick={() => setView(item.key)} style={{ padding: "8px 14px", background: view === item.key ? C.bgWarm : "transparent", color: view === item.key ? C.greenDark : C.muted, fontFamily: F.sans, fontSize: 14, fontWeight: view === item.key ? 600 : 500, border: "none", borderRadius: 6, cursor: "pointer" }}>{item.label}</button>
           ))}
@@ -370,7 +370,7 @@ function FounderHome({ identity, setView }: { identity: Identity; setView: (v: V
   }
 
   return (
-    <div style={{ maxWidth: 1040, margin: "0 auto", padding: "56px 28px 80px" }}>
+    <div className="portal-page" style={{ maxWidth: 1040, margin: "0 auto", padding: "56px 28px 80px" }}>
       <div style={{ fontFamily: F.sans, fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>
         {identity.home_eyebrow || "Your pathway"}
       </div>
@@ -490,7 +490,7 @@ function HomeView({ identity, team, you, setView }: { identity: Identity; team: 
   const cards = order.map((k) => CARDS[k]).filter(Boolean);
 
   return (
-    <div style={{ maxWidth: 1040, margin: "0 auto", padding: "56px 28px 80px" }}>
+    <div className="portal-page" style={{ maxWidth: 1040, margin: "0 auto", padding: "56px 28px 80px" }}>
       <div style={{ fontFamily: F.sans, fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>{eyebrow}</div>
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(40px, 6vw, 64px)", color: C.greenDark, lineHeight: 1.1, margin: 0, letterSpacing: "-0.01em" }}>
         {firstName}, this is yours.
@@ -638,7 +638,7 @@ function ProgramsView({ identity }: { identity: Identity }) {
   }
 
   return (
-    <div style={{ maxWidth: 960, margin: "0 auto", padding: "56px 28px 80px" }}>
+    <div className="portal-page" style={{ maxWidth: 960, margin: "0 auto", padding: "56px 28px 80px" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Audit</div>
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(32px, 4.5vw, 44px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>Your programs in Trellis</h1>
       <p style={{ fontFamily: F.sans, fontSize: 16, color: C.muted, lineHeight: 1.6, margin: "20px 0 32px", maxWidth: 640 }}>
@@ -763,7 +763,7 @@ function FeedbackView({ identity }: { identity: Identity }) {
   }
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: "56px 28px 80px" }}>
+    <div className="portal-page" style={{ maxWidth: 860, margin: "0 auto", padding: "56px 28px 80px" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Observations</div>
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(32px, 4.5vw, 44px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>Feedback thread</h1>
       <p style={{ fontFamily: F.sans, fontSize: 16, color: C.muted, lineHeight: 1.6, margin: "20px 0 32px", maxWidth: 640 }}>
@@ -893,7 +893,7 @@ function PriorityView({ identity }: { identity: Identity }) {
   }
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: "56px 28px 80px" }}>
+    <div className="portal-page" style={{ maxWidth: 860, margin: "0 auto", padding: "56px 28px 80px" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Focus</div>
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(32px, 4.5vw, 44px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>Priority programs</h1>
       <p style={{ fontFamily: F.sans, fontSize: 16, color: C.muted, lineHeight: 1.6, margin: "20px 0 24px", maxWidth: 640 }}>
@@ -1013,7 +1013,7 @@ function SandboxView({ identity }: { identity: Identity }) {
   }
 
   return (
-    <div style={{ maxWidth: 1120, margin: "0 auto", padding: "56px 28px 80px" }}>
+    <div className="portal-page" style={{ maxWidth: 1120, margin: "0 auto", padding: "56px 28px 80px" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Co-pilot</div>
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(32px, 4.5vw, 44px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>Feature sandbox</h1>
       <p style={{ fontFamily: F.sans, fontSize: 16, color: C.muted, lineHeight: 1.6, margin: "20px 0 8px", maxWidth: 720 }}>
@@ -1214,13 +1214,13 @@ function GuidedTour({ identity, onDone, onJumpToSandbox }: { identity: Identity;
       <div style={{ minHeight: "calc(100vh - 48px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ width: "100%", maxWidth: 640, background: C.bg, borderRadius: 12, overflow: "hidden", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.5)", position: "relative" }}>
         <button onClick={onDone} aria-label="Close tour" style={{ position: "absolute", top: 12, right: 12, background: "transparent", border: "none", color: C.muted, fontSize: 28, cursor: "pointer", padding: 0, width: 36, height: 36, lineHeight: 1, zIndex: 1 }}>×</button>
-        <div style={{ padding: "40px 40px 20px" }}>
+        <div className="tour-card-pad-top" style={{ padding: "40px 40px 20px" }}>
           <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Guided tour · {step + 1} of {steps.length}</div>
           <h2 style={{ fontFamily: F.serif, fontSize: "clamp(26px, 3.4vw, 36px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>{s.title}</h2>
           <p style={{ fontSize: 15.5, color: C.text, lineHeight: 1.7, margin: "18px 0 0" }}>{s.body}</p>
         </div>
         {s.art === "sandbox" && (
-          <div style={{ padding: "0 40px" }}>
+          <div className="tour-section-pad" style={{ padding: "0 40px" }}>
             <div style={{ background: "linear-gradient(135deg, #F5E9C7 0%, #FAFAF7 100%)", border: `1.5px solid ${C.gold}`, borderRadius: 10, padding: 22, position: "relative", overflow: "hidden" }}>
               <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
                 <div style={{ flexShrink: 0, width: 48, height: 48, borderRadius: 10, background: C.greenDark, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>✦</div>
@@ -1241,7 +1241,7 @@ function GuidedTour({ identity, onDone, onJumpToSandbox }: { identity: Identity;
           </div>
         )}
         {s.art === "cropmind" && (
-          <div style={{ padding: "0 40px" }}>
+          <div className="tour-section-pad" style={{ padding: "0 40px" }}>
             <div style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 8, padding: 18 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
                 <div>
@@ -1250,7 +1250,7 @@ function GuidedTour({ identity, onDone, onJumpToSandbox }: { identity: Identity;
                 </div>
                 <div style={{ fontSize: 11, padding: "3px 10px", borderRadius: 12, background: C.bgWarm, color: C.greenDark, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>Real company</div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 13 }}>
+              <div className="tour-cropmind-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 13 }}>
                 <div>
                   <div style={{ fontSize: 10, fontWeight: 700, color: C.gold, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>What they did</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -1276,7 +1276,7 @@ function GuidedTour({ identity, onDone, onJumpToSandbox }: { identity: Identity;
             </div>
           </div>
         )}
-        <div style={{ padding: "24px 40px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 12 }}>
+        <div className="tour-buttons-pad" style={{ padding: "24px 40px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
           <button onClick={onDone} style={{ padding: "10px 18px", background: "transparent", color: C.muted, fontFamily: F.sans, fontSize: 13, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
             Skip the tour
           </button>

@@ -98,6 +98,7 @@ export default function PortalFeedbackFloater() {
       <button
         onClick={reopen}
         aria-label="Open feedback panel"
+        className="portal-feedback-pill"
         style={{
           position: "fixed", top: 96, right: 24, zIndex: 60,
           padding: "10px 16px", display: "flex", alignItems: "center", gap: 10,
@@ -119,6 +120,7 @@ export default function PortalFeedbackFloater() {
     <div
       role="complementary"
       aria-label="Portal feedback"
+      className="portal-feedback-panel"
       style={{
         position: "fixed", top: 96, right: 24, zIndex: 60,
         width: 360, maxHeight: "calc(100vh - 112px)", overflow: "auto",
