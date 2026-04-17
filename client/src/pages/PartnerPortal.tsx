@@ -17,6 +17,7 @@ const C = {
   border: "#E8E5E0",
   hairline: "#D9D4CB",
   red: "#C04A3D",
+  blue: "#3E6B8C",
 };
 
 const F = {
@@ -26,6 +27,7 @@ const F = {
 
 const PORTAL_PASSWORD = "bioenterprise2026";
 const AUTH_KEY = "trellis-portal-auth-v1";
+const TOUR_KEY = (org: string, person: string) => `trellis-portal-tour-${org}-${person}-v1`;
 
 type View = "home" | "programs" | "feedback" | "priority" | "sandbox";
 
@@ -35,6 +37,10 @@ interface Identity {
   display_name: string;
   role: string | null;
   email: string | null;
+  home_eyebrow: string | null;
+  home_subheading: string | null;
+  home_hero_callout: string | null;
+  card_order: string[] | null;
 }
 
 interface TeamRow {
@@ -54,6 +60,15 @@ interface YouSummary {
   last_visit: string | null;
 }
 
+const SANDBOX_EXAMPLES = [
+  "A view that shows all programs from a specific funder side by side",
+  "Email me when an Ontario accelerator program opens a new intake",
+  "A chart of funding amounts by stage, by province",
+  "Side-by-side comparison of two founders' pathways",
+  "A one-pager I can drop into a grant proposal",
+  "A heatmap of where our portfolio companies have been routed",
+];
+
 function logEvent(org: string, person: string, event_type: string, path: string, metadata: Record<string, unknown> = {}) {
   fetch("/api/portal/log", {
     method: "POST",
@@ -69,9 +84,7 @@ function PasswordGate({ onPass }: { onPass: () => void }) {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (value.trim().toLowerCase() === PORTAL_PASSWORD) {
-      try {
-        localStorage.setItem(AUTH_KEY, "1");
-      } catch {}
+      try { localStorage.setItem(AUTH_KEY, "1"); } catch {}
       onPass();
     } else {
       setError(true);
@@ -85,36 +98,8 @@ function PasswordGate({ onPass }: { onPass: () => void }) {
         <div style={{ fontSize: 14, color: C.muted, marginBottom: 24, lineHeight: 1.5 }}>
           You should have received the password by email. One-time entry — we'll remember you after this.
         </div>
-        <input
-          autoFocus
-          type="password"
-          value={value}
-          onChange={(e) => { setValue(e.target.value); setError(false); }}
-          placeholder="password"
-          style={{
-            width: "100%",
-            padding: "12px 14px",
-            fontSize: 15,
-            fontFamily: F.sans,
-            border: `1px solid ${error ? C.red : C.border}`,
-            borderRadius: 6,
-            outline: "none",
-            boxSizing: "border-box",
-            marginBottom: 16,
-          }}
-        />
-        <button type="submit" style={{
-          width: "100%",
-          padding: "12px",
-          background: C.greenDark,
-          color: "#fff",
-          fontFamily: F.sans,
-          fontSize: 15,
-          fontWeight: 600,
-          border: "none",
-          borderRadius: 6,
-          cursor: "pointer",
-        }}>Enter</button>
+        <input autoFocus type="password" value={value} onChange={(e) => { setValue(e.target.value); setError(false); }} placeholder="password" style={{ width: "100%", padding: "12px 14px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${error ? C.red : C.border}`, borderRadius: 6, outline: "none", boxSizing: "border-box", marginBottom: 16 }} />
+        <button type="submit" style={{ width: "100%", padding: "12px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 15, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>Enter</button>
         {error && <div style={{ fontSize: 13, color: C.red, marginTop: 12 }}>That's not quite right. Try again, or email Justyn.</div>}
       </form>
     </div>
@@ -125,9 +110,9 @@ function Header({ identity, view, setView }: { identity: Identity; view: View; s
   const navItems: { key: View; label: string }[] = [
     { key: "home", label: "Home" },
     { key: "programs", label: "Your programs" },
-    { key: "feedback", label: "Feedback" },
-    { key: "priority", label: "Priority programs" },
     { key: "sandbox", label: "Sandbox" },
+    { key: "priority", label: "Priority" },
+    { key: "feedback", label: "Feedback" },
   ];
   return (
     <header style={{ background: C.cardBg, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 10 }}>
@@ -140,26 +125,12 @@ function Header({ identity, view, setView }: { identity: Identity; view: View; s
         </div>
         <nav style={{ display: "flex", gap: 4 }}>
           {navItems.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setView(item.key)}
-              style={{
-                padding: "8px 14px",
-                background: view === item.key ? C.bgWarm : "transparent",
-                color: view === item.key ? C.greenDark : C.muted,
-                fontFamily: F.sans,
-                fontSize: 14,
-                fontWeight: view === item.key ? 600 : 500,
-                border: "none",
-                borderRadius: 6,
-                cursor: "pointer",
-              }}
-            >{item.label}</button>
+            <button key={item.key} onClick={() => setView(item.key)} style={{ padding: "8px 14px", background: view === item.key ? C.bgWarm : "transparent", color: view === item.key ? C.greenDark : C.muted, fontFamily: F.sans, fontSize: 14, fontWeight: view === item.key ? 600 : 500, border: "none", borderRadius: 6, cursor: "pointer" }}>{item.label}</button>
           ))}
         </nav>
         <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.muted }}>
           <div style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgWarm, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: C.greenDark, fontSize: 13 }}>
-            {identity.display_name.split(" ").map(s => s[0]).join("").slice(0, 2)}
+            {identity.display_name.split(" ").map((s) => s[0]).join("").slice(0, 2)}
           </div>
           <div>{identity.display_name.split(" ")[0]}</div>
         </div>
@@ -168,57 +139,55 @@ function Header({ identity, view, setView }: { identity: Identity; view: View; s
   );
 }
 
+const CARDS: Record<string, { view: View; eyebrow: string; title: string; blurb: string }> = {
+  programs: { view: "programs", eyebrow: "Audit", title: "Your programs", blurb: "Every Trellis entry that touches BioEnterprise. Corrections ship inside 24 hours." },
+  sandbox: { view: "sandbox", eyebrow: "What if", title: "Feature sandbox", blurb: "Describe what you wish Trellis did. Claude designs three takes. Endorse one, it goes on the team roadmap everyone can see." },
+  priority: { view: "priority", eyebrow: "Focus", title: "Priority programs", blurb: "Pin the programs you care about most. Shared with the team." },
+  feedback: { view: "feedback", eyebrow: "Observations", title: "Feedback thread", blurb: "Half-baked thoughts, questions, things you notice. Private by default — share with the team if you want." },
+};
+
 function HomeView({ identity, team, you, setView }: { identity: Identity; team: TeamRow[]; you: YouSummary | null; setView: (v: View) => void }) {
   const firstName = identity.display_name.split(" ")[0];
   const lastVisit = you?.last_visit ? new Date(you.last_visit) : null;
   const sinceText = lastVisit
     ? `Welcome back. Last time you were here: ${lastVisit.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}.`
-    : "First time in. Take the tour below — it's a faster way in than me sending five more emails.";
+    : "First time in. The tour started automatically — or skip it and poke around on your own.";
 
-  const cards = [
-    { view: "programs" as View, eyebrow: "Audit", title: "Your programs", blurb: "The seven BioEnterprise entries in Trellis. Flag anything wrong — I'll update within 24 hours." },
-    { view: "feedback" as View, eyebrow: "Observations", title: "Feedback thread", blurb: "Not formal corrections. Just things you notice, half-baked ideas, questions. I read everything." },
-    { view: "priority" as View, eyebrow: "Focus", title: "Priority programs", blurb: "Out of 500+ entries, which do you want kept most accurate? Tag them and I'll watch those closely." },
-    { view: "sandbox" as View, eyebrow: "What if", title: "Feature sandbox", blurb: "Describe something you wish Trellis did. Watch Claude design a mockup in the Trellis style. Endorse what should ship." },
-  ];
+  const eyebrow = identity.home_eyebrow || "Welcome";
+  const subheading = identity.home_subheading || sinceText;
+  const heroCallout = identity.home_hero_callout;
+  const order = identity.card_order && identity.card_order.length > 0
+    ? identity.card_order
+    : ["programs", "sandbox", "priority", "feedback"];
+  const cards = order.map((k) => CARDS[k]).filter(Boolean);
 
   return (
     <div style={{ maxWidth: 1040, margin: "0 auto", padding: "56px 28px 80px" }}>
-      <div style={{ fontFamily: F.sans, fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Welcome</div>
+      <div style={{ fontFamily: F.sans, fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>{eyebrow}</div>
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(40px, 6vw, 64px)", color: C.greenDark, lineHeight: 1.1, margin: 0, letterSpacing: "-0.01em" }}>
         {firstName}, this is yours.
       </h1>
-      <p style={{ fontFamily: F.serif, fontSize: "clamp(18px, 2vw, 22px)", color: C.muted, fontStyle: "italic", lineHeight: 1.55, margin: "20px 0 0", maxWidth: 640 }}>
+      <p style={{ fontFamily: F.serif, fontSize: "clamp(18px, 2vw, 22px)", color: C.muted, fontStyle: "italic", lineHeight: 1.55, margin: "20px 0 0", maxWidth: 680 }}>
+        {subheading}
+      </p>
+      <p style={{ fontFamily: F.sans, fontSize: 15, color: C.soft, lineHeight: 1.6, margin: "12px 0 0" }}>
         {sinceText}
       </p>
+
+      {heroCallout && (
+        <div style={{ marginTop: 36, padding: "22px 26px", background: C.bgWarm, borderLeft: `3px solid ${C.gold}`, borderRadius: 4, maxWidth: 720 }}>
+          <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 8 }}>Your lead</div>
+          <div style={{ fontFamily: F.serif, fontSize: 19, color: C.greenDark, lineHeight: 1.5 }}>{heroCallout}</div>
+        </div>
+      )}
 
       <div style={{ height: 1, background: C.hairline, margin: "56px 0 40px" }} />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
         {cards.map((c) => (
-          <button
-            key={c.view}
-            onClick={() => setView(c.view)}
-            style={{
-              textAlign: "left",
-              padding: "24px 22px",
-              background: C.cardBg,
-              border: `1px solid ${C.border}`,
-              borderRadius: 10,
-              cursor: "pointer",
-              transition: "transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 12px 32px -18px rgba(27,67,50,0.2)";
-              (e.currentTarget as HTMLButtonElement).style.borderColor = C.gold;
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = "none";
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
-              (e.currentTarget as HTMLButtonElement).style.borderColor = C.border;
-            }}
-          >
+          <button key={c.view} onClick={() => setView(c.view)} style={{ textAlign: "left", padding: "24px 22px", background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 10, cursor: "pointer", transition: "transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 12px 32px -18px rgba(27,67,50,0.2)"; (e.currentTarget as HTMLButtonElement).style.borderColor = C.gold; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "none"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "none"; (e.currentTarget as HTMLButtonElement).style.borderColor = C.border; }}>
             <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>{c.eyebrow}</div>
             <div style={{ fontFamily: F.serif, fontSize: 22, color: C.greenDark, marginBottom: 8, letterSpacing: "-0.005em" }}>{c.title}</div>
             <div style={{ fontSize: 14, color: C.muted, lineHeight: 1.55 }}>{c.blurb}</div>
@@ -227,12 +196,9 @@ function HomeView({ identity, team, you, setView }: { identity: Identity; team: 
       </div>
 
       <div style={{ marginTop: 48, padding: "24px 24px", background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 10 }}>
-        <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>Team activity</div>
+        <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>Team activity (last 30 days)</div>
         <div style={{ fontFamily: F.serif, fontSize: 20, color: C.greenDark, marginBottom: 14 }}>
           What others on your team have been doing
-        </div>
-        <div style={{ fontSize: 13, color: C.muted, marginBottom: 18, lineHeight: 1.5 }}>
-          Counters only — their content stays private to them. You just see they've been in, and on what.
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {team.length === 0 ? (
@@ -252,13 +218,11 @@ function HomeView({ identity, team, you, setView }: { identity: Identity; team: 
                       {views > 0 && <span>{views} page view{views === 1 ? "" : "s"}</span>}
                       {feedback > 0 && <span>{feedback} feedback</span>}
                       {features > 0 && <span>{features} sandbox</span>}
-                      {priorities > 0 && <span>{priorities} priorities</span>}
+                      {priorities > 0 && <span>{priorities} pinned</span>}
                     </>
                   )}
                 </div>
-                {t.last_seen && <div style={{ fontSize: 12, color: C.soft }}>
-                  {new Date(t.last_seen).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
-                </div>}
+                {t.last_seen && <div style={{ fontSize: 12, color: C.soft }}>{new Date(t.last_seen).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</div>}
               </div>
             );
           })}
@@ -266,15 +230,9 @@ function HomeView({ identity, team, you, setView }: { identity: Identity; team: 
       </div>
 
       <div style={{ marginTop: 32, display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <a href="/for/bioenterprise" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>
-          About this tool →
-        </a>
-        <a href="/demo" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>
-          The walkthrough →
-        </a>
-        <a href="/navigator" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>
-          The live tool →
-        </a>
+        <a href="/for/bioenterprise" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>About this tool →</a>
+        <a href="/demo" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>The walkthrough →</a>
+        <a href="/navigator" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>The live tool →</a>
       </div>
     </div>
   );
@@ -317,21 +275,12 @@ function ProgramsView({ identity }: { identity: Identity }) {
     const resp = await fetch("/api/portal/correction", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        org: identity.org,
-        person: identity.person,
-        program_id: programId,
-        field,
-        suggested_value: suggested,
-        note,
-      }),
+      body: JSON.stringify({ org: identity.org, person: identity.person, program_id: programId, field, suggested_value: suggested, note }),
     });
     setSubmitting(false);
     if (resp.ok) {
       setSubmitted(programId);
-      setField("");
-      setSuggested("");
-      setNote("");
+      setField(""); setSuggested(""); setNote("");
       setTimeout(() => { setOpenId(null); setSubmitted(null); }, 2500);
     }
   }
@@ -339,11 +288,9 @@ function ProgramsView({ identity }: { identity: Identity }) {
   return (
     <div style={{ maxWidth: 960, margin: "0 auto", padding: "56px 28px 80px" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Audit</div>
-      <h1 style={{ fontFamily: F.serif, fontSize: "clamp(32px, 4.5vw, 44px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>
-        Your programs in Trellis
-      </h1>
+      <h1 style={{ fontFamily: F.serif, fontSize: "clamp(32px, 4.5vw, 44px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>Your programs in Trellis</h1>
       <p style={{ fontFamily: F.sans, fontSize: 16, color: C.muted, lineHeight: 1.6, margin: "20px 0 32px", maxWidth: 640 }}>
-        These are the entries that mention BioEnterprise directly or show up through partnership. If any detail is wrong — wrong stage, wrong province, out-of-date URL, fictional program — flag it and I'll fix within 24 hours.
+        These are the entries that mention BioEnterprise directly (gold border) or show up through partnership (grey border). If any detail is wrong, flag it and I'll fix within 24 hours.
       </p>
 
       {error && <div style={{ padding: 16, background: "#FEE", border: `1px solid ${C.red}`, borderRadius: 6, color: C.red }}>Couldn't load: {error}</div>}
@@ -360,9 +307,7 @@ function ProgramsView({ identity }: { identity: Identity }) {
                     <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 12, background: p.ownership === "direct" ? "#F5E9C7" : "#EEE", color: p.ownership === "direct" ? C.greenDark : C.muted, letterSpacing: "0.03em", textTransform: "uppercase" }}>
                       {p.ownership === "direct" ? "Yours" : "Partnership"}
                     </span>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 12, background: p.status === "verified" || p.status === "active" ? "#E7F2E7" : p.status === "unverified" ? "#FEF3DC" : "#F0F0F0", color: C.muted, letterSpacing: "0.03em", textTransform: "uppercase" }}>
-                      {p.status}
-                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 12, background: p.status === "verified" || p.status === "active" ? "#E7F2E7" : p.status === "unverified" ? "#FEF3DC" : "#F0F0F0", color: C.muted, letterSpacing: "0.03em", textTransform: "uppercase" }}>{p.status}</span>
                   </div>
                   <div style={{ fontSize: 13, color: C.muted, marginBottom: 10, display: "flex", gap: 14, flexWrap: "wrap" }}>
                     <span>{p.category}</span>
@@ -372,10 +317,7 @@ function ProgramsView({ identity }: { identity: Identity }) {
                   <div style={{ fontSize: 14, color: C.text, lineHeight: 1.55, marginBottom: 10 }}>{p.description}</div>
                   <a href={p.website} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: C.green, textDecoration: "none", borderBottom: `1px solid ${C.gold}`, paddingBottom: 1 }}>{p.website}</a>
                 </div>
-                <button
-                  onClick={() => setOpenId(openId === p.id ? null : p.id)}
-                  style={{ padding: "8px 14px", background: openId === p.id ? C.greenDark : "transparent", color: openId === p.id ? "#fff" : C.greenDark, fontFamily: F.sans, fontSize: 13, fontWeight: 600, border: `1px solid ${C.greenDark}`, borderRadius: 6, cursor: "pointer", whiteSpace: "nowrap" }}
-                >
+                <button onClick={() => setOpenId(openId === p.id ? null : p.id)} style={{ padding: "8px 14px", background: openId === p.id ? C.greenDark : "transparent", color: openId === p.id ? "#fff" : C.greenDark, fontFamily: F.sans, fontSize: 13, fontWeight: 600, border: `1px solid ${C.greenDark}`, borderRadius: 6, cursor: "pointer", whiteSpace: "nowrap" }}>
                   {openId === p.id ? "Close" : "Suggest correction"}
                 </button>
               </div>
@@ -393,7 +335,7 @@ function ProgramsView({ identity }: { identity: Identity }) {
                           <option value="category">Category</option>
                           <option value="province">Province(s)</option>
                           <option value="stage">Stage(s)</option>
-                          <option value="status">Status (active / closed / verified)</option>
+                          <option value="status">Status</option>
                           <option value="description">Description</option>
                           <option value="website">Website URL</option>
                           <option value="other">Something else</option>
@@ -424,25 +366,33 @@ function ProgramsView({ identity }: { identity: Identity }) {
   );
 }
 
+interface FeedbackReply { id: number; body: string; created_at: string; }
 interface FeedbackPost {
   id: number;
   topic: string;
   body: string;
+  visibility: string;
   created_at: string;
+  replies?: FeedbackReply[];
+  author_name?: string;
+  author_person?: string;
 }
 
 function FeedbackView({ identity }: { identity: Identity }) {
   const [yours, setYours] = useState<FeedbackPost[]>([]);
-  const [teamCounts, setTeamCounts] = useState<{ topic: string; cnt: string }[]>([]);
+  const [teamPublic, setTeamPublic] = useState<FeedbackPost[]>([]);
+  const [teamPrivateCounts, setTeamPrivateCounts] = useState<{ topic: string; cnt: string }[]>([]);
   const [topic, setTopic] = useState("General");
   const [body, setBody] = useState("");
+  const [shareWithTeam, setShareWithTeam] = useState(false);
   const [sending, setSending] = useState(false);
 
   async function load() {
     const resp = await fetch(`/api/portal/feedback?org=${identity.org}&person=${identity.person}`);
     const data = await resp.json();
     setYours(data.yours || []);
-    setTeamCounts(data.teamCounts || []);
+    setTeamPublic(data.teamPublic || []);
+    setTeamPrivateCounts(data.teamPrivateCounts || []);
   }
 
   useEffect(() => { load(); }, [identity.org, identity.person]);
@@ -453,7 +403,7 @@ function FeedbackView({ identity }: { identity: Identity }) {
     await fetch("/api/portal/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ org: identity.org, person: identity.person, topic, body }),
+      body: JSON.stringify({ org: identity.org, person: identity.person, topic, body, visibility: shareWithTeam ? "team" : "private" }),
     });
     setSending(false);
     setBody("");
@@ -465,7 +415,7 @@ function FeedbackView({ identity }: { identity: Identity }) {
       <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Observations</div>
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(32px, 4.5vw, 44px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>Feedback thread</h1>
       <p style={{ fontFamily: F.sans, fontSize: 16, color: C.muted, lineHeight: 1.6, margin: "20px 0 32px", maxWidth: 640 }}>
-        Less formal than corrections. Observations, half-baked ideas, questions. Your posts are private to you — I'm the only other person who reads them.
+        Less formal than corrections. Observations, half-baked ideas, questions. Private by default — tick the share-with-team box if you want it visible to your colleagues.
       </p>
 
       <div style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 8, padding: 22, marginBottom: 32 }}>
@@ -475,36 +425,78 @@ function FeedbackView({ identity }: { identity: Identity }) {
           ))}
         </div>
         <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} placeholder="What did you notice?" style={{ width: "100%", padding: "12px 14px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 6, boxSizing: "border-box", resize: "vertical", marginBottom: 12 }} />
-        <button onClick={submit} disabled={body.trim().length < 4 || sending} style={{ padding: "10px 18px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: body.trim().length >= 4 ? "pointer" : "not-allowed", opacity: body.trim().length >= 4 ? 1 : 0.5 }}>
-          {sending ? "Sending…" : "Post"}
-        </button>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: C.muted, cursor: "pointer" }}>
+            <input type="checkbox" checked={shareWithTeam} onChange={(e) => setShareWithTeam(e.target.checked)} />
+            <span>Share with teammates (default: private, just you + Justyn)</span>
+          </label>
+          <button onClick={submit} disabled={body.trim().length < 4 || sending} style={{ padding: "10px 18px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: body.trim().length >= 4 ? "pointer" : "not-allowed", opacity: body.trim().length >= 4 ? 1 : 0.5 }}>
+            {sending ? "Sending…" : "Post"}
+          </button>
+        </div>
       </div>
 
-      {teamCounts.length > 0 && (
-        <div style={{ marginBottom: 32, padding: "18px 22px", background: C.bgWarm, border: `1px solid ${C.border}`, borderRadius: 8 }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>What the team is looking at</div>
-          <div style={{ fontSize: 13, color: C.muted, marginBottom: 10, lineHeight: 1.55 }}>Others have been commenting on (content stays private):</div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {teamCounts.map((t) => (
-              <span key={t.topic} style={{ padding: "6px 12px", background: "#fff", border: `1px solid ${C.border}`, borderRadius: 14, fontSize: 13, color: C.text }}>
-                <span style={{ fontWeight: 600 }}>{t.topic}</span> <span style={{ color: C.muted }}>· {t.cnt}</span>
-              </span>
+      {teamPublic.length > 0 && (
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>What your team is saying publicly</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {teamPublic.map((p) => (
+              <div key={p.id} style={{ background: C.bgWarm, border: `1px solid ${C.border}`, borderRadius: 8, padding: 18 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: C.greenDark }}>{p.author_name}</span>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: C.gold, letterSpacing: "0.04em", textTransform: "uppercase" }}>{p.topic}</span>
+                    <span style={{ fontSize: 11, color: C.soft }}>{new Date(p.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                  </div>
+                </div>
+                <div style={{ fontSize: 14, color: C.text, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{p.body}</div>
+              </div>
             ))}
           </div>
         </div>
       )}
 
+      {teamPrivateCounts.length > 0 && (
+        <div style={{ marginBottom: 32, padding: "14px 18px", background: "#F5F5F0", border: `1px dashed ${C.border}`, borderRadius: 6 }}>
+          <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.55 }}>
+            <strong style={{ color: C.greenDark }}>Private posts this month:</strong>{" "}
+            {teamPrivateCounts.map((t, i) => (
+              <span key={t.topic}>{i > 0 && " · "}{t.topic} ({t.cnt})</span>
+            ))}
+            {" "}<span style={{ color: C.soft }}>— content stays with the author.</span>
+          </div>
+        </div>
+      )}
+
+      <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>Your posts</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>Your posts</div>
         {yours.length === 0 ? (
           <div style={{ fontSize: 14, color: C.soft, fontStyle: "italic" }}>Nothing yet. First thought goes above.</div>
         ) : yours.map((p) => (
           <div key={p.id} style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 8, padding: 18 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: C.gold, letterSpacing: "0.04em", textTransform: "uppercase" }}>{p.topic}</span>
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: C.gold, letterSpacing: "0.04em", textTransform: "uppercase" }}>{p.topic}</span>
+                <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 10, background: p.visibility === "team" ? "#E7F2E7" : "#F5F5F0", color: p.visibility === "team" ? C.green : C.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  {p.visibility === "team" ? "shared" : "private"}
+                </span>
+              </div>
               <span style={{ fontSize: 12, color: C.soft }}>{new Date(p.created_at).toLocaleString("en-CA", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
             </div>
             <div style={{ fontSize: 15, color: C.text, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{p.body}</div>
+            {p.replies && p.replies.length > 0 && (
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px dashed ${C.border}` }}>
+                {p.replies.map((r) => (
+                  <div key={r.id} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
+                    <div style={{ minWidth: 28, height: 28, borderRadius: "50%", background: C.greenDark, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 }}>J</div>
+                    <div>
+                      <div style={{ fontSize: 12, color: C.soft, marginBottom: 2 }}>Justyn · {new Date(r.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</div>
+                      <div style={{ fontSize: 14, color: C.text, lineHeight: 1.55, whiteSpace: "pre-wrap" }}>{r.body}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -533,7 +525,7 @@ function PriorityView({ identity }: { identity: Identity }) {
     if (search.trim().length < 2) { setSearchResults([]); return; }
     const ctrl = new AbortController();
     fetch(`/api/portal/search?q=${encodeURIComponent(search)}&limit=12`, { signal: ctrl.signal })
-      .then((r) => r.ok ? r.json() : { results: [] })
+      .then((r) => (r.ok ? r.json() : { results: [] }))
       .then((d) => setSearchResults(d.results || []))
       .catch(() => {});
     return () => ctrl.abort();
@@ -553,17 +545,11 @@ function PriorityView({ identity }: { identity: Identity }) {
       <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Focus</div>
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(32px, 4.5vw, 44px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>Priority programs</h1>
       <p style={{ fontFamily: F.sans, fontSize: 16, color: C.muted, lineHeight: 1.6, margin: "20px 0 24px", maxWidth: 640 }}>
-        Trellis has 500+ programs. Some matter more to you than others. Tag the ones you want me to watch closely — I'll prioritize accuracy and re-verification on those.
+        Trellis has 500+ programs. Some matter more to you than others. Pin the ones you want me to watch closely — your picks are shared with your team.
       </p>
 
       <div style={{ marginBottom: 32 }}>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search Trellis programs to pin…"
-          style={{ width: "100%", padding: "14px 16px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 8, boxSizing: "border-box", background: "#fff" }}
-        />
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search Trellis programs to pin…" style={{ width: "100%", padding: "14px 16px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 8, boxSizing: "border-box", background: "#fff" }} />
         {searchResults.length > 0 && (
           <div style={{ marginTop: 8, background: "#fff", border: `1px solid ${C.border}`, borderRadius: 8, maxHeight: 320, overflow: "auto" }}>
             {searchResults.map((r) => {
@@ -609,25 +595,32 @@ function PriorityView({ identity }: { identity: Identity }) {
   );
 }
 
+interface SandboxVariant { id: number; angle: string; html: string; }
+interface RoadmapMockup { id: number; person: string; prompt: string; mockup_html: string; status: string; created_at: string; author_name: string; }
+
 function SandboxView({ identity }: { identity: Identity }) {
   const [prompt, setPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [result, setResult] = useState<{ id: number; html: string; prompt: string } | null>(null);
+  const [variants, setVariants] = useState<SandboxVariant[] | null>(null);
+  const [lastPrompt, setLastPrompt] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [endorsed, setEndorsed] = useState(false);
+  const [endorsedId, setEndorsedId] = useState<number | null>(null);
+  const [roadmap, setRoadmap] = useState<RoadmapMockup[]>([]);
+  const [placeholder] = useState(SANDBOX_EXAMPLES[Math.floor(Math.random() * SANDBOX_EXAMPLES.length)]);
 
-  const examples = [
-    "A way to see all programs from a specific funder side by side",
-    "Email me when an Ontario accelerator program opens a new intake",
-    "A chart showing how funding amounts change by stage across provinces",
-    "A view that shows which programs best-fit a specific company we're advising",
-  ];
+  async function loadRoadmap() {
+    const r = await fetch(`/api/portal/roadmap-feed?org=${identity.org}&person=${identity.person}`);
+    const d = await r.json();
+    setRoadmap(d.mockups || []);
+  }
+  useEffect(() => { loadRoadmap(); }, [identity.org, identity.person]);
 
   async function generate() {
     if (prompt.trim().length < 8) return;
     setGenerating(true);
     setError(null);
-    setEndorsed(false);
+    setEndorsedId(null);
+    setVariants(null);
     try {
       const resp = await fetch("/api/portal/sandbox", {
         method: "POST",
@@ -639,7 +632,8 @@ function SandboxView({ identity }: { identity: Identity }) {
         throw new Error(err.error || "Generation failed");
       }
       const data = await resp.json();
-      setResult({ id: data.id, html: data.mockup_html, prompt });
+      setVariants(data.variants || []);
+      setLastPrompt(data.prompt || prompt);
     } catch (e: any) {
       setError(e.message || String(e));
     } finally {
@@ -647,37 +641,41 @@ function SandboxView({ identity }: { identity: Identity }) {
     }
   }
 
-  async function endorse() {
-    if (!result) return;
+  async function endorse(id: number) {
     await fetch("/api/portal/roadmap", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ org: identity.org, person: identity.person, id: result.id, action: "endorse" }),
+      body: JSON.stringify({ org: identity.org, person: identity.person, id, action: "endorse" }),
     });
-    setEndorsed(true);
+    setEndorsedId(id);
+    loadRoadmap();
+  }
+
+  function buildOn(m: RoadmapMockup) {
+    const basePrompt = m.prompt.replace(/\s*\[variant \d+:[^\]]*\]\s*$/, "").replace(/\s*\[seed from meeting:[^\]]*\]\s*$/, "");
+    setPrompt(`Like ${m.author_name}'s "${basePrompt.slice(0, 120)}${basePrompt.length > 120 ? "…" : ""}", but `);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setVariants(null);
+    setEndorsedId(null);
   }
 
   return (
-    <div style={{ maxWidth: 960, margin: "0 auto", padding: "56px 28px 80px" }}>
-      <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>What if</div>
+    <div style={{ maxWidth: 1120, margin: "0 auto", padding: "56px 28px 80px" }}>
+      <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Co-pilot</div>
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(32px, 4.5vw, 44px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>Feature sandbox</h1>
-      <p style={{ fontFamily: F.sans, fontSize: 16, color: C.muted, lineHeight: 1.6, margin: "20px 0 32px", maxWidth: 640 }}>
-        Describe something you wish Trellis did — even roughly. Claude will design what it might look like, in the Trellis style. Endorse the ones you'd want shipped and they go on the real roadmap.
+      <p style={{ fontFamily: F.sans, fontSize: 16, color: C.muted, lineHeight: 1.6, margin: "20px 0 8px", maxWidth: 720 }}>
+        You are a co-product-manager on Trellis, not a user. Describe something you wish it did. Claude designs three takes in the Trellis style. Pick the one closest — it goes on the roadmap your team can see and build on.
+      </p>
+      <p style={{ fontFamily: F.sans, fontSize: 14, color: C.soft, lineHeight: 1.55, margin: "0 0 32px", maxWidth: 720, fontStyle: "italic" }}>
+        I've seeded the roadmap with three ideas based on what came up in our first meeting. Add on to them, or start fresh below.
       </p>
 
-      <div style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 24, marginBottom: 24 }}>
+      <div style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 24, marginBottom: 24, maxWidth: 860 }}>
         <label style={{ fontSize: 12, fontWeight: 600, color: C.muted, display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>What would make Trellis more useful for you?</label>
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          rows={3}
-          placeholder="A feature, a workflow, a view…"
-          style={{ width: "100%", padding: "12px 14px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 6, boxSizing: "border-box", resize: "vertical" }}
-        />
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14, flexWrap: "wrap", gap: 12 }}>
-          <div style={{ fontSize: 12, color: C.soft }}>Try: <span style={{ color: C.muted, fontStyle: "italic" }}>{examples[Math.floor(Math.random() * examples.length)]}</span></div>
+        <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} placeholder={placeholder} style={{ width: "100%", padding: "12px 14px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 6, boxSizing: "border-box", resize: "vertical" }} />
+        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginTop: 14, gap: 12 }}>
           <button onClick={generate} disabled={prompt.trim().length < 8 || generating} style={{ padding: "12px 22px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: prompt.trim().length >= 8 ? "pointer" : "not-allowed", opacity: prompt.trim().length >= 8 ? 1 : 0.5 }}>
-            {generating ? "Designing…" : "Design this →"}
+            {generating ? "Designing three takes…" : "Design this →"}
           </button>
         </div>
       </div>
@@ -685,36 +683,181 @@ function SandboxView({ identity }: { identity: Identity }) {
       {error && <div style={{ padding: 16, background: "#FEE", border: `1px solid ${C.red}`, borderRadius: 6, color: C.red, marginBottom: 24 }}>Couldn't generate: {error}</div>}
 
       {generating && (
-        <div style={{ padding: 40, background: C.bgWarm, border: `1px dashed ${C.gold}`, borderRadius: 10, textAlign: "center" }}>
-          <div style={{ fontFamily: F.serif, fontSize: 20, color: C.greenDark, marginBottom: 8 }}>Claude is designing this…</div>
-          <div style={{ fontSize: 13, color: C.muted }}>Usually takes 8-15 seconds.</div>
+        <div style={{ padding: 40, background: C.bgWarm, border: `1px dashed ${C.gold}`, borderRadius: 10, textAlign: "center", marginBottom: 24 }}>
+          <div style={{ fontFamily: F.serif, fontSize: 20, color: C.greenDark, marginBottom: 8 }}>Claude is designing three takes…</div>
+          <div style={{ fontSize: 13, color: C.muted }}>Usually 20-40 seconds for three variants.</div>
         </div>
       )}
 
-      {result && !generating && (
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: C.gold, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>Generated from: "{result.prompt}"</div>
-          <div style={{ background: C.cardBg, border: `2px solid ${C.gold}`, borderRadius: 10, padding: 24, marginBottom: 20 }}>
-            <div dangerouslySetInnerHTML={{ __html: result.html }} />
+      {variants && !generating && (
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.gold, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>
+            Three takes on: "{lastPrompt}"
           </div>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            {endorsed ? (
-              <div style={{ fontSize: 14, color: C.green, fontWeight: 600 }}>
-                ✓ Added to the roadmap. I'll ping you when it ships.
-              </div>
-            ) : (
-              <>
-                <button onClick={endorse} style={{ padding: "12px 22px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
-                  Add to roadmap →
-                </button>
-                <button onClick={() => { setResult(null); setPrompt(result.prompt); }} style={{ padding: "12px 22px", background: "transparent", color: C.muted, fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: `1px solid ${C.border}`, borderRadius: 6, cursor: "pointer" }}>
-                  Try again
-                </button>
-              </>
-            )}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 16 }}>
+            {variants.map((v, i) => {
+              const isEndorsed = endorsedId === v.id;
+              const isAnyEndorsed = endorsedId !== null;
+              return (
+                <div key={v.id} style={{ background: C.cardBg, border: `2px solid ${isEndorsed ? C.gold : isAnyEndorsed ? C.hairline : C.border}`, borderRadius: 10, padding: 18, opacity: isAnyEndorsed && !isEndorsed ? 0.5 : 1, transition: "opacity 0.2s ease, border-color 0.2s ease" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontSize: 10, letterSpacing: "0.18em", fontWeight: 700, color: C.gold, textTransform: "uppercase" }}>Take {i + 1}</div>
+                    <div style={{ fontSize: 13, color: C.muted, fontStyle: "italic" }}>{v.angle}</div>
+                  </div>
+                  <div style={{ border: `1px solid ${C.border}`, borderRadius: 6, padding: 14, marginBottom: 14, background: C.bg, minHeight: 200, overflow: "auto" }}>
+                    <div dangerouslySetInnerHTML={{ __html: v.html }} />
+                  </div>
+                  {isEndorsed ? (
+                    <div style={{ fontSize: 13, color: C.green, fontWeight: 600 }}>✓ Added to the team roadmap</div>
+                  ) : (
+                    <button onClick={() => endorse(v.id)} disabled={isAnyEndorsed} style={{ width: "100%", padding: "10px 14px", background: isAnyEndorsed ? C.hairline : C.greenDark, color: isAnyEndorsed ? C.muted : "#fff", fontFamily: F.sans, fontSize: 13, fontWeight: 600, border: "none", borderRadius: 6, cursor: isAnyEndorsed ? "not-allowed" : "pointer" }}>
+                      This one →
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: 16, textAlign: "center" }}>
+            <button onClick={() => { setVariants(null); setEndorsedId(null); setPrompt(lastPrompt); }} style={{ padding: "10px 18px", background: "transparent", color: C.muted, fontFamily: F.sans, fontSize: 13, fontWeight: 600, border: `1px solid ${C.border}`, borderRadius: 6, cursor: "pointer" }}>
+              Try again with the same prompt
+            </button>
           </div>
         </div>
       )}
+
+      {roadmap.length > 0 && (
+        <div>
+          <div style={{ height: 1, background: C.hairline, margin: "48px 0 32px" }} />
+          <div style={{ fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>Team roadmap</div>
+          <h2 style={{ fontFamily: F.serif, fontSize: "clamp(24px, 3vw, 32px)", color: C.greenDark, lineHeight: 1.2, margin: "0 0 10px", letterSpacing: "-0.005em" }}>
+            What the team has on the roadmap
+          </h2>
+          <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.6, marginBottom: 28, maxWidth: 680 }}>
+            Mockups the team endorsed, plus three starters I seeded based on what came up in the meeting. Click <strong style={{ color: C.greenDark }}>Build on this</strong> to riff off one — the sandbox picks up the thread.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 16 }}>
+            {roadmap.map((m) => {
+              const cleanPrompt = m.prompt.replace(/\s*\[variant \d+:[^\]]*\]\s*$/, "").replace(/\s*\[seed from meeting:[^\]]*\]\s*$/, "");
+              const isSeed = m.prompt.includes("[seed from meeting:");
+              const seedTag = isSeed ? (m.prompt.match(/\[seed from meeting: ([^\]]+)\]/) || [])[1] : null;
+              return (
+                <div key={m.id} style={{ background: C.cardBg, border: `1px solid ${isSeed ? C.gold : m.status === "endorsed" ? C.gold : C.border}`, borderRadius: 10, padding: 18 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: C.greenDark }}>{m.author_name}</div>
+                    <div style={{ fontSize: 10, padding: "2px 8px", borderRadius: 10, background: isSeed ? "#F5E9C7" : m.status === "endorsed" ? "#F5E9C7" : "#F5F5F0", color: isSeed ? C.greenDark : m.status === "endorsed" ? C.greenDark : C.muted, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      {isSeed ? (seedTag || "Seed") : m.status === "endorsed" ? "On roadmap" : "Draft"}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 13, color: C.muted, fontStyle: "italic", marginBottom: 10, lineHeight: 1.5 }}>"{cleanPrompt}"</div>
+                  <div style={{ border: `1px solid ${C.border}`, borderRadius: 6, padding: 12, background: C.bg, maxHeight: 280, overflow: "auto", marginBottom: 12 }}>
+                    <div dangerouslySetInnerHTML={{ __html: m.mockup_html }} />
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                    <button onClick={() => buildOn(m)} style={{ padding: "8px 14px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 13, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
+                      Build on this →
+                    </button>
+                    <div style={{ fontSize: 11, color: C.soft }}>{new Date(m.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GuidedTour({ identity, onDone }: { identity: Identity; onDone: () => void }) {
+  const [step, setStep] = useState(0);
+
+  const steps = [
+    {
+      title: `Hi ${identity.display_name.split(" ")[0]}. Thirty seconds of context first.`,
+      body: "Trellis is the public-facing navigation layer for Canadian agtech — 500+ programs, a wizard that builds pathways, and a gap-map that shows where the ecosystem is thin. This portal is your way in. Five minutes here on day one is worth more than any email I could send.",
+      art: "welcome",
+    },
+    {
+      title: "A real founder's path, as an anchor.",
+      body: "CropMind — NB-based precision agtech. Their actual path: NBIF seed → Energia Ventures (verified alumnus) → left Canada for a US accelerator (Reservoir) → Google for Startups. Trellis would have suggested NBIF and Energia for an MVP-stage NB soil-tech founder. Both were right. The Scale step we couldn't suggest because it doesn't exist in Canada — and that is precisely what the Gap Map shows.",
+      art: "cropmind",
+    },
+    {
+      title: "Your portal has five surfaces.",
+      body: "Home (this one) is tailored to you specifically — Tabitha sees a grant-writer angle, Dave sees strategic, Carla sees Engine-adjacent. Your programs is audit. Sandbox is the wild one — describe a feature, Claude designs three takes, pick one. Priority programs is where you flag what to keep accurate. Feedback is where you tell me what feels off.",
+      art: "cards",
+    },
+    {
+      title: "Ground rule before you go.",
+      body: "This is in closed beta. If something looks wrong, say so — that signal is the most valuable thing you can give me. Every correction you flag, every feature you endorse, every pin you drop makes Trellis sharper. Okay: go.",
+      art: "end",
+    },
+  ];
+
+  const s = steps[step];
+  const isLast = step === steps.length - 1;
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(27,67,50,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 24, fontFamily: F.sans }}>
+      <div style={{ width: "100%", maxWidth: 640, background: C.bg, borderRadius: 12, overflow: "hidden", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.5)" }}>
+        <div style={{ padding: "40px 40px 20px" }}>
+          <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Guided tour · {step + 1} of {steps.length}</div>
+          <h2 style={{ fontFamily: F.serif, fontSize: "clamp(26px, 3.4vw, 36px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>{s.title}</h2>
+          <p style={{ fontSize: 15.5, color: C.text, lineHeight: 1.7, margin: "18px 0 0" }}>{s.body}</p>
+        </div>
+        {s.art === "cropmind" && (
+          <div style={{ padding: "0 40px" }}>
+            <div style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 8, padding: 18 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
+                <div>
+                  <div style={{ fontFamily: F.serif, fontSize: 18, color: C.greenDark }}>CropMind — NB precision agtech</div>
+                  <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>Actual path vs Trellis-suggested</div>
+                </div>
+                <div style={{ fontSize: 11, padding: "3px 10px", borderRadius: 12, background: C.bgWarm, color: C.greenDark, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>Real company</div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, fontSize: 13 }}>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: C.gold, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>What they did</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ padding: "6px 10px", background: "#F1F7F1", borderRadius: 4, color: C.green, fontWeight: 600 }}>✓ NBIF seed</div>
+                    <div style={{ padding: "6px 10px", background: "#F1F7F1", borderRadius: 4, color: C.green, fontWeight: 600 }}>✓ Energia Ventures</div>
+                    <div style={{ padding: "6px 10px", background: "#FEF3DC", borderRadius: 4, color: "#8B6B1F", fontWeight: 600 }}>→ Reservoir (US)</div>
+                    <div style={{ padding: "6px 10px", background: "#FEF3DC", borderRadius: 4, color: "#8B6B1F", fontWeight: 600 }}>→ Google for Startups</div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: C.gold, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>What Trellis would have suggested</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ padding: "6px 10px", background: "#E7F2E7", borderRadius: 4, color: C.greenDark, fontWeight: 600 }}>✓ NBIF</div>
+                    <div style={{ padding: "6px 10px", background: "#E7F2E7", borderRadius: 4, color: C.greenDark, fontWeight: 600 }}>✓ Energia Ventures</div>
+                    <div style={{ padding: "6px 10px", background: "#FAEAE7", borderRadius: 4, color: C.red, fontWeight: 600, fontStyle: "italic" }}>Scale gap — no suggestion</div>
+                    <div style={{ padding: "6px 10px", background: "#F5F5F0", borderRadius: 4, color: C.muted, fontStyle: "italic" }}>(US gap, can't fill)</div>
+                  </div>
+                </div>
+              </div>
+              <div style={{ fontSize: 12, color: C.muted, fontStyle: "italic", marginTop: 14, paddingTop: 12, borderTop: `1px dashed ${C.border}`, lineHeight: 1.5 }}>
+                The Gap Map reveals this before the founder hits the wall. That's the whole point.
+              </div>
+            </div>
+          </div>
+        )}
+        <div style={{ padding: "24px 40px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 12 }}>
+          <button onClick={onDone} style={{ padding: "10px 18px", background: "transparent", color: C.muted, fontFamily: F.sans, fontSize: 13, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
+            Skip the tour
+          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            {step > 0 && (
+              <button onClick={() => setStep(step - 1)} style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: `1px solid ${C.border}`, borderRadius: 6, cursor: "pointer" }}>
+                Back
+              </button>
+            )}
+            <button onClick={() => { if (isLast) onDone(); else setStep(step + 1); }} style={{ padding: "10px 22px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
+              {isLast ? "Start exploring →" : "Next →"}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -731,11 +874,10 @@ export default function PartnerPortal() {
   const [you, setYou] = useState<YouSummary | null>(null);
   const [view, setViewState] = useState<View>("home");
   const [notFound, setNotFound] = useState(false);
+  const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
-    try {
-      if (localStorage.getItem(AUTH_KEY) === "1") setAuthed(true);
-    } catch {}
+    try { if (localStorage.getItem(AUTH_KEY) === "1") setAuthed(true); } catch {}
   }, []);
 
   const onPass = () => setAuthed(true);
@@ -743,16 +885,22 @@ export default function PartnerPortal() {
   useEffect(() => {
     if (!authed || !org || !person) return;
     fetch(`/api/portal/me?org=${org}&person=${person}`)
-      .then(async (r) => {
-        if (r.status === 404) { setNotFound(true); return null; }
-        return r.json();
-      })
+      .then(async (r) => { if (r.status === 404) { setNotFound(true); return null; } return r.json(); })
       .then((d) => {
         if (!d) return;
         setIdentity(d.identity);
         setTeam(d.team || []);
         setYou(d.you || null);
         logEvent(org, person, "view", "/portal/home");
+        // Stash identity for the cross-site floating feedback button.
+        try {
+          localStorage.setItem(
+            "trellis-portal-identity-v1",
+            JSON.stringify({ org, person, display_name: d.identity.display_name })
+          );
+          const seen = localStorage.getItem(TOUR_KEY(org, person));
+          if (!seen) setShowTour(true);
+        } catch {}
       })
       .catch(() => {});
   }, [authed, org, person]);
@@ -761,6 +909,11 @@ export default function PartnerPortal() {
     setViewState(v);
     if (identity) logEvent(identity.org, identity.person, "view", `/portal/${v}`);
   };
+
+  function endTour() {
+    try { localStorage.setItem(TOUR_KEY(org, person), "1"); } catch {}
+    setShowTour(false);
+  }
 
   const pageTitle = useMemo(() => identity ? `${identity.display_name} · Trellis Portal` : "Trellis Partner Portal", [identity]);
   useEffect(() => { document.title = pageTitle; }, [pageTitle]);
@@ -795,6 +948,7 @@ export default function PartnerPortal() {
       {view === "feedback" && <FeedbackView identity={identity} />}
       {view === "priority" && <PriorityView identity={identity} />}
       {view === "sandbox" && <SandboxView identity={identity} />}
+      {showTour && <GuidedTour identity={identity} onDone={endTour} />}
     </div>
   );
 }

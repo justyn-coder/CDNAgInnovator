@@ -28,6 +28,7 @@ export default function PartnersAdmin() {
   const [authed, setAuthed] = useState(false);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(AUTH_KEY);
@@ -36,6 +37,7 @@ export default function PartnersAdmin() {
 
   useEffect(() => {
     if (!authed || !secret || !org) return;
+    setLoading(true);
     fetch(`/api/admin/partners?org=${org}`, {
       headers: { Authorization: `Bearer ${secret}` },
     })
@@ -43,18 +45,33 @@ export default function PartnersAdmin() {
         if (!r.ok) { throw new Error(r.status === 401 ? "Wrong secret" : `Error ${r.status}`); }
         return r.json();
       })
-      .then(setData)
-      .catch((e) => { setError(e.message); setAuthed(false); localStorage.removeItem(AUTH_KEY); });
+      .then((d) => { setData(d); setLoading(false); setError(null); })
+      .catch((e) => {
+        setError(e.message);
+        setAuthed(false);
+        setData(null);
+        setLoading(false);
+        localStorage.removeItem(AUTH_KEY);
+      });
   }, [authed, secret, org]);
 
   useEffect(() => { document.title = `Admin: ${org}`; }, [org]);
 
+  function resetAuth() {
+    localStorage.removeItem(AUTH_KEY);
+    setAuthed(false);
+    setData(null);
+    setSecret("");
+    setError(null);
+  }
+
   if (!authed) {
     return (
       <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.sans }}>
-        <form onSubmit={(e) => { e.preventDefault(); localStorage.setItem(AUTH_KEY, secret); setAuthed(true); setError(null); }} style={{ width: 360, padding: "40px 32px", background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 8 }}>
-          <div style={{ fontFamily: F.serif, fontSize: 26, color: C.greenDark, marginBottom: 20 }}>Admin · {org}</div>
-          <input type="password" autoFocus value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="ADMIN_SECRET" style={{ width: "100%", padding: "12px 14px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${error ? C.red : C.border}`, borderRadius: 6, outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
+        <form onSubmit={(e) => { e.preventDefault(); localStorage.setItem(AUTH_KEY, secret); setAuthed(true); setError(null); }} style={{ width: 380, padding: "40px 32px", background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 8 }}>
+          <div style={{ fontFamily: F.serif, fontSize: 26, color: C.greenDark, marginBottom: 8 }}>Admin · {org}</div>
+          <div style={{ fontSize: 13, color: C.muted, marginBottom: 20, lineHeight: 1.5 }}>Paste the value of your <code style={{ background: C.bgWarm, padding: "1px 5px", borderRadius: 3, fontSize: 12 }}>ADMIN_SECRET</code> env var.</div>
+          <input type="password" autoFocus value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="Paste secret value" style={{ width: "100%", padding: "12px 14px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${error ? C.red : C.border}`, borderRadius: 6, outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
           <button type="submit" style={{ width: "100%", padding: 12, background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 15, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>Enter</button>
           {error && <div style={{ fontSize: 13, color: C.red, marginTop: 12 }}>{error}</div>}
         </form>
@@ -62,7 +79,17 @@ export default function PartnersAdmin() {
     );
   }
 
-  if (!data) return <div style={{ padding: 40, fontFamily: F.sans, color: C.muted }}>Loading…</div>;
+  if (loading) return <div style={{ padding: 40, fontFamily: F.sans, color: C.muted }}>Loading…</div>;
+
+  if (!data) {
+    return (
+      <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.sans, flexDirection: "column", gap: 16 }}>
+        <div style={{ fontFamily: F.serif, fontSize: 24, color: C.greenDark }}>Something went sideways.</div>
+        <div style={{ fontSize: 14, color: C.muted }}>{error || "No data returned."}</div>
+        <button onClick={resetAuth} style={{ padding: "10px 20px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>Reset and try again</button>
+      </div>
+    );
+  }
 
   const { people, activity, feedback, features, priorities } = data;
 

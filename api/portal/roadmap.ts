@@ -15,6 +15,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const newStatus = action === "endorse" ? "endorsed" : action === "discard" ? "discarded" : null;
   if (!newStatus) return res.status(400).json({ error: "action must be endorse or discard" });
 
+  // If endorsing, look up the shared prompt prefix and discard sibling variants from the same generation
+  if (newStatus === "endorsed") {
+    const row = await sql`
+      SELECT prompt FROM portal_feature_requests
+      WHERE id = ${requestId} AND org = ${org} AND person = ${person}
+    `;
+    const promptText = (row as any[])[0]?.prompt || "";
+    // Prompts look like "<base> [variant N: <angle>]" — strip bracket suffix to match siblings.
+    const basePrompt = promptText.replace(/\s*\[variant \d+:[^\]]*\]\s*$/, "");
+    if (basePrompt && basePrompt !== promptText) {
+      await sql`
+        UPDATE portal_feature_requests
+        SET status = 'discarded'
+        WHERE org = ${org} AND person = ${person}
+          AND id != ${requestId}
+          AND status = 'draft'
+          AND prompt LIKE ${basePrompt + ' [variant%'}
+      `;
+    }
+  }
+
   await sql`
     UPDATE portal_feature_requests
     SET status = ${newStatus}

@@ -11,12 +11,17 @@ export interface PortalPerson {
   display_name: string;
   role: string | null;
   email: string | null;
+  home_eyebrow: string | null;
+  home_subheading: string | null;
+  home_hero_callout: string | null;
+  card_order: string[] | null;
 }
 
 export async function verifyPerson(org: string, person: string): Promise<PortalPerson | null> {
   if (!org || !person) return null;
   const rows = await sql`
-    SELECT org, person, display_name, role, email
+    SELECT org, person, display_name, role, email,
+           home_eyebrow, home_subheading, home_hero_callout, card_order
     FROM portal_people
     WHERE org = ${org} AND person = ${person}
     LIMIT 1
@@ -62,6 +67,7 @@ export function portalCors(req: VercelRequest, res: VercelResponse): boolean {
     "http://localhost:5173",
     "http://localhost:3000",
     "http://localhost:3001",
+    "http://localhost:3002",
   ];
   const origin = req.headers.origin || "";
   if (origin && !ALLOWED.includes(origin)) {

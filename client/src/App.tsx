@@ -1,5 +1,6 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { lazy, Suspense } from "react";
+import PortalFeedbackFloater from "./components/PortalFeedbackFloater";
 
 const Home = lazy(() => import("./pages/Home"));
 const Navigator = lazy(() => import("./pages/Navigator"));
@@ -7,6 +8,15 @@ const Demo = lazy(() => import("./pages/Demo"));
 const ForBioEnterprise = lazy(() => import("./pages/ForBioEnterprise"));
 const PartnerPortal = lazy(() => import("./pages/PartnerPortal"));
 const PartnersAdmin = lazy(() => import("./pages/PartnersAdmin"));
+
+function MaybeFloater() {
+  const [location] = useLocation();
+  // Don't show the floater on the portal itself (feedback lives there natively)
+  // or on admin pages.
+  if (location.startsWith("/for/") && location.split("/").length >= 4) return null;
+  if (location.startsWith("/admin/")) return null;
+  return <PortalFeedbackFloater />;
+}
 
 export default function App() {
   return (
@@ -27,6 +37,7 @@ export default function App() {
           </div>
         </Route>
       </Switch>
+      <MaybeFloater />
     </Suspense>
   );
 }
