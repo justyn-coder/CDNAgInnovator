@@ -1210,8 +1210,10 @@ function GuidedTour({ identity, onDone, onJumpToSandbox }: { identity: Identity;
   const isLast = step === steps.length - 1;
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(27,67,50,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 24, fontFamily: F.sans }}>
-      <div style={{ width: "100%", maxWidth: 640, background: C.bg, borderRadius: 12, overflow: "hidden", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.5)" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(27,67,50,0.85)", zIndex: 100, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: 24, fontFamily: F.sans }}>
+      <div style={{ minHeight: "calc(100vh - 48px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: "100%", maxWidth: 640, background: C.bg, borderRadius: 12, overflow: "hidden", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.5)", position: "relative" }}>
+        <button onClick={onDone} aria-label="Close tour" style={{ position: "absolute", top: 12, right: 12, background: "transparent", border: "none", color: C.muted, fontSize: 28, cursor: "pointer", padding: 0, width: 36, height: 36, lineHeight: 1, zIndex: 1 }}>×</button>
         <div style={{ padding: "40px 40px 20px" }}>
           <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>Guided tour · {step + 1} of {steps.length}</div>
           <h2 style={{ fontFamily: F.serif, fontSize: "clamp(26px, 3.4vw, 36px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>{s.title}</h2>
@@ -1294,6 +1296,7 @@ function GuidedTour({ identity, onDone, onJumpToSandbox }: { identity: Identity;
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
