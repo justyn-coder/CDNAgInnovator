@@ -511,12 +511,12 @@ function FieldSelect({ label, value, options, onChange }: { label: string; value
 function HomeView({ identity, team, you, setView }: { identity: Identity; team: TeamRow[]; you: YouSummary | null; setView: (v: View) => void }) {
   const firstName = identity.display_name.split(" ")[0];
   const lastVisit = you?.last_visit ? new Date(you.last_visit) : null;
-  const sinceText = lastVisit
+  const welcomeBack = lastVisit
     ? `Welcome back. Last time you were here: ${lastVisit.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}.`
-    : "First time in. The tour started automatically, or skip it and poke around on your own.";
+    : null;
 
   const eyebrow = identity.home_eyebrow || "Welcome";
-  const subheading = identity.home_subheading || sinceText;
+  const subheading = identity.home_subheading || welcomeBack;
   const heroCallout = identity.home_hero_callout;
   const order = identity.card_order && identity.card_order.length > 0
     ? identity.card_order
@@ -529,12 +529,11 @@ function HomeView({ identity, team, you, setView }: { identity: Identity; team: 
       <h1 style={{ fontFamily: F.serif, fontSize: "clamp(40px, 6vw, 64px)", color: C.greenDark, lineHeight: 1.1, margin: 0, letterSpacing: "-0.01em" }}>
         {firstName}, this is yours.
       </h1>
-      <p style={{ fontFamily: F.serif, fontSize: "clamp(18px, 2vw, 22px)", color: C.muted, fontStyle: "italic", lineHeight: 1.55, margin: "20px 0 0", maxWidth: 680 }}>
-        {subheading}
-      </p>
-      <p style={{ fontFamily: F.sans, fontSize: 15, color: C.soft, lineHeight: 1.6, margin: "12px 0 0" }}>
-        {sinceText}
-      </p>
+      {subheading && (
+        <p style={{ fontFamily: F.serif, fontSize: "clamp(18px, 2vw, 22px)", color: C.muted, fontStyle: "italic", lineHeight: 1.55, margin: "20px 0 0", maxWidth: 680 }}>
+          {subheading}
+        </p>
+      )}
 
       {heroCallout && (
         <div style={{ marginTop: 32, padding: "18px 22px", background: C.bgWarm, borderLeft: `3px solid ${C.gold}`, borderRadius: 4, maxWidth: 720 }}>
