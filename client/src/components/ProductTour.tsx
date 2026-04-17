@@ -146,8 +146,8 @@ export default function ProductTour({ mode, programCount, onComplete }: Props) {
   return (
     <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/50 backdrop-blur-[6px] animate-fade-in p-4">
       <div
-        className="bg-bg rounded-xl shadow-xl border border-border w-full max-w-lg overflow-hidden animate-fade-in-up"
-        style={{ maxHeight: "90vh" }}
+        className="bg-bg rounded-xl shadow-xl border border-border w-full max-w-lg overflow-y-auto animate-fade-in-up"
+        style={{ maxHeight: "calc(100vh - 32px)", WebkitOverflowScrolling: "touch" }}
       >
         {/* Content */}
         <div className="px-6 pt-7 pb-5 flex flex-col items-center text-center">

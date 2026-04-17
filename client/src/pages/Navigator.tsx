@@ -971,7 +971,7 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
       onClick={onClose}
       onKeyDown={e => { if (e.key === "Escape") onClose(); }}
     >
-      <div onClick={e => e.stopPropagation()} className="bg-bg rounded-lg max-w-[440px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-hidden animate-slide-up">
+      <div onClick={e => e.stopPropagation()} className="bg-bg rounded-lg max-w-[440px] w-full shadow-[0_24px_80px_rgba(0,0,0,0.2)] overflow-y-auto animate-slide-up" style={{ maxHeight: "calc(100vh - 40px)" }}>
         {/* Amber header */}
         <div className="bg-gradient-to-br from-[#8B6914] via-[#D4A828] to-[#BF9624] px-4 md:px-6 py-[18px] flex items-center gap-2.5">
           <span className="text-[1.3rem]">⚠️</span>
