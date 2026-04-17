@@ -159,13 +159,13 @@ function LogoStrip() {
       <span style={{ color: C.hairline, fontFamily: F.sans, fontSize: 14 }}>×</span>
       <img
         src="/brand/bioenterprise-logo.svg"
-        alt="BioEnterprise — Canada's Food & Agri-Tech Engine"
+        alt="BioEnterprise. Canada's Food and Agri-Tech Engine"
         style={{ height: 38, width: "auto", display: "block" }}
       />
       <span style={{ color: C.hairline, fontFamily: F.sans, fontSize: 14 }}>×</span>
       <img
         src="/brand/bestinshow-logo.png"
-        alt="BestInShow — Trade Show Better."
+        alt="BestInShow. Trade Show Better."
         style={{ height: 42, width: "auto", display: "block" }}
       />
     </div>
@@ -410,7 +410,7 @@ export default function ForBioEnterprise() {
       <Section eyebrow="Who's talking" heading="A few words about the builder.">
         <p style={{ margin: "0 0 18px" }}>
           <strong style={{ color: C.greenDark, fontWeight: 700 }}>Justyn Szymczyk.</strong>{" "}
-          Engineer by training. Twenty years in wine and viticulture — revenue
+          Engineer by training. Twenty years in wine and viticulture. Revenue
           operations, DTC, the desk work that makes a vineyard actually make money.
           Plenty of time in cellars and fields too, rarely as the expert in them.
           My in-laws run a farm. You're the experts in the room today, not me.
@@ -419,14 +419,14 @@ export default function ForBioEnterprise() {
           A client engagement pulled me into agtech last year. I walked the floors
           at Ag Days in Brandon and World Ag Expo in California and watched founders
           burn real money on booths that weren't converting. So I started a
-          practice — BestInShow.ag — helping early-stage agtech companies turn
-          trade shows into pipeline. That's the paid work. Trellis is not.
+          practice called BestInShow.ag, helping early-stage agtech companies
+          turn trade shows into pipeline. That's the paid work. Trellis is not.
         </p>
       </Section>
 
       <Section eyebrow="How this happened" heading="I built it for one customer. Then I kept going." delay={0.05}>
         <p style={{ margin: "0 0 18px" }}>
-          The first version of Trellis was built for exactly one person —
+          The first version of Trellis was built for exactly one person:
           Kevin Shearer at StoneSite. He wanted help finding grants for a
           soil biology platform. I wrote a small matching tool so he'd stop
           losing evenings to Google. He used it, said roughly "holy shit,
@@ -436,7 +436,7 @@ export default function ForBioEnterprise() {
           I took a rough beta to the Calgary AgTech Summit in February to
           pressure-test it. The reaction was consistent: the tool needs to
           exist, it's too hard, nobody will build it. Which made me want to
-          build it more. Meanwhile, everyone was calling for it on paper —
+          build it more. Meanwhile, everyone was calling for it on paper.
           BioEnterprise's National Roundtable flagged navigation as a top
           unsolved problem. RBC's agtech report said the same thing in more
           polite language. So I built it. No funding, no team, no mandate.
@@ -460,7 +460,7 @@ export default function ForBioEnterprise() {
           </div>
           <p style={{ margin: 0, color: C.muted, fontSize: 16, lineHeight: 1.65 }}>
             I'll run the founder experience the way a real founder runs it,
-            then flip to the operator view — where I think BioEnterprise
+            then flip to the operator view, where I think BioEnterprise
             specifically will have opinions. Fifteen minutes.
           </p>
         </div>
@@ -503,7 +503,7 @@ export default function ForBioEnterprise() {
 
       <Section eyebrow="One ground rule" heading="This is closed beta. Please try to break it." delay={0.05}>
         <p style={{ margin: "0 0 18px" }}>
-          About a dozen people have used Trellis so far — a few founders,
+          About a dozen people have used Trellis so far. A few founders,
           a couple of operators, one agronomist with strong opinions and
           a very sharp eye. You're the first accelerator. That matters,
           because the places Trellis still gets wrong are exactly the

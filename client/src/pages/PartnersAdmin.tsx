@@ -123,7 +123,7 @@ export default function PartnersAdmin() {
               return (
                 <div key={p.person} style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 8, padding: "16px 18px" }}>
                   <div style={{ fontFamily: F.serif, fontSize: 18, color: C.greenDark }}>{p.display_name}</div>
-                  <div style={{ fontSize: 12, color: C.muted, marginBottom: 10 }}>{p.role || "—"}</div>
+                  <div style={{ fontSize: 12, color: C.muted, marginBottom: 10 }}>{p.role || "-"}</div>
                   <div style={{ display: "flex", gap: 12, fontSize: 12, color: C.muted, flexWrap: "wrap" }}>
                     <span><b style={{ color: C.text }}>{views}</b> views</span>
                     <span>URL: /for/{org}/{p.person}</span>

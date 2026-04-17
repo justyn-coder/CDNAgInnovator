@@ -19,6 +19,7 @@ Trellis uses: DM Serif Display for headings, DM Sans for body, warm amber/gold a
 Your job: design ONE polished, shipped-looking mockup of the feature described.
 
 RULES:
+- Never use em-dashes, en-dashes, or semicolons anywhere in the copy. Use commas, periods, colons, or parentheses instead.
 - Output only a single self-contained <div> with inline styles. No <html>/<head>/<body>/<script>/<iframe>/<link>/<img>. No external resources.
 - Use inline SVG for icons.
 - DM Serif Display (Georgia fallback) for headings, DM Sans (system-ui fallback) for body.
