@@ -111,6 +111,29 @@ const EXPLAIN_CACHE: Record<string, ExplainResponse> = {
 };
 
 // ── AI Explain card ────────────────────────────────────────────────────────
+const GAP_PHRASES = [
+  "Scanning the back forty…",
+  "Walking the gap line…",
+  "Checking coverage county by county…",
+  "Comparing yield to neighbours…",
+  "Flagging thin spots…",
+  "Cross-referencing the almanac…",
+];
+
+function GapLoaderPhrase() {
+  const [idx, setIdx] = useState(() => Math.floor(Math.random() * GAP_PHRASES.length));
+  useEffect(() => {
+    const id = setInterval(() => setIdx((i) => (i + 1) % GAP_PHRASES.length), 2400);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="text-left">
+      <div className="text-[0.72rem] font-bold text-[#EDE9F0]">Reading the land…</div>
+      <div className="text-[0.62rem] text-[#C0B8C8] mt-0.5 italic">{GAP_PHRASES[idx]}</div>
+    </div>
+  );
+}
+
 function ExplainCard({
   prov, cat, stage, mode, autoFetch = false,
 }: {
@@ -193,14 +216,27 @@ function ExplainCard({
 
   if (loading) {
     return (
-      <div className="w-full p-3.5 bg-gradient-to-br from-[#2D2438] to-[#3D3248] border border-[#4D4458] rounded-[10px] mt-2.5 flex items-center gap-2">
-        <div className="w-[22px] h-[22px] rounded-[6px] bg-gradient-to-br from-[#5B4A6B] to-[#7A6A8A] flex items-center justify-center shrink-0">
-          <div className="w-2.5 h-2.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+      <div className="w-full p-3.5 bg-gradient-to-br from-[#2D2438] to-[#3D3248] border border-[#4D4458] rounded-[10px] mt-2.5 flex items-center gap-3">
+        <style>{`
+          @keyframes trellis-pulse-gap {
+            0%, 80%, 100% { opacity: 0.35; transform: scale(0.85); }
+            40% { opacity: 1; transform: scale(1.18); }
+          }
+        `}</style>
+        <div className="inline-flex items-center gap-1.5 shrink-0 pl-1">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              style={{
+                width: 9, height: 9, borderRadius: "50%",
+                background: i === 0 ? "#48B87A" : i === 1 ? "#8CC63F" : "#D4A828",
+                display: "inline-block",
+                animation: `trellis-pulse-gap 1.2s ease-in-out ${i * 0.18}s infinite`,
+              }}
+            />
+          ))}
         </div>
-        <div>
-          <div className="text-[0.72rem] font-bold text-[#EDE9F0]">Analyzing…</div>
-          <div className="text-[0.6rem] text-[#C0B8C8] mt-px">Reasoning about this ecosystem gap</div>
-        </div>
+        <GapLoaderPhrase />
       </div>
     );
   }

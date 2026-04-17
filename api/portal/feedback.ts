@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Your own posts (full content, with any Justyn replies attached)
     const yours = await sql`
-      SELECT pf.id, pf.topic, pf.body, pf.visibility, pf.created_at,
+      SELECT pf.id, pf.topic, pf.body, pf.visibility, pf.page_path, pf.created_at,
              COALESCE(
                json_agg(json_build_object('id', pfr.id, 'body', pfr.body, 'created_at', pfr.created_at) ORDER BY pfr.created_at)
                FILTER (WHERE pfr.id IS NOT NULL),
@@ -58,25 +58,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === "POST") {
-    const { org, person, topic, body, visibility = "private" } = req.body || {};
+    const { org, person, topic, body, visibility = "private", page_path } = req.body || {};
     const identity = await verifyPerson(org, person);
     if (!identity) return res.status(404).json({ error: "unknown portal identity" });
     if (!topic || !body) return res.status(400).json({ error: "topic and body required" });
     const cleanTopic = VALID_TOPICS.includes(String(topic)) ? String(topic) : "General";
     const cleanBody = String(body).slice(0, 4000);
     const cleanVisibility = visibility === "team" ? "team" : "private";
+    const cleanPath = page_path ? String(page_path).slice(0, 500) : null;
 
     const inserted = await sql`
-      INSERT INTO portal_feedback (org, person, topic, body, visibility)
-      VALUES (${org}, ${person}, ${cleanTopic}, ${cleanBody}, ${cleanVisibility})
-      RETURNING id, topic, body, visibility, created_at
+      INSERT INTO portal_feedback (org, person, topic, body, visibility, page_path)
+      VALUES (${org}, ${person}, ${cleanTopic}, ${cleanBody}, ${cleanVisibility}, ${cleanPath})
+      RETURNING id, topic, body, visibility, page_path, created_at
     `;
 
     await logEvent({
       req, org, person,
       event_type: "feedback_submit",
-      path: "/portal/feedback",
-      metadata: { topic: cleanTopic, chars: cleanBody.length, visibility: cleanVisibility },
+      path: cleanPath || "/portal/feedback",
+      metadata: { topic: cleanTopic, chars: cleanBody.length, visibility: cleanVisibility, page_path: cleanPath },
     });
 
     return res.status(200).json({ ok: true, post: (inserted as any[])[0] });

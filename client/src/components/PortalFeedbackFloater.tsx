@@ -60,11 +60,16 @@ export default function PortalFeedbackFloater() {
           topic,
           body,
           visibility: "private",
+          page_path: typeof window !== "undefined" ? window.location.pathname + window.location.search : null,
         }),
       });
       setSent(true);
       setBody("");
-      setTimeout(() => setSent(false), 3500);
+      setTimeout(() => {
+        setSent(false);
+        // Collapse back to the pill once the "noted" beat plays
+        setOpen(false);
+      }, 2000);
       try { localStorage.setItem(TOPIC_KEY, topic); } catch {}
     } finally {
       setSending(false);
@@ -85,36 +90,38 @@ export default function PortalFeedbackFloater() {
 
   if (!identity) return null;
 
-  // Collapsed state: a small pill in the top-right. Lets them reopen without re-dismissing everything.
+  const firstName = identity.display_name.split(" ")[0];
+
+  // Collapsed state: a personalized green pill in the top-right. Below page header.
   if (dismissed || !open) {
     return (
       <button
         onClick={reopen}
         aria-label="Open feedback panel"
         style={{
-          position: "fixed", top: 16, right: 16, zIndex: 60,
-          padding: "8px 14px", display: "flex", alignItems: "center", gap: 8,
+          position: "fixed", top: 96, right: 24, zIndex: 60,
+          padding: "10px 16px", display: "flex", alignItems: "center", gap: 10,
           background: C.greenDark, color: "#fff",
-          fontFamily: F.sans, fontSize: 13, fontWeight: 600,
+          fontFamily: F.sans, fontSize: 13.5, fontWeight: 600,
           border: "none", borderRadius: 999,
-          boxShadow: "0 8px 20px -8px rgba(27,67,50,0.5)",
+          boxShadow: "0 10px 24px -10px rgba(27,67,50,0.5)",
           cursor: "pointer",
         }}
       >
         <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.goldDeep }} />
-        Flag something
+        {firstName}, flag something →
       </button>
     );
   }
 
-  // Expanded panel: sticky top-right, scrolls past with page content.
+  // Expanded panel: fixed top-right, offset below the page header so it never hides under a sticky nav.
   return (
     <div
       role="complementary"
       aria-label="Portal feedback"
       style={{
-        position: "fixed", top: 16, right: 16, zIndex: 60,
-        width: 360, maxHeight: "calc(100vh - 32px)", overflow: "auto",
+        position: "fixed", top: 96, right: 24, zIndex: 60,
+        width: 360, maxHeight: "calc(100vh - 112px)", overflow: "auto",
         background: C.cardBg,
         border: `1.5px solid ${C.gold}`, borderRadius: 12,
         boxShadow: "0 24px 56px -16px rgba(27,67,50,0.35)",

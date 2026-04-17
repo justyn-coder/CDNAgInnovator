@@ -164,7 +164,10 @@ export default function PartnersAdmin() {
                   <span style={{ fontSize: 11, color: C.gold, textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 700 }}>{f.topic}</span>
                 </div>
                 <div style={{ fontSize: 14, color: C.text, whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{f.body}</div>
-                <div style={{ fontSize: 11, color: C.soft, marginTop: 6 }}>{new Date(f.created_at).toLocaleString()}</div>
+                <div style={{ fontSize: 11, color: C.soft, marginTop: 6, display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                  <span>{new Date(f.created_at).toLocaleString()}</span>
+                  {f.page_path && <span style={{ fontFamily: "monospace", color: C.muted }}>on {f.page_path}</span>}
+                </div>
               </div>
             ))}
           </div>

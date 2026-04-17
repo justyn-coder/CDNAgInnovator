@@ -820,8 +820,17 @@ function BrowsePanel({
           {PROVINCES_LIST.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
         </select>
         <DateFilter onChange={(range) => { setDateRange(range); }} />
-        <select value={sortMode} onChange={e => setSortMode(e.target.value as "default" | "upcoming")}
-          className="px-3 py-2 rounded-sm border-[1.5px] border-border text-[0.78rem] bg-bg text-text font-sans">
+        <select
+          value={sortMode}
+          onChange={e => setSortMode(e.target.value as "default" | "upcoming")}
+          className="px-3 py-2 rounded-sm border-[1.5px] text-[0.78rem] font-sans font-medium"
+          style={{
+            background: sortMode === "default" ? "#FEF7E0" : "#F5E9C7",
+            borderColor: "#D4A828",
+            color: "#1B4332",
+          }}
+          title="Sort by calendar: upcoming intake dates and event deadlines first"
+        >
           <option value="default">Sort: Default</option>
           <option value="upcoming">Sort: Upcoming dates</option>
         </select>
@@ -1030,32 +1039,44 @@ function FeedbackModal({ onClose, isEco, pageContext }: { onClose: () => void; i
 }
 
 // ── Loading Messages ─────────────────────────────────────────────────────────
-function LoadingMessages({ programCount }: { programCount?: number | null }) {
+// Cycles through farm-themed clever phrases while an AI call is in flight.
+function LoadingMessages({ programCount: _programCount }: { programCount?: number | null }) {
   const LOADING_MSGS = [
-    `Searching across ${programCount ?? 500} programs…`,
-    "This usually takes 10–15 seconds — hang tight.",
-    "Cross-referencing with ecosystem insights…",
-    "Almost there…",
+    "Walking the rows…",
+    "Cross-referencing the almanac…",
+    "Pulling last year's yield map…",
+    "Consulting the agronomist…",
+    "Checking soil samples…",
+    "Pacing the fenceline…",
+    "Sorting the seed stock…",
+    "Flagging the test plot…",
   ];
   const [idx, setIdx] = useState(0);
   useEffect(() => {
-    const timers = [
-      setTimeout(() => setIdx(1), 4000),
-      setTimeout(() => setIdx(2), 8000),
-      setTimeout(() => setIdx(3), 12000),
-    ];
-    return () => timers.forEach(clearTimeout);
+    const id = setInterval(() => setIdx((i) => (i + 1) % LOADING_MSGS.length), 2400);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <div className="px-4 pb-1">
-      <div className="inline-flex items-center gap-2 bg-bg border border-border rounded-[16px_16px_16px_4px] px-4 py-2.5 shadow-sm">
+      <div className="inline-flex items-center gap-3 bg-bg border border-border rounded-[16px_16px_16px_4px] px-4 py-2.5 shadow-sm">
+        <style>{`
+          @keyframes trellis-pulse-nav {
+            0%, 80%, 100% { opacity: 0.35; transform: scale(0.88); }
+            40% { opacity: 1; transform: scale(1.15); }
+          }
+        `}</style>
         {[0, 1, 2].map(i => (
-          <div key={i}
-            className="w-[5px] h-[5px] rounded-full bg-text-tertiary animate-pulse-dot"
-            style={{ animationDelay: `${i * 0.2}s` }}
+          <span key={i}
+            style={{
+              width: 8, height: 8, borderRadius: "50%",
+              background: i === 0 ? "#48B87A" : i === 1 ? "#8CC63F" : "#D4A828",
+              display: "inline-block",
+              animation: `trellis-pulse-nav 1.2s ease-in-out ${i * 0.18}s infinite`,
+            }}
           />
         ))}
-        <span className="text-[0.75rem] text-text-secondary font-sans font-medium transition-opacity duration-300">
+        <span className="text-[0.8rem] font-sans italic" style={{ color: "#6B7C6B" }}>
           {LOADING_MSGS[idx]}
         </span>
       </div>

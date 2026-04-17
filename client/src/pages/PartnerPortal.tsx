@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRoute, useLocation } from "wouter";
+import FarmLoader from "../components/FarmLoader";
 
 const C = {
   green: "#2D5A3D",
@@ -129,27 +130,11 @@ function Header({ identity, view, setView }: { identity: Identity; view: View; s
             <button key={item.key} onClick={() => setView(item.key)} style={{ padding: "8px 14px", background: view === item.key ? C.bgWarm : "transparent", color: view === item.key ? C.greenDark : C.muted, fontFamily: F.sans, fontSize: 14, fontWeight: view === item.key ? 600 : 500, border: "none", borderRadius: 6, cursor: "pointer" }}>{item.label}</button>
           ))}
         </nav>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <a
-            href="/"
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "8px 14px", background: C.greenDark, color: "#fff",
-              fontFamily: F.sans, fontSize: 13, fontWeight: 600,
-              borderRadius: 6, textDecoration: "none",
-              boxShadow: "0 4px 12px -6px rgba(27,67,50,0.4)",
-            }}
-          >
-            Visit live site <span>↗</span>
-          </a>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.muted }}>
-            <div style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgWarm, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: C.greenDark, fontSize: 13 }}>
-              {identity.display_name.split(" ").map((s) => s[0]).join("").slice(0, 2)}
-            </div>
-            <div>{identity.display_name.split(" ")[0]}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.muted }}>
+          <div style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgWarm, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: C.greenDark, fontSize: 13 }}>
+            {identity.display_name.split(" ").map((s) => s[0]).join("").slice(0, 2)}
           </div>
+          <div>{identity.display_name.split(" ")[0]}</div>
         </div>
       </div>
     </header>
@@ -461,7 +446,7 @@ function ProgramsView({ identity }: { identity: Identity }) {
       </p>
 
       {error && <div style={{ padding: 16, background: "#FEE", border: `1px solid ${C.red}`, borderRadius: 6, color: C.red }}>Couldn't load: {error}</div>}
-      {!programs && !error && <div style={{ fontSize: 14, color: C.muted }}>Loading…</div>}
+      {!programs && !error && <div style={{ padding: "12px 0" }}><FarmLoader kind="generic" inline compact /></div>}
 
       {programs && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -852,8 +837,9 @@ function SandboxView({ identity }: { identity: Identity }) {
 
       {generating && (
         <div style={{ padding: 40, background: C.bgWarm, border: `1px dashed ${C.gold}`, borderRadius: 10, textAlign: "center", marginBottom: 24 }}>
-          <div style={{ fontFamily: F.serif, fontSize: 20, color: C.greenDark, marginBottom: 8 }}>Claude is designing three takes…</div>
-          <div style={{ fontSize: 13, color: C.muted }}>Usually 20-40 seconds for three variants.</div>
+          <div style={{ fontFamily: F.serif, fontSize: 22, color: C.greenDark, marginBottom: 14 }}>Claude is drawing up three takes.</div>
+          <FarmLoader kind="sandbox" />
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 14 }}>Usually 20-40 seconds for three variants.</div>
         </div>
       )}
 
@@ -1188,12 +1174,32 @@ export default function PartnerPortal() {
   }
 
   if (!identity) {
-    return <div style={{ minHeight: "100vh", background: C.bg, fontFamily: F.sans, padding: "120px 28px", textAlign: "center", color: C.muted }}>Loading your portal…</div>;
+    return (
+      <div style={{ minHeight: "100vh", background: C.bg, fontFamily: F.sans, padding: "140px 28px", textAlign: "center" }}>
+        <FarmLoader kind="generic" />
+      </div>
+    );
   }
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text }}>
       <Header identity={identity} view={view} setView={setView} />
+      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "14px 28px 0", display: "flex", justifyContent: "flex-end" }}>
+        <a
+          href="/"
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "8px 14px", background: C.greenDark, color: "#fff",
+            fontFamily: F.sans, fontSize: 13, fontWeight: 600,
+            borderRadius: 6, textDecoration: "none",
+            boxShadow: "0 4px 12px -6px rgba(27,67,50,0.4)",
+          }}
+        >
+          Visit live site <span>↗</span>
+        </a>
+      </div>
       {view === "home" && <HomeView identity={identity} team={team} you={you} setView={setView} />}
       {view === "programs" && <ProgramsView identity={identity} />}
       {view === "feedback" && <FeedbackView identity={identity} />}

@@ -72,7 +72,13 @@ export default function DateFilter({
       <select
         value={preset}
         onChange={e => handlePreset(e.target.value as DatePreset)}
-        className="px-3 py-2 rounded-sm border-[1.5px] border-border text-[0.78rem] bg-bg text-text font-sans"
+        className="px-3 py-2 rounded-sm border-[1.5px] text-[0.78rem] font-sans font-medium"
+        style={{
+          background: preset === "all" ? "#FEF7E0" : "#F5E9C7",
+          borderColor: "#D4A828",
+          color: "#1B4332",
+        }}
+        title="Filter by date: intake windows, deadlines, event dates"
       >
         {(Object.keys(PRESET_LABELS) as DatePreset[]).map(key => (
           <option key={key} value={key}>{PRESET_LABELS[key]}</option>
