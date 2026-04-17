@@ -28,6 +28,7 @@ const F = {
 const PORTAL_PASSWORD = "bioenterprise2026";
 const AUTH_KEY = "trellis-portal-auth-v1";
 const TOUR_KEY = (org: string, person: string) => `trellis-portal-tour-${org}-${person}-v1`;
+const PATHWAY_KEY = (org: string, person: string) => `trellis-portal-pathway-${org}-${person}-v1`;
 
 type View = "home" | "programs" | "feedback" | "priority" | "sandbox";
 
@@ -128,11 +129,27 @@ function Header({ identity, view, setView }: { identity: Identity; view: View; s
             <button key={item.key} onClick={() => setView(item.key)} style={{ padding: "8px 14px", background: view === item.key ? C.bgWarm : "transparent", color: view === item.key ? C.greenDark : C.muted, fontFamily: F.sans, fontSize: 14, fontWeight: view === item.key ? 600 : 500, border: "none", borderRadius: 6, cursor: "pointer" }}>{item.label}</button>
           ))}
         </nav>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.muted }}>
-          <div style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgWarm, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: C.greenDark, fontSize: 13 }}>
-            {identity.display_name.split(" ").map((s) => s[0]).join("").slice(0, 2)}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <a
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "8px 14px", background: C.greenDark, color: "#fff",
+              fontFamily: F.sans, fontSize: 13, fontWeight: 600,
+              borderRadius: 6, textDecoration: "none",
+              boxShadow: "0 4px 12px -6px rgba(27,67,50,0.4)",
+            }}
+          >
+            Visit live site <span>↗</span>
+          </a>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.muted }}>
+            <div style={{ width: 32, height: 32, borderRadius: "50%", background: C.bgWarm, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: C.greenDark, fontSize: 13 }}>
+              {identity.display_name.split(" ").map((s) => s[0]).join("").slice(0, 2)}
+            </div>
+            <div>{identity.display_name.split(" ")[0]}</div>
           </div>
-          <div>{identity.display_name.split(" ")[0]}</div>
         </div>
       </div>
     </header>
@@ -146,6 +163,131 @@ const CARDS: Record<string, CardConfig> = {
   priority: { view: "priority", eyebrow: "Focus", title: "Priority programs", blurb: "Pin the programs you care about most. Shared with the team." },
   feedback: { view: "feedback", eyebrow: "Observations", title: "Feedback thread", blurb: "Half-baked thoughts, questions, things you notice. Private by default. Share with the team if you want." },
 };
+
+interface PathwayStep {
+  id: string;
+  label: string;
+  body: string;
+  cta: string;
+  href?: string;
+  onClickView?: View;
+  external?: boolean;
+}
+
+function PathwayChecklist({ identity, setView }: { identity: Identity; setView: (v: View) => void }) {
+  const [done, setDone] = useState<Record<string, boolean>>({});
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PATHWAY_KEY(identity.org, identity.person));
+      if (raw) setDone(JSON.parse(raw));
+    } catch {}
+    setReady(true);
+  }, [identity.org, identity.person]);
+
+  const steps: PathwayStep[] = [
+    {
+      id: "poke",
+      label: "Poke around Trellis. See what a founder sees.",
+      body: "Five minutes of browsing. Skim the home page, click Browse Programs, glance at the Gap Map. No pressure to finish.",
+      cta: "Open Trellis",
+      href: "/",
+      external: true,
+    },
+    {
+      id: "wizard-early",
+      label: "Run the wizard with an early-stage partner.",
+      body: "Pick a real partner company you worked with in the last year. Something MVP or Pilot stage. Run them through the wizard and see the pathway Trellis suggests. Note what matches their reality and what doesn't.",
+      cta: "Launch the founder wizard",
+      href: "/navigator",
+      external: true,
+    },
+    {
+      id: "wizard-scale",
+      label: "Run the wizard with a later-stage partner.",
+      body: "Same wizard, but pick a partner at Comm or Scale stage. This is where the Gap Map pattern shows up most: the tool tends to run out of Canadian answers, which is exactly the 'Scale Cliff' Tabitha's kind of narrative wants to cite.",
+      cta: "Open the wizard again",
+      href: "/navigator",
+      external: true,
+    },
+    {
+      id: "audit",
+      label: "Come back here and audit your programs.",
+      body: "The Your Programs tab lists every Trellis entry that touches BioEnterprise. If a stage, province, status, or description is wrong, flag it. I ship corrections within 24 hours.",
+      cta: "Go to Your programs",
+      onClickView: "programs",
+    },
+    {
+      id: "shape",
+      label: "Shape what comes next.",
+      body: "Pin the programs you want me watching closely. Try the Sandbox and endorse a mockup. Drop one piece of feedback. Any of these lets me know where to focus.",
+      cta: "Open the Sandbox",
+      onClickView: "sandbox",
+    },
+  ];
+
+  function toggle(id: string) {
+    const next = { ...done, [id]: !done[id] };
+    setDone(next);
+    try {
+      localStorage.setItem(PATHWAY_KEY(identity.org, identity.person), JSON.stringify(next));
+    } catch {}
+  }
+
+  const completedCount = steps.filter((s) => done[s.id]).length;
+  const allDone = completedCount === steps.length;
+
+  if (!ready) return null;
+
+  return (
+    <div style={{ marginTop: 36, padding: "28px 30px", background: C.cardBg, border: `1.5px solid ${C.gold}`, borderRadius: 12, maxWidth: 820, boxShadow: "0 10px 30px -18px rgba(212,168,40,0.35)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, gap: 12, flexWrap: "wrap" }}>
+        <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.goldDeep, textTransform: "uppercase" }}>Your suggested pathway</div>
+        <div style={{ fontSize: 12, color: C.muted, fontWeight: 600 }}>{completedCount} of {steps.length} done</div>
+      </div>
+      <div style={{ fontFamily: F.serif, fontSize: 22, color: C.greenDark, lineHeight: 1.3, marginBottom: 6, letterSpacing: "-0.005em" }}>
+        {allDone ? "You did the tour. Thank you." : "Take these in order. 15 minutes end to end."}
+      </div>
+      <div style={{ fontSize: 14, color: C.muted, lineHeight: 1.5, marginBottom: 20 }}>
+        {allDone
+          ? "Everything below is still yours to come back to whenever."
+          : "Each step opens either the live Trellis site (new tab) or a panel here. Check them off as you go."}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {steps.map((s, i) => {
+          const checked = !!done[s.id];
+          return (
+            <div key={s.id} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "12px 14px", background: checked ? "#F5F5F0" : C.bg, borderRadius: 8, border: `1px solid ${C.border}`, opacity: checked ? 0.6 : 1, transition: "opacity 0.2s ease, background 0.2s ease" }}>
+              <button onClick={() => toggle(s.id)} aria-label={`Mark step ${i + 1} done`} style={{ flexShrink: 0, marginTop: 2, width: 22, height: 22, borderRadius: 6, border: `2px solid ${checked ? C.green : C.hairline}`, background: checked ? C.green : "#fff", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {checked && (
+                  <svg width="12" height="12" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 5" stroke="#fff" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                )}
+              </button>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: F.serif, fontSize: 17, color: C.greenDark, lineHeight: 1.35, marginBottom: 4, textDecoration: checked ? "line-through" : "none" }}>
+                  {i + 1}. {s.label}
+                </div>
+                <div style={{ fontSize: 13.5, color: C.muted, lineHeight: 1.55, marginBottom: 8 }}>{s.body}</div>
+                <div>
+                  {s.external && s.href ? (
+                    <a href={s.href} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 12.5, fontWeight: 600, borderRadius: 6, textDecoration: "none" }}>
+                      {s.cta} <span>↗</span>
+                    </a>
+                  ) : s.onClickView ? (
+                    <button onClick={() => s.onClickView && setView(s.onClickView)} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 12.5, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
+                      {s.cta} →
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function HomeView({ identity, team, you, setView }: { identity: Identity; team: TeamRow[]; you: YouSummary | null; setView: (v: View) => void }) {
   const firstName = identity.display_name.split(" ")[0];
@@ -176,13 +318,16 @@ function HomeView({ identity, team, you, setView }: { identity: Identity; team: 
       </p>
 
       {heroCallout && (
-        <div style={{ marginTop: 36, padding: "22px 26px", background: C.bgWarm, borderLeft: `3px solid ${C.gold}`, borderRadius: 4, maxWidth: 720 }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 8 }}>Your lead</div>
-          <div style={{ fontFamily: F.serif, fontSize: 19, color: C.greenDark, lineHeight: 1.5 }}>{heroCallout}</div>
+        <div style={{ marginTop: 32, padding: "18px 22px", background: C.bgWarm, borderLeft: `3px solid ${C.gold}`, borderRadius: 4, maxWidth: 720 }}>
+          <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 8 }}>Why you're here</div>
+          <div style={{ fontFamily: F.serif, fontSize: 17, color: C.greenDark, lineHeight: 1.5 }}>{heroCallout}</div>
         </div>
       )}
 
-      <div style={{ height: 1, background: C.hairline, margin: "56px 0 40px" }} />
+      <PathwayChecklist identity={identity} setView={setView} />
+
+      <div style={{ height: 1, background: C.hairline, margin: "56px 0 28px" }} />
+      <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.muted, textTransform: "uppercase", marginBottom: 14 }}>Or jump straight in</div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
         {cards.map((c) => {
@@ -252,9 +397,9 @@ function HomeView({ identity, team, you, setView }: { identity: Identity; team: 
       </div>
 
       <div style={{ marginTop: 32, display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <a href="/for/bioenterprise" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>About this tool →</a>
-        <a href="/demo" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>The walkthrough →</a>
-        <a href="/navigator" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>The live tool →</a>
+        <a href="/for/bioenterprise" target="_blank" rel="noreferrer" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>About this tool ↗</a>
+        <a href="/demo" target="_blank" rel="noreferrer" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>The walkthrough ↗</a>
+        <a href="/navigator" target="_blank" rel="noreferrer" style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none", border: `1px solid ${C.border}` }}>The live tool ↗</a>
       </div>
     </div>
   );

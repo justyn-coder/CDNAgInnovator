@@ -2,7 +2,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { portalCors, verifyPerson, logEvent, sql } from "../_lib/portal.js";
 import { checkRateLimit } from "../_lib/rate-limit.js";
 
-export const maxDuration = 60;
+// Allow up to 60s since we fire three parallel Anthropic calls per request.
+export const config = { maxDuration: 60 };
 
 const SYSTEM_PROMPT = `You are a senior UI designer for Trellis (Canada's agtech ecosystem navigation tool).
 Trellis uses: DM Serif Display for headings, DM Sans for body, warm amber/gold accents (#D4A828, #C4A052), forest green primary (#1B4332, #2D5A3D), cream background (#FAFAF7), soft borders (#E8E5E0), generous whitespace, card-based layouts.
