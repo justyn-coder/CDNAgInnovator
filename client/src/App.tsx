@@ -27,6 +27,7 @@ export default function App() {
         <Route path="/demo" component={Demo} />
         <Route path="/for/bioenterprise" component={ForBioEnterprise} />
         <Route path="/for/:org/:person" component={PartnerPortal} />
+        <Route path="/admin/partners" component={PartnersAdmin} />
         <Route path="/admin/partners/:org" component={PartnersAdmin} />
         <Route>
           <div className="p-10 text-center font-sans">
