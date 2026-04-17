@@ -1158,7 +1158,16 @@ export default function PartnerPortal() {
     const meta = document.createElement("meta");
     meta.name = "robots"; meta.content = "noindex, nofollow";
     document.head.appendChild(meta);
-    return () => { document.head.removeChild(meta); };
+
+    // Swap the favicon so the portal tab is visually distinct from the main site.
+    const iconLinks = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"], link[rel="apple-touch-icon"]'));
+    const prev = iconLinks.map((l) => ({ link: l, href: l.href }));
+    iconLinks.forEach((l) => { l.href = "/brand/trellis-favicon-portal.svg?v=1"; });
+
+    return () => {
+      document.head.removeChild(meta);
+      prev.forEach(({ link, href }) => { link.href = href; });
+    };
   }, []);
 
   if (!authed) return <PasswordGate onPass={onPass} />;

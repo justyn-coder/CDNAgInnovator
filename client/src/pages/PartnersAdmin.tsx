@@ -55,7 +55,13 @@ export default function PartnersAdmin() {
       });
   }, [authed, secret, org]);
 
-  useEffect(() => { document.title = `Admin: ${org}`; }, [org]);
+  useEffect(() => {
+    document.title = `Admin: ${org}`;
+    const iconLinks = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"], link[rel="apple-touch-icon"]'));
+    const prev = iconLinks.map((l) => ({ link: l, href: l.href }));
+    iconLinks.forEach((l) => { l.href = "/brand/trellis-favicon-portal.svg?v=1"; });
+    return () => { prev.forEach(({ link, href }) => { link.href = href; }); };
+  }, [org]);
 
   function resetAuth() {
     localStorage.removeItem(AUTH_KEY);
