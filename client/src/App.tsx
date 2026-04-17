@@ -5,6 +5,8 @@ const Home = lazy(() => import("./pages/Home"));
 const Navigator = lazy(() => import("./pages/Navigator"));
 const Demo = lazy(() => import("./pages/Demo"));
 const ForBioEnterprise = lazy(() => import("./pages/ForBioEnterprise"));
+const PartnerPortal = lazy(() => import("./pages/PartnerPortal"));
+const PartnersAdmin = lazy(() => import("./pages/PartnersAdmin"));
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
         <Route path="/navigator" component={Navigator} />
         <Route path="/demo" component={Demo} />
         <Route path="/for/bioenterprise" component={ForBioEnterprise} />
+        <Route path="/for/:org/:person" component={PartnerPortal} />
+        <Route path="/admin/partners/:org" component={PartnersAdmin} />
         <Route>
           <div className="p-10 text-center font-sans">
             <div className="text-4xl mb-4">🚜</div>
