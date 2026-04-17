@@ -139,9 +139,10 @@ function Header({ identity, view, setView }: { identity: Identity; view: View; s
   );
 }
 
-const CARDS: Record<string, { view: View; eyebrow: string; title: string; blurb: string }> = {
+interface CardConfig { view: View; eyebrow: string; title: string; blurb: string; hero?: boolean; }
+const CARDS: Record<string, CardConfig> = {
   programs: { view: "programs", eyebrow: "Audit", title: "Your programs", blurb: "Every Trellis entry that touches BioEnterprise. Corrections ship inside 24 hours." },
-  sandbox: { view: "sandbox", eyebrow: "What if", title: "Feature sandbox", blurb: "Describe what you wish Trellis did. Claude designs three takes. Endorse one, it goes on the team roadmap everyone can see." },
+  sandbox: { view: "sandbox", eyebrow: "The wild one", title: "Feature sandbox", blurb: "Type a feature you wish Trellis had. Claude designs three takes in seconds. Endorse one, it goes on the roadmap your team can see and build on.", hero: true },
   priority: { view: "priority", eyebrow: "Focus", title: "Priority programs", blurb: "Pin the programs you care about most. Shared with the team." },
   feedback: { view: "feedback", eyebrow: "Observations", title: "Feedback thread", blurb: "Half-baked thoughts, questions, things you notice. Private by default. Share with the team if you want." },
 };
@@ -184,15 +185,36 @@ function HomeView({ identity, team, you, setView }: { identity: Identity; team: 
       <div style={{ height: 1, background: C.hairline, margin: "56px 0 40px" }} />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16 }}>
-        {cards.map((c) => (
-          <button key={c.view} onClick={() => setView(c.view)} style={{ textAlign: "left", padding: "24px 22px", background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 10, cursor: "pointer", transition: "transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 12px 32px -18px rgba(27,67,50,0.2)"; (e.currentTarget as HTMLButtonElement).style.borderColor = C.gold; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "none"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "none"; (e.currentTarget as HTMLButtonElement).style.borderColor = C.border; }}>
-            <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 10 }}>{c.eyebrow}</div>
-            <div style={{ fontFamily: F.serif, fontSize: 22, color: C.greenDark, marginBottom: 8, letterSpacing: "-0.005em" }}>{c.title}</div>
-            <div style={{ fontSize: 14, color: C.muted, lineHeight: 1.55 }}>{c.blurb}</div>
-          </button>
-        ))}
+        {cards.map((c) => {
+          const isHero = !!c.hero;
+          return (
+            <button key={c.view} onClick={() => setView(c.view)}
+              className={isHero ? "trellis-hero-card" : undefined}
+              style={{
+                textAlign: "left", padding: "24px 22px",
+                background: isHero ? "linear-gradient(135deg, #F5E9C7 0%, #FAFAF7 90%)" : C.cardBg,
+                border: `${isHero ? 2 : 1}px solid ${isHero ? C.gold : C.border}`,
+                borderRadius: 10, cursor: "pointer",
+                transition: "transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease",
+                position: "relative",
+                boxShadow: isHero ? "0 10px 30px -16px rgba(212,168,40,0.45)" : "none",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = isHero ? "0 18px 44px -14px rgba(212,168,40,0.6)" : "0 12px 32px -18px rgba(27,67,50,0.2)"; (e.currentTarget as HTMLButtonElement).style.borderColor = C.gold; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "none"; (e.currentTarget as HTMLButtonElement).style.boxShadow = isHero ? "0 10px 30px -16px rgba(212,168,40,0.45)" : "none"; (e.currentTarget as HTMLButtonElement).style.borderColor = isHero ? C.gold : C.border; }}>
+              {isHero && (
+                <div style={{ position: "absolute", top: 14, right: 14, fontSize: 9, padding: "3px 8px", borderRadius: 12, background: C.goldDeep, color: "#fff", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Start here</div>
+              )}
+              <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: isHero ? C.goldDeep : C.gold, textTransform: "uppercase", marginBottom: 10 }}>{c.eyebrow}</div>
+              <div style={{ fontFamily: F.serif, fontSize: isHero ? 26 : 22, color: C.greenDark, marginBottom: 8, letterSpacing: "-0.005em" }}>{c.title}</div>
+              <div style={{ fontSize: 14, color: isHero ? C.text : C.muted, lineHeight: 1.55 }}>{c.blurb}</div>
+              {isHero && (
+                <div style={{ marginTop: 14, fontSize: 13, fontWeight: 600, color: C.greenDark, display: "flex", alignItems: "center", gap: 6 }}>
+                  Open the sandbox <span style={{ transform: "translateY(-1px)" }}>→</span>
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <div style={{ marginTop: 48, padding: "24px 24px", background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 10 }}>
@@ -607,6 +629,7 @@ function SandboxView({ identity }: { identity: Identity }) {
   const [endorsedId, setEndorsedId] = useState<number | null>(null);
   const [roadmap, setRoadmap] = useState<RoadmapMockup[]>([]);
   const [placeholder] = useState(SANDBOX_EXAMPLES[Math.floor(Math.random() * SANDBOX_EXAMPLES.length)]);
+  const [expandedMockup, setExpandedMockup] = useState<{ html: string; title: string; author: string } | null>(null);
 
   async function loadRoadmap() {
     const r = await fetch(`/api/portal/roadmap-feed?org=${identity.org}&person=${identity.person}`);
@@ -750,9 +773,42 @@ function SandboxView({ identity }: { identity: Identity }) {
                     </div>
                   </div>
                   <div style={{ fontSize: 13, color: C.muted, fontStyle: "italic", marginBottom: 10, lineHeight: 1.5 }}>"{cleanPrompt}"</div>
-                  <div style={{ border: `1px solid ${C.border}`, borderRadius: 6, padding: 12, background: C.bg, maxHeight: 280, overflow: "auto", marginBottom: 12 }}>
-                    <div dangerouslySetInnerHTML={{ __html: m.mockup_html }} />
-                  </div>
+                  <button
+                    onClick={() => setExpandedMockup({ html: m.mockup_html, title: cleanPrompt, author: m.author_name })}
+                    style={{
+                      position: "relative",
+                      display: "block",
+                      width: "100%",
+                      border: `1px solid ${C.border}`, borderRadius: 6,
+                      background: C.bg,
+                      padding: 0,
+                      marginBottom: 12,
+                      cursor: "zoom-in",
+                      overflow: "hidden",
+                      height: 220,
+                    }}
+                  >
+                    <div style={{
+                      transform: "scale(0.48)",
+                      transformOrigin: "top left",
+                      width: "210%",
+                      pointerEvents: "none",
+                      padding: 14,
+                    }}>
+                      <div dangerouslySetInnerHTML={{ __html: m.mockup_html }} />
+                    </div>
+                    <div style={{
+                      position: "absolute", bottom: 0, left: 0, right: 0,
+                      padding: "32px 12px 10px 12px",
+                      background: "linear-gradient(to top, rgba(250,250,247,0.98) 40%, rgba(250,250,247,0))",
+                      display: "flex", justifyContent: "flex-end",
+                    }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: C.greenDark, letterSpacing: "0.05em", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6 }}>
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden><path d="M6 2H2v4m8-4h4v4m0 4v4h-4m-4 0H2v-4" stroke={C.greenDark} strokeWidth="1.6" strokeLinecap="round"/></svg>
+                        Click to expand
+                      </span>
+                    </div>
+                  </button>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
                     <button onClick={() => buildOn(m)} style={{ padding: "8px 14px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 13, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
                       Build on this →
@@ -765,11 +821,30 @@ function SandboxView({ identity }: { identity: Identity }) {
           </div>
         </div>
       )}
+      {expandedMockup && (
+        <div
+          onClick={() => setExpandedMockup(null)}
+          style={{ position: "fixed", inset: 0, background: "rgba(27,67,50,0.85)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, overflow: "auto" }}
+        >
+          <div onClick={(e) => e.stopPropagation()} style={{ background: C.cardBg, borderRadius: 12, maxWidth: 1000, width: "100%", maxHeight: "calc(100vh - 48px)", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 40px 80px -20px rgba(0,0,0,0.5)" }}>
+            <div style={{ padding: "18px 22px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, background: C.bg }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 10, letterSpacing: "0.2em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 4 }}>From {expandedMockup.author}</div>
+                <div style={{ fontSize: 13, color: C.muted, fontStyle: "italic", lineHeight: 1.5 }}>"{expandedMockup.title}"</div>
+              </div>
+              <button onClick={() => setExpandedMockup(null)} aria-label="Close" style={{ background: "transparent", border: "none", color: C.muted, fontSize: 24, cursor: "pointer", padding: 0, width: 32, height: 32, lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ padding: 32, overflow: "auto", flex: 1, display: "flex", justifyContent: "center" }}>
+              <div dangerouslySetInnerHTML={{ __html: expandedMockup.html }} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function GuidedTour({ identity, onDone }: { identity: Identity; onDone: () => void }) {
+function GuidedTour({ identity, onDone, onJumpToSandbox }: { identity: Identity; onDone: () => void; onJumpToSandbox: () => void }) {
   const [step, setStep] = useState(0);
 
   const steps = [
@@ -785,11 +860,16 @@ function GuidedTour({ identity, onDone }: { identity: Identity; onDone: () => vo
     },
     {
       title: "Your portal has five surfaces.",
-      body: "Home (this one) is tailored to you specifically. Tabitha sees a grant-writer angle, Dave sees strategic, Carla sees Engine-adjacent. Your programs is audit. Sandbox is the wild one. Describe a feature, Claude designs three takes, pick one. Priority programs is where you flag what to keep accurate. Feedback is where you tell me what feels off.",
+      body: "Home (this one) is tailored to you specifically. Tabitha sees a grant-writer angle, Dave sees strategic, Carla sees Engine-adjacent. Your programs is audit. Priority programs is where you flag what to keep accurate. Feedback is where you tell me what feels off. The wild one gets its own step.",
       art: "cards",
     },
     {
-      title: "Ground rule before you go.",
+      title: "The Sandbox is where you stop being a user and start being a co-product-manager.",
+      body: "You type a feature you wish Trellis did. Claude designs three takes in the Trellis style in about 30 seconds. Pick the one closest to what you imagined. It goes on the team roadmap, and your colleagues can riff on it. I already seeded three starters based on what came up in our meeting. Go play with it first. Seriously.",
+      art: "sandbox",
+    },
+    {
+      title: "One ground rule before you go.",
       body: "This is in closed beta. If something looks wrong, say so. That signal is the most valuable thing you can give me. Every correction you flag, every feature you endorse, every pin you drop makes Trellis sharper. Okay: go.",
       art: "end",
     },
@@ -806,6 +886,27 @@ function GuidedTour({ identity, onDone }: { identity: Identity; onDone: () => vo
           <h2 style={{ fontFamily: F.serif, fontSize: "clamp(26px, 3.4vw, 36px)", color: C.greenDark, lineHeight: 1.15, margin: 0, letterSpacing: "-0.005em" }}>{s.title}</h2>
           <p style={{ fontSize: 15.5, color: C.text, lineHeight: 1.7, margin: "18px 0 0" }}>{s.body}</p>
         </div>
+        {s.art === "sandbox" && (
+          <div style={{ padding: "0 40px" }}>
+            <div style={{ background: "linear-gradient(135deg, #F5E9C7 0%, #FAFAF7 100%)", border: `1.5px solid ${C.gold}`, borderRadius: 10, padding: 22, position: "relative", overflow: "hidden" }}>
+              <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
+                <div style={{ flexShrink: 0, width: 48, height: 48, borderRadius: 10, background: C.greenDark, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>✦</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.goldDeep, textTransform: "uppercase", marginBottom: 6 }}>How it works</div>
+                  <ol style={{ margin: 0, padding: "0 0 0 20px", fontSize: 14, color: C.text, lineHeight: 1.7 }}>
+                    <li>Type a feature. Something like <em>"Show me all programs from FedDev Ontario, stacked by stage."</em></li>
+                    <li>Claude designs <strong>three</strong> different takes on it, in the Trellis visual style.</li>
+                    <li>Pick the one closest to what you imagined. The other two fade. The one you picked lands on the team roadmap.</li>
+                    <li>Your colleagues see it, click <strong>Build on this</strong>, and riff. It's a shared design session that never ends.</li>
+                  </ol>
+                </div>
+              </div>
+              <div style={{ marginTop: 18, fontSize: 13, color: C.muted, fontStyle: "italic", paddingTop: 14, borderTop: `1px dashed ${C.hairline}` }}>
+                Three starters are already in the roadmap, tailored to things that came up in our meeting. Worth looking at first to see the shape of what's possible.
+              </div>
+            </div>
+          </div>
+        )}
         {s.art === "cropmind" && (
           <div style={{ padding: "0 40px" }}>
             <div style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 8, padding: 18 }}>
@@ -850,6 +951,11 @@ function GuidedTour({ identity, onDone }: { identity: Identity; onDone: () => vo
             {step > 0 && (
               <button onClick={() => setStep(step - 1)} style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: `1px solid ${C.border}`, borderRadius: 6, cursor: "pointer" }}>
                 Back
+              </button>
+            )}
+            {s.art === "sandbox" && (
+              <button onClick={() => { onJumpToSandbox(); onDone(); }} style={{ padding: "10px 18px", background: C.goldDeep, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 700, border: "none", borderRadius: 6, cursor: "pointer" }}>
+                Take me there now →
               </button>
             )}
             <button onClick={() => { if (isLast) onDone(); else setStep(step + 1); }} style={{ padding: "10px 22px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
@@ -948,7 +1054,7 @@ export default function PartnerPortal() {
       {view === "feedback" && <FeedbackView identity={identity} />}
       {view === "priority" && <PriorityView identity={identity} />}
       {view === "sandbox" && <SandboxView identity={identity} />}
-      {showTour && <GuidedTour identity={identity} onDone={endTour} />}
+      {showTour && <GuidedTour identity={identity} onDone={endTour} onJumpToSandbox={() => setView("sandbox")} />}
     </div>
   );
 }
