@@ -201,8 +201,14 @@ function OverviewView({ data }: { data: SummaryData }) {
               <span><b>{o.feedback_count}</b> feedback</span>
               <span><b>{o.feature_count}</b> ideas</span>
             </div>
-            <div style={{ fontSize: 11, color: C.soft, marginTop: 10 }}>
-              {o.last_activity ? `Last activity: ${new Date(o.last_activity).toLocaleString()}` : "No activity yet"}
+            <div style={{ fontSize: 11, color: C.soft, marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+              <span>{o.last_activity ? `Last activity: ${new Date(o.last_activity).toLocaleString()}` : "No activity yet"}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(`/for/${o.slug}/justyn`, "_blank", "noopener,noreferrer"); }}
+                style={{ fontSize: 11, color: o.theme_color, fontWeight: 700, background: "transparent", border: "none", cursor: "pointer", padding: 0, whiteSpace: "nowrap", fontFamily: F.sans }}
+              >
+                Preview as you ↗
+              </button>
             </div>
           </Link>
         ))}
@@ -266,9 +272,19 @@ function OrgDetailView({ org, data }: { org: string; data: any }) {
 
   return (
     <div style={{ maxWidth: 1280, margin: "0 auto", padding: "36px 32px 80px" }}>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontFamily: F.serif, fontSize: 30, color: C.greenDark, letterSpacing: "-0.005em" }}>Partner engagement · {org}</div>
-        <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>{people.length} people · {activity.length} events logged (last 300)</div>
+      <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
+        <div>
+          <div style={{ fontFamily: F.serif, fontSize: 30, color: C.greenDark, letterSpacing: "-0.005em" }}>Partner engagement · {org}</div>
+          <div style={{ fontSize: 13, color: C.muted, marginTop: 4 }}>{people.length} people · {activity.length} events logged (last 300)</div>
+        </div>
+        <a
+          href={`/for/${org}/justyn`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ padding: "9px 16px", background: C.greenDark, color: "#fff", fontSize: 13, fontWeight: 700, borderRadius: 6, textDecoration: "none", fontFamily: F.sans, whiteSpace: "nowrap" }}
+        >
+          Preview as you ↗
+        </a>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
