@@ -5,6 +5,18 @@ import crypto from "crypto";
 const conn = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 export const sql = postgres(conn, { ssl: "require", max: 1 });
 
+export interface FounderProfile {
+  description?: string;
+  stage?: string;
+  provinces?: string[];
+  sector?: string;
+  product_type?: string;
+  needs?: string[];
+  primary_need?: string;
+  expansion?: string;
+  completed?: string;
+}
+
 export interface PortalPerson {
   org: string;
   person: string;
@@ -15,13 +27,16 @@ export interface PortalPerson {
   home_subheading: string | null;
   home_hero_callout: string | null;
   card_order: string[] | null;
+  portal_type: string;
+  founder_profile: FounderProfile | null;
 }
 
 export async function verifyPerson(org: string, person: string): Promise<PortalPerson | null> {
   if (!org || !person) return null;
   const rows = await sql`
     SELECT org, person, display_name, role, email,
-           home_eyebrow, home_subheading, home_hero_callout, card_order
+           home_eyebrow, home_subheading, home_hero_callout, card_order,
+           portal_type, founder_profile
     FROM portal_people
     WHERE org = ${org} AND person = ${person}
     LIMIT 1

@@ -33,6 +33,16 @@ const PATHWAY_KEY = (org: string, person: string) => `trellis-portal-pathway-${o
 
 type View = "home" | "programs" | "feedback" | "priority" | "sandbox";
 
+interface FounderProfile {
+  description?: string;
+  stage?: string;
+  provinces?: string[];
+  sector?: string;
+  product_type?: string;
+  needs?: string[];
+  primary_need?: string;
+}
+
 interface Identity {
   org: string;
   person: string;
@@ -43,6 +53,8 @@ interface Identity {
   home_subheading: string | null;
   home_hero_callout: string | null;
   card_order: string[] | null;
+  portal_type: string;
+  founder_profile: FounderProfile | null;
 }
 
 interface TeamRow {
@@ -270,6 +282,194 @@ function PathwayChecklist({ identity, setView }: { identity: Identity; setView: 
           );
         })}
       </div>
+    </div>
+  );
+}
+
+interface PathwayProgram {
+  id: number;
+  name: string;
+  category: string;
+  province: string[] | null;
+  stage: string[] | null;
+  description: string | null;
+  website: string | null;
+  tags?: string[];
+  why?: string | null;
+}
+
+const STAGE_OPTIONS = ["Idea", "MVP", "Pilot", "Comm", "Scale"];
+const PROVINCE_OPTIONS = ["AB", "BC", "MB", "NB", "NL", "NS", "ON", "PE", "QC", "SK", "Atlantic", "National"];
+const SECTOR_OPTIONS = [
+  { key: "crops", label: "Crops" },
+  { key: "livestock", label: "Livestock" },
+  { key: "mixed", label: "Mixed" },
+  { key: "agnostic", label: "Not sector-specific" },
+];
+const NEED_OPTIONS = [
+  { key: "non-dilutive-capital", label: "Money to build" },
+  { key: "validate-with-farmers", label: "Prove it works" },
+  { key: "structured-program", label: "Structure and mentorship" },
+  { key: "pilot-site-field-validation", label: "Pilot site access" },
+  { key: "first-customers", label: "Find first buyers" },
+  { key: "channel-distribution", label: "Dealers and distribution" },
+  { key: "go-to-market", label: "Go-to-market strategy" },
+  { key: "growth-capital", label: "Growth capital" },
+  { key: "all", label: "Show me everything" },
+];
+
+function FounderHome({ identity, setView }: { identity: Identity; setView: (v: View) => void }) {
+  const [profile, setProfile] = useState<FounderProfile>(() => identity.founder_profile || {});
+  const [pathway, setPathway] = useState<PathwayProgram[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+
+  async function runPathway(p: FounderProfile) {
+    if (!p.stage || !p.description) {
+      setError("Need at least a stage and description to run.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const resp = await fetch("/api/pathway", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: p.description,
+          stage: p.stage,
+          provinces: p.provinces || [],
+          need: p.primary_need || (p.needs && p.needs[0]) || "all",
+          sector: p.sector,
+        }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || `Pathway call failed (${resp.status})`);
+      }
+      const data = await resp.json();
+      const programs = (data.programs || []).slice(0, 5);
+      setPathway(programs);
+    } catch (e: any) {
+      setError(e.message || String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (identity.founder_profile) runPathway(identity.founder_profile);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [identity.org, identity.person]);
+
+  const firstName = identity.display_name.split(" ")[0];
+
+  function updateProfile(patch: Partial<FounderProfile>) {
+    setProfile((p) => ({ ...p, ...patch }));
+  }
+
+  return (
+    <div style={{ maxWidth: 1040, margin: "0 auto", padding: "56px 28px 80px" }}>
+      <div style={{ fontFamily: F.sans, fontSize: 11, letterSpacing: "0.22em", fontWeight: 600, color: C.gold, textTransform: "uppercase", marginBottom: 16 }}>
+        {identity.home_eyebrow || "Your pathway"}
+      </div>
+      <h1 style={{ fontFamily: F.serif, fontSize: "clamp(40px, 6vw, 56px)", color: C.greenDark, lineHeight: 1.1, margin: 0, letterSpacing: "-0.01em" }}>
+        {firstName}, I ran the wizard for you.
+      </h1>
+      <p style={{ fontFamily: F.serif, fontSize: "clamp(18px, 2vw, 22px)", color: C.muted, fontStyle: "italic", lineHeight: 1.55, margin: "20px 0 0", maxWidth: 720 }}>
+        {identity.home_subheading || "Here is what Trellis thinks your path looks like. Tell me where I got it wrong, and we will re-run."}
+      </p>
+
+      <div style={{ marginTop: 36, padding: "22px 26px", background: C.cardBg, border: `1.5px solid ${C.border}`, borderRadius: 12, maxWidth: 860 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase" }}>What I assumed about you</div>
+          <button onClick={() => setEditing((e) => !e)} style={{ fontSize: 12, fontWeight: 600, color: C.greenDark, background: "transparent", border: `1px solid ${C.border}`, padding: "5px 12px", borderRadius: 6, cursor: "pointer" }}>
+            {editing ? "Done editing" : "Edit"}
+          </button>
+        </div>
+        {editing ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+            <FieldSelect label="Stage" value={profile.stage || ""} options={STAGE_OPTIONS.map((s) => ({ key: s, label: s }))} onChange={(v) => updateProfile({ stage: v })} />
+            <FieldSelect label="Province" value={(profile.provinces || [])[0] || ""} options={PROVINCE_OPTIONS.map((p) => ({ key: p, label: p }))} onChange={(v) => updateProfile({ provinces: [v] })} />
+            <FieldSelect label="Sector" value={profile.sector || ""} options={SECTOR_OPTIONS} onChange={(v) => updateProfile({ sector: v })} />
+            <FieldSelect label="Primary need" value={profile.primary_need || ""} options={NEED_OPTIONS} onChange={(v) => updateProfile({ primary_need: v })} />
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: C.muted, display: "block", marginBottom: 4, letterSpacing: "0.05em", textTransform: "uppercase" }}>What you're building</label>
+              <textarea value={profile.description || ""} onChange={(e) => updateProfile({ description: e.target.value })} rows={2} style={{ width: "100%", padding: "10px 12px", fontSize: 14, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 6, boxSizing: "border-box", resize: "vertical" }} />
+            </div>
+            <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "flex-end" }}>
+              <button onClick={() => { setEditing(false); runPathway(profile); }} style={{ padding: "10px 18px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
+                Re-run with these changes →
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, fontSize: 13.5 }}>
+            <Fact label="Stage" value={profile.stage || "—"} />
+            <Fact label="Province" value={(profile.provinces || []).join(", ") || "—"} />
+            <Fact label="Sector" value={SECTOR_OPTIONS.find((s) => s.key === profile.sector)?.label || profile.sector || "—"} />
+            <Fact label="Primary need" value={NEED_OPTIONS.find((n) => n.key === profile.primary_need)?.label || profile.primary_need || "—"} />
+            <div style={{ gridColumn: "1 / -1", fontSize: 13, color: C.muted, fontStyle: "italic", paddingTop: 10, borderTop: `1px dashed ${C.border}` }}>
+              "{profile.description || "(no description yet)"}"
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ height: 1, background: C.hairline, margin: "48px 0 28px" }} />
+
+      <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 12 }}>Your pathway</div>
+      <h2 style={{ fontFamily: F.serif, fontSize: "clamp(26px, 3.4vw, 34px)", color: C.greenDark, lineHeight: 1.2, margin: "0 0 24px", letterSpacing: "-0.005em" }}>
+        {pathway && pathway.length > 0 ? `${pathway.length} programs to start` : loading ? "Reading the land…" : "Nothing yet"}
+      </h2>
+
+      {loading && <FarmLoader kind="pathway" />}
+      {error && <div style={{ padding: 16, background: "#FEE", border: `1px solid ${C.red}`, borderRadius: 6, color: C.red, marginBottom: 20 }}>Couldn't run: {error}</div>}
+      {pathway && !loading && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {pathway.map((p, i) => (
+            <div key={p.id} style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "18px 20px" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: C.gold, letterSpacing: "0.1em" }}>{i + 1}.</span>
+                <a href={p.website || "#"} target="_blank" rel="noreferrer" style={{ fontFamily: F.serif, fontSize: 22, color: C.greenDark, textDecoration: "none", borderBottom: `2px solid ${C.gold}` }}>{p.name}</a>
+                <span style={{ fontSize: 12, color: C.muted }}>{p.category} · {(p.province || []).join(", ")}</span>
+              </div>
+              {p.description && <div style={{ fontSize: 14, color: C.text, lineHeight: 1.55, marginTop: 8 }}>{p.description}</div>}
+              {p.why && <div style={{ fontSize: 13, color: C.gold, fontStyle: "italic", marginTop: 8 }}>Why: {p.why}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ marginTop: 40, display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <a href="/navigator" target="_blank" rel="noreferrer" style={{ padding: "10px 18px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, borderRadius: 6, textDecoration: "none" }}>Go deeper on the live site ↗</a>
+        <button onClick={() => setView("sandbox")} style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: `1px solid ${C.border}`, borderRadius: 6, cursor: "pointer" }}>Shape what Trellis could do for you →</button>
+        <button onClick={() => setView("feedback")} style={{ padding: "10px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: `1px solid ${C.border}`, borderRadius: 6, cursor: "pointer" }}>Tell me what's off →</button>
+      </div>
+    </div>
+  );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 14, color: C.greenDark, fontWeight: 600 }}>{value}</div>
+    </div>
+  );
+}
+
+function FieldSelect({ label, value, options, onChange }: { label: string; value: string; options: { key: string; label: string }[]; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label style={{ fontSize: 11, fontWeight: 600, color: C.muted, display: "block", marginBottom: 4, letterSpacing: "0.05em", textTransform: "uppercase" }}>{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)} style={{ width: "100%", padding: "10px 12px", fontSize: 14, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 6, background: "#fff" }}>
+        <option value="">—</option>
+        {options.map((o) => (
+          <option key={o.key} value={o.key}>{o.label}</option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -1219,7 +1419,10 @@ export default function PartnerPortal() {
           Visit live site <span style={{ fontSize: 16 }}>↗</span>
         </a>
       </div>
-      {view === "home" && <HomeView identity={identity} team={team} you={you} setView={setView} />}
+      {view === "home" && (identity.portal_type === "founder"
+        ? <FounderHome identity={identity} setView={setView} />
+        : <HomeView identity={identity} team={team} you={you} setView={setView} />
+      )}
       {view === "programs" && <ProgramsView identity={identity} />}
       {view === "feedback" && <FeedbackView identity={identity} />}
       {view === "priority" && <PriorityView identity={identity} />}
