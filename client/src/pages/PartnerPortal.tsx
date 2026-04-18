@@ -735,7 +735,12 @@ function HomeView({ identity, team, you, setView, onProfileUpdated }: { identity
         </div>
       )}
 
-      {identity.portal_type !== "operator" && (
+      {/* Wrap-up card intentionally disabled on the portal surface.
+          The pattern belongs on the public founder flow (/navigator, wizard, chat),
+          where real founders interact as themselves, not on the backstage portal
+          where advisors and operators are critiquing. Keeping the component + API
+          endpoints in the codebase for the public-site build. */}
+      {false && (
         <WrapUpCard identity={identity} onProfileUpdated={onProfileUpdated} />
       )}
 
