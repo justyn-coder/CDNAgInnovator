@@ -2036,25 +2036,6 @@ export default function Navigator() {
                   </div>
                 </div>
 
-                {/* Wrap-up card: AI summarizes the founder's session + pathway */}
-                <div className="mt-6 mb-6">
-                  <WrapUpSection
-                    wizardSnapshot={{
-                      description: wizardDescription,
-                      stage: wizardSnapshot.stage,
-                      provinces: wizardSnapshot.provinces,
-                      need: wizardSnapshot.need,
-                      sector: wizardSnapshot.sector,
-                      company_url: wizardSnapshot.companyUrl,
-                      product_type: wizardSnapshot.productType,
-                      expansion_provinces: wizardSnapshot.expansionProvinces,
-                    }}
-                    pathwayData={restoredPathwayData}
-                    journeyToken={journeyToken}
-                    onSummaryConfirmed={(s) => setPendingSummaryText(s)}
-                  />
-                </div>
-
                 {/* Save Pathway card */}
                 <SaveJourney
                   stage={wizardSnapshot.stage}
@@ -2069,6 +2050,25 @@ export default function Navigator() {
                   pathwayData={restoredPathwayData}
                   alreadySaved={isRestored}
                   summaryText={pendingSummaryText || undefined}
+                />
+              </div>
+
+              {/* Wrap-up card: full-width below the advisor+save row so long summary text doesn't orphan cards */}
+              <div className="mt-4">
+                <WrapUpSection
+                  wizardSnapshot={{
+                    description: wizardDescription,
+                    stage: wizardSnapshot.stage,
+                    provinces: wizardSnapshot.provinces,
+                    need: wizardSnapshot.need,
+                    sector: wizardSnapshot.sector,
+                    company_url: wizardSnapshot.companyUrl,
+                    product_type: wizardSnapshot.productType,
+                    expansion_provinces: wizardSnapshot.expansionProvinces,
+                  }}
+                  pathwayData={restoredPathwayData}
+                  journeyToken={journeyToken}
+                  onSummaryConfirmed={(s) => setPendingSummaryText(s)}
                 />
               </div>
             </div>
