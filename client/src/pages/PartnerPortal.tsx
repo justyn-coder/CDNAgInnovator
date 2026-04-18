@@ -705,7 +705,11 @@ function HomeView({ identity, team, you, setView, onProfileUpdated }: { identity
     : null;
 
   const eyebrow = identity.home_eyebrow || "Welcome";
-  const subheading = identity.home_subheading || welcomeBack;
+  const savedDescription = (identity.founder_profile as any)?.description || null;
+  // Priority: org-curated home_subheading beats the user's own saved description,
+  // which in turn beats the generic "welcome back" line. Each step is more specific
+  // to this person than the one below it, so we render the most specific available.
+  const subheading = identity.home_subheading || savedDescription || welcomeBack;
   const heroCallout = identity.home_hero_callout;
   const order = identity.card_order && identity.card_order.length > 0
     ? identity.card_order
