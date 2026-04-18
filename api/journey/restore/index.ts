@@ -26,7 +26,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const rows = await sql`
       SELECT name, description, stage, provinces, need, sector,
              company_url, product_type, expansion_provinces, completed_programs,
-             pathway_data, notify_new_programs, created_at
+             pathway_data, notify_new_programs, created_at,
+             last_summary_text, last_summary_at
       FROM saved_journeys
       WHERE token = ${token} AND status = 'active'
       LIMIT 1
@@ -62,6 +63,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       pathwayData: row.pathway_data,
       savedAt: row.created_at,
       notifyNewPrograms: row.notify_new_programs,
+      lastSummaryText: row.last_summary_text || null,
+      lastSummaryAt: row.last_summary_at || null,
     });
   } catch (e) {
     console.error("Journey restore error:", e);

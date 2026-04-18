@@ -12,6 +12,7 @@ import DateFilter, { getDateBadge, DateBadge, type DateRange } from "../componen
 import ResourceCenter from "../components/ResourceCenter";
 import ProductTour, { shouldShowTour, dismissTour } from "../components/ProductTour";
 import SaveJourney from "../components/SaveJourney";
+import WrapUpSection from "../components/WrapUpSection";
 
 interface Program {
   id: number; name: string; category: string;
@@ -1154,6 +1155,9 @@ export default function Navigator() {
   const [restoreLoading, setRestoreLoading] = useState(false);
   const [restoreError, setRestoreError] = useState("");
   const [journeyToken, setJourneyToken] = useState<string | null>(null);
+  const [restoredSummaryText, setRestoredSummaryText] = useState<string | null>(null);
+  const [restoredSummaryAt, setRestoredSummaryAt] = useState<string | null>(null);
+  const [pendingSummaryText, setPendingSummaryText] = useState<string | null>(null);
 
   // Interest tracking
   const [interests, setInterests] = useState<InterestMap>(() => readInterests());
@@ -1318,6 +1322,8 @@ export default function Navigator() {
             setRestoredPathwayData(data.pathwayData);
             setRestoredName(data.name);
             setRestoredSavedAt(data.savedAt);
+            setRestoredSummaryText(data.lastSummaryText || null);
+            setRestoredSummaryAt(data.lastSummaryAt || null);
             setIsRestored(true);
             setJourneyToken(journeyToken);
             setShowPathway(true);
@@ -1921,6 +1927,26 @@ export default function Navigator() {
             </div>
           )}
 
+          {/* Return-visit summary banner: shows the prior AI wrap-up when the journey is restored */}
+          {isRestored && showPathway && restoredSummaryText && (
+            <div
+              className="mx-auto mt-3 px-5 py-4 max-w-3xl w-full rounded-lg animate-fade-in-up"
+              style={{ background: "#FAFAF7", border: "1px solid #E8E5E0", borderLeft: "3px solid #D4A828" }}
+            >
+              <div className="font-sans text-[0.65rem] tracking-[0.22em] font-bold text-brand-gold uppercase">
+                Last time, this is where I had you
+              </div>
+              <p className="font-display text-[1rem] text-brand-forest leading-[1.55] mt-2 m-0">
+                {restoredSummaryText}
+              </p>
+              {restoredSummaryAt && (
+                <div className="text-[0.7rem] text-text-tertiary mt-2">
+                  Captured {new Date(restoredSummaryAt).toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}. Scroll down to update it.
+                </div>
+              )}
+            </div>
+          )}
+
           {!isEco && showWizard && !restoreLoading && (
             <>
               {/* Skip wizard links */}
@@ -2010,6 +2036,25 @@ export default function Navigator() {
                   </div>
                 </div>
 
+                {/* Wrap-up card: AI summarizes the founder's session + pathway */}
+                <div className="mt-6 mb-6">
+                  <WrapUpSection
+                    wizardSnapshot={{
+                      description: wizardDescription,
+                      stage: wizardSnapshot.stage,
+                      provinces: wizardSnapshot.provinces,
+                      need: wizardSnapshot.need,
+                      sector: wizardSnapshot.sector,
+                      company_url: wizardSnapshot.companyUrl,
+                      product_type: wizardSnapshot.productType,
+                      expansion_provinces: wizardSnapshot.expansionProvinces,
+                    }}
+                    pathwayData={restoredPathwayData}
+                    journeyToken={journeyToken}
+                    onSummaryConfirmed={(s) => setPendingSummaryText(s)}
+                  />
+                </div>
+
                 {/* Save Pathway card */}
                 <SaveJourney
                   stage={wizardSnapshot.stage}
@@ -2023,6 +2068,7 @@ export default function Navigator() {
                   completedPrograms={wizardSnapshot.completedPrograms}
                   pathwayData={restoredPathwayData}
                   alreadySaved={isRestored}
+                  summaryText={pendingSummaryText || undefined}
                 />
               </div>
             </div>

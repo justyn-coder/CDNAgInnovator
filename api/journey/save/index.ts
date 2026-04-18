@@ -102,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!allowed) return;
 
   try {
-    const { email, name, wizardSnapshot, pathwayData, notifyNewPrograms } = req.body;
+    const { email, name, wizardSnapshot, pathwayData, notifyNewPrograms, lastSummaryText } = req.body;
 
     // Validate required fields
     if (!email || !EMAIL_RE.test(email)) {
@@ -128,6 +128,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let isUpdate = false;
     let token: string;
 
+    const summaryText = typeof lastSummaryText === "string" && lastSummaryText.trim().length > 0
+      ? lastSummaryText.trim().slice(0, 2000)
+      : null;
+
     if (existing.length > 0) {
       // Update existing journey (keep same token)
       isUpdate = true;
@@ -146,6 +150,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           completed_programs = ${wizardSnapshot.completedPrograms || null},
           pathway_data = ${sql.json(pathwayData)},
           notify_new_programs = ${!!notifyNewPrograms},
+          last_summary_text = COALESCE(${summaryText}, last_summary_text),
+          last_summary_at = CASE WHEN ${summaryText}::text IS NOT NULL THEN NOW() ELSE last_summary_at END,
           updated_at = NOW()
         WHERE email = ${emailLower} AND status = 'active'
       `;
@@ -155,7 +161,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         INSERT INTO saved_journeys (
           email, name, description, stage, provinces, need,
           sector, company_url, product_type, expansion_provinces,
-          completed_programs, pathway_data, notify_new_programs
+          completed_programs, pathway_data, notify_new_programs,
+          last_summary_text, last_summary_at
         ) VALUES (
           ${emailLower},
           ${name?.trim() || null},
@@ -169,7 +176,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ${wizardSnapshot.expansionProvinces || null},
           ${wizardSnapshot.completedPrograms || null},
           ${sql.json(pathwayData)},
-          ${!!notifyNewPrograms}
+          ${!!notifyNewPrograms},
+          ${summaryText},
+          ${summaryText ? new Date().toISOString() : null}
         ) RETURNING token
       `;
       token = result[0].token;

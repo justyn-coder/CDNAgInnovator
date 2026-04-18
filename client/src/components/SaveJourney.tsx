@@ -13,12 +13,14 @@ interface Props {
   pathwayData: unknown;
   /** If the journey was already saved, show the "already saved" state */
   alreadySaved?: boolean;
+  /** Optional AI-generated summary to persist alongside the journey on save. */
+  summaryText?: string;
 }
 
 export default function SaveJourney({
   stage, provinces, description, need, sector,
   companyUrl, productType, expansionProvinces, completedPrograms,
-  pathwayData, alreadySaved,
+  pathwayData, alreadySaved, summaryText,
 }: Props) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -78,6 +80,7 @@ export default function SaveJourney({
           },
           pathwayData,
           notifyNewPrograms: notify,
+          lastSummaryText: summaryText || null,
         }),
       });
       if (!resp.ok) {
