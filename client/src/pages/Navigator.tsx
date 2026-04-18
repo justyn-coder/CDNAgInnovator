@@ -1928,7 +1928,8 @@ export default function Navigator() {
           )}
 
           {/* Return-visit summary banner: shows the prior AI wrap-up when the journey is restored */}
-          {isRestored && showPathway && restoredSummaryText && (
+          {/* Disabled on production while we iterate on the design. Keep the state + API wiring so enabling is a one-line flip. */}
+          {false && isRestored && showPathway && restoredSummaryText && (
             <div
               className="mx-auto mt-3 px-5 py-4 max-w-3xl w-full rounded-lg animate-fade-in-up"
               style={{ background: "#FAFAF7", border: "1px solid #E8E5E0", borderLeft: "3px solid #D4A828" }}
@@ -2053,24 +2054,28 @@ export default function Navigator() {
                 />
               </div>
 
-              {/* Wrap-up card: full-width below the advisor+save row so long summary text doesn't orphan cards */}
-              <div className="mt-4">
-                <WrapUpSection
-                  wizardSnapshot={{
-                    description: wizardDescription,
-                    stage: wizardSnapshot.stage,
-                    provinces: wizardSnapshot.provinces,
-                    need: wizardSnapshot.need,
-                    sector: wizardSnapshot.sector,
-                    company_url: wizardSnapshot.companyUrl,
-                    product_type: wizardSnapshot.productType,
-                    expansion_provinces: wizardSnapshot.expansionProvinces,
-                  }}
-                  pathwayData={restoredPathwayData}
-                  journeyToken={journeyToken}
-                  onSummaryConfirmed={(s) => setPendingSummaryText(s)}
-                />
-              </div>
+              {/* Wrap-up card disabled on production while we iterate on the design per 2026-04-18 feedback.
+                  Keep the component wired up (state, endpoints, tests) so re-enabling is a one-line flip.
+                  Iteration candidates live in the repo under design iterations. */}
+              {false && (
+                <div className="mt-4">
+                  <WrapUpSection
+                    wizardSnapshot={{
+                      description: wizardDescription,
+                      stage: wizardSnapshot.stage,
+                      provinces: wizardSnapshot.provinces,
+                      need: wizardSnapshot.need,
+                      sector: wizardSnapshot.sector,
+                      company_url: wizardSnapshot.companyUrl,
+                      product_type: wizardSnapshot.productType,
+                      expansion_provinces: wizardSnapshot.expansionProvinces,
+                    }}
+                    pathwayData={restoredPathwayData}
+                    journeyToken={journeyToken}
+                    onSummaryConfirmed={(s) => setPendingSummaryText(s)}
+                  />
+                </div>
+              )}
             </div>
           )}
 
