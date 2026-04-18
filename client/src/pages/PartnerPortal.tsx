@@ -508,196 +508,7 @@ function FieldSelect({ label, value, options, onChange }: { label: string; value
   );
 }
 
-interface SummaryResult {
-  summary: string;
-  facts: {
-    stage: string | null;
-    provinces: string[];
-    sector: string | null;
-    primary_need: string | null;
-    description: string | null;
-  };
-}
-
-function WrapUpCard({ identity, onProfileUpdated }: { identity: Identity; onProfileUpdated: (p: FounderProfile) => void }) {
-  const profile = identity.founder_profile || {};
-  const lastSummary = (profile as any).last_summary_text as string | undefined;
-  const lastSummaryAt = (profile as any).last_summary_at as string | undefined;
-
-  const [mode, setMode] = useState<"saved" | "empty" | "generating" | "review">(
-    lastSummary ? "saved" : "empty"
-  );
-  const [freeText, setFreeText] = useState("");
-  const [result, setResult] = useState<SummaryResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  async function generate() {
-    setError(null);
-    setMode("generating");
-    try {
-      const r = await fetch("/api/portal/summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ org: identity.org, person: identity.person, freeText: freeText.trim() }),
-      });
-      if (!r.ok) {
-        const body = await r.json().catch(() => ({}));
-        throw new Error(body.error || `HTTP ${r.status}`);
-      }
-      const data = await r.json();
-      setResult({ summary: data.summary, facts: data.facts });
-      setMode("review");
-    } catch (e: any) {
-      setError(e.message || "Could not generate a summary right now.");
-      setMode(lastSummary ? "saved" : "empty");
-    }
-  }
-
-  async function confirm() {
-    if (!result) return;
-    setSaving(true);
-    setError(null);
-    try {
-      const payload = {
-        ...result.facts,
-        last_summary_text: result.summary,
-        source: "wrap-up",
-      };
-      const r = await fetch("/api/portal/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ org: identity.org, person: identity.person, profile: payload }),
-      });
-      if (!r.ok) {
-        const body = await r.json().catch(() => ({}));
-        throw new Error(body.error || `HTTP ${r.status}`);
-      }
-      const data = await r.json();
-      onProfileUpdated(data.profile);
-      setResult(null);
-      setFreeText("");
-      setMode("saved");
-    } catch (e: any) {
-      setError(e.message || "Could not save just now.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function updateResultFact<K extends keyof SummaryResult["facts"]>(key: K, value: SummaryResult["facts"][K]) {
-    if (!result) return;
-    setResult({ ...result, facts: { ...result.facts, [key]: value } });
-  }
-
-  const accentStyle = { fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase" as const };
-
-  if (mode === "saved") {
-    return (
-      <div style={{ marginTop: 32, padding: "22px 24px", background: C.cardBg, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.gold}`, borderRadius: 6, maxWidth: 760 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 14 }}>
-          <div style={{ flex: 1 }}>
-            <div style={accentStyle}>Last time, this is where I had you</div>
-            <p style={{ fontFamily: F.serif, fontSize: 17, color: C.greenDark, lineHeight: 1.5, margin: "10px 0 0" }}>{lastSummary}</p>
-            {lastSummaryAt && (
-              <div style={{ fontSize: 12, color: C.soft, marginTop: 8 }}>
-                Captured {new Date(lastSummaryAt).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
-              </div>
-            )}
-          </div>
-        </div>
-        <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button onClick={() => { setMode("empty"); setFreeText(""); setResult(null); }} style={{ padding: "8px 14px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 13, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
-            Update this →
-          </button>
-          <div style={{ fontSize: 12, color: C.soft, alignSelf: "center" }}>or scroll down and keep poking.</div>
-        </div>
-        {error && <div style={{ fontSize: 12, color: C.red, marginTop: 10 }}>{error}</div>}
-      </div>
-    );
-  }
-
-  if (mode === "generating") {
-    return (
-      <div style={{ marginTop: 32, padding: "22px 24px", background: C.cardBg, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.gold}`, borderRadius: 6, maxWidth: 760 }}>
-        <div style={accentStyle}>Thinking</div>
-        <p style={{ fontFamily: F.serif, fontSize: 17, color: C.greenDark, lineHeight: 1.5, margin: "10px 0 0", fontStyle: "italic" }}>Reading your portal activity and writing what I think I see.</p>
-      </div>
-    );
-  }
-
-  if (mode === "review" && result) {
-    return (
-      <div style={{ marginTop: 32, padding: "22px 24px", background: C.cardBg, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.gold}`, borderRadius: 6, maxWidth: 760 }}>
-        <div style={accentStyle}>Here is what I got. Edit or confirm.</div>
-        <textarea
-          value={result.summary}
-          onChange={(e) => setResult({ ...result, summary: e.target.value })}
-          rows={4}
-          style={{ width: "100%", padding: "12px 14px", fontSize: 15, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 6, marginTop: 10, boxSizing: "border-box", resize: "vertical", lineHeight: 1.5 }}
-        />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginTop: 12 }}>
-          <FactField label="Stage" value={result.facts.stage || ""} onChange={(v) => updateResultFact("stage", v || null)} placeholder="MVP, Pilot, Comm, Scale" />
-          <FactField label="Provinces" value={(result.facts.provinces || []).join(", ")} onChange={(v) => updateResultFact("provinces", v.split(",").map((s) => s.trim()).filter(Boolean))} placeholder="ON, SK" />
-          <FactField label="Sector" value={result.facts.sector || ""} onChange={(v) => updateResultFact("sector", v || null)} placeholder="Precision ag / soil" />
-          <FactField label="Primary need" value={result.facts.primary_need || ""} onChange={(v) => updateResultFact("primary_need", v || null)} placeholder="Pilot site intros" />
-        </div>
-        <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button onClick={confirm} disabled={saving} style={{ padding: "9px 18px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: saving ? "default" : "pointer", opacity: saving ? 0.7 : 1 }}>
-            {saving ? "Saving…" : "Confirm"}
-          </button>
-          <button onClick={generate} disabled={saving} style={{ padding: "9px 18px", background: "transparent", color: C.greenDark, fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: `1px solid ${C.border}`, borderRadius: 6, cursor: saving ? "default" : "pointer" }}>
-            Redo
-          </button>
-          <button onClick={() => { setMode(lastSummary ? "saved" : "empty"); setResult(null); }} disabled={saving} style={{ padding: "9px 14px", background: "transparent", color: C.muted, fontFamily: F.sans, fontSize: 13, fontWeight: 500, border: "none", borderRadius: 6, cursor: saving ? "default" : "pointer" }}>
-            Cancel
-          </button>
-        </div>
-        {error && <div style={{ fontSize: 12, color: C.red, marginTop: 10 }}>{error}</div>}
-      </div>
-    );
-  }
-
-  // Empty state
-  return (
-    <div style={{ marginTop: 32, padding: "22px 24px", background: C.cardBg, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.gold}`, borderRadius: 6, maxWidth: 760 }}>
-      <div style={accentStyle}>Wrap this up</div>
-      <p style={{ fontFamily: F.serif, fontSize: 17, color: C.greenDark, lineHeight: 1.5, margin: "10px 0 0" }}>
-        Before you leave, let me summarize what I learned about you. You edit or confirm, and I remember it for next time.
-      </p>
-      <textarea
-        value={freeText}
-        onChange={(e) => setFreeText(e.target.value)}
-        placeholder="Optional. Anything specific you want me to capture? Where you are stuck, what you are looking for, what I probably missed."
-        rows={2}
-        style={{ width: "100%", padding: "12px 14px", fontSize: 14, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 6, marginTop: 14, boxSizing: "border-box", resize: "vertical", lineHeight: 1.5 }}
-      />
-      <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        <button onClick={generate} style={{ padding: "9px 18px", background: C.greenDark, color: "#fff", fontFamily: F.sans, fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, cursor: "pointer" }}>
-          Wrap this up →
-        </button>
-        <span style={{ fontSize: 12, color: C.soft }}>Takes about ten seconds.</span>
-      </div>
-      {error && <div style={{ fontSize: 12, color: C.red, marginTop: 10 }}>{error}</div>}
-    </div>
-  );
-}
-
-function FactField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return (
-    <div>
-      <label style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: 4 }}>{label}</label>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        style={{ width: "100%", padding: "8px 10px", fontSize: 13, fontFamily: F.sans, border: `1px solid ${C.border}`, borderRadius: 5, boxSizing: "border-box" }}
-      />
-    </div>
-  );
-}
-
-function HomeView({ identity, team, you, setView, onProfileUpdated }: { identity: Identity; team: TeamRow[]; you: YouSummary | null; setView: (v: View) => void; onProfileUpdated: (p: FounderProfile) => void }) {
+function HomeView({ identity, team, you, setView }: { identity: Identity; team: TeamRow[]; you: YouSummary | null; setView: (v: View) => void }) {
   const firstName = identity.display_name.split(" ")[0];
   const lastVisit = you?.last_visit ? new Date(you.last_visit) : null;
   const welcomeBack = lastVisit
@@ -705,11 +516,7 @@ function HomeView({ identity, team, you, setView, onProfileUpdated }: { identity
     : null;
 
   const eyebrow = identity.home_eyebrow || "Welcome";
-  const savedDescription = (identity.founder_profile as any)?.description || null;
-  // Priority: org-curated home_subheading beats the user's own saved description,
-  // which in turn beats the generic "welcome back" line. Each step is more specific
-  // to this person than the one below it, so we render the most specific available.
-  const subheading = identity.home_subheading || savedDescription || welcomeBack;
+  const subheading = identity.home_subheading || welcomeBack;
   const heroCallout = identity.home_hero_callout;
   const order = identity.card_order && identity.card_order.length > 0
     ? identity.card_order
@@ -733,15 +540,6 @@ function HomeView({ identity, team, you, setView, onProfileUpdated }: { identity
           <div style={{ fontSize: 10, letterSpacing: "0.22em", fontWeight: 700, color: C.gold, textTransform: "uppercase", marginBottom: 8 }}>Why you're here</div>
           <div style={{ fontFamily: F.serif, fontSize: 17, color: C.greenDark, lineHeight: 1.5 }}>{heroCallout}</div>
         </div>
-      )}
-
-      {/* Wrap-up card intentionally disabled on the portal surface.
-          The pattern belongs on the public founder flow (/navigator, wizard, chat),
-          where real founders interact as themselves, not on the backstage portal
-          where advisors and operators are critiquing. Keeping the component + API
-          endpoints in the codebase for the public-site build. */}
-      {false && (
-        <WrapUpCard identity={identity} onProfileUpdated={onProfileUpdated} />
       )}
 
       <PathwayChecklist identity={identity} setView={setView} />
@@ -1708,7 +1506,7 @@ export default function PartnerPortal() {
       </div>
       {view === "home" && (identity.portal_type === "founder"
         ? <FounderHome identity={identity} setView={setView} />
-        : <HomeView identity={identity} team={team} you={you} setView={setView} onProfileUpdated={(p) => setIdentity({ ...identity, founder_profile: p })} />
+        : <HomeView identity={identity} team={team} you={you} setView={setView} />
       )}
       {view === "programs" && <ProgramsView identity={identity} />}
       {view === "feedback" && <FeedbackView identity={identity} />}
