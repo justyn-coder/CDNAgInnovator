@@ -1942,7 +1942,7 @@ export default function Navigator() {
               </p>
               {restoredSummaryAt && (
                 <div className="text-[0.7rem] text-text-tertiary mt-2">
-                  Captured {new Date(restoredSummaryAt).toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}. Scroll down to update it.
+                  Captured {new Date(restoredSummaryAt!).toLocaleDateString("en-CA", { year: "numeric", month: "short", day: "numeric" })}. Scroll down to update it.
                 </div>
               )}
             </div>
@@ -2062,13 +2062,13 @@ export default function Navigator() {
                   <WrapUpSection
                     wizardSnapshot={{
                       description: wizardDescription,
-                      stage: wizardSnapshot.stage,
-                      provinces: wizardSnapshot.provinces,
-                      need: wizardSnapshot.need,
-                      sector: wizardSnapshot.sector,
-                      company_url: wizardSnapshot.companyUrl,
-                      product_type: wizardSnapshot.productType,
-                      expansion_provinces: wizardSnapshot.expansionProvinces,
+                      stage: wizardSnapshot!.stage,
+                      provinces: wizardSnapshot!.provinces,
+                      need: wizardSnapshot!.need,
+                      sector: wizardSnapshot!.sector,
+                      company_url: wizardSnapshot!.companyUrl,
+                      product_type: wizardSnapshot!.productType,
+                      expansion_provinces: wizardSnapshot!.expansionProvinces,
                     }}
                     pathwayData={restoredPathwayData}
                     journeyToken={journeyToken}

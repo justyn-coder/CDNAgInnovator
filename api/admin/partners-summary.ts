@@ -9,6 +9,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   if (req.method !== "GET") return res.status(405).end();
 
+  // All counts exclude `person = 'justyn'` so Justyn's own preview/admin activity
+  // does not pollute the real partner numbers. Activity feeds still include him
+  // so he can see his own actions in the timeline for debugging.
   const orgs = await sql`
     SELECT
       po.slug,
@@ -16,14 +19,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       po.theme_color,
       po.banner_text,
       po.tour_variant,
-      (SELECT COUNT(*) FROM portal_people pp WHERE pp.org = po.slug) AS people_count,
-      (SELECT COUNT(*) FROM portal_people pp WHERE pp.org = po.slug AND pp.first_seen_at IS NOT NULL) AS people_active,
-      (SELECT COUNT(*) FROM portal_access_log pal WHERE pal.org = po.slug AND pal.event_type = 'view') AS views_total,
-      (SELECT COUNT(*) FROM portal_access_log pal WHERE pal.org = po.slug AND pal.event_type = 'view' AND pal.created_at > NOW() - INTERVAL '7 days') AS views_7d,
-      (SELECT COUNT(*) FROM portal_feedback pf WHERE pf.org = po.slug) AS feedback_count,
-      (SELECT COUNT(*) FROM portal_feature_requests pfr WHERE pfr.org = po.slug) AS feature_count,
-      (SELECT COUNT(DISTINCT ppv.program_id) FROM portal_priority_votes ppv WHERE ppv.org = po.slug) AS priority_count,
-      (SELECT MAX(created_at) FROM portal_access_log pal WHERE pal.org = po.slug) AS last_activity
+      (SELECT COUNT(*) FROM portal_people pp WHERE pp.org = po.slug AND pp.person != 'justyn') AS people_count,
+      (SELECT COUNT(*) FROM portal_people pp WHERE pp.org = po.slug AND pp.person != 'justyn' AND pp.first_seen_at IS NOT NULL) AS people_active,
+      (SELECT COUNT(*) FROM portal_access_log pal WHERE pal.org = po.slug AND pal.person != 'justyn' AND pal.event_type = 'view') AS views_total,
+      (SELECT COUNT(*) FROM portal_access_log pal WHERE pal.org = po.slug AND pal.person != 'justyn' AND pal.event_type = 'view' AND pal.created_at > NOW() - INTERVAL '7 days') AS views_7d,
+      (SELECT COUNT(*) FROM portal_feedback pf WHERE pf.org = po.slug AND pf.person != 'justyn') AS feedback_count,
+      (SELECT COUNT(*) FROM portal_feature_requests pfr WHERE pfr.org = po.slug AND pfr.person != 'justyn') AS feature_count,
+      (SELECT COUNT(DISTINCT ppv.program_id) FROM portal_priority_votes ppv WHERE ppv.org = po.slug AND ppv.person != 'justyn') AS priority_count,
+      (SELECT MAX(created_at) FROM portal_access_log pal WHERE pal.org = po.slug AND pal.person != 'justyn') AS last_activity
     FROM portal_orgs po
     ORDER BY po.display_name
   `;

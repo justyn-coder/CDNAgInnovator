@@ -12,10 +12,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const org = String(req.query.org || "bioenterprise");
 
+  // People/feedback/features/priorities exclude Justyn's admin-preview identity so
+  // the real partner numbers aren't polluted by his own clicks. The activity
+  // timeline keeps him in so he can still see his actions for debugging.
   const people = await sql`
     SELECT person, display_name, role, email, first_seen_at, last_seen_at
     FROM portal_people
-    WHERE org = ${org}
+    WHERE org = ${org} AND person != 'justyn'
     ORDER BY display_name
   `;
 
@@ -30,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const feedback = await sql`
     SELECT id, person, topic, body, created_at
     FROM portal_feedback
-    WHERE org = ${org}
+    WHERE org = ${org} AND person != 'justyn'
     ORDER BY created_at DESC
     LIMIT 100
   `;
@@ -38,7 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const features = await sql`
     SELECT id, person, prompt, status, created_at
     FROM portal_feature_requests
-    WHERE org = ${org}
+    WHERE org = ${org} AND person != 'justyn'
     ORDER BY created_at DESC
     LIMIT 100
   `;
@@ -47,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     SELECT ppv.person, p.id AS program_id, p.name, p.category, p.province, ppv.created_at
     FROM portal_priority_votes ppv
     JOIN programs p ON p.id = ppv.program_id
-    WHERE ppv.org = ${org}
+    WHERE ppv.org = ${org} AND ppv.person != 'justyn'
     ORDER BY ppv.created_at DESC
     LIMIT 200
   `;
