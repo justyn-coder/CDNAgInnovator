@@ -1380,7 +1380,12 @@ export default function PartnerPortal() {
   const org = params?.org || "";
   const person = params?.person || "";
 
-  const [authed, setAuthed] = useState(false);
+  // Password gate removed 2026-04-20 per Justyn. URLs are per-person,
+  // unguessable, noindex, and shared only via direct email. Gate was a
+  // friction point that hid every click in the tracking blind spot.
+  // Leaving `authed` state + AUTH_KEY localStorage logic intact but defaulting
+  // to authed=true so every visit flows straight to /api/portal/me and logs.
+  const [authed, setAuthed] = useState(true);
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [orgConfig, setOrgConfig] = useState<OrgConfig | null>(null);
   const [team, setTeam] = useState<TeamRow[]>([]);
@@ -1454,7 +1459,8 @@ export default function PartnerPortal() {
     };
   }, [orgConfig?.theme_color]);
 
-  if (!authed) return <PasswordGate org={org} onPass={onPass} />;
+  // PasswordGate disabled — portal URLs open directly. See state-init comment above.
+  // if (!authed) return <PasswordGate org={org} onPass={onPass} />;
 
   if (notFound) {
     return (
