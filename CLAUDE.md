@@ -44,7 +44,7 @@ Every push to `main` triggers Vercel auto-deploy.
 |-------|------|
 | Frontend | React 19 + TypeScript + Vite (SPA) |
 | Backend | Vercel serverless functions (`api/` directory) |
-| Database | Supabase Postgres, project `slttpknnuthbttjuzrnz` (ca-central-1) |
+| Database | Supabase Postgres, project `xzglgidmmuepaakmlpqd` (ca-central-1). Trellis-standalone since 2026-07-04 — split from shared-org project `slttpknnuthbttjuzrnz` (Tally HQ / BIS / Inorsa). See [canon/supabase-migration-plan-2026-07-04.md](canon/supabase-migration-plan-2026-07-04.md). |
 | AI | Anthropic Claude API (Sonnet 4, `claude-sonnet-4-20250514`) |
 | Routing | wouter |
 | ORM | drizzle-orm (schema definition only, most queries use raw `postgres` client) |

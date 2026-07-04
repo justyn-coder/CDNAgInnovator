@@ -1,6 +1,6 @@
 # Database Schema
 
-Supabase Postgres — project `slttpknnuthbttjuzrnz` (ca-central-1).
+Supabase Postgres — project `xzglgidmmuepaakmlpqd` (ca-central-1). Trellis-standalone since 2026-07-04 (split from shared-org project `slttpknnuthbttjuzrnz` which still hosts Tally HQ / BIS / Inorsa).
 
 ## Tables
 
